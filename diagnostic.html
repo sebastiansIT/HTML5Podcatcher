@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Playlist &mdash; HTML5 Podcatcher</title>
+        <meta name="description" content="A HTML5 podcast player!">
+        <meta name="viewport" content="width=device-width">
+
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+        <!--<link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/main.css">-->
+        <!--<script src="js/vendor/modernizr-2.6.2.min.js"></script>-->
+    </head>
+    <body>
+		<p id="SupportFilesystemAPI" class="message" style="display:none">Your Browser don't supports HTML 5 Filesystem API</p>
+
+		<p><a href="#" onclick="showFileSystemEntries(); return false;">List Files</a></p>
+		<ul id="filelist"></ul>
+
+		<p><a href="#" onclick="saveZwerg(); return false;">Download and Save Zwerg</a></p>
+
+		<p><a href="#" onclick="deleteZwerg(); return false;">Delete Zwerg</a></p>
+
+
+		<h2>Test MP3-Playback</h2>
+		<audio controls="controls">
+		   <source src="Revision1.mp3" type='audio/mpeg; codecs="mp3"'>
+		</audio>
+		<script>
+			var audio = new Audio();
+			var canPlayOgg = !!audio.canPlayType && audio.canPlayType('audio/ogg; codecs="vorbis"') != "";
+			var canPlayMP3 = !!audio.canPlayType && audio.canPlayType('audio/mpeg; codecs="mp3"') != "";
+		</script>
+		<script>
+
+// Take care of vendor prefixes.
+window.URL = window.URL || window.webkitURL;
+window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
+
+var getFileSystem = function() {
+	if (!FileSystem) {
+		var FileSystem = undefined;
+		window.requestFileSystem(window.TEMPORARY, 1024*1024*50, function(fs){
+			FileSystem = fs; console.log("File system opend: " + fs);
+		}, onError);
+	}
+	return FileSystem;
+}
+
+var onError = function(e) {
+  console.log('There was an error', e);
+};
+
+/**
+ * Writes a Blob to the filesystem.
+ *
+ * @param {DirectoryEntry} dir The directory to write the blob into.
+ * @param {Blob} blob The data to write.
+ * @param {string} fileName A name for the file.
+ * @param {function(ProgressEvent)} opt_callback An optional callback.
+ *     Invoked when the write completes.
+ **/
+
+var writeBlob = function(dir, blob, fileName, opt_callback) {
+  dir.getFile(fileName, {create: true, exclusive: true}, function(fileEntry) {
+
+    fileEntry.createWriter(function(writer) {
+      if (opt_callback) {
+        writer.onwrite = opt_callback;
+      }
+      writer.write(blob);
+    }, onError);
+
+  }, onError);
+};
+
+/**
+ * Fetches a file by URL and writes it to the filesystem.
+ *
+ * @param {string} url The url the resource resides under.
+ * @param {string} mimeType The content type of the file.
+ **/
+ 
+var downloadImage = function(url, mimeType) {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', url, true);
+  xhr.responseType = 'arraybuffer';
+  
+  xhr.onload = function(e) {
+    if (this.status == 200) {
+      var blob = new Blob([xhr.response], {type: mimeType});
+      
+	  var parts = url.split('/');
+      var fileName = parts[parts.length - 1];
+
+      window.requestFileSystem(TEMPORARY, 1024*1024*50 /*2MB*/, function(fs) {
+        var onWrite = function(evt) {
+          console.log('Write completed.');
+        };
+
+        // Write file to the root directory.
+        writeBlob(fs.root, blob, fileName, onWrite);
+      }, onError);
+    }
+  };
+
+  xhr.send(null);
+};
+
+if (window.requestFileSystem && window.URL) {
+  //downloadImage('zwerg.png', 'image/png');
+}
+else {
+	document.getElementById("SupportFilesystemAPI");
+}
+
+
+
+
+
+//List Content
+function toArray(list) {
+  return Array.prototype.slice.call(list || [], 0);
+}
+
+function listResults(entries) {
+  // Document fragments can improve performance since they're only appended
+  // to the DOM once. Only one browser reflow occurs.
+  var fragment = document.createDocumentFragment();
+
+  entries.forEach(function(entry, i) {
+    var img = entry.isDirectory ? '<img src="folder-icon.gif">' :
+                                  '<img src="file-icon.gif">';
+    var li = document.createElement('li');
+			if (entry.name.indexOf(".png") !== -1) {
+				li.innerHTML = ['<img src="' + entry.toURL() + '" title="' + entry.name + '" width="' + 50 + '" />'].join('');
+			}
+			else if (entry.name.indexOf(".mp3") !== -1) {
+				li.innerHTML = ['<audio controls="controls" src="' + entry.toURL() + '" title="' + entry.name + '" />'].join('');
+			}
+			else {
+				li.innerHTML = ['<a href="' + entry.toURL() + '" title="' + entry.name + '">', entry.name, '</a>'].join('');
+			}
+    fragment.appendChild(li);
+  });
+
+  document.querySelector('#filelist').appendChild(fragment);
+}
+
+function onInitFs(fs) {
+  var dirReader = fs.root.createReader();
+  var entries = [];
+
+  // Call the reader.readEntries() until no more results are returned.
+  var readEntries = function() {
+     dirReader.readEntries (function(results) {
+      if (!results.length) {
+        listResults(entries.sort());
+      } else {
+        entries = entries.concat(toArray(results));
+        readEntries();
+      }
+    }, onError);
+  };
+
+  readEntries(); // Start reading dirs.
+}
+
+function showFileSystemEntries() {
+	//onInitFS(getFileSystem());
+	window.requestFileSystem(window.TEMPORARY, 1024*1024*50, onInitFs, onError);
+}
+
+function saveZwerg() {
+	downloadImage('zwerg.png', 'image/png');
+}
+
+function deleteZwerg() {
+	window.requestFileSystem(window.TEMPORARY, 1024*1024*50, function(fs) {
+		fs.root.getFile('zwerg.png', {create: false}, function(fileEntry) {
+
+			fileEntry.remove(function() {
+			  console.log('File removed.');
+			}, onError);
+		}, onError);
+		
+		fs.root.getFile('Revision1.mp3', {create: false}, function(fileEntry) {
+
+			fileEntry.remove(function() {
+			  console.log('File removed.');
+			}, onError);
+		}, onError);
+	}, onError);
+}
+		</script>
+
+
+</body>
+</html>
+

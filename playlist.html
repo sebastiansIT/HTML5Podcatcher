@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Playlist &mdash; HTML5 Podcatcher</title>
+        <meta name="description" content="A HTML5 podcast player!">
+        <meta name="viewport" content="width=device-width">
+
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+        <!--<link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/main.css">-->
+        <!--<script src="js/vendor/modernizr-2.6.2.min.js"></script>-->
+    </head>
+    <body>
+        <header role="banner"> 
+			<h1>HTML5 Podcatcher</h1>
+		</header>
+		<div class="main">
+			<div id="player">
+				<audio src="jingle.mp3" controls="controls" preload="none">
+				</audio>
+			</div>
+			
+			<ul id="playlist"></ul>
+			
+			<div id="feedlist">
+			</div>
+			
+			<footer>
+				<!-- Global Functions -->
+				<ol>
+					<li><a href="#" class="refresh">Refresch Playlist</a></li>
+					<li><a href="#" class="clear">Clear Playlist</a></li>
+				</ol>
+				
+				<p id="statusbar"></p>
+			</footer>
+		</div>
+		<footer>
+			<!-- Impressum ec. -->
+		</footer>
+        <script src="scripts/main.js"></script>
+    </body>
+</html>
