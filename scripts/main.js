@@ -22,26 +22,28 @@ var SuccessHandler = function(event) {
 
 
 /** Comunication with the obscure thing named "Internet" */
-var countDownloadsPerSerssion = 0;
+var countDownloadsPerSession = 0;
 var downloadTrackList = function() {
-	//TODO lade wirklich aus dem Internet
-	var tracks;
-	if (countDownloadsPerSerssion === 0) {
-		tracks = [
-			{'uri':'http://cre.fm/cre199','title':'CRE199 NetHack', 'mediaUrl':'http://lab.human-injection.de/podcatcher/scripts/cre199-nethack.mp3'},
-			{'uri':'http://cre.fm/cre198','title':'CRE198 Pornographie', 'mediaUrl':'http://meta.metaebene.me/media/cre/cre198-pornographie.mp3'},
-			{'uri':'http://cre.fm/cre197','title':'CRE197 IPv6', 'mediaUrl':'http://meta.metaebene.me/media/cre/cre197-ipv6.mp3'}
-		];
-	}
-	else {
-		tracks = [
-			{'uri':'http://cre.fm/cre202','title':'CRE202 Hackerfilme', 'mediaUrl':'http://meta.metaebene.me/media/cre/cre202-hackerfilme.mp3'},
-			{'uri':'http://cre.fm/cre201','title':'CRE201 Höhlenforschung', 'mediaUrl':'http://meta.metaebene.me/media/cre/cre201-hoehlenforschung.mp3'},
-			{'uri':'http://cre.fm/cre200','title':'CRE200 Stadtplanung', 'mediaUrl':'http://meta.metaebene.me/media/cre/cre200-stadtplanung.mp3'}
-		];
+	var tracks = [];
+	var sourcelist = loadSourceList();
+	for( var i=0; i< sourcelist.feeds.length; i++ ) {
+		$.ajax({
+			'url': sourcelist.feeds[i],
+			'async': false,
+			'dataType': 'xml',
+			'success': function(data, textStatus, jqXHR ) {
+				var xml = $(data);
+				$(xml).find('entry').has('link[rel=enclosure]').slice(0, 15).each(function() {
+					tracks.push({'uri': $(this).find('id:first').text()
+						, 'title':$(this).find('title:first').text()
+						, 'mediaUrl':$(this).find('link[rel=enclosure]:first').attr('href')
+						, 'updated':$(this).find('updated:first').text() });
+				});
+			}
+		});
 	}
 	
-	var playlist = readPlaylist();
+	var playlist = loadPlaylist();
 	for( var i=0; i< tracks.length; i++ ) {
 		var k = playlist.entries.length;
 		var existsTrackInPlaylist = false;
@@ -55,9 +57,10 @@ var downloadTrackList = function() {
 			playlist.entries.push(tracks[i]);
 		}
 	}
-	countDownloadsPerSerssion++;
+	countDownloadsPerSession++;
 	savePlaylist(playlist);
 };
+
 var downloadTrack = function(trackID, url, mimeType) {
 	var track = loadTrack(trackID);
 	var xhr = new XMLHttpRequest();
@@ -77,12 +80,42 @@ var downloadTrack = function(trackID, url, mimeType) {
 }
 
 
-/** The following functions handles the central Playlist */
-var savePlaylist = function(playlist) {
-	localStorage.setItem('playlist', JSON.stringify(playlist));
+/** The following functions handles the list of sources to refresh the playlist*/
+var loadSourceList = function() {
+	var sourcelist = JSON.parse(localStorage.getItem('sourcelist'));
+	if (!sourcelist) {
+		sourcelist = {'feeds': [] };
+	}
+	else if (!sourcelist.feeds) {
+		sourcelist.feeds = [];
+	}
+	return sourcelist;
+}
+
+var saveSourceList = function(sourcelist) {
+	localStorage.setItem('sourcelist', JSON.stringify(sourcelist));
 };
 
-var readPlaylist = function() {
+var clearSourceList = function() {
+	localStorage.removeItem('sourcelist');
+}
+
+var renderSourceList = function(sourcelist) {
+	var sourcelistUI = $('#sourcelist .entries');
+	sourcelistUI.empty();
+	if (sourcelist && sourcelist.feeds) {
+		for( var i=0; i< sourcelist.feeds.length; i++ ) {
+			var entryUI = $('<li>');
+			entryUI.append('<a href="' + sourcelist.feeds[i] + '">' + sourcelist.feeds[i] + '</a>')
+			//TODO delete function
+			sourcelistUI.append(entryUI);
+		}
+	}
+};
+
+
+/** The following functions handles the central Playlist */
+var loadPlaylist = function() {
 	
 	var playlist = JSON.parse(localStorage.getItem('playlist'));
 	if (!playlist) {
@@ -94,23 +127,29 @@ var readPlaylist = function() {
 	return playlist;
 };
 
+var savePlaylist = function(playlist) {
+	localStorage.setItem('playlist', JSON.stringify(playlist));
+};
+
 var clearPlaylist = function() {
 	localStorage.removeItem('playlist');
 }
 
 var renderPlaylist = function(playlist) {
-	var playlistUI = $('#playlist');
+	var playlistUI = $('#playlist .entries');
 	playlistUI.empty();
 	if (playlist && playlist.entries) {
 		for( var i=0; i< playlist.entries.length; i++ ) {
 			var playlistEntryUI = $('<li>');
 			playlistEntryUI.data('trackid', playlist.entries[i].uri);
 			playlistEntryUI.append('<a href="' + playlist.entries[i].uri + '">' + playlist.entries[i].title + '</a>')
-			if (playlist.entries[i].offlineUrl) {
-				//TODO delete function
-			}
-			else {
-				playlistEntryUI.append(' | <a class="downloadTrack" href="' + playlist.entries[i].mediaUrl + '">Download</a>');
+			if (window.requestFileSystem) {
+				if (playlist.entries[i].offlineUrl) {
+					//TODO delete function
+				}
+				else {
+					playlistEntryUI.append(' | <a class="downloadTrack" href="' + playlist.entries[i].mediaUrl + '">Download</a>');
+				}
 			}
 			playlistUI.append(playlistEntryUI);
 		}
@@ -141,7 +180,7 @@ var playTrack = function(trackID) {
 var loadTrack = function(trackID) {
 	console.log(trackID);
 	
-	var playlist = readPlaylist();
+	var playlist = loadPlaylist();
 	for( var i=0; i< playlist.entries.length; i++ ) {
 		if (playlist.entries[i].uri === trackID) {
 			return playlist.entries[i];
@@ -159,7 +198,7 @@ var saveTrack = function(track, blob, fileName, opt_callback) {
 				writer.write(blob);				
 			}, ErrorHandler);
 			
-			var playlist = readPlaylist();
+			var playlist = loadPlaylist();
 			var k = playlist.entries.length;
 			while (k--) {
 				if (track.uri === playlist.entries[k].uri) {
@@ -170,6 +209,8 @@ var saveTrack = function(track, blob, fileName, opt_callback) {
 		}, ErrorHandler);
 	}, ErrorHandler);
 };
+
+
 
 /** Central 'ready" event handler */
 $(document).ready(function() {
@@ -185,7 +226,7 @@ $(document).ready(function() {
 		//Play track
 		playTrack($(this).data('trackid'));
 	});
-	$('#playlist').on('click', '.downloadTrack', function(event) {
+	$('#playlist .entries').on('click', '.downloadTrack', function(event) {
 		event.preventDefault();
 		event.stopPropagation();
 		
@@ -193,22 +234,40 @@ $(document).ready(function() {
 		
 		//Play track
 		downloadTrack($(this).parent().data('trackid'), $(this).attr('href'), 'audio/mp3');
+		renderPlaylist(loadPlaylist());
+	});
+	$('#addFeedUrlButton').on('click', function(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		
+		var sourcelist = loadSourceList();
+		sourcelist.feeds.push($('#addFeedUrlInput').val());
+		saveSourceList(sourcelist);
+		renderSourceList(sourcelist);
 	});
 	$('.refresh').on('click', function(event) {
 		event.preventDefault();
 		event.stopPropagation();
 		
 		downloadTrackList();
-		renderPlaylist(readPlaylist());
+		renderPlaylist(loadPlaylist());
 		
 	});
-	$('.clear').on('click', function(event) {
+	$('.clearPlaylist').on('click', function(event) {
 		event.preventDefault();
 		event.stopPropagation();
 		
 		clearPlaylist();
-		renderPlaylist(readPlaylist());
+		renderPlaylist(loadPlaylist());
+	});
+	$('.clearFeeds').on('click', function(event) {
+		event.preventDefault();
+		event.stopPropagation();
+		
+		clearSourceList();
+		renderSourceList(loadSourceList());
 	});
 	
-	renderPlaylist(readPlaylist());
+	renderPlaylist(loadPlaylist());
+	renderSourceList(loadSourceList());
 });
