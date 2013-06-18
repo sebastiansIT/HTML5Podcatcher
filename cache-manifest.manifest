@@ -1,0 +1,10 @@
+﻿CACHE MANIFEST
+
+# Version 4
+
+CACHE:
+./playlist.html
+./scripts/main.js
+
+NETWORK:
+*
