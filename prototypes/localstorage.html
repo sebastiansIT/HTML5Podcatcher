@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+
+<!--
+    Copyright 2013 Sebastian Spautz
+
+    This file is part of "HTML5 Podcatcher".
+    
+    "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    "HTML5 Podcatcher" is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see http://www.gnu.org/licenses/.
+-->
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Local Storage &mdash; Prototypes &mdash; HTML5 Podcatcher</title>
+        <meta name="description" content="A HTML5 podcast player!">
+        <meta name="viewport" content="width=device-width">
+
+        <link rel="stylesheet" href="../css/main.css" />
+    </head>
+    <body>
+        <header role="banner"> 
+			<h1>HTML5 Podcatcher</h1>
+		</header>
+		<section id="sources">
+				<header><h2>Sources</h2></header>
+				<ul class="entries">
+					<li>
+						no entries
+					</li>
+				</ul>
+				<footer>
+					<form action="#">
+						<label for="addSourceUrlInput">Add Podcast Feed</label>
+						<input type="url" name="addSourceUrlInput" id="addSourceUrlInput" />
+						<input type="button" name="addSourceButton" id="addSourceButton" value="Add Feed" />
+					</form>
+				</footer>
+			</section>
+		<footer>
+			<p id="statusbar"></p>
+			<!-- Impressum ec. -->
+		</footer>
+		<script src="http://code.jquery.com/jquery-2.0.0.min.js"></script>
+		<script src="localstorage.js"></script>
+    </body>
+</html>

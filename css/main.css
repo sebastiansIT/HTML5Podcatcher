@@ -1,0 +1,95 @@
+﻿/*  Copyright 2013 Sebastian Spautz
+
+    This file is part of "HTML5 Podcatcher".
+    
+    "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    "HTML5 Podcatcher" is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see http://www.gnu.org/licenses/.
+*/
+
+body { 
+  text-align:center; 
+  margin:0;
+}
+
+body > header,
+body > footer {
+	position: fixed;
+    right: 0;
+	width: 100%;
+	padding:0.5rem 0;
+	background-color: darkgreen;
+    color: #EEEEEE;
+    line-height: 1em;
+    text-align: left;    
+	z-index: 100;
+}
+body > header {
+	top: 0;
+	max-height:2rem;
+}
+body > header h1,
+body > header h2  {
+	display: inline-block;
+    margin: 0 1rem;
+}
+body > header h1 {
+	font-size: 1rem;
+}
+body > header h2  {
+	font-size: 0.8rem;
+}
+.main {
+	margin: 3rem 1rem 5rem 1rem;
+}
+body > footer {
+	bottom: 0;
+	max-height:3rem;
+	overflow:scroll;
+}
+
+audio { width: 100%; height: 3em; }
+
+.entries { 
+	list-style: none; 
+	padding:0;
+}
+.entries li:first-child {
+	margin-top: 0;
+}
+.entries li {
+	background-color:white;
+	border: 2px solid black;
+	border-radius: 0.1em 0.1em 1.6em 1.6em ;
+	margin: -1.5em 0 0 0;
+	padding: 1.5em 1em 2.0em 1em;
+	text-align:left;
+}
+.entries li:last-child {
+	padding-bottom: 0.5em;
+}
+
+.entries .activeTrack { 
+	background-color:#CCCCCC; 
+	position:relative;
+	z-index:50;
+	padding-bottom: 0.5em;
+}
+.entries h3 { margin:0; }
+.entries .source ,
+.entries .updated{ 
+	display: block; 
+	padding-left: 1em;
+}
+.entries .functions { display: block; text-align: right; }
+.entries .functions .origin:after,
+.entries .functions .status:after { content: " | "; }

@@ -93,27 +93,31 @@ var clearPlaylist = function() {
     localStorage.removeItem('playlist');
 };
 
-var renderPlaylist = function(playlist) {
+var renderPlaylist = function(playlist, played) {
     "use strict";
     var playlistUI = $('#playlist .entries'), playlistEntryUI, i;
     playlistUI.empty();
     if (playlist && playlist.entries) {
         for (i = 0; i < playlist.entries.length; i++) {
-            playlistEntryUI = $('<li>');
-            playlistEntryUI.data('trackid', playlist.entries[i].uri);
-            playlistEntryUI.append('<a href="' + playlist.entries[i].uri + '">' + playlist.entries[i].title + '</a>');
-            if (window.requestFileSystem) {
-                if (playlist.entries[i].offlineUrl) {
-                    playlistEntryUI.append(' | <a class="downloadTrackFile" href="' + playlist.entries[i].mediaUrl + '">Delete</a>');
-                } else {
-                    playlistEntryUI.append(' | <a class="downloadTrack" href="' + playlist.entries[i].mediaUrl + '">Download</a>');
+            if (!(!played && playlist.entries[i].playback && playlist.entries[i].playback.played)) {
+                playlistEntryUI = $('<li>');
+                playlistEntryUI.data('trackid', playlist.entries[i].uri);
+                playlistEntryUI.append('<a href="' + playlist.entries[i].uri + '">' + playlist.entries[i].title + '</a>');
+                if (window.requestFileSystem) {
+                    if (playlist.entries[i].offlineUrl) {
+                        playlistEntryUI.append(' | <a class="downloadTrackFile" href="' + playlist.entries[i].mediaUrl + '">Delete</a>');
+                    } else {
+                        playlistEntryUI.append(' | <a class="downloadTrack" href="' + playlist.entries[i].mediaUrl + '">Download</a>');
+                    }
                 }
+                playlistUI.append(playlistEntryUI);
             }
-            playlistUI.append(playlistEntryUI);
         }
     }
 };
 
+
+/** The following functions handles Tracks */
 var loadTrack = function(trackID) {
     "use strict";
     logHandler("Load Track " + trackID);
@@ -158,7 +162,6 @@ var saveActiveTrack = function(track) {
     localStorage.setItem('track.active', JSON.stringify(track));
 };
 
-/** The following functions handles Tracks */
 var playTrack = function(track) {
     "use strict";
     $('#player audio').off('timeupdate');
@@ -166,17 +169,19 @@ var playTrack = function(track) {
     if (typeof track === 'string') {
         track = loadTrack(track);
     }
-    saveActiveTrack(track);
+    if (track) {
+        saveActiveTrack(track);
 
-    if (track.offlineUrl) {
-        $(audioTag).attr('src', track.offlineUrl);
-        audioTag.load(track.offlineUrl);
-    } else {
-        $(audioTag).attr('src', track.mediaUrl);
-        audioTag.load(track.mediaUrl);
+        if (track.offlineUrl) {
+            $(audioTag).attr('src', track.offlineUrl);
+            audioTag.load(track.offlineUrl);
+        } else {
+            $(audioTag).attr('src', track.mediaUrl);
+            audioTag.load(track.mediaUrl);
+        }
+        $(audioTag).attr('title', track.title);
+        $(audioTag).attr('controls', 'controls');
     }
-    $(audioTag).attr('title', track.title);
-    $(audioTag).attr('controls', 'controls');
 };
 
 var downloadTrack = function(trackID, url, mimeType) {
@@ -215,10 +220,10 @@ var downloadTrackList = function() {
             'success': successfunction
         });
     }
-    k = playlist.entries.length;
     existsTrackInPlaylist = false;
     for (i = 0; i < tracks.length; i++) {
-        while (k--) {
+        k = playlist.entries.length;
+		while (k--) {
             if (tracks[i].uri === playlist.entries[k].uri) {
                 existsTrackInPlaylist = true;
                 //TODO update entry
@@ -233,14 +238,14 @@ var downloadTrackList = function() {
 };
 
 
-/** Central 'ready" event handler */
+/** Central 'ready' event handler */
 $(document).ready(function() {
     "use strict";
     $('#playlist').on('click', 'li', function(event) {
         event.preventDefault();
         event.stopPropagation();
 
-        //Sytyling
+        //Styling
         $(this).parent().children('.active').removeClass('active');
         $(this).addClass('active');
 
@@ -294,21 +299,45 @@ $(document).ready(function() {
     playTrack(loadActiveTrack());
 
     $('#player audio').on('playing', function() {
-        logHandler('Playing ' + loadActiveTrack().title);
+        var track = loadActiveTrack();
+        if (track) {
+            logHandler('Playing ' + track.title);
+        }
+    });
+    $('#player audio').on('ended', function() {
+        var track, playlist, k;
+		logHandler('Playing ' + loadActiveTrack().title + " is ended");
+        track = loadActiveTrack();
+        playlist = loadPlaylist();
+        k = playlist.entries.length;
+        while (k--) {
+            if (track.uri === playlist.entries[k].uri) {
+                if (!playlist.entries[k].playback) {
+                    playlist.entries[k].playback = {};
+                }
+                playlist.entries[k].playback.played = true;
+            }
+        }
+        localStorage.removeItem('track.active');
+        savePlaylist(playlist);
     });
     $('#player audio').on('loadedmetadata', function() {
         var track = loadActiveTrack();
+		logHandler('Load metadata of Track ' + loadActiveTrack().title);
         if (track.playback && track.playback.time) {
             this.currentTime = track.playback.time;
         }
         this.play();
         $(this).on('timeupdate', function(event) {
             var track = loadActiveTrack();
-            if (!track.playback) {
-                track.playback = {'time': 0};
+            if (track) {
+                logHandler('A timeupdate for track ' + loadActiveTrack().title + ' occures on time ' + event.target.currentTime);
+				if (!track.playback) {
+                    track.playback = {'time': 0};
+                }
+                track.playback.time = Math.floor(event.target.currentTime / 10) * 10;
+                saveActiveTrack(track);
             }
-            track.playback.time = Math.floor(event.target.currentTime / 10) * 10;
-            saveActiveTrack(track);
         });
     });
 });

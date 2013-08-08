@@ -20,184 +20,176 @@
 		<p><a href="#" onclick="showFileSystemEntries(); return false;">List Files</a></p>
 		<ul id="filelist"></ul>
 
-		<p><a href="#" onclick="saveZwerg(); return false;">Download and Save Zwerg</a></p>
-
-		<p><a href="#" onclick="deleteZwerg(); return false;">Delete Zwerg</a></p>
-
-
 		<h2>Test MP3-Playback</h2>
 		<audio controls="controls">
-		   <source src="Revision1.mp3" type='audio/mpeg; codecs="mp3"'>
+		   <source src="http://workingdraft.de/podpress_trac/web/1/0/Revision1_-Sencha-Animator-Webfernsehen-und-Firesheep.mp3" type='audio/mpeg; codecs="mp3"'>
 		</audio>
+		
+		<h2>Application Cache</h2>
+		<p><a href="chrome://appcache-internals/">chrome://appcache-internals/</a></p>
+		
 		<script>
 			var audio = new Audio();
 			var canPlayOgg = !!audio.canPlayType && audio.canPlayType('audio/ogg; codecs="vorbis"') != "";
 			var canPlayMP3 = !!audio.canPlayType && audio.canPlayType('audio/mpeg; codecs="mp3"') != "";
 		</script>
 		<script>
+			// Take care of vendor prefixes.
+			window.URL = window.URL || window.webkitURL;
+			window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
 
-// Take care of vendor prefixes.
-window.URL = window.URL || window.webkitURL;
-window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
-
-var getFileSystem = function() {
-	if (!FileSystem) {
-		var FileSystem = undefined;
-		window.requestFileSystem(window.TEMPORARY, 1024*1024*50, function(fs){
-			FileSystem = fs; console.log("File system opend: " + fs);
-		}, onError);
-	}
-	return FileSystem;
-}
-
-var onError = function(e) {
-  console.log('There was an error', e);
-};
-
-/**
- * Writes a Blob to the filesystem.
- *
- * @param {DirectoryEntry} dir The directory to write the blob into.
- * @param {Blob} blob The data to write.
- * @param {string} fileName A name for the file.
- * @param {function(ProgressEvent)} opt_callback An optional callback.
- *     Invoked when the write completes.
- **/
-
-var writeBlob = function(dir, blob, fileName, opt_callback) {
-  dir.getFile(fileName, {create: true, exclusive: true}, function(fileEntry) {
-
-    fileEntry.createWriter(function(writer) {
-      if (opt_callback) {
-        writer.onwrite = opt_callback;
-      }
-      writer.write(blob);
-    }, onError);
-
-  }, onError);
-};
-
-/**
- * Fetches a file by URL and writes it to the filesystem.
- *
- * @param {string} url The url the resource resides under.
- * @param {string} mimeType The content type of the file.
- **/
- 
-var downloadImage = function(url, mimeType) {
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', url, true);
-  xhr.responseType = 'arraybuffer';
-  
-  xhr.onload = function(e) {
-    if (this.status == 200) {
-      var blob = new Blob([xhr.response], {type: mimeType});
-      
-	  var parts = url.split('/');
-      var fileName = parts[parts.length - 1];
-
-      window.requestFileSystem(TEMPORARY, 1024*1024*50 /*2MB*/, function(fs) {
-        var onWrite = function(evt) {
-          console.log('Write completed.');
-        };
-
-        // Write file to the root directory.
-        writeBlob(fs.root, blob, fileName, onWrite);
-      }, onError);
-    }
-  };
-
-  xhr.send(null);
-};
-
-if (window.requestFileSystem && window.URL) {
-  //downloadImage('zwerg.png', 'image/png');
-}
-else {
-	document.getElementById("SupportFilesystemAPI");
-}
-
-
-
-
-
-//List Content
-function toArray(list) {
-  return Array.prototype.slice.call(list || [], 0);
-}
-
-function listResults(entries) {
-  // Document fragments can improve performance since they're only appended
-  // to the DOM once. Only one browser reflow occurs.
-  var fragment = document.createDocumentFragment();
-
-  entries.forEach(function(entry, i) {
-    var img = entry.isDirectory ? '<img src="folder-icon.gif">' :
-                                  '<img src="file-icon.gif">';
-    var li = document.createElement('li');
-			if (entry.name.indexOf(".png") !== -1) {
-				li.innerHTML = ['<img src="' + entry.toURL() + '" title="' + entry.name + '" width="' + 50 + '" />'].join('');
+			var getFileSystem = function() {
+				if (!FileSystem) {
+					var FileSystem = undefined;
+					window.requestFileSystem(window.TEMPORARY, 1024*1024*50, function(fs){
+						FileSystem = fs; console.log("File system opend: " + fs);
+					}, onError);
+				}
+				return FileSystem;
 			}
-			else if (entry.name.indexOf(".mp3") !== -1) {
-				li.innerHTML = ['<audio controls="controls" src="' + entry.toURL() + '" title="' + entry.name + '" />'].join('');
+
+			var onError = function(e) {
+			  console.log('There was an error', e);
+			};
+
+			/**
+			 * Writes a Blob to the filesystem.
+			 *
+			 * @param {DirectoryEntry} dir The directory to write the blob into.
+			 * @param {Blob} blob The data to write.
+			 * @param {string} fileName A name for the file.
+			 * @param {function(ProgressEvent)} opt_callback An optional callback.
+			 *     Invoked when the write completes.
+			 **/
+
+			var writeBlob = function(dir, blob, fileName, opt_callback) {
+			  dir.getFile(fileName, {create: true, exclusive: true}, function(fileEntry) {
+
+				fileEntry.createWriter(function(writer) {
+				  if (opt_callback) {
+					writer.onwrite = opt_callback;
+				  }
+				  writer.write(blob);
+				}, onError);
+
+			  }, onError);
+			};
+
+			/**
+			 * Fetches a file by URL and writes it to the filesystem.
+			 *
+			 * @param {string} url The url the resource resides under.
+			 * @param {string} mimeType The content type of the file.
+			 **/
+			var downloadImage = function(url, mimeType) {
+			  var xhr = new XMLHttpRequest();
+			  xhr.open('GET', url, true);
+			  xhr.responseType = 'arraybuffer';
+			  
+			  xhr.onload = function(e) {
+				if (this.status == 200) {
+				  var blob = new Blob([xhr.response], {type: mimeType});
+				  
+				  var parts = url.split('/');
+				  var fileName = parts[parts.length - 1];
+
+				  window.requestFileSystem(TEMPORARY, 1024*1024*50 /*2MB*/, function(fs) {
+					var onWrite = function(evt) {
+					  console.log('Write completed.');
+					};
+
+					// Write file to the root directory.
+					writeBlob(fs.root, blob, fileName, onWrite);
+				  }, onError);
+				}
+			  };
+
+			  xhr.send(null);
+			};
+
+			if (window.requestFileSystem && window.URL) {
+			  //downloadImage('zwerg.png', 'image/png');
 			}
 			else {
-				li.innerHTML = ['<a href="' + entry.toURL() + '" title="' + entry.name + '">', entry.name, '</a>'].join('');
+				document.getElementById("SupportFilesystemAPI");
 			}
-    fragment.appendChild(li);
-  });
 
-  document.querySelector('#filelist').appendChild(fragment);
-}
+			//List Content
+			function toArray(list) {
+			  return Array.prototype.slice.call(list || [], 0);
+			}
 
-function onInitFs(fs) {
-  var dirReader = fs.root.createReader();
-  var entries = [];
+			function listResults(entries) {
+			  // Document fragments can improve performance since they're only appended
+			  // to the DOM once. Only one browser reflow occurs.
+			  var fragment = document.createDocumentFragment();
 
-  // Call the reader.readEntries() until no more results are returned.
-  var readEntries = function() {
-     dirReader.readEntries (function(results) {
-      if (!results.length) {
-        listResults(entries.sort());
-      } else {
-        entries = entries.concat(toArray(results));
-        readEntries();
-      }
-    }, onError);
-  };
+			  entries.forEach(function(entry, i) {
+				var img = entry.isDirectory ? '<img src="folder-icon.gif">' :
+											  '<img src="file-icon.gif">';
+				var li = document.createElement('li');
+						if (entry.name.indexOf(".png") !== -1) {
+							li.innerHTML = ['<img src="' + entry.toURL() + '" title="' + entry.name + '" width="' + 50 + '" />'].join('');
+						}
+						else if (entry.name.indexOf(".mp3") !== -1) {
+							li.innerHTML = ['<audio controls="controls" src="' + entry.toURL() + '" title="' + entry.name + '" />'].join('');
+						}
+						else {
+							li.innerHTML = ['<a href="' + entry.toURL() + '" title="' + entry.name + '">', entry.name, '</a>'].join('');
+						}
+				fragment.appendChild(li);
+			  });
 
-  readEntries(); // Start reading dirs.
-}
+			  document.querySelector('#filelist').appendChild(fragment);
+			}
 
-function showFileSystemEntries() {
-	//onInitFS(getFileSystem());
-	window.requestFileSystem(window.TEMPORARY, 1024*1024*50, onInitFs, onError);
-}
+			function onInitFs(fs) {
+			  var dirReader = fs.root.createReader();
+			  var entries = [];
 
-function saveZwerg() {
-	downloadImage('zwerg.png', 'image/png');
-}
+			  // Call the reader.readEntries() until no more results are returned.
+			  var readEntries = function() {
+				 dirReader.readEntries (function(results) {
+				  if (!results.length) {
+					listResults(entries.sort());
+				  } else {
+					entries = entries.concat(toArray(results));
+					readEntries();
+				  }
+				}, onError);
+			  };
 
-function deleteZwerg() {
-	window.requestFileSystem(window.TEMPORARY, 1024*1024*50, function(fs) {
-		fs.root.getFile('zwerg.png', {create: false}, function(fileEntry) {
+			  readEntries(); // Start reading dirs.
+			}
 
-			fileEntry.remove(function() {
-			  console.log('File removed.');
-			}, onError);
-		}, onError);
-		
-		fs.root.getFile('Revision1.mp3', {create: false}, function(fileEntry) {
+			function showFileSystemEntries() {
+				//onInitFS(getFileSystem());
+				window.requestFileSystem(window.TEMPORARY, 1024*1024*50, onInitFs, onError);
+				window.requestFileSystem(window.PERSISTENT, 1024*1024*50, onInitFs, onError);
+			}
 
-			fileEntry.remove(function() {
-			  console.log('File removed.');
-			}, onError);
-		}, onError);
-	}, onError);
-}
+			function saveZwerg() {
+				downloadImage('zwerg.png', 'image/png');
+			}
+
+			function deleteZwerg() {
+				window.requestFileSystem(window.TEMPORARY, 1024*1024*50, function(fs) {
+					fs.root.getFile('zwerg.png', {create: false}, function(fileEntry) {
+
+						fileEntry.remove(function() {
+						  console.log('File removed.');
+						}, onError);
+					}, onError);
+					
+					fs.root.getFile('Revision1.mp3', {create: false}, function(fileEntry) {
+
+						fileEntry.remove(function() {
+						  console.log('File removed.');
+						}, onError);
+					}, onError);
+				}, onError);
+			}
 		</script>
-
-
 </body>
 </html>
 

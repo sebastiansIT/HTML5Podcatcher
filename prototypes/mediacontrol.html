@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Audio control &mdash; Prototypes &mdash; HTML5 Podcatcher</title>
+        <meta name="description" content="A HTML5 podcast player!">
+        <meta name="viewport" content="width=device-width">
+
+        <link rel="stylesheet" href="../css/main.css" />
+    </head>
+    <body>
+        <header role="banner"> 
+			<h1>HTML5 Podcatcher</h1>
+		</header>
+		<div class="main">
+			<div id="player">
+				<h2>Player</h2>
+				<form action="#">
+				<audio controls="controls" preload="none" title="http://meta.metaebene.me/media/cre/cre197-ipv6.mp3">
+					<source src="http://meta.metaebene.me/media/cre/cre197-ipv6.mp3" type="audio/mpeg">
+				</audio>
+				<input id="playPreviousTrack" name="playPreviousTrack" type="button" value="|&lt;&lt;" title="Previous Track" />
+				<input id="jumpBackwards" name="jumpBackwards" type="button" value="&lt;&lt;" title="Jump 10 seconds backwards" />
+				<input id="jumpForwards" name="jumpForwards" type="button" value="&gt;&gt;" title="Jump 10 seconds forwards" />
+				<input id="playNextTrack" name="playNextTrack" type="button" value="&gt&gt|" title="Next Track" />
+				</form>
+			</div>
+			
+			<div id="playlist">
+				<h2>Playlist</h2>
+				<ul class="entries">
+					<li>
+						<h3 class="title"><a href="http://meta.metaebene.me/media/cre/cre202-hackerfilme.mp3">CRE202 Hackerfilme</a></h3>
+						<span class="source">CRE: Technik, Kultur, Gesellschaft</span>
+						<span class="functions">
+							<a class="origin" href="http://cre.fm/cre202">Internet</a>
+							<a class="download" href="http://meta.metaebene.me/media/cre/cre202-hackerfilme.mp3" download="cre202-hackerfilme.mp3">Download</a>
+						</span>
+					</li>
+					<li>
+						<h3 class="title"><a href="http://meta.metaebene.me/media/cre/cre201-hoehlenforschung.mp3">CRE201 Höhlenforschung</a></h3>
+						<span class="source">CRE: Technik, Kultur, Gesellschaft</span>
+						<span class="functions">
+							<a class="origin" href="http://cre.fm/cre201">Internet</a>
+							<a class="download" href="http://meta.metaebene.me/media/cre/cre201-hoehlenforschung.mp3" download="cre201-hoehlenforschung.mp3">Download</a>
+						</span>
+					</li>
+					<li>
+						<h3 class="title"><a href="http://meta.metaebene.me/media/cre/cre200-stadtplanung.mp3">CRE200 Stadtplanung</a></h3>
+						<span class="source">CRE: Technik, Kultur, Gesellschaft</span>
+						<span class="functions">
+							<a class="origin" href="http://cre.fm/cre200">Internet</a>
+							<a class="download" href="http://meta.metaebene.me/media/cre/cre200-stadtplanung.mp3" download="cre200-stadtplanung.mp3">Download</a>
+						</span>
+					</li>
+				</ul>
+			</div>
+
+			<footer>
+				<p id="statusbar"></p>
+			</footer>
+		</div>
+		<footer>
+			<!-- Impressum ec. -->
+		</footer>
+		<script src="http://code.jquery.com/jquery-2.0.0.min.js"></script>
+		<script src="mediacontrol.js"></script>
+    </body>
+</html>
