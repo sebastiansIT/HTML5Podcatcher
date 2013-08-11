@@ -18,6 +18,7 @@
 		<p id="SupportFilesystemAPI" class="message" style="display:none">Your Browser don't supports HTML 5 Filesystem API</p>
 
 		<p><a href="#" onclick="showFileSystemEntries(); return false;">List Files</a></p>
+		<p><a href="#" onclick="deleteFileSystemEntries(); return false;">Delete Files</a></p>
 		<ul id="filelist"></ul>
 
 		<h2>Test MP3-Playback</h2>
@@ -161,11 +162,37 @@
 
 			  readEntries(); // Start reading dirs.
 			}
+			function onDeleteFs(fs) {
+			  var dirReader = fs.root.createReader();
+			  var entries = [];
+
+			  // Call the reader.readEntries() until no more results are returned.
+			  var readEntries = function() {
+				 dirReader.readEntries (function(results) {
+				  if (!results.length) {
+					entries.forEach(function(entry, i) {
+                                        	entry.remove(function() {
+							console.log('File removed.');
+						}, onError);
+				        });
+				  } else {
+					entries = entries.concat(toArray(results));
+					readEntries();
+				  }
+				}, onError);
+			  };
+
+			  readEntries(); // Start reading dirs.
+			}
 
 			function showFileSystemEntries() {
 				//onInitFS(getFileSystem());
 				window.requestFileSystem(window.TEMPORARY, 1024*1024*50, onInitFs, onError);
 				window.requestFileSystem(window.PERSISTENT, 1024*1024*50, onInitFs, onError);
+			}
+			function deleteFileSystemEntries() {
+				window.requestFileSystem(window.TEMPORARY, 1024*1024*500, onDeleteFs, onError);
+				window.requestFileSystem(window.PERSISTENT, 1024*1024*500, onDeleteFs, onError);
 			}
 
 			function saveZwerg() {
@@ -189,6 +216,7 @@
 					}, onError);
 				}, onError);
 			}
+			
 		</script>
 </body>
 </html>
