@@ -65,33 +65,39 @@ var renderConfiguration = function() {
     }
 };
 
-/** Functions for tracks */
-var readTrack = function(trackUri) {
+/** Functions for episodes */
+var readEpisode = function(episodeUri) {
     "use strict";
-    var track;
-    if (trackUri) {
-        track = JSON.parse(localStorage.getItem('track.' + trackUri));
-        track.updated = new Date(track.updated);
-        if (!track.playback) {
-            track.playback = {'played': false, 'currentTime': 0};
+    var episode;
+    if (episodeUri) {
+        //Read Episode from local DOM-Storage
+        episode = JSON.parse(localStorage.getItem('episode.' + episodeUri));
+        if (!episode) {
+            episode = { 'uri': episodeUri };
+        }
+        //Convert "updated" to date object 
+        episode.updated = new Date(episode.updated);
+        //Generate "playback" object if not exists
+        if (!episode.playback) {
+            episode.playback = {'played': false, 'currentTime': 0};
         }
     }
-    return track;
+    return episode;
 };
-var writeTrack = function(track) {
+var writeEpisode = function(episode) {
     "use strict";
-    localStorage.setItem('track.' + track.uri, JSON.stringify(track));
+    localStorage.setItem('episode.' + episode.uri, JSON.stringify(episode));
 };
-var sortTracks = function(firstTrack, secondTrack) {
+var sortEpisodes = function(firstEpisode, secondEpisode) {
     "use strict";
-    return secondTrack.updated < firstTrack.updated;
+    return secondEpisode.updated < firstEpisode.updated;
 };
-var saveBlob = function(track, arraybuffer, mimeType) {
+var saveBlob = function(episode, arraybuffer, mimeType) {
     "use strict";
     logHandler('Saving blob to local file system');
     var blob, parts, fileName;
     blob = new Blob([arraybuffer], {type: mimeType});
-    parts = track.mediaUrl.split('/');
+    parts = episode.mediaUrl.split('/');
     fileName = parts[parts.length - 1];
     // Write file to the root directory.
     window.requestFileSystem(fileSystemStatus, fileSystemSize, function(filesystem) {
@@ -100,71 +106,71 @@ var saveBlob = function(track, arraybuffer, mimeType) {
                 writer.onwrite = successHandler;
                 writer.write(blob);
             }, errorHandler);
-            track.offlineMediaUrl = fileEntry.toURL();
-            writeTrack(track);
+            episode.offlineMediaUrl = fileEntry.toURL();
+            writeEpisode(episode);
         }, errorHandler);
     }, errorHandler);
-    logHandler('Saving blob with ' + track.mediaUrl + ' finished');
+    logHandler('Saving blob with ' + episode.mediaUrl + ' finished');
 };
-var deleteBlob = function(track) {
+var deleteBlob = function(episode) {
     "use strict";
-    window.resolveLocalFileSystemURL(track.offlineMediaUrl, function(fileEntry) {
+    window.resolveLocalFileSystemURL(episode.offlineMediaUrl, function(fileEntry) {
         fileEntry.remove(successHandler, errorHandler);
-        track.offlineMediaUrl = undefined;
-        writeTrack(track);
+        episode.offlineMediaUrl = undefined;
+        writeEpisode(episode);
     }, errorHandler);
 };
-var downloadTrack = function(track, mimeType) {
+var downloadEpisode = function(episode, mimeType) {
     "use strict";
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', track.mediaUrl, true);
+    xhr.open('GET', episode.mediaUrl, true);
     xhr.responseType = 'arraybuffer';
     xhr.addEventListener("progress", progressHandler, false);
     xhr.addEventListener("abort", logHandler, false);
     xhr.addEventListener("error", function() {
-        logHandler('Try proxy: ' + localStorage.getItem("configuration.proxyUrl").replace("$url$", track.mediaUrl));
+        logHandler('Try proxy: ' + localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl));
         var xhrProxy = new XMLHttpRequest();
-        xhrProxy.open('GET', localStorage.getItem("configuration.proxyUrl").replace("$url$", track.mediaUrl), true);
+        xhrProxy.open('GET', localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl), true);
         xhrProxy.responseType = 'arraybuffer';
         xhrProxy.addEventListener("progress", progressHandler, false);
         xhrProxy.addEventListener("abort", logHandler, false);
         xhrProxy.addEventListener("error", errorHandler, false);
         xhrProxy.onload = function() {
             if (this.status === 200) {
-                saveBlob(track, xhrProxy.response, mimeType);
+                saveBlob(episode, xhrProxy.response, mimeType);
             }
-            logHandler('Download of file ' + track.mediaUrl + ' via proxy is finished');
+            logHandler('Download of file ' + episode.mediaUrl + ' via proxy is finished');
         };
         xhrProxy.send(null);
     }, false);
     xhr.onload = function() {
         if (this.status === 200) {
-            saveBlob(track, xhr.response, mimeType);
+            saveBlob(episode, xhr.response, mimeType);
         }
     };
     xhr.send(null);
 };
-var toggleTrackStatus = function(track) {
+var toggleEpisodeStatus = function(episode) {
     "use strict";
-    track.playback.played = !track.playback.played;
-    track.playback.currentTime = 0;
-    deleteBlob(track);
-    writeTrack(track);
+    episode.playback.played = !episode.playback.played;
+    episode.playback.currentTime = 0;
+    deleteBlob(episode);
+    writeEpisode(episode);
 };
-var activeTrack = function() {
+var activeEpisode = function() {
     "use strict";
-    var activeTrack = $('#playlist').find('.activeTrack');
-    return readTrack(activeTrack.data('trackuri'));
+    var activeEpisode = $('#playlist').find('.activeEpisode');
+    return readEpisode(activeEpisode.data('trackuri'));
 };
-var previousTrack = function() {
+var previousEpisode = function() {
     "use strict";
-    var activeTrack = $('#playlist').find('.activeTrack');
-    return readTrack(activeTrack.prev().data('trackuri'));
+    var activeEpisode = $('#playlist').find('.activeEpisode');
+    return readEpisode(activeEpisode.prev().data('trackuri'));
 };
-var nextTrack = function() {
+var nextEpisode = function() {
     "use strict";
-    var activeTrack = $('#playlist').find('.activeTrack');
-    return readTrack(activeTrack.next().data('trackuri'));
+    var activeEpisode = $('#playlist').find('.activeEpisode');
+    return readEpisode(activeEpisode.next().data('trackuri'));
 };
 
 /** Functions for Sources/Feeds */
@@ -172,40 +178,51 @@ var readSource = function(sourceUri) {
     "use strict";
     var source;
     source = JSON.parse(localStorage.getItem('source.' + sourceUri));
+    if (!source) {
+        source = { 'uri': sourceUri };
+    }
     return source;
 };
 var writeSource = function(source) {
     "use strict";
-    if (localStorage.getItem('source.' + source.uri)) {
-        //TODO Update einbauen
-    } else {
-        localStorage.setItem('source.' + source.uri, JSON.stringify(source));
-    }
+    localStorage.setItem('source.' + source.uri, JSON.stringify(source));
 };
-var parseFeed = function(feed, tracks) {
+var deleteSource = function(source) {
     "use strict";
-    var xml = $(feed);
+    localStorage.removeItem('source.' + source.uri);
+};
+var parseSource = function(xml, source) {
+    "use strict";
+    var episode, tracks = [];
     //RSS-Feed
-    $(xml).find('item').has('enclosure').slice(0, 5).each(function() {
-        tracks.push({'uri': $(this).find('link:first').text(), 'title': $(this).find('title:first').text(), 'mediaUrl' : $(this).find('enclosure:first').attr('url'), 'updated' : new Date($(this).find('pubDate:first').text()), 'source' : $(xml).find('channel > title').text() });
-    });
-    //ATOM-Feed
-    $(xml).find('entry').has('link[rel=enclosure]').slice(0, 5).each(function() {
-        tracks.push({'uri': $(this).find('id:first').text(), 'title': $(this).find('title:first').text(), 'mediaUrl' : $(this).find('link[rel=enclosure]:first').attr('href'), 'updated' : new Date($(this).find('updated:first').text()) });
-    });
+    if ($(xml).has('rss[version="2.0"]')) {
+        //RSS-Channel
+        source.link = $(xml).find('channel > link').text();
+        source.title = $(xml).find('channel > title').text();
+        source.description = $(xml).find('channel > description').text();
+        //RSS-Entries
+        $(xml).find('item').has('enclosure').slice(0, 5).each(function() {
+            episode = readEpisode($(this).find('link:first').text());
+            episode.title = $(this).find('title:first').text();
+            episode.mediaUrl = $(this).find('enclosure:first').attr('url');
+            episode.updated = new Date($(this).find('pubDate:first').text());
+            episode.source = source.title;
+            tracks.push(episode);
+        });
+    }
+    return {'source': source, 'episodes': tracks};
 };
 var downloadSource = function(source) {
     "use strict";
-    var tracks, successfunction, errorfunction;
-    tracks = [];
+    var successfunction, errorfunction, parserresult;
     successfunction = function(data, jqXHR) {
-        parseFeed(data, tracks);
+        parserresult = parseSource(data, source);
         if (jqXHR.requestURL) {
-            logHandler("Load " + jqXHR.requestURL + " succesfully");
+            logHandler("Loaded " + jqXHR.requestURL + " succesfully", 'info');
         }
     };
     errorfunction = function(jqXHR, textStatus, errorThrown) {
-        errorHandler(textStatus + " " + jqXHR.status + " : " + errorThrown);
+        logHandler(textStatus + " " + jqXHR.status + " : " + errorThrown, 'error');
         if (localStorage.getItem("configuration.proxyUrl")) {
             logHandler(source.uri + " can not loaded directly; using proxy");
             $.ajax({
@@ -213,7 +230,7 @@ var downloadSource = function(source) {
                 'async': false,
                 'dataType': 'xml',
                 'success': successfunction,
-                'error': function() { errorHandler(source.uri + " can not loaded using proxy"); }
+                'error': function() { logHandler(source.uri + " can not loaded using proxy", 'error'); }
             });
             logHandler("Load " + source.uri + " succesfully while using proxy");
         }
@@ -229,7 +246,7 @@ var downloadSource = function(source) {
             'error': errorfunction
         });
     } catch (ignore) {}
-    return tracks;
+    return parserresult;
 };
 var readSourceList = function() {
     "use strict";
@@ -241,6 +258,20 @@ var readSourceList = function() {
     }
     return sourcelist;
 };
+var renderSource = function(source) {
+    "use strict";
+    var entryUI, entryFunctionsUI;
+    entryUI = $('<li>');
+    entryUI.data('sourceuri', source.uri);
+    entryUI.append('<h3 class="title">' + source.title + '<h3>');
+    entryUI.append('<p class="description">' + source.description + '</p>');
+    entryUI.append('<p class="uri"><a href="' + source.uri + '">' + source.uri + '</a></p>');
+    entryFunctionsUI = $('<span class="functions">');
+    entryFunctionsUI.append('<a class="link" href="' + source.link + '">Internet</a> ');
+    entryFunctionsUI.append('<a class="deleteSource" href="' + source.uri + '">Delete</a>');
+    entryUI.append(entryFunctionsUI);
+    return entryUI;
+};
 var renderSourceList = function(sourcelist) {
     "use strict";
     var sourcelistUI, entryUI, i;
@@ -248,9 +279,7 @@ var renderSourceList = function(sourcelist) {
     sourcelistUI.empty();
     if (sourcelist && sourcelist.length > 0) {
         for (i = 0; i < sourcelist.length; i++) {
-            entryUI = $('<li>');
-            entryUI.append('<a href="' + sourcelist[i].uri + '">' + sourcelist[i].uri + '</a>');
-            //TODO delete function
+            entryUI = renderSource(sourcelist[i]);
             sourcelistUI.append(entryUI);
         }
     } else {
@@ -265,16 +294,16 @@ var readPlaylist = function(showAll) {
     if (!showAll) {
         showAll = false;
     }
-    var i, track, playlist = [];
+    var i, episode, playlist = [];
     for (i = 0; i < localStorage.length; i++) {
-        if (localStorage.key(i).slice(0, 6) === 'track.') {
-            track = readTrack(localStorage.key(i).substring(6));
-            if (track.playback.played === false || showAll === true) {
-                playlist.push(track);
+        if (localStorage.key(i).slice(0, 8) === 'episode.') {
+            episode = readEpisode(localStorage.key(i).substring(8));
+            if (episode.playback.played === false || showAll === true) {
+                playlist.push(episode);
             }
         }
     }
-    playlist.sort(sortTracks);
+    playlist.sort(sortEpisodes);
     return playlist;
 };
 var renderPlaylist = function(playlist) {
@@ -313,38 +342,38 @@ var renderPlaylist = function(playlist) {
 };
 
 /** Functions for playback */
-var activateTrack = function(track) {
+var activateEpisode = function(episode) {
     "use strict";
     var mediaUrl, audioTag, mp3SourceTag;
     $(audioTag).off('timeupdate');
-    if (track) {
-        if (track.offlineMediaUrl) {
-            mediaUrl =  track.offlineMediaUrl;
+    if (episode) {
+        if (episode.offlineMediaUrl) {
+            mediaUrl =  episode.offlineMediaUrl;
         } else {
-            mediaUrl = track.mediaUrl;
+            mediaUrl = episode.mediaUrl;
         }
         if ($('#player audio').length > 0) {
             audioTag = $('#player audio')[0];
             $(audioTag).find('source[type="audio/mpeg"]').attr('src', mediaUrl);
-            $(audioTag).attr('title', track.title);
+            $(audioTag).attr('title', episode.title);
         } else {
             $('#mediacontrol > p').remove();
             audioTag = $('<audio controls="controls" preload="metadata">');
             mp3SourceTag = $('<source type="audio/mpeg" />');
             mp3SourceTag.attr('src', mediaUrl);
             audioTag.append(mp3SourceTag);
-            audioTag.attr('title', track.title);
+            audioTag.attr('title', episode.title);
             $('#mediacontrol').prepend(audioTag);
         }
         //Styling
-        $('#playlist').find('.activeTrack').removeClass('activeTrack');
-        $('#playlist li').filter(function() { return $(this).data('trackuri') === track.uri; }).addClass('activeTrack');
+        $('#playlist').find('.activeEpisode').removeClass('activeEpisode');
+        $('#playlist li').filter(function() { return $(this).data('trackuri') === episode.uri; }).addClass('activeEpisode');
     }
 };
-var playTrack = function(track) {
+var playEpisode = function(episode) {
     "use strict";
-    if (track) {
-        activateTrack(track);
+    if (episode) {
+        activateEpisode(episode);
         $('#player audio')[0].load();
     }
 };
@@ -352,12 +381,20 @@ var playTrack = function(track) {
 /** Central 'ready' event handler */
 $(document).ready(function() {
     "use strict";
+    //Update local storage to actual version
+    var k;
+    for (k = 0; k < localStorage.length; k++) {
+        if (localStorage.key(k).slice(0, 6) === 'track.') {
+            localStorage.setItem(localStorage.key(k).replace('track.', 'episode.'), localStorage.getItem(localStorage.key(k)));
+            localStorage.removeItem(localStorage.key(k));
+        }
+    }
     //Player UI Events
-    $('#player #playPreviousTrack').on('click', function() {
-        playTrack(previousTrack());
+    $('#player #playPreviousEpisode').on('click', function() {
+        playEpisode(previousEpisode());
     });
-    $('#player #playNextTrack').on('click', function() {
-        playTrack(nextTrack());
+    $('#player #playNextEpisode').on('click', function() {
+        playEpisode(nextEpisode());
     });
     $('#player #jumpBackwards').on('click', function() {
         var audioTag = $('#player audio')[0];
@@ -371,31 +408,31 @@ $(document).ready(function() {
     $('#playlist').on('click', 'li', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        //Play track
+        //Play episode
         $('#player audio')[0].autoplay = true;
-        playTrack(readTrack($(this).data('trackuri')));
+        playEpisode(readEpisode($(this).data('trackuri')));
     });
     $('#playlist').on('click', '.download', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        var track;
-        track = readTrack($(this).closest('li').data('trackuri'));
-        logHandler('Downloading file ' + track.mediaUrl);
-        downloadTrack(track, 'audio/mp3');
+        var episode;
+        episode = readEpisode($(this).closest('li').data('trackuri'));
+        logHandler('Downloading file ' + episode.mediaUrl);
+        downloadEpisode(episode, 'audio/mp3');
     });
     $('#playlist').on('click', '.delete', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        var track;
-        track = readTrack($(this).closest('li').data('trackuri'));
-        deleteBlob(track);
+        var episode;
+        episode = readEpisode($(this).closest('li').data('trackuri'));
+        deleteBlob(episode);
     });
     $('#playlist').on('click', '.status', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        var track;
-        track = readTrack($(this).closest('li').data('trackuri'));
-        toggleTrackStatus(track);
+        var episode;
+        episode = readEpisode($(this).closest('li').data('trackuri'));
+        toggleEpisodeStatus(episode);
     });
     $('#playlist .functions').on('click', 'a', function(event) {
         event.stopPropagation();
@@ -403,17 +440,16 @@ $(document).ready(function() {
     $('#playlist #updatePlaylist').on('click', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        var i, j, sources, tracks;
+        var i, j, sources, parserresult;
         sources = readSourceList();
         for (i = 0; i < sources.length; i++) {
-            tracks = downloadSource(sources[i]);
-            //Save Tracks to local storage
-            for (j = 0; j < tracks.length; j++) {
-                if (localStorage.getItem('track.' + tracks[j].uri)) {
-                    //TODO Update einbauen
-                } else {
-                    writeTrack(tracks[j]);
-                }
+            parserresult = downloadSource(sources[i]);
+            //Update source in storage
+            writeSource(parserresult.source);
+            //Save Episodes to local storage
+            for (j = 0; j < parserresult.episodes.length; j++) {
+                //Save all Episodes in the parser result
+                writeEpisode(parserresult.episodes[j]);
             }
         }
         renderPlaylist(readPlaylist());
@@ -424,12 +460,47 @@ $(document).ready(function() {
         renderPlaylist(readPlaylist(true));
     });
     //Sources UI Events
-    $('#addFeedUrlButton').on('click', function(event) {
+    $('#sources').on('click', '.deleteSource', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        writeSource({'uri': $('#addFeedUrlInput').val()});
-        downloadSource(readSource($('#addFeedUrlInput').val()));
-        renderSourceList(readSourceList());
+        var source, i;
+        source = readSource($(this).closest('li').data('sourceuri'));
+        deleteSource(source);
+        for (i = 0; i < $('#sources .entries li').length; i++) {
+            if ($($('#sources .entries li')[i]).data('sourceuri') === source.uri) {
+                $($('#sources .entries li')[i]).slideUp(400, function() {$(this).remove(); });
+                break;
+            }
+        }
+    });
+    $('#sources').on('click', '.link', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        window.open($(this).attr('href'), '_blank');
+    });
+    $('#addSourceButton').on('click', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var parserresult, entryUI, i;
+        parserresult = downloadSource(readSource($('#addSourceUrlInput').val()));
+        writeSource(parserresult.source);
+        entryUI = renderSource(parserresult.source);
+        for (i = 0; i < $('#sources .entries li').length; i++) {
+            if ($($('#sources .entries li')[i]).data('sourceuri') === parserresult.source.uri) {
+                $($('#sources .entries li')[i]).slideUp().html(entryUI.html()).slideDown();
+                i = -1;
+                break;
+            }
+        }
+        if (i !== -1) {
+            entryUI.hide();
+            $('#sources .entries').append(entryUI);
+            entryUI.fadeIn();
+        }
+        for (i = 0; i < parserresult.episodes.length; i++) {
+            //Save all Episodes in the parser result
+            writeEpisode(parserresult.episodes[i]);
+        }
         renderPlaylist(readPlaylist());
     });
     //Configuration UI Events
@@ -449,44 +520,40 @@ $(document).ready(function() {
     }, function(e) {
         errorHandler(e);
     });
-    renderConfiguration();
-    renderSourceList(readSourceList());
-    renderPlaylist(readPlaylist());
-    playTrack(readTrack($('#playlist li:first-child').data('trackuri')));
     //Player Events
     $('#player audio').on('loadstart', function() {
         logHandler("==============================================", 'debug');
-        logHandler("Start loading " + activeTrack().title, 'debug');
+        logHandler("Start loading " + activeEpisode().title, 'debug');
     });
     $('#player audio').on('loadedmetadata', function() {
-        logHandler("Load metadata of " + activeTrack().title);
+        logHandler("Load metadata of " + activeEpisode().title);
         $(this).on('timeupdate', function(event) {
-            var track = activeTrack();
-            if (track) {
-                if (event.target.currentTime > (track.playback.currentTime + 10) || event.target.currentTime < (track.playback.currentTime - 10)) {
-                    track.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10;
-                    writeTrack(track);
-                    logHandler('Current timecode is ' + track.playback.currentTime + '.', 'debug');
+            var episode = activeEpisode();
+            if (episode) {
+                if (event.target.currentTime > (episode.playback.currentTime + 10) || event.target.currentTime < (episode.playback.currentTime - 10)) {
+                    episode.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10;
+                    writeEpisode(episode);
+                    logHandler('Current timecode is ' + episode.playback.currentTime + '.', 'debug');
                 }
             }
         });
     });
     $('#player audio').on('canplay', function() {
-        logHandler(activeTrack().title + " is ready to play");
+        logHandler(activeEpisode().title + " is ready to play");
     });
     $('#player audio').on('canplaythrough', function() {
-        logHandler(activeTrack().title + " is realy ready to play (\"canplaythrough\")");
+        logHandler(activeEpisode().title + " is realy ready to play (\"canplaythrough\")");
     });
     $('#player audio').on('playing', function() {
-        logHandler(activeTrack().title + " is playing", 'info');
+        logHandler(activeEpisode().title + " is playing", 'info');
         this.autoplay = true;
     });
     $('#player audio').on('ended', function() {
-        logHandler(activeTrack().title + " is ended");
-        var track = activeTrack();
-        toggleTrackStatus(track);
-        //Plays next Track in Playlist
-        playTrack(nextTrack());
+        logHandler(activeEpisode().title + " is ended");
+        var episode = activeEpisode();
+        toggleEpisodeStatus(episode);
+        //Plays next Episode in Playlist
+        playEpisode(nextEpisode());
     });
     $('#player audio').on('error', function(error) {
         errorHandler(error);
@@ -495,10 +562,14 @@ $(document).ready(function() {
         errorHandler(error);
     });
     $('#player audio').on('durationchange', function(event) {
-        logHandler("Duration of " + activeTrack().title + " is changed to " + event.currentTarget.duration + ".", 'info');
-        var track = activeTrack();
-        if (track && this.duration > track.playback.currentTime && this.currentTime < track.playback.currentTime) {
-            this.currentTime = track.playback.currentTime;
+        logHandler("Duration of " + activeEpisode().title + " is changed to " + event.currentTarget.duration + ".", 'info');
+        var episode = activeEpisode();
+        if (episode && this.duration > episode.playback.currentTime && this.currentTime < episode.playback.currentTime) {
+            this.currentTime = episode.playback.currentTime;
         }
     });
+    renderConfiguration();
+    renderSourceList(readSourceList());
+    renderPlaylist(readPlaylist());
+    playEpisode(readEpisode($('#playlist li:first-child').data('trackuri')));
 });
