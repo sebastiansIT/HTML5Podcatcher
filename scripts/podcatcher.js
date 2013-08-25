@@ -86,6 +86,7 @@ var readEpisode = function(episodeUri) {
 };
 var writeEpisode = function(episode) {
     "use strict";
+	//logHandler('Saving Episode with timecode ' + episode.playback.currentTime, 'debug');
     localStorage.setItem('episode.' + episode.uri, JSON.stringify(episode));
 };
 var sortEpisodes = function(firstEpisode, secondEpisode) {
@@ -115,8 +116,8 @@ var saveBlob = function(episode, arraybuffer, mimeType) {
 var deleteBlob = function(episode) {
     "use strict";
     window.resolveLocalFileSystemURL(episode.offlineMediaUrl, function(fileEntry) {
-        fileEntry.remove(successHandler, errorHandler);
         episode.offlineMediaUrl = undefined;
+		fileEntry.remove(successHandler, errorHandler);
         writeEpisode(episode);
     }, errorHandler);
 };
@@ -154,7 +155,9 @@ var toggleEpisodeStatus = function(episode) {
     "use strict";
     episode.playback.played = !episode.playback.played;
     episode.playback.currentTime = 0;
-    deleteBlob(episode);
+    if (episode.offlineMediaUrl) {
+		deleteBlob(episode);
+	}
     writeEpisode(episode);
 };
 var activeEpisode = function() {
@@ -345,8 +348,9 @@ var renderPlaylist = function(playlist) {
 var activateEpisode = function(episode) {
     "use strict";
     var mediaUrl, audioTag, mp3SourceTag;
-    $(audioTag).off('timeupdate');
-    if (episode) {
+    $('#player audio').off('timeupdate');
+    logHandler("Timeupdate off", 'debug');
+	if (episode) {
         if (episode.offlineMediaUrl) {
             mediaUrl =  episode.offlineMediaUrl;
         } else {
@@ -433,6 +437,12 @@ $(document).ready(function() {
         var episode;
         episode = readEpisode($(this).closest('li').data('trackuri'));
         toggleEpisodeStatus(episode);
+		if (episode.playback.played) {
+			$(this).text("Status: played");
+		} else {
+			$(this).text("Status: new");
+		}
+		
     });
     $('#playlist .functions').on('click', 'a', function(event) {
         event.stopPropagation();
@@ -521,22 +531,16 @@ $(document).ready(function() {
         errorHandler(e);
     });
     //Player Events
+	renderConfiguration();
+    renderSourceList(readSourceList());
+    renderPlaylist(readPlaylist());
+	playEpisode(readEpisode($('#playlist li:first-child').data('trackuri')));
     $('#player audio').on('loadstart', function() {
         logHandler("==============================================", 'debug');
         logHandler("Start loading " + activeEpisode().title, 'debug');
     });
     $('#player audio').on('loadedmetadata', function() {
         logHandler("Load metadata of " + activeEpisode().title);
-        $(this).on('timeupdate', function(event) {
-            var episode = activeEpisode();
-            if (episode) {
-                if (event.target.currentTime > (episode.playback.currentTime + 10) || event.target.currentTime < (episode.playback.currentTime - 10)) {
-                    episode.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10;
-                    writeEpisode(episode);
-                    logHandler('Current timecode is ' + episode.playback.currentTime + '.', 'debug');
-                }
-            }
-        });
     });
     $('#player audio').on('canplay', function() {
         logHandler(activeEpisode().title + " is ready to play");
@@ -558,18 +562,23 @@ $(document).ready(function() {
     $('#player audio').on('error', function(error) {
         errorHandler(error);
     });
-    $('#player audio').on('error', function(error) {
-        errorHandler(error);
-    });
     $('#player audio').on('durationchange', function(event) {
-        logHandler("Duration of " + activeEpisode().title + " is changed to " + event.currentTarget.duration + ".", 'info');
+        logHandler("Duration of " + activeEpisode().title + " is changed to " + event.currentTarget.duration + ".", 'debug');
         var episode = activeEpisode();
-        if (episode && this.duration > episode.playback.currentTime && this.currentTime < episode.playback.currentTime) {
-            this.currentTime = episode.playback.currentTime;
-        }
+        if (episode && this.duration > episode.playback.currentTime && this.currentTime <= episode.playback.currentTime) {
+            logHandler("CurrentTime will set to " + episode.playback.currentTime + " seconds", 'debug');
+			this.currentTime = episode.playback.currentTime;
+			$(this).on('timeupdate', function(event) {
+				//logHandler("Timeupdate reached", 'debug');
+				var episode = activeEpisode();
+				if (episode && (event.target.currentTime > (episode.playback.currentTime + 10) || event.target.currentTime < (episode.playback.currentTime - 10))) {
+					episode.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10;
+					writeEpisode(episode);
+					logHandler('Current timecode is ' + episode.playback.currentTime + '.', 'debug');
+				}
+			});
+			logHandler("Timeupdate on", 'debug');
+		}
     });
-    renderConfiguration();
-    renderSourceList(readSourceList());
-    renderPlaylist(readPlaylist());
     playEpisode(readEpisode($('#playlist li:first-child').data('trackuri')));
 });

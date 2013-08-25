@@ -72,17 +72,15 @@ var downloadSource = function(source) {
     };
     errorfunction = function(jqXHR, textStatus, errorThrown) {
         logHandler(textStatus + " " + jqXHR.status + " : " + errorThrown, 'error');
-        if (localStorage.getItem("configuration.proxyUrl")) {
-            logHandler(source.uri + " can not loaded directly; using proxy");
-            $.ajax({
-                'url': localStorage.getItem("configuration.proxyUrl").replace("$url$", source.uri),
+        logHandler(source.uri + " can not loaded directly; using proxy");
+        $.ajax({
+                'url': './sourceparsing.py?url=' + source.uri,
                 'async': false,
                 'dataType': 'xml',
                 'success': successfunction,
                 'error': function() { logHandler(source.uri + " can not loaded using proxy", 'error'); }
             });
-            logHandler("Load " + source.uri + " succesfully while using proxy");
-        }
+        logHandler("Load " + source.uri + " succesfully while using proxy");
     };
     //Load Feed and Parse Entries
     try {
