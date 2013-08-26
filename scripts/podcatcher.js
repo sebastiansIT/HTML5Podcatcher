@@ -39,22 +39,50 @@ var logHandler = function(message, loglevel) {
     console.log(loglevel + ': ' + message);
     $('#statusbar').prepend('<span class=' + loglevel + '>' + message + '</span></br>');
 };
-var errorHandler = function(error) {
+var errorHandler = function(event) {
     "use strict";
-    logHandler(error, 'error');
+    var eventstring = event.toString() + ' {';
+    $.each(event, function(i, n) {
+        eventstring += i + ': "' + n + '"; ';
+    });
+    eventstring += '}';
+    logHandler(eventstring, 'error');
 };
 var successHandler = function(event) {
     "use strict";
     logHandler(event, 'info');
 };
-var progressHandler = function(xmlHttpRequestProgressEvent) {
+var progressHandler = function(progressEvent) {
     "use strict";
-    if (xmlHttpRequestProgressEvent.lengthComputable) {
-        var percentComplete = xmlHttpRequestProgressEvent.loaded / xmlHttpRequestProgressEvent.total;
+    var percentComplete;
+    if (progressEvent.lengthComputable) {
+        percentComplete = progressEvent.loaded / progressEvent.total;
         console.log('Download: ' + percentComplete * 100 + '%');
     } else {
         console.log('Downloading...');
     }
+};
+
+/** User interface functions */
+var actualiseEpisodeUI = function(episode) {
+    "use strict";
+    $('#playlist .entries li').each(function() {
+        if ($(this).data('episodeUri') === episode.uri) {
+            // Status
+            if (episode.playback.played) {
+                $(this).find('.status').text("Status: played");
+            } else {
+                $(this).find('.status').text("Status: new");
+            }
+            // Download/Delete link
+            if (episode.offlineMediaUrl) {
+                $(this).find('.download').replaceWith('<a class="delete" href="' + episode.offlineMediaUrl + '">Delete</a>');
+            } else {
+                $(this).find('.delete').replaceWith('<a class="download" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
+            }
+            return false;
+        }
+    });
 };
 
 /** Functions for configuration */
@@ -63,6 +91,92 @@ var renderConfiguration = function() {
     if (localStorage.getItem("configuration.proxyUrl")) {
         $('#httpProxyInput').val(localStorage.getItem("configuration.proxyUrl"));
     }
+};
+
+/** Functions for files */
+var saveFile = function(episode, arraybuffer, mimeType) {
+    "use strict";
+    logHandler('Saving file "' + episode.mediaUrl + '" to local file system starts now', 'debug');
+    var blob, parts, fileName;
+    blob = new Blob([arraybuffer], {type: mimeType});
+    parts = episode.mediaUrl.split('/');
+    fileName = parts[parts.length - 1];
+    // Write file to the root directory.
+    window.requestFileSystem(fileSystemStatus, fileSystemSize, function(filesystem) {
+        filesystem.root.getFile(fileName, {create: true, exclusive: false}, function(fileEntry) {
+            fileEntry.createWriter(function(writer) {
+                writer.onwrite = function() {
+                    logHandler('Writing to disk...', 'debug');
+                };
+                writer.onwriteend = function() { //success
+                    episode.offlineMediaUrl = fileEntry.toURL();
+                    writeEpisode(episode);
+                    logHandler('Saving file "' + episode.mediaUrl + '" to local file system finished', 'info');
+                };
+                writer.onerror = function(event) {
+                    logHandler('Error on saving file "' + episode.mediaUrl + '" to local file system (' + event + ')', 'error');
+                };
+                writer.write(blob);
+            }, errorHandler);
+        }, errorHandler);
+    }, errorHandler);
+};
+var deleteFile = function(episode) {
+    "use strict";
+    window.resolveLocalFileSystemURL(episode.offlineMediaUrl, function(fileEntry) { //success
+        fileEntry.remove(function() { //success
+            var url;
+            url = episode.offlineMediaUrl;
+            episode.offlineMediaUrl = undefined;
+            writeEpisode(episode);
+            logHandler('Deleting file "' + url + '" finished', 'info');
+        }, errorHandler);
+    }, function(event) { //error
+        if (event.code === event.NOT_FOUND_ERR) {
+            var url;
+            url = episode.offlineMediaUrl;
+            episode.offlineMediaUrl = undefined;
+            writeEpisode(episode);
+            logHandler('File "' + url + '"not found. But that\'s OK', 'info');
+        } else {
+            errorHandler(event);
+        }
+    });
+};
+var downloadFile = function(episode, mimeType) {
+    "use strict";
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', episode.mediaUrl, true);
+    xhr.responseType = 'arraybuffer';
+    xhr.addEventListener("progress", progressHandler, false);
+    xhr.addEventListener("abort", logHandler, false);
+    xhr.addEventListener("error", function() {
+        logHandler('Direct download failed. Try proxy: ' + localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl), 'warning');
+        var xhrProxy = new XMLHttpRequest();
+        xhrProxy.open('GET', localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl), true);
+        xhrProxy.responseType = 'arraybuffer';
+        xhrProxy.addEventListener("progress", progressHandler, false);
+        xhrProxy.addEventListener("abort", logHandler, false);
+        xhrProxy.addEventListener("error", errorHandler, false);
+        xhrProxy.onload = function() {
+            if (this.status === 200) {
+                logHandler('Download of file "' + episode.mediaUrl + '" via proxy is finished', 'debug');
+                saveFile(episode, xhrProxy.response, mimeType);
+            } else {
+                logHandler('Error Downloading file "' + episode.mediaUrl + '" via proxy: ' + this.statusText + ' (' + this.status + ')', 'error');
+            }
+        };
+        xhrProxy.send(null);
+    }, false);
+    xhr.onload = function() {
+        if (this.status === 200) {
+            logHandler('Download of file "' + episode.mediaUrl + '" is finished', 'debug');
+            saveFile(episode, xhr.response, mimeType);
+        } else {
+            logHandler('Error Downloading file "' + episode.mediaUrl + '": ' + this.statusText + ' (' + this.status + ')', 'error');
+        }
+    };
+    xhr.send(null);
 };
 
 /** Functions for episodes */
@@ -86,94 +200,37 @@ var readEpisode = function(episodeUri) {
 };
 var writeEpisode = function(episode) {
     "use strict";
-	//logHandler('Saving Episode with timecode ' + episode.playback.currentTime, 'debug');
+    //logHandler('Saving Episode with timecode ' + episode.playback.currentTime, 'debug');
     localStorage.setItem('episode.' + episode.uri, JSON.stringify(episode));
+    actualiseEpisodeUI(episode);
 };
 var sortEpisodes = function(firstEpisode, secondEpisode) {
     "use strict";
     return secondEpisode.updated < firstEpisode.updated;
-};
-var saveBlob = function(episode, arraybuffer, mimeType) {
-    "use strict";
-    logHandler('Saving blob to local file system');
-    var blob, parts, fileName;
-    blob = new Blob([arraybuffer], {type: mimeType});
-    parts = episode.mediaUrl.split('/');
-    fileName = parts[parts.length - 1];
-    // Write file to the root directory.
-    window.requestFileSystem(fileSystemStatus, fileSystemSize, function(filesystem) {
-        filesystem.root.getFile(fileName, {create: true, exclusive: false}, function(fileEntry) {
-            fileEntry.createWriter(function(writer) {
-                writer.onwrite = successHandler;
-                writer.write(blob);
-            }, errorHandler);
-            episode.offlineMediaUrl = fileEntry.toURL();
-            writeEpisode(episode);
-        }, errorHandler);
-    }, errorHandler);
-    logHandler('Saving blob with ' + episode.mediaUrl + ' finished');
-};
-var deleteBlob = function(episode) {
-    "use strict";
-    window.resolveLocalFileSystemURL(episode.offlineMediaUrl, function(fileEntry) {
-        episode.offlineMediaUrl = undefined;
-		fileEntry.remove(successHandler, errorHandler);
-        writeEpisode(episode);
-    }, errorHandler);
-};
-var downloadEpisode = function(episode, mimeType) {
-    "use strict";
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', episode.mediaUrl, true);
-    xhr.responseType = 'arraybuffer';
-    xhr.addEventListener("progress", progressHandler, false);
-    xhr.addEventListener("abort", logHandler, false);
-    xhr.addEventListener("error", function() {
-        logHandler('Try proxy: ' + localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl));
-        var xhrProxy = new XMLHttpRequest();
-        xhrProxy.open('GET', localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl), true);
-        xhrProxy.responseType = 'arraybuffer';
-        xhrProxy.addEventListener("progress", progressHandler, false);
-        xhrProxy.addEventListener("abort", logHandler, false);
-        xhrProxy.addEventListener("error", errorHandler, false);
-        xhrProxy.onload = function() {
-            if (this.status === 200) {
-                saveBlob(episode, xhrProxy.response, mimeType);
-            }
-            logHandler('Download of file ' + episode.mediaUrl + ' via proxy is finished');
-        };
-        xhrProxy.send(null);
-    }, false);
-    xhr.onload = function() {
-        if (this.status === 200) {
-            saveBlob(episode, xhr.response, mimeType);
-        }
-    };
-    xhr.send(null);
 };
 var toggleEpisodeStatus = function(episode) {
     "use strict";
     episode.playback.played = !episode.playback.played;
     episode.playback.currentTime = 0;
     if (episode.offlineMediaUrl) {
-		deleteBlob(episode);
-	}
+        deleteFile(episode);
+    }
     writeEpisode(episode);
 };
 var activeEpisode = function() {
     "use strict";
     var activeEpisode = $('#playlist').find('.activeEpisode');
-    return readEpisode(activeEpisode.data('trackuri'));
+    return readEpisode(activeEpisode.data('episodeUri'));
 };
 var previousEpisode = function() {
     "use strict";
     var activeEpisode = $('#playlist').find('.activeEpisode');
-    return readEpisode(activeEpisode.prev().data('trackuri'));
+    return readEpisode(activeEpisode.prev().data('episodeUri'));
 };
 var nextEpisode = function() {
     "use strict";
     var activeEpisode = $('#playlist').find('.activeEpisode');
-    return readEpisode(activeEpisode.next().data('trackuri'));
+    return readEpisode(activeEpisode.next().data('episodeUri'));
 };
 
 /** Functions for Sources/Feeds */
@@ -317,7 +374,7 @@ var renderPlaylist = function(playlist) {
     if (playlist && playlist.length > 0) {
         for (i = 0; i < playlist.length; i++) {
             entryUI = $('<li>');
-            entryUI.data('trackuri', playlist[i].uri);
+            entryUI.data('episodeUri', playlist[i].uri);
             entryUI.append('<h3 class="title"><a href="' + playlist[i].uri + '">' + playlist[i].title + '</a></h3>');
             entryUI.append('<span class="source">' + playlist[i].source + '</span>');
             entryUI.append('<span class="updated">' + playlist[i].updated.toLocaleDateString() + " " + playlist[i].updated.toLocaleTimeString() + '</span>');
@@ -350,7 +407,7 @@ var activateEpisode = function(episode) {
     var mediaUrl, audioTag, mp3SourceTag;
     $('#player audio').off('timeupdate');
     logHandler("Timeupdate off", 'debug');
-	if (episode) {
+    if (episode) {
         if (episode.offlineMediaUrl) {
             mediaUrl =  episode.offlineMediaUrl;
         } else {
@@ -371,7 +428,7 @@ var activateEpisode = function(episode) {
         }
         //Styling
         $('#playlist').find('.activeEpisode').removeClass('activeEpisode');
-        $('#playlist li').filter(function() { return $(this).data('trackuri') === episode.uri; }).addClass('activeEpisode');
+        $('#playlist li').filter(function() { return $(this).data('episodeUri') === episode.uri; }).addClass('activeEpisode');
     }
 };
 var playEpisode = function(episode) {
@@ -414,35 +471,35 @@ $(document).ready(function() {
         event.stopPropagation();
         //Play episode
         $('#player audio')[0].autoplay = true;
-        playEpisode(readEpisode($(this).data('trackuri')));
+        playEpisode(readEpisode($(this).data('episodeUri')));
     });
     $('#playlist').on('click', '.download', function(event) {
         event.preventDefault();
         event.stopPropagation();
         var episode;
-        episode = readEpisode($(this).closest('li').data('trackuri'));
-        logHandler('Downloading file ' + episode.mediaUrl);
-        downloadEpisode(episode, 'audio/mp3');
+        episode = readEpisode($(this).closest('li').data('episodeUri'));
+        logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info');
+        downloadFile(episode, 'audio/mp3');
     });
     $('#playlist').on('click', '.delete', function(event) {
         event.preventDefault();
         event.stopPropagation();
         var episode;
-        episode = readEpisode($(this).closest('li').data('trackuri'));
-        deleteBlob(episode);
+        episode = readEpisode($(this).closest('li').data('episodeUri'));
+        logHandler('Deleting file "' + episode.offlineMediaUrl + '" starts now', 'info');
+        deleteFile(episode);
     });
     $('#playlist').on('click', '.status', function(event) {
         event.preventDefault();
         event.stopPropagation();
         var episode;
-        episode = readEpisode($(this).closest('li').data('trackuri'));
+        episode = readEpisode($(this).closest('li').data('episodeUri'));
         toggleEpisodeStatus(episode);
-		if (episode.playback.played) {
-			$(this).text("Status: played");
-		} else {
-			$(this).text("Status: new");
-		}
-		
+        if (episode.playback.played) {
+            $(this).text("Status: played");
+        } else {
+            $(this).text("Status: new");
+        }
     });
     $('#playlist .functions').on('click', 'a', function(event) {
         event.stopPropagation();
@@ -531,10 +588,10 @@ $(document).ready(function() {
         errorHandler(e);
     });
     //Player Events
-	renderConfiguration();
+    renderConfiguration();
     renderSourceList(readSourceList());
     renderPlaylist(readPlaylist());
-	playEpisode(readEpisode($('#playlist li:first-child').data('trackuri')));
+    playEpisode(readEpisode($('#playlist li:first-child').data('episodeUri')));
     $('#player audio').on('loadstart', function() {
         logHandler("==============================================", 'debug');
         logHandler("Start loading " + activeEpisode().title, 'debug');
@@ -567,18 +624,18 @@ $(document).ready(function() {
         var episode = activeEpisode();
         if (episode && this.duration > episode.playback.currentTime && this.currentTime <= episode.playback.currentTime) {
             logHandler("CurrentTime will set to " + episode.playback.currentTime + " seconds", 'debug');
-			this.currentTime = episode.playback.currentTime;
-			$(this).on('timeupdate', function(event) {
-				//logHandler("Timeupdate reached", 'debug');
-				var episode = activeEpisode();
-				if (episode && (event.target.currentTime > (episode.playback.currentTime + 10) || event.target.currentTime < (episode.playback.currentTime - 10))) {
-					episode.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10;
-					writeEpisode(episode);
-					logHandler('Current timecode is ' + episode.playback.currentTime + '.', 'debug');
-				}
-			});
-			logHandler("Timeupdate on", 'debug');
-		}
+            this.currentTime = episode.playback.currentTime;
+            $(this).on('timeupdate', function(event) {
+                //logHandler("Timeupdate reached", 'debug');
+                var episode = activeEpisode();
+                if (episode && (event.target.currentTime > (episode.playback.currentTime + 10) || event.target.currentTime < (episode.playback.currentTime - 10))) {
+                    episode.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10;
+                    writeEpisode(episode);
+                    logHandler('Current timecode is ' + episode.playback.currentTime + '.', 'debug');
+                }
+            });
+            logHandler("Timeupdate on", 'debug');
+        }
     });
-    playEpisode(readEpisode($('#playlist li:first-child').data('trackuri')));
+    playEpisode(readEpisode($('#playlist li:first-child').data('episodeUri')));
 });
