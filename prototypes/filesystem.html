@@ -19,34 +19,21 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 -->
 
-<html manifest="cache-manifest.manifest">
+<html>
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>Playlist &mdash; HTML5 Podcatcher</title>
+        <title>Download Files &mdash; Prototypes &mdash; HTML5 Podcatcher</title>
         <meta name="description" content="A HTML5 podcast player!">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="viewport" content="width=device-width">
 
-        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-
-        <link rel="stylesheet" href="css/main.css" />
+        <link rel="stylesheet" href="../css/main.css" />
     </head>
     <body>
         <header role="banner"> 
 			<h1>HTML5 Podcatcher</h1>
-			<h2>Beta 0.10.4</h2>
 		</header>
 		<div class="main">
-			<section id="player">
-				<header><h2>Player</h2></header>
-				<div id="mediacontrol"><p>Nothing to play!</p></div>
-				<form action="#">
-					<input id="playPreviousTrack" name="playPreviousTrack" type="button" value="|&lt;&lt;" title="Previous Track" />
-					<input id="jumpBackwards" name="jumpBackwards" type="button" value="&lt;&lt;" title="Jump 10 seconds backwards" />
-					<input id="jumpForwards" name="jumpForwards" type="button" value="&gt;&gt;" title="Jump 10 seconds forwards" />
-					<input id="playNextTrack" name="playNextTrack" type="button" value="&gt&gt|" title="Next Track" />
-				</form>
-			</section>
 			<section id="playlist">
 				<header><h2>Playlist</h2></header>
 				<ul class="entries">
@@ -57,22 +44,6 @@
 				<footer>
 					<!--general Functions-->
 					<a href="#" id="updatePlaylist">Update Playlist</a>
-					<a href="#" id="showFullPlaylist">Show all Tracks</a>
-				</footer>
-			</section>
-			<section id="sources">
-				<header><h2>Sources</h2></header>
-				<ul class="entries">
-					<li>
-						no entries
-					</li>
-				</ul>
-				<footer>
-					<form action="#" id="addSourceForm">
-						<label for="addSourceUrlInput">Add Podcast Feed</label>
-						<input type="url" name="addSourceUrlInput" id="addSourceUrlInput" required="required" />
-						<input type="submit" name="addSourceButton" id="addSourceButton" value="Add Feed" />
-					</form>
 				</footer>
 			</section>
 			<section id="configuration">
@@ -82,18 +53,14 @@
 					<input title="Allowed size for downloaded files in megabyte" type="number" required="required" min="100" step="20" value="500" name="memorySizeInput" id="memorySizeInput" />
 					<input type="submit" name="saveMemorySizeButton" id="saveMemorySizeButton" value="Save" />
 				</form>
-				<form action="#" id="proxyForm">
-					<label for="httpProxyInput">Proxy-URL</label>
-					<input type="url" name="httpProxyInput" id="httpProxyInput" />
-					<input type="submit" name="saveConfigurationButton" id="saveConfigurationButton" value="Save" />
-				</form>
 			</section>
 		</div>
 		<footer>
+			<meter value="0" min="0" max="1">0%</meter>
 			<p id="statusbar"></p>
 			<!-- Impressum ec. -->
 		</footer>
 		<script src="http://code.jquery.com/jquery-2.0.0.min.js"></script>
-		<script src="scripts/podcatcher.js"></script>
+		<script src="filesystem.js"></script>
     </body>
 </html>
