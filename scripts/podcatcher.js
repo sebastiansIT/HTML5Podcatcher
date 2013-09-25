@@ -33,6 +33,38 @@ window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileS
 window.resolveLocalFileSystemURL = window.resolveLocalFileSystemURL || window.webkitResolveLocalFileSystemURL;
 navigator.persistentStorage = navigator.persistentStorage || navigator.webkitPersistentStorage;
 
+/** User interface functions */
+var findEpisodeUI = function(episode) {
+    "use strict";
+    var episodeUI;
+    $('#playlist .entries li').each(function() {
+        if ($(this).data('episodeUri') === episode.uri) {
+            episodeUI = this;
+            return false;
+        }
+    });
+    return episodeUI;
+};
+var actualiseEpisodeUI = function(episode) {
+    "use strict";
+    var episodeUI;
+    episodeUI = findEpisodeUI(episode);
+    // Status
+    if (episode.playback.played) {
+        $(episodeUI).find('.status').text("Status: played");
+    } else {
+        $(episodeUI).find('.status').text("Status: new");
+    }
+    // Download/Delete link
+    if (episode.offlineMediaUrl) {
+        $(episodeUI).find('.download').replaceWith('<a class="delete" href="' + episode.offlineMediaUrl + '">Delete</a>');
+    } else {
+        $(episodeUI).find('.delete').replaceWith('<a class="download" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
+    }
+    $(episodeUI).find('progress').remove();
+    return false;
+};
+
 /** Helper Functions */
 var escapeHtml = function(text) {
     "use strict";
@@ -61,25 +93,34 @@ var successHandler = function(event) {
     "use strict";
     logHandler(event, 'info');
 };
-var progressHandler = function(progressEvent) {
-    "use strict";
-    var percentComplete;
+var progressHandler = function(progressEvent, prefix, episode) {
+    "use strict"; //xmlHttpRequestProgressEvent
+    var progressbar, percentComplete, episodeUI;
+    episodeUI = findEpisodeUI(episode);
+    if ($(episodeUI).find('progress').length) {
+        progressbar = $(episodeUI).find('progress');
+    } else {
+        progressbar = $('<progress min="0" max="1">&helip;</progress>');
+        $(episodeUI).find('.download').hide().after(progressbar);
+    }
     if (progressEvent.lengthComputable) {
         percentComplete = progressEvent.loaded / progressEvent.total;
-        console.log('Download: ' + percentComplete * 100 + '%');
+        console.log(prefix + ': ' + (percentComplete * 100).toFixed(2) + '%');
+        $(episodeUI).find('progress').attr('value', percentComplete).text((percentComplete * 100).toFixed(2) + '%');
     } else {
-        console.log('Downloading...');
+        console.log(prefix + '...');
+        $(episodeUI).find('progress').removeAttr('value').text('&helip;');
     }
 };
 var requestFileSystemQuota = function(quota) {
     "use strict";
-    if(navigator.persistentStorage) {
+    if (navigator.persistentStorage) {
         navigator.persistentStorage.requestQuota(quota, function(grantedBytes) {
             logHandler('You gain access to ' + grantedBytes / 1024 / 1024 + ' MiB of memory', 'debug');
             navigator.persistentStorage.queryUsageAndQuota(function (usage, quota) {
                 localStorage.setItem("configuration.quota", quota);
                 var availableSpace = quota - usage;
-                $('#memorySizeInput').val(quota / 1024 / 1024).attr('min', Math.ceil(usage / 1024 / 1024)).css('background', 'linear-gradient( 90deg, rgba(0,100,0,0.45) ' + Math.ceil((usage / quota)*100) + '%, transparent ' + Math.ceil((usage / quota)*100) + '%, transparent )');
+                $('#memorySizeInput').val(quota / 1024 / 1024).attr('min', Math.ceil(usage / 1024 / 1024)).css('background', 'linear-gradient( 90deg, rgba(0,100,0,0.45) ' + Math.ceil((usage / quota) * 100) + '%, transparent ' + Math.ceil((usage / quota) * 100) + '%, transparent )');
                 if (availableSpace <= (1024 * 1024 * 50)) {
                     logHandler('You are out of space! Please allow more then ' + Math.ceil(quota / 1024 / 1024) + ' MiB of space', 'warning');
                 } else {
@@ -90,120 +131,12 @@ var requestFileSystemQuota = function(quota) {
     }
 };
 
-/** User interface functions */
-var actualiseEpisodeUI = function(episode) {
-    "use strict";
-    $('#playlist .entries li').each(function() {
-        if ($(this).data('episodeUri') === episode.uri) {
-            // Status
-            if (episode.playback.played) {
-                $(this).find('.status').text("Status: played");
-            } else {
-                $(this).find('.status').text("Status: new");
-            }
-            // Download/Delete link
-            if (episode.offlineMediaUrl) {
-                $(this).find('.download').replaceWith('<a class="delete" href="' + episode.offlineMediaUrl + '">Delete</a>');
-            } else {
-                $(this).find('.delete').replaceWith('<a class="download" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
-            }
-            return false;
-        }
-    });
-};
-
 /** Functions for configuration */
 var renderConfiguration = function() {
     "use strict";
     if (localStorage.getItem("configuration.proxyUrl")) {
         $('#httpProxyInput').val(localStorage.getItem("configuration.proxyUrl"));
     }
-};
-
-/** Functions for files */
-var saveFile = function(episode, arraybuffer, mimeType) {
-    "use strict";
-    logHandler('Saving file "' + episode.mediaUrl + '" to local file system starts now', 'debug');
-    var blob, parts, fileName;
-    blob = new Blob([arraybuffer], {type: mimeType});
-    parts = episode.mediaUrl.split('/');
-    fileName = parts[parts.length - 1];
-    // Write file to the root directory.
-    window.requestFileSystem(fileSystemStatus, fileSystemSize, function(filesystem) {
-        filesystem.root.getFile(fileName, {create: true, exclusive: false}, function(fileEntry) {
-            fileEntry.createWriter(function(writer) {
-                writer.onwrite = function() {
-                    logHandler('Writing to disk...', 'debug');
-                };
-                writer.onwriteend = function() { //success
-                    episode.offlineMediaUrl = fileEntry.toURL();
-                    writeEpisode(episode);
-                    logHandler('Saving file "' + episode.mediaUrl + '" to local file system finished', 'info');
-                };
-                writer.onerror = function(event) {
-                    logHandler('Error on saving file "' + episode.mediaUrl + '" to local file system (' + event + ')', 'error');
-                };
-                writer.write(blob);
-            }, errorHandler);
-        }, errorHandler);
-    }, errorHandler);
-};
-var deleteFile = function(episode) {
-    "use strict";
-    window.resolveLocalFileSystemURL(episode.offlineMediaUrl, function(fileEntry) { //success
-        fileEntry.remove(function() { //success
-            var url;
-            url = episode.offlineMediaUrl;
-            episode.offlineMediaUrl = undefined;
-            writeEpisode(episode);
-            logHandler('Deleting file "' + url + '" finished', 'info');
-        }, errorHandler);
-    }, function(event) { //error
-        if (event.code === event.NOT_FOUND_ERR) {
-            var url;
-            url = episode.offlineMediaUrl;
-            episode.offlineMediaUrl = undefined;
-            writeEpisode(episode);
-            logHandler('File "' + url + '"not found. But that\'s OK', 'info');
-        } else {
-            errorHandler(event);
-        }
-    });
-};
-var downloadFile = function(episode, mimeType) {
-    "use strict";
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', episode.mediaUrl, true);
-    xhr.responseType = 'arraybuffer';
-    xhr.addEventListener("progress", progressHandler, false);
-    xhr.addEventListener("abort", logHandler, false);
-    xhr.addEventListener("error", function() {
-        logHandler('Direct download failed. Try proxy: ' + localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl), 'warning');
-        var xhrProxy = new XMLHttpRequest();
-        xhrProxy.open('GET', localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl), true);
-        xhrProxy.responseType = 'arraybuffer';
-        xhrProxy.addEventListener("progress", progressHandler, false);
-        xhrProxy.addEventListener("abort", logHandler, false);
-        xhrProxy.addEventListener("error", errorHandler, false);
-        xhrProxy.onload = function() {
-            if (this.status === 200) {
-                logHandler('Download of file "' + episode.mediaUrl + '" via proxy is finished', 'debug');
-                saveFile(episode, xhrProxy.response, mimeType);
-            } else {
-                logHandler('Error Downloading file "' + episode.mediaUrl + '" via proxy: ' + this.statusText + ' (' + this.status + ')', 'error');
-            }
-        };
-        xhrProxy.send(null);
-    }, false);
-    xhr.onload = function() {
-        if (this.status === 200) {
-            logHandler('Download of file "' + episode.mediaUrl + '" is finished', 'debug');
-            saveFile(episode, xhr.response, mimeType);
-        } else {
-            logHandler('Error Downloading file "' + episode.mediaUrl + '": ' + this.statusText + ' (' + this.status + ')', 'error');
-        }
-    };
-    xhr.send(null);
 };
 
 /** Functions for episodes */
@@ -265,6 +198,96 @@ var nextEpisode = function() {
     "use strict";
     var activeEpisode = $('#playlist').find('.activeEpisode');
     return readEpisode(activeEpisode.next().data('episodeUri'));
+};
+
+/** Functions for files */
+var saveFile = function(episode, arraybuffer, mimeType) {
+    "use strict";
+    logHandler('Saving file "' + episode.mediaUrl + '" to local file system starts now', 'debug');
+    var blob, parts, fileName;
+    blob = new Blob([arraybuffer], {type: mimeType});
+    parts = episode.mediaUrl.split('/');
+    fileName = parts[parts.length - 1];
+    // Write file to the root directory.
+    window.requestFileSystem(fileSystemStatus, fileSystemSize, function(filesystem) {
+        filesystem.root.getFile(fileName, {create: true, exclusive: false}, function(fileEntry) {
+            fileEntry.createWriter(function(writer) {
+                writer.onwrite = function(event) {
+                    progressHandler(event, 'Write', episode);
+                };
+                writer.onwriteend = function() { //success
+                    episode.offlineMediaUrl = fileEntry.toURL();
+                    writeEpisode(episode);
+                    logHandler('Saving file "' + episode.mediaUrl + '" to local file system finished', 'info');
+                };
+                writer.onerror = function(event) {
+                    logHandler('Error on saving file "' + episode.mediaUrl + '" to local file system (' + event + ')', 'error');
+                };
+                writer.write(blob);
+            }, errorHandler);
+        }, errorHandler);
+    }, errorHandler);
+};
+var deleteFile = function(episode) {
+    "use strict";
+    window.resolveLocalFileSystemURL(episode.offlineMediaUrl, function(fileEntry) { //success
+        fileEntry.remove(function() { //success
+            var url;
+            url = episode.offlineMediaUrl;
+            episode.offlineMediaUrl = undefined;
+            writeEpisode(episode);
+            logHandler('Deleting file "' + url + '" finished', 'info');
+        }, errorHandler);
+    }, function(event) { //error
+        if (event.code === event.NOT_FOUND_ERR) {
+            var url;
+            url = episode.offlineMediaUrl;
+            episode.offlineMediaUrl = undefined;
+            writeEpisode(episode);
+            logHandler('File "' + url + '"not found. But that\'s OK', 'info');
+        } else {
+            errorHandler(event);
+        }
+    });
+};
+var downloadFile = function(episode, mimeType) {
+    "use strict";
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', episode.mediaUrl, true);
+    xhr.responseType = 'arraybuffer';
+    xhr.addEventListener("progress", function(event) {
+        progressHandler(event, 'Download', episode);
+    }, false);
+    xhr.addEventListener("abort", logHandler, false);
+    xhr.addEventListener("error", function() {
+        logHandler('Direct download failed. Try proxy: ' + localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl), 'warning');
+        var xhrProxy = new XMLHttpRequest();
+        xhrProxy.open('GET', localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl), true);
+        xhrProxy.responseType = 'arraybuffer';
+        xhrProxy.addEventListener("progress", function(event) {
+            progressHandler(event, 'Download', episode);
+        }, false);
+        xhrProxy.addEventListener("abort", logHandler, false);
+        xhrProxy.addEventListener("error", errorHandler, false);
+        xhrProxy.onload = function() {
+            if (this.status === 200) {
+                logHandler('Download of file "' + episode.mediaUrl + '" via proxy is finished', 'debug');
+                saveFile(episode, xhrProxy.response, mimeType);
+            } else {
+                logHandler('Error Downloading file "' + episode.mediaUrl + '" via proxy: ' + this.statusText + ' (' + this.status + ')', 'error');
+            }
+        };
+        xhrProxy.send(null);
+    }, false);
+    xhr.onload = function() {
+        if (this.status === 200) {
+            logHandler('Download of file "' + episode.mediaUrl + '" is finished', 'debug');
+            saveFile(episode, xhr.response, mimeType);
+        } else {
+            logHandler('Error Downloading file "' + episode.mediaUrl + '": ' + this.statusText + ' (' + this.status + ')', 'error');
+        }
+    };
+    xhr.send(null);
 };
 
 /** Functions for Sources/Feeds */

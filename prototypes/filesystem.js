@@ -35,6 +35,31 @@ window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileS
 window.resolveLocalFileSystemURL = window.resolveLocalFileSystemURL || window.webkitResolveLocalFileSystemURL;
 navigator.persistentStorage = navigator.persistentStorage || navigator.webkitPersistentStorage;
 
+/** UI-Functions */
+var findEpisodeUI = function(episode) {
+    "use strict";
+    var episodeUI;
+    $('#playlist .entries li').each(function() {
+        if ($(this).data('episodeUri') === episode.uri) {
+            episodeUI = this;
+            return false;
+        }
+    });
+    return episodeUI;
+};
+var actualiseEpisodeUI = function(episode) {
+    "use strict";
+    var episodeUI;
+    episodeUI = findEpisodeUI(episode);
+    if (episode.offlineMediaUrl) {
+        $(episodeUI).find('.download').replaceWith('<a class="delete" href="' + episode.offlineMediaUrl + '">Delete</a>');
+    } else {
+        $(episodeUI).find('.delete').replaceWith('<a class="download" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
+    }
+    $(episodeUI).find('progress').remove();
+    return false;
+};
+
 /** Helper Functions */
 var logHandler = function(message, loglevel) {
     "use strict";
@@ -54,26 +79,34 @@ var successHandler = function(event) {
     "use strict";
     logHandler(event, 'success');
 };
-var progressHandler = function(progressEvent, prefix) {
+var progressHandler = function(progressEvent, prefix, episode) {
     "use strict"; //xmlHttpRequestProgressEvent
-    var percentComplete;
+    var progressbar, percentComplete, episodeUI;
+    episodeUI = findEpisodeUI(episode);
+    if ($(episodeUI).find('progress').length) {
+        progressbar = $(episodeUI).find('progress');
+    } else {
+        progressbar = $('<progress min="0" max="1">&helip;</progress>');
+        $(episodeUI).find('.download').hide().after(progressbar);
+    }
     if (progressEvent.lengthComputable) {
         percentComplete = progressEvent.loaded / progressEvent.total;
         console.log(prefix + ': ' + (percentComplete * 100).toFixed(2) + '%');
-        $('meter').attr('value', percentComplete).text((percentComplete * 100).toFixed(2) + '%');
+        $(episodeUI).find('progress').attr('value', percentComplete).text((percentComplete * 100).toFixed(2) + '%');
     } else {
         console.log(prefix + '...');
+        $(episodeUI).find('progress').removeAttr('value').text('&helip;');
     }
 };
 var requestFileSystemQuota = function(quota) {
     "use strict";
-    if(navigator.persistentStorage) {
+    if (navigator.persistentStorage) {
         navigator.persistentStorage.requestQuota(quota, function(grantedBytes) {
             logHandler('You gain access to ' + grantedBytes / 1024 / 1024 + ' MiB of memory', 'debug');
             navigator.persistentStorage.queryUsageAndQuota(function (usage, quota) {
                 localStorage.setItem("configuration.quota", quota);
                 var availableSpace = quota - usage;
-                $('#memorySizeInput').val(quota / 1024 / 1024).attr('min', Math.ceil(usage / 1024 / 1024)).css('background', 'linear-gradient( 90deg, rgba(0,100,0,0.45) ' + Math.ceil((usage / quota)*100) + '%, transparent ' + Math.ceil((usage / quota)*100) + '%, transparent )');
+                $('#memorySizeInput').val(quota / 1024 / 1024).attr('min', Math.ceil(usage / 1024 / 1024)).css('background', 'linear-gradient( 90deg, rgba(0,100,0,0.45) ' + Math.ceil((usage / quota) * 100) + '%, transparent ' + Math.ceil((usage / quota) * 100) + '%, transparent )');
                 if (availableSpace <= (1024 * 1024 * 50)) {
                     logHandler('You are out of space! Please allow more then ' + Math.ceil(quota / 1024 / 1024) + ' MiB of space', 'warning');
                 } else {
@@ -82,21 +115,6 @@ var requestFileSystemQuota = function(quota) {
             }, errorHandler);
         }, errorHandler);
     }
-};
-
-/** UI-Functions */
-var actualiseEpisodeUI = function(episode) {
-    "use strict";
-    $('#playlist .entries li').each(function() {
-        if ($(this).data('episodeUri') === episode.uri) {
-            if (episode.offlineMediaUrl) {
-                $(this).find('.download').replaceWith('<a class="delete" href="' + episode.offlineMediaUrl + '">Delete</a>');
-            } else {
-                $(this).find('.delete').replaceWith('<a class="download" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
-            }
-            return false;
-        }
-    });
 };
 
 /** Functions for episodes */
@@ -150,7 +168,7 @@ var saveFile = function(episode, arraybuffer, mimeType) {
         filesystem.root.getFile(fileName, {create: true, exclusive: false}, function(fileEntry) {
             fileEntry.createWriter(function(writer) {
                 writer.onwrite = function(event) {
-                    progressHandler(event, 'Write');
+                    progressHandler(event, 'Write', episode);
                 };
                 writer.onwriteend = function() { //success
                     episode.offlineMediaUrl = fileEntry.toURL();
@@ -193,7 +211,7 @@ var downloadFile = function(episode, mimeType) {
     xhr.open('GET', episode.mediaUrl, true);
     xhr.responseType = 'arraybuffer';
     xhr.addEventListener("progress", function(event) {
-        progressHandler(event, 'Write');
+        progressHandler(event, 'Download', episode);
     }, false);
     xhr.addEventListener("abort", logHandler, false);
     xhr.addEventListener("error", function() {
@@ -202,7 +220,7 @@ var downloadFile = function(episode, mimeType) {
         xhrProxy.open('GET', 'filesystem.py?url=' + episode.mediaUrl, true);
         xhrProxy.responseType = 'arraybuffer';
         xhrProxy.addEventListener("progress", function(event) {
-            progressHandler(event, 'Write');
+            progressHandler(event, 'Download', episode);
         }, false);
         xhrProxy.addEventListener("abort", logHandler, false);
         xhrProxy.addEventListener("error", errorHandler, false);

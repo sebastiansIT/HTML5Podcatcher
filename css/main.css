@@ -58,6 +58,7 @@ body > footer {
 }
 
 audio { width: 100%; height: 3em; }
+progress { width:5em; }
 
 .entries { 
 	list-style: none; 
