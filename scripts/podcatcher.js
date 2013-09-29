@@ -346,7 +346,7 @@ var parseSource = function(xml, source) {
             }
         });
         tracks.sort(sortEpisodes);
-        tracks = tracks.slice(0, 5);
+        tracks = tracks.slice(tracks.length-5, tracks.length);
     }
     logHandler('Parsing source file "' + source.uri + '" finished', 'info');
     return {'source': source, 'episodes': tracks};
@@ -403,6 +403,7 @@ var renderSource = function(source) {
     entryUI.append('<p class="uri"><a href="' + source.uri + '">' + source.uri + '</a></p>');
     entryFunctionsUI = $('<span class="functions">');
     entryFunctionsUI.append('<a class="link" href="' + source.link + '">Internet</a> ');
+    entryFunctionsUI.append('<a class="updateSource" href="' + source.uri + '">Update</a> ');
     entryFunctionsUI.append('<a class="deleteSource" href="' + source.uri + '">Delete</a>');
     entryUI.append(entryFunctionsUI);
     return entryUI;
@@ -602,6 +603,20 @@ $(document).ready(function() {
         renderPlaylist(readPlaylist(true));
     });
     //Sources UI Events
+    $('#sources').on('click', '.updateSource', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var i, parserresult;
+        parserresult = downloadSource(readSource($(this).attr("href")));
+        //Update source in storage
+        writeSource(parserresult.source);
+        //Save Episodes to local storage
+        for (i = 0; i < parserresult.episodes.length; i++) {
+            //Save all Episodes in the parser result
+            writeEpisode(parserresult.episodes[i]);
+        }
+        renderPlaylist(readPlaylist());
+    });
     $('#sources').on('click', '.deleteSource', function(event) {
         event.preventDefault();
         event.stopPropagation();
