@@ -255,6 +255,7 @@ var downloadFile = function(episode, mimeType) {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', episode.mediaUrl, true);
     xhr.responseType = 'arraybuffer';
+    xhr.timeout = 40000;
     xhr.addEventListener("progress", function(event) {
         progressHandler(event, 'Download', episode);
     }, false);
@@ -264,6 +265,7 @@ var downloadFile = function(episode, mimeType) {
         var xhrProxy = new XMLHttpRequest();
         xhrProxy.open('GET', localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl), true);
         xhrProxy.responseType = 'arraybuffer';
+        xhrProxy.timeout = 40000;
         xhrProxy.addEventListener("progress", function(event) {
             progressHandler(event, 'Download', episode);
         }, false);
@@ -277,6 +279,9 @@ var downloadFile = function(episode, mimeType) {
                 logHandler('Error Downloading file "' + episode.mediaUrl + '" via proxy: ' + this.statusText + ' (' + this.status + ')', 'error');
             }
         };
+        xhrProxy.ontimeout = function() {
+            logHandler("Timeout after " + (xhrProxy.timeout / 1000) + " seconds.", "error");
+        };
         xhrProxy.send(null);
     }, false);
     xhr.onload = function() {
@@ -286,6 +291,9 @@ var downloadFile = function(episode, mimeType) {
         } else {
             logHandler('Error Downloading file "' + episode.mediaUrl + '": ' + this.statusText + ' (' + this.status + ')', 'error');
         }
+    };
+    xhr.ontimeout = function() {
+        logHandler("Timeout after " + (xhr.timeout / 1000) + " seconds.", "error");
     };
     xhr.send(null);
 };
@@ -346,7 +354,7 @@ var parseSource = function(xml, source) {
             }
         });
         tracks.sort(sortEpisodes);
-        tracks = tracks.slice(tracks.length-5, tracks.length);
+        tracks = tracks.slice(tracks.length - 5, tracks.length);
     }
     logHandler('Parsing source file "' + source.uri + '" finished', 'info');
     return {'source': source, 'episodes': tracks};
@@ -354,6 +362,7 @@ var parseSource = function(xml, source) {
 var downloadSource = function(source) {
     "use strict";
     var successfunction, errorfunction, parserresult;
+    parserresult = {'source': source, 'episodes': []};
     successfunction = function(data) {
         logHandler('Download of source "' + source.uri + '" is finished', 'debug');
         parserresult = parseSource(data, source);
@@ -688,17 +697,11 @@ $(document).ready(function() {
             logHandler('Please insert a URL', 'error');
         }
     });
-    // navigator.persistentStorage.queryUsageAndQuota(function (usage, quota) {
-        // var availableSpace = quota - usage;
-        // if (availableSpace <= (1024 * 1024 * 20)) {
-            // logHandler('You are out of space! Please allow more then ' + quota / 1024 / 1024 + 'MB of space');
-        // }
-    // }, errorHandler);
-    // navigator.persistentStorage.requestQuota(1024 * 1024 * 500, function(grantedBytes) {
-        // logHandler('Allow access to local file system with ' + grantedBytes / 1024 / 1024 + 'MB');
-    // }, function(e) {
-        // errorHandler(e);
-    // });
+    $('#statusbar').on('click', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        $(this).parent().toggleClass('fullscreen');
+    });
     quota = localStorage.getItem("configuration.quota");
     if (!quota) { quota = 1024 * 1024 * 200; }
     requestFileSystemQuota(quota);

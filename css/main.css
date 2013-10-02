@@ -56,6 +56,10 @@ body > footer {
 	max-height:3rem;
 	overflow:scroll;
 }
+body > footer.fullscreen {
+	max-height:100%;
+	height:100%;
+}
 
 audio { width: 100%; height: 3em; }
 progress { width:5em; }
