@@ -1,4 +1,4 @@
-﻿/*  Copyright 2013 Sebastian Spautz
+﻿/*  Copyright 2013, 2014 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
     
@@ -19,12 +19,15 @@
 /*global window */
 /*global document */
 /*global console */
+/*global alert */
 /*global Blob */
 /*global XMLHttpRequest */
 /*global localStorage */
+/*global applicationCache */
 /*global $ */
 
 /** Global Variables/Objects */
+var downloadTimeout = 600000;
 var fileSystemSize = 1024 * 1024 * 500; /*500 MB */
 var fileSystemStatus = window.PERSISTENT; //window.TEMPORARY;
 // Take care of vendor prefixes.
@@ -255,7 +258,7 @@ var downloadFile = function(episode, mimeType) {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', episode.mediaUrl, true);
     xhr.responseType = 'arraybuffer';
-    xhr.timeout = 40000;
+    xhr.timeout = downloadTimeout;
     xhr.addEventListener("progress", function(event) {
         progressHandler(event, 'Download', episode);
     }, false);
@@ -265,7 +268,7 @@ var downloadFile = function(episode, mimeType) {
         var xhrProxy = new XMLHttpRequest();
         xhrProxy.open('GET', localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl), true);
         xhrProxy.responseType = 'arraybuffer';
-        xhrProxy.timeout = 40000;
+        xhrProxy.timeout = downloadTimeout;
         xhrProxy.addEventListener("progress", function(event) {
             progressHandler(event, 'Download', episode);
         }, false);
@@ -280,7 +283,7 @@ var downloadFile = function(episode, mimeType) {
             }
         };
         xhrProxy.ontimeout = function() {
-            logHandler("Timeout after " + (xhrProxy.timeout / 1000) + " seconds.", "error");
+            logHandler("Timeout after " + (xhrProxy.timeout / 60000) + " minutes.", "error");
         };
         xhrProxy.send(null);
     }, false);
@@ -293,7 +296,7 @@ var downloadFile = function(episode, mimeType) {
         }
     };
     xhr.ontimeout = function() {
-        logHandler("Timeout after " + (xhr.timeout / 1000) + " seconds.", "error");
+        logHandler("Timeout after " + (xhr.timeout / 60000) + " minutes.", "error");
     };
     xhr.send(null);
 };
@@ -520,6 +523,7 @@ var playEpisode = function(episode) {
     "use strict";
     if (episode) {
         activateEpisode(episode);
+        localStorage.setItem('configuration.lastPlayed', episode.uri);
         $('#player audio')[0].load();
     }
 };
@@ -527,7 +531,7 @@ var playEpisode = function(episode) {
 /** Central 'ready' event handler */
 $(document).ready(function() {
     "use strict";
-    //Update local storage to actual version
+    //Update local storage to actual version if key-names
     var k, quota;
     for (k = 0; k < localStorage.length; k++) {
         if (localStorage.key(k).slice(0, 6) === 'track.') {
@@ -697,6 +701,42 @@ $(document).ready(function() {
             logHandler('Please insert a URL', 'error');
         }
     });
+    $('#configuration #exportConfiguration').on('click', function() {
+        var i, key, config;
+        config = {'Episodes': {}, 'Sources': {}, 'Settings': {}};
+        for (i = 0; i < localStorage.length; i++) {
+            key = localStorage.key(i);
+            if (key.slice(0, 7) === 'source.') {
+                config.Sources[key] = localStorage.getItem(key);
+            } else if (localStorage.key(i).slice(0, 8) === 'episode.') {
+                config.Episodes[key] = localStorage.getItem(key);
+            } else {
+                config.Settings[key] = localStorage.getItem(key);
+            }
+        }
+        $(this).parent().find('#SerialisedConfigurationInput').val(JSON.stringify(config));
+        $(this).parent().find('#SerialisedConfigurationInput')[0].select();
+    });
+    $('#configuration #importConfiguration').on('click', function() {
+        var config, property;
+        localStorage.clear();
+        config = JSON.parse($(this).parent().find('#SerialisedConfigurationInput').val());
+        for (property in config.Episodes) {
+            if (config.Episodes.hasOwnProperty(property)) {
+                localStorage.setItem(property, config.Episodes[property]);
+            }
+        }
+        for (property in config.Sources) {
+            if (config.Sources.hasOwnProperty(property)) {
+                localStorage.setItem(property, config.Sources[property]);
+            }
+        }
+        for (property in config.Settings) {
+            if (config.Settings.hasOwnProperty(property)) {
+                localStorage.setItem(property, config.Settings[property]);
+            }
+        }
+    });
     $('#statusbar').on('click', function(event) {
         event.preventDefault();
         event.stopPropagation();
@@ -755,5 +795,39 @@ $(document).ready(function() {
             logHandler("Timeupdate on", 'debug');
         }
     });
-    playEpisode(readEpisode($('#playlist li:first-child').data('episodeUri')));
+    //Application Cache Events
+    $(applicationCache).on('checking', function() {
+        logHandler("Application cache checks for updates (Cache status: " + applicationCache.status + ")", 'debug');
+        $('#applicationCacheLog').prepend('<span>' + "Application cache check for updates" + '</span></br>');
+    });
+    $(applicationCache).on('noupdate', function() {
+        logHandler("Application cache founds no update (Cache status: " + applicationCache.status + ")", 'debug');
+        $('#applicationCacheLog').prepend('<span>' + "Application cache founds no update" + '</span></br>');
+    });
+    $(applicationCache).on('downloading', function() {
+        logHandler("Application cache download updated files (Cache status: " + applicationCache.status + ")", 'debug');
+        $('#applicationCacheLog').prepend('<span>' + "Application cache download updated files" + '</span></br>');
+    });
+    $(applicationCache).on('progress', function() {
+        logHandler("Application cache downloading files (Cache status: " + applicationCache.status + ")", 'debug');
+        $('#applicationCacheLog').prepend('<span>' + "Application cache downloading files" + '</span></br>');
+    });
+    $(applicationCache).on('cached', function() {
+        logHandler("Application cached (Cache status: " + applicationCache.status + ")", 'debug');
+        $('#applicationCacheLog').prepend('<span>' + "Application cached" + '</span></br>');
+    });
+    $(applicationCache).on('updateready', function() {
+        logHandler("Application cache is updated (Cache status: " + applicationCache.status + ")", 'info');
+        $('#applicationCacheLog').prepend('<span>' + "Application cache is updated" + '</span></br>');
+        applicationCache.swapCache();        alert("An update of HTML5 Podcatcher is available. Please reload to activate the new Version.");
+    });
+    $(applicationCache).on('obsolete', function() {
+        logHandler("Application cache is corrupted and will be deletet (Cache status: " + applicationCache.status + ")", 'debug');
+        $('#applicationCacheLog').prepend('<span>' + "Application cache is corrupted and will be deletet" + '</span></br>');
+    });
+    $(applicationCache).on('error', function() {
+        logHandler("Error downloading manifest or resources (Cache status: " + applicationCache.status + ")", 'error');
+        $('#applicationCacheLog').prepend('<span>' + "Error downloading manifest or resources" + '</span></br>');
+    });
+    playEpisode(readEpisode(localStorage.getItem('configuration.lastPlayed')));
 });

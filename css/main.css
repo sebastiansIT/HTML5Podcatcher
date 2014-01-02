@@ -82,6 +82,10 @@ progress { width:5em; }
 .entries li:last-child {
 	padding-bottom: 0.5em;
 }
+.entries li p {
+	overflow:hidden;
+	text-overflow:ellipsis;
+}
 
 .entries .activeEpisode { 
 	background-color:#CCCCCC; 
