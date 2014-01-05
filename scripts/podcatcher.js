@@ -27,6 +27,7 @@
 /*global $ */
 
 /** Global Variables/Objects */
+var version = "Alpha 0.12.11";
 var downloadTimeout = 600000;
 var fileSystemSize = 1024 * 1024 * 500; /*500 MB */
 var fileSystemStatus = window.PERSISTENT; //window.TEMPORARY;
@@ -131,14 +132,6 @@ var requestFileSystemQuota = function(quota) {
                 }
             }, errorHandler);
         }, errorHandler);
-    }
-};
-
-/** Functions for configuration */
-var renderConfiguration = function() {
-    "use strict";
-    if (localStorage.getItem("configuration.proxyUrl")) {
-        $('#httpProxyInput').val(localStorage.getItem("configuration.proxyUrl"));
     }
 };
 
@@ -489,6 +482,29 @@ var renderPlaylist = function(playlist) {
     }
 };
 
+/** Functions for configuration */
+var renderConfiguration = function() {
+    "use strict";
+    if (localStorage.getItem("configuration.proxyUrl")) {
+        $('#httpProxyInput').val(localStorage.getItem("configuration.proxyUrl"));
+    }
+};
+var getLastPlayedEpisode = function() {
+    "use strict";
+    var lastPlayedEpisode, playlist, i;
+    lastPlayedEpisode = $('#playlist li:first-child').data('episodeUri');
+    playlist = readPlaylist();
+    if (playlist && playlist.length > 0) {
+        for (i = 0; i < playlist.length; i++) {
+            if (playlist[i].uri === localStorage.getItem('configuration.lastPlayed')) {
+                lastPlayedEpisode = playlist[i].uri;
+                break;
+            }
+        }
+    }
+    return readEpisode(lastPlayedEpisode);
+};
+
 /** Functions for playback */
 var activateEpisode = function(episode) {
     "use strict";
@@ -513,6 +529,52 @@ var activateEpisode = function(episode) {
             audioTag.append(mp3SourceTag);
             audioTag.attr('title', episode.title);
             $('#mediacontrol').prepend(audioTag);
+            //Attach player events
+            $('#player audio').on('loadstart', function() {
+                logHandler("==============================================", 'debug');
+                logHandler("Start loading " + activeEpisode().title, 'debug');
+            });
+            $('#player audio').on('loadedmetadata', function() {
+                logHandler("Load metadata of " + activeEpisode().title, 'debug');
+            });
+            $('#player audio').on('canplay', function() {
+                logHandler(activeEpisode().title + " is ready to play", 'debug');
+            });
+            $('#player audio').on('canplaythrough', function() {
+                logHandler(activeEpisode().title + " is realy ready to play (\"canplaythrough\")", 'debug');
+            });
+            $('#player audio').on('playing', function() {
+                logHandler(activeEpisode().title + " is playing", 'info');
+                this.autoplay = true;
+            });
+            $('#player audio').on('ended', function() {
+                logHandler(activeEpisode().title + " is ended", 'debug');
+                var episode = activeEpisode();
+                toggleEpisodeStatus(episode);
+                //Plays next Episode in Playlist
+                playEpisode(nextEpisode());
+            });
+            $('#player audio').on('error', function(error) {
+                errorHandler(error);
+            });
+            $('#player audio').on('durationchange', function(event) {
+                logHandler("Duration of " + activeEpisode().title + " is changed to " + event.currentTarget.duration + ".", 'debug');
+                var episode = activeEpisode();
+                if (episode && this.duration > episode.playback.currentTime && this.currentTime <= episode.playback.currentTime) {
+                    logHandler("CurrentTime will set to " + episode.playback.currentTime + " seconds", 'debug');
+                    this.currentTime = episode.playback.currentTime;
+                    $(this).on('timeupdate', function(event) {
+                        //logHandler("Timeupdate reached", 'debug');
+                        var episode = activeEpisode();
+                        if (episode && (event.target.currentTime > (episode.playback.currentTime + 10) || event.target.currentTime < (episode.playback.currentTime - 10))) {
+                            episode.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10;
+                            writeEpisode(episode);
+                            logHandler('Current timecode is ' + episode.playback.currentTime + '.', 'debug');
+                        }
+                    });
+                    logHandler("Timeupdate on", 'debug');
+                }
+            });
         }
         //Styling
         $('#playlist').find('.activeEpisode').removeClass('activeEpisode');
@@ -531,7 +593,7 @@ var playEpisode = function(episode) {
 /** Central 'ready' event handler */
 $(document).ready(function() {
     "use strict";
-    //Update local storage to actual version if key-names
+    //Update local storage to actual version of key-names (changed "track" to "episode")
     var k, quota;
     for (k = 0; k < localStorage.length; k++) {
         if (localStorage.key(k).slice(0, 6) === 'track.') {
@@ -539,6 +601,41 @@ $(document).ready(function() {
             localStorage.removeItem(localStorage.key(k));
         }
     }
+    //Application Cache Events
+    $(applicationCache).on('checking', function() {
+        logHandler("Application cache checks for updates (Cache status: " + applicationCache.status + ")", 'debug');
+        $('#applicationCacheLog').prepend('<span>' + "Application cache check for updates" + '</span></br>');
+    });
+    $(applicationCache).on('noupdate', function() {
+        logHandler("Application cache founds no update (Cache status: " + applicationCache.status + ")", 'debug');
+        $('#applicationCacheLog').prepend('<span>' + "Application cache founds no update" + '</span></br>');
+    });
+    $(applicationCache).on('downloading', function() {
+        logHandler("Application cache download updated files (Cache status: " + applicationCache.status + ")", 'debug');
+        $('#applicationCacheLog').prepend('<span>' + "Application cache download updated files" + '</span></br>');
+    });
+    $(applicationCache).on('progress', function() {
+        logHandler("Application cache downloading files (Cache status: " + applicationCache.status + ")", 'debug');
+        $('#applicationCacheLog').prepend('<span>' + "Application cache downloading files" + '</span></br>');
+    });
+    $(applicationCache).on('cached', function() {
+        logHandler("Application cached (Cache status: " + applicationCache.status + ")", 'debug');
+        $('#applicationCacheLog').prepend('<span>' + "Application cached" + '</span></br>');
+    });
+    $(applicationCache).on('updateready', function() {
+        logHandler("Application cache is updated (Cache status: " + applicationCache.status + ")", 'info');
+        $('#applicationCacheLog').prepend('<span>' + "Application cache is updated" + '</span></br>');
+        applicationCache.swapCache();
+        alert("An update of HTML5 Podcatcher is available. Please reload to activate the new Version.");
+    });
+    $(applicationCache).on('obsolete', function() {
+        logHandler("Application cache is corrupted and will be deletet (Cache status: " + applicationCache.status + ")", 'debug');
+        $('#applicationCacheLog').prepend('<span>' + "Application cache is corrupted and will be deletet" + '</span></br>');
+    });
+    $(applicationCache).on('error', function() {
+        logHandler("Error downloading manifest or resources (Cache status: " + applicationCache.status + ")", 'error');
+        $('#applicationCacheLog').prepend('<span>' + "Error downloading manifest or resources" + '</span></br>');
+    });
     //Player UI Events
     $('#player #playPreviousEpisode').on('click', function() {
         playEpisode(previousEpisode());
@@ -638,7 +735,7 @@ $(document).ready(function() {
         deleteSource(source);
         for (i = 0; i < $('#sources .entries li').length; i++) {
             if ($($('#sources .entries li')[i]).data('sourceuri') === source.uri) {
-                $($('#sources .entries li')[i]).slideUp(400, function() {$(this).remove(); });
+                $($('#sources .entries li')[i]).slideUp(400, function() { $(this).remove(); });
                 break;
             }
         }
@@ -742,92 +839,16 @@ $(document).ready(function() {
         event.stopPropagation();
         $(this).parent().toggleClass('fullscreen');
     });
+    //Quota and Filesystem initialisation
     quota = localStorage.getItem("configuration.quota");
     if (!quota) { quota = 1024 * 1024 * 200; }
     requestFileSystemQuota(quota);
+    //Render lists and settings
     renderConfiguration();
     renderSourceList(readSourceList());
     renderPlaylist(readPlaylist());
-    playEpisode(readEpisode($('#playlist li:first-child').data('episodeUri')));
-    //Player Events
-    $('#player audio').on('loadstart', function() {
-        logHandler("==============================================", 'debug');
-        logHandler("Start loading " + activeEpisode().title, 'debug');
-    });
-    $('#player audio').on('loadedmetadata', function() {
-        logHandler("Load metadata of " + activeEpisode().title, 'debug');
-    });
-    $('#player audio').on('canplay', function() {
-        logHandler(activeEpisode().title + " is ready to play", 'debug');
-    });
-    $('#player audio').on('canplaythrough', function() {
-        logHandler(activeEpisode().title + " is realy ready to play (\"canplaythrough\")", 'debug');
-    });
-    $('#player audio').on('playing', function() {
-        logHandler(activeEpisode().title + " is playing", 'info');
-        this.autoplay = true;
-    });
-    $('#player audio').on('ended', function() {
-        logHandler(activeEpisode().title + " is ended", 'debug');
-        var episode = activeEpisode();
-        toggleEpisodeStatus(episode);
-        //Plays next Episode in Playlist
-        playEpisode(nextEpisode());
-    });
-    $('#player audio').on('error', function(error) {
-        errorHandler(error);
-    });
-    $('#player audio').on('durationchange', function(event) {
-        logHandler("Duration of " + activeEpisode().title + " is changed to " + event.currentTarget.duration + ".", 'debug');
-        var episode = activeEpisode();
-        if (episode && this.duration > episode.playback.currentTime && this.currentTime <= episode.playback.currentTime) {
-            logHandler("CurrentTime will set to " + episode.playback.currentTime + " seconds", 'debug');
-            this.currentTime = episode.playback.currentTime;
-            $(this).on('timeupdate', function(event) {
-                //logHandler("Timeupdate reached", 'debug');
-                var episode = activeEpisode();
-                if (episode && (event.target.currentTime > (episode.playback.currentTime + 10) || event.target.currentTime < (episode.playback.currentTime - 10))) {
-                    episode.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10;
-                    writeEpisode(episode);
-                    logHandler('Current timecode is ' + episode.playback.currentTime + '.', 'debug');
-                }
-            });
-            logHandler("Timeupdate on", 'debug');
-        }
-    });
-    //Application Cache Events
-    $(applicationCache).on('checking', function() {
-        logHandler("Application cache checks for updates (Cache status: " + applicationCache.status + ")", 'debug');
-        $('#applicationCacheLog').prepend('<span>' + "Application cache check for updates" + '</span></br>');
-    });
-    $(applicationCache).on('noupdate', function() {
-        logHandler("Application cache founds no update (Cache status: " + applicationCache.status + ")", 'debug');
-        $('#applicationCacheLog').prepend('<span>' + "Application cache founds no update" + '</span></br>');
-    });
-    $(applicationCache).on('downloading', function() {
-        logHandler("Application cache download updated files (Cache status: " + applicationCache.status + ")", 'debug');
-        $('#applicationCacheLog').prepend('<span>' + "Application cache download updated files" + '</span></br>');
-    });
-    $(applicationCache).on('progress', function() {
-        logHandler("Application cache downloading files (Cache status: " + applicationCache.status + ")", 'debug');
-        $('#applicationCacheLog').prepend('<span>' + "Application cache downloading files" + '</span></br>');
-    });
-    $(applicationCache).on('cached', function() {
-        logHandler("Application cached (Cache status: " + applicationCache.status + ")", 'debug');
-        $('#applicationCacheLog').prepend('<span>' + "Application cached" + '</span></br>');
-    });
-    $(applicationCache).on('updateready', function() {
-        logHandler("Application cache is updated (Cache status: " + applicationCache.status + ")", 'info');
-        $('#applicationCacheLog').prepend('<span>' + "Application cache is updated" + '</span></br>');
-        applicationCache.swapCache();        alert("An update of HTML5 Podcatcher is available. Please reload to activate the new Version.");
-    });
-    $(applicationCache).on('obsolete', function() {
-        logHandler("Application cache is corrupted and will be deletet (Cache status: " + applicationCache.status + ")", 'debug');
-        $('#applicationCacheLog').prepend('<span>' + "Application cache is corrupted and will be deletet" + '</span></br>');
-    });
-    $(applicationCache).on('error', function() {
-        logHandler("Error downloading manifest or resources (Cache status: " + applicationCache.status + ")", 'error');
-        $('#applicationCacheLog').prepend('<span>' + "Error downloading manifest or resources" + '</span></br>');
-    });
-    playEpisode(readEpisode(localStorage.getItem('configuration.lastPlayed')));
+    //Initialise player
+    playEpisode(getLastPlayedEpisode());
+    //set up player to last played state
+    //playEpisode(readEpisode(localStorage.getItem('configuration.lastPlayed')));
 });
