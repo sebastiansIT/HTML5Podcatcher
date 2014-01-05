@@ -27,7 +27,7 @@
 /*global $ */
 
 /** Global Variables/Objects */
-var version = "Alpha 0.12.12";
+var version = "Alpha 0.12.13";
 var downloadTimeout = 600000;
 var fileSystemSize = 1024 * 1024 * 500; /*500 MB */
 var fileSystemStatus = window.PERSISTENT; //window.TEMPORARY;
@@ -554,8 +554,33 @@ var activateEpisode = function(episode) {
                 //Plays next Episode in Playlist
                 playEpisode(nextEpisode());
             });
-            $('#player audio').on('error', function(error) {
-                errorHandler(error);
+            $('#player audio, #player audio source').on('error', function(e) {
+                var errormessage, readystate;
+                errormessage = e.toString();
+                readystate = $(this).parent()[0].readyState;
+                if (readystate === 0) {
+                    errormessage = "Can't load file";
+                } else if ($(this).parent()[0].error) {
+                    switch (e.target.error.code) {
+                    case e.target.error.MEDIA_ERR_ABORTED:
+                        errormessage = 'You aborted the video playback.';
+                        break;
+                    case e.target.error.MEDIA_ERR_NETWORK:
+                        errormessage = 'A network error caused the audio download to fail.';
+                        break;
+                    case e.target.error.MEDIA_ERR_DECODE:
+                        errormessage = 'The audio playback was aborted due to a corruption problem or because the video used features your browser did not support.';
+                        break;
+                    case e.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                        errormessage = 'The video audio not be loaded, either because the server or network failed or because the format is not supported.';
+                        break;
+                    default:
+                        errormessage = 'An unknown error occurred.';
+                        break;
+                    }
+                }
+                logHandler(errormessage, 'error');
+                playEpisode(nextEpisode());
             });
             $('#player audio').on('durationchange', function(event) {
                 logHandler("Duration of " + activeEpisode().title + " is changed to " + event.currentTarget.duration + ".", 'debug');
@@ -688,7 +713,6 @@ $(document).ready(function() {
         }
     });
     $('#playlist').on('click', '.origin', function(event) {
-        var win;
         event.stopPropagation();
         event.preventDefault();
         window.open($(this).attr('href'), '_blank');

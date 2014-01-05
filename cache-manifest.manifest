@@ -17,12 +17,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see http://www.gnu.org/licenses/.
 
-# Version 0.12.12 Alpha
+# Version 0.12.13 Alpha
 # Change Log: 
 ## 0.12.11
 ### Fix a Bug on setting the last played episode after page load
 ## 0.12.12
 ### Fix a Bug opening the eposide link in a new window
+## 0.12.13
+### skip episodes with errors (i.e. download failed because of network failures)
 
 CACHE:
 ./podcatcher.html
