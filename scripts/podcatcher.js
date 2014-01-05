@@ -27,7 +27,7 @@
 /*global $ */
 
 /** Global Variables/Objects */
-var version = "Alpha 0.12.13";
+var version = "Alpha 0.12.14";
 var downloadTimeout = 600000;
 var fileSystemSize = 1024 * 1024 * 500; /*500 MB */
 var fileSystemStatus = window.PERSISTENT; //window.TEMPORARY;
