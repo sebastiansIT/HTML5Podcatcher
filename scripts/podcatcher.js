@@ -27,7 +27,7 @@
 /*global $ */
 
 /** Global Variables/Objects */
-var version = "Alpha 0.12.11";
+var version = "Alpha 0.12.12";
 var downloadTimeout = 600000;
 var fileSystemSize = 1024 * 1024 * 500; /*500 MB */
 var fileSystemStatus = window.PERSISTENT; //window.TEMPORARY;
@@ -687,8 +687,11 @@ $(document).ready(function() {
             $(this).text("Status: new");
         }
     });
-    $('#playlist .functions').on('click', 'a', function(event) {
+    $('#playlist').on('click', '.origin', function(event) {
+        var win;
         event.stopPropagation();
+        event.preventDefault();
+        window.open($(this).attr('href'), '_blank');
     });
     $('#playlist #updatePlaylist').on('click', function(event) {
         event.preventDefault();
