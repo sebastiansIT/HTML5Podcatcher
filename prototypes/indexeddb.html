@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+
+<!--
+    Copyright 2013, 2014 Sebastian Spautz
+
+    This file is part of "HTML5 Podcatcher".
+    
+    "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    "HTML5 Podcatcher" is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see http://www.gnu.org/licenses/.
+-->
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>IndexedDB Prototype &mdash; HTML5 Podcatcher</title>
+        <meta name="description" content="A HTML5 podcast player!">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+        <link rel="stylesheet" href="../css/main.css" />
+    </head>
+    <body>
+        <header role="banner"> 
+			<h1>HTML5 Podcatcher</h1>
+			<h2>Alpha 0.13.0</h2>
+		</header>
+		<div class="main">
+			<section id="player">
+				<header><h2>Player</h2></header>
+				<div id="mediacontrol"><p>Nothing to play!</p></div>
+				<form action="#">
+					<input id="playPreviousEpisode" name="playPreviousEpisode" type="button" value="|&lt;&lt;" title="Previous Episode" />
+					<input id="jumpBackwards" name="jumpBackwards" type="button" value="&lt;&lt;" title="Jump 10 seconds backwards" />
+					<input id="jumpForwards" name="jumpForwards" type="button" value="&gt;&gt;" title="Jump 10 seconds forwards" />
+					<input id="playNextEpisode" name="playNextEpisode" type="button" value="&gt&gt|" title="Next Episode" />
+				</form>
+			</section>
+			<section id="playlist">
+				<header><h2>Playlist</h2></header>
+				<ul class="entries">
+					<li>
+						no entries
+					</li>
+				</ul>
+				<footer>
+					<!--general Functions-->
+					<a href="#" id="updatePlaylist">Update Playlist</a>
+					<a href="#" id="showFullPlaylist">Show all Tracks</a>
+				</footer>
+			</section>
+			<section id="sources">
+				<header><h2>Sources</h2></header>
+				<ul class="entries">
+					<li>
+						no entries
+					</li>
+				</ul>
+				<footer>
+					<form action="#" id="addSourceForm">
+						<label for="addSourceUrlInput">Add Podcast Feed</label>
+						<input type="url" name="addSourceUrlInput" id="addSourceUrlInput" required="required" />
+						<input type="submit" name="addSourceButton" id="addSourceButton" value="Add Feed" />
+					</form>
+				</footer>
+			</section>
+			<section id="configuration">
+				<header><h2>Configuration</h2></header>
+				<form action="#" id="memorySizeForm">
+					<label for="memorySizeInput">Memory size (MiB):</label>
+					<input title="Allowed size for downloaded files in megabyte" type="number" required="required" min="100" step="20" value="500" name="memorySizeInput" id="memorySizeInput" />
+					<input type="submit" name="saveMemorySizeButton" id="saveMemorySizeButton" value="Save" />
+				</form>
+				<form action="#" id="proxyForm">
+					<label for="httpProxyInput">Proxy-URL</label>
+					<input type="url" name="httpProxyInput" id="httpProxyInput" />
+					<input type="submit" name="saveConfigurationButton" id="saveConfigurationButton" value="Save" />
+				</form>
+				<form action="#" id="ExportImportForm">
+					<label for="httpProxyInput">Import/Export Configuration</label>
+					<textarea name="SerialisedConfigurationInput" id="SerialisedConfigurationInput" style="width:100%; height: 10em;"></textarea>
+					<input type="button" name="importConfiguration" id="importConfiguration" value="Import" />
+					<input type="button" name="exportConfiguration" id="exportConfiguration" value="Export" />
+				</form>
+			</section>
+		</div>
+		<footer>
+			<p id="statusbar"></p>
+			<!-- Impressum ec. -->
+		</footer>
+		<script src="http://code.jquery.com/jquery-2.0.0.min.js"></script>
+		<script src="indexeddb.js"></script>
+    </body>
+</html>

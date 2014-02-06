@@ -30,8 +30,10 @@
 var version = "Alpha 0.12.14";
 var indexedDbSettings = {
     name: 'HTML5Podcatcher',
-    version: '1',
-    sourcesStore: 'sources'
+    version: '2',
+    sourcesStore: 'sources',
+	episodesStore: 'episodes',
+	filesStore: 'files'
 };
 var downloadTimeout = 600000;
 var fileSystemSize = 1024 * 1024 * 500; /*500 MB */
@@ -149,6 +151,12 @@ var updateIndexedDB = function(event) {
     if (!db.objectStoreNames.contains(indexedDbSettings.sourcesStore)) {
         db.createObjectStore(indexedDbSettings.sourcesStore, {});
     }
+	if (!db.objectStoreNames.contains(indexedDbSettings.episodesStore)) {
+        db.createObjectStore(indexedDbSettings.episodesStore, {});
+    }
+	if (!db.objectStoreNames.contains(indexedDbSettings.filesStore)) {
+        db.createObjectStore(indexedDbSettings.filesStore, {});
+    }
 };
 
 /** Functions for episodes */
@@ -210,6 +218,31 @@ var nextEpisode = function() {
     "use strict";
     var activeEpisode = $('#playlist').find('.activeEpisode');
     return readEpisode(activeEpisode.next().data('episodeUri'));
+};
+var renderEpisode = function(episode) {
+    "use strict";
+    var entryUI, entryFunctionsUI;
+    entryUI = $('<li>');
+    entryUI.data('episodeUri', episode.uri);
+    entryUI.append('<h3 class="title"><a href="' + episode.uri + '">' + episode.title + '</a></h3>');
+    entryUI.append('<span class="source">' + episode.source + '</span>');
+    entryUI.append('<time datetime="' + episode.updated.toISOString() + '" class="updated">' + episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString() + '</span>');
+    entryFunctionsUI = $('<span class="functions">');
+    if (episode.playback.played) {
+        entryFunctionsUI.append('<a class="status" href="#">Status: played</a>');
+    } else {
+        entryFunctionsUI.append('<a class="status" href="#">Status: new</a>');
+    }
+    entryFunctionsUI.append('<a class="origin" href="' + episode.uri + '">Internet</a>');
+    if (window.requestFileSystem) {
+        if (episode.offlineMediaUrl) {
+            entryFunctionsUI.append('<a class="delete" href="' + episode.offlineMediaUrl + '">Delete</a>');
+        } else if (episode.mediaUrl) {
+            entryFunctionsUI.append('<a class="download" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
+        }
+    }
+    entryUI.append(entryFunctionsUI);
+    return entryUI;
 };
 
 /** Functions for files */
@@ -821,19 +854,24 @@ $(document).ready(function() {
     $('#playlist #updatePlaylist').on('click', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        var i, j, sources, parserresult;
-        sources = readSourceList();
-        for (i = 0; i < sources.length; i++) {
-            parserresult = downloadSource(sources[i]);
+        var i, j, computeResult;
+        computeResult = function(parserresult) {
+            var playlistUI;
             //Update source in storage
             writeSource(parserresult.source);
-            //Save Episodes to local storage
+            //Save Episodes to local storage and render it out
+            playlistUI = $('#playlist .entries');
             for (j = 0; j < parserresult.episodes.length; j++) {
                 //Save all Episodes in the parser result
                 writeEpisode(parserresult.episodes[j]);
+                playlistUI.append(renderEpisode(parserresult.episodes[j]));
             }
-        }
-        renderPlaylist(readPlaylist());
+        };
+        readSourceList(function(sources) {
+            for (i = 0; i < sources.length; i++) {
+                downloadSource(sources[i], computeResult);
+            }
+        });
     });
     $('#playlist #showFullPlaylist').on('click', function(event) {
         event.preventDefault();
@@ -906,7 +944,7 @@ $(document).ready(function() {
                         //Save all Episodes in the parser result
                         writeEpisode(parserresult.episodes[i]);
                     }
-                    readPlaylist(renderPlaylist);
+                    renderPlaylist(readPlaylist());
                     logHandler('Added new source "' + parserresult.source.uri + '" sucessfully', 'info');
                 } else {
                     logHandler('Adding new source "' + $('#addSourceUrlInput').val() + '" throws an error', 'info');
@@ -936,8 +974,10 @@ $(document).ready(function() {
         }
     });
     $('#configuration #exportConfiguration').on('click', function() {
-        var i, key, config;
+        var i, key, config, button;
+        button = this;
         config = {'Episodes': {}, 'Sources': {}, 'Settings': {}};
+        //Read config from localStorage
         for (i = 0; i < localStorage.length; i++) {
             key = localStorage.key(i);
             if (key.slice(0, 7) === 'source.') {
@@ -948,11 +988,18 @@ $(document).ready(function() {
                 config.Settings[key] = localStorage.getItem(key);
             }
         }
-        $(this).parent().find('#SerialisedConfigurationInput').val(JSON.stringify(config));
-        $(this).parent().find('#SerialisedConfigurationInput')[0].select();
+        //Read configuration from IndexedDB
+        readSourceList(function(sourcelist) {
+            for (i = 0; i < sourcelist.length; i++) {
+                config.Sources['source.' + sourcelist[i].uri] = sourcelist[i];
+            }
+            $(button).parent().find('#SerialisedConfigurationInput').val(JSON.stringify(config));
+            $(button).parent().find('#SerialisedConfigurationInput')[0].select();
+        });
     });
     $('#configuration #importConfiguration').on('click', function() {
-        var config, property;
+        var config, property, request;
+        //Import Localstorage objects
         localStorage.clear();
         config = JSON.parse($(this).parent().find('#SerialisedConfigurationInput').val());
         for (property in config.Episodes) {
@@ -960,16 +1007,31 @@ $(document).ready(function() {
                 localStorage.setItem(property, config.Episodes[property]);
             }
         }
-        for (property in config.Sources) {
-            if (config.Sources.hasOwnProperty(property)) {
-                localStorage.setItem(property, config.Sources[property]);
-            }
-        }
         for (property in config.Settings) {
             if (config.Settings.hasOwnProperty(property)) {
                 localStorage.setItem(property, config.Settings[property]);
             }
         }
+        //import objects to indexedDB
+        request = window.indexedDB.open(indexedDbSettings.name, indexedDbSettings.version);
+        request.onupgradeneeded = updateIndexedDB;
+        request.onblocked = function() {
+            logHandler("Database blocked", 'debug');
+        };
+        request.onsuccess = function () {
+            logHandler("Success creating/accessing IndexedDB database", 'debug');
+            var db, transaction, store;
+            db = this.result;
+            transaction = db.transaction([indexedDbSettings.sourcesStore], 'readwrite');
+            store = transaction.objectStore(indexedDbSettings.sourcesStore);
+            store.clear();
+            for (property in config.Sources) {
+                if (config.Sources.hasOwnProperty(property)) {
+                    writeSource(config.Sources[property]);
+                }
+            }
+        };
+        request.onerror = function () { logHandler("Error creating/accessing IndexedDB database", 'error'); };
     });
     $('#statusbar').on('click', function(event) {
         event.preventDefault();
