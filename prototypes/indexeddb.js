@@ -24,16 +24,18 @@
 /*global XMLHttpRequest */
 /*global localStorage */
 /*global applicationCache */
+/*global IDBTransaction */
+/*global IDBKeyRange */
 /*global $ */
 
 /** Global Variables/Objects */
 var version = "Alpha 0.12.14";
 var indexedDbSettings = {
     name: 'HTML5Podcatcher',
-    version: '2',
+    version: '4',
     sourcesStore: 'sources',
-	episodesStore: 'episodes',
-	filesStore: 'files'
+    episodesStore: 'episodes',
+    filesStore: 'files'
 };
 var downloadTimeout = 600000;
 var fileSystemSize = 1024 * 1024 * 500; /*500 MB */
@@ -61,7 +63,7 @@ var actualiseEpisodeUI = function(episode) {
     var episodeUI;
     episodeUI = findEpisodeUI(episode);
     // Status
-    if (episode.playback.played) {
+    if (episode.playback && episode.playback.played) {
         $(episodeUI).find('.status').text("Status: played");
     } else {
         $(episodeUI).find('.status').text("Status: new");
@@ -146,40 +148,90 @@ var requestFileSystemQuota = function(quota) {
 var updateIndexedDB = function(event) {
     "use strict";
     logHandler("Database Update from Version " + event.oldVersion + " to Version " + event.newVersion, 'info');
-    var db;
+    var db, episodeStore;
     db = this.result;
+    //db.deleteObjectStore(indexedDbSettings.sourcesStore);
     if (!db.objectStoreNames.contains(indexedDbSettings.sourcesStore)) {
-        db.createObjectStore(indexedDbSettings.sourcesStore, {});
+        db.createObjectStore(indexedDbSettings.sourcesStore, { keyPath: 'uri' });
     }
-	if (!db.objectStoreNames.contains(indexedDbSettings.episodesStore)) {
-        db.createObjectStore(indexedDbSettings.episodesStore, {});
+    //db.deleteObjectStore(indexedDbSettings.episodesStore);
+    if (!db.objectStoreNames.contains(indexedDbSettings.episodesStore)) {
+        episodeStore = db.createObjectStore(indexedDbSettings.episodesStore, { keyPath: 'uri' });
+        episodeStore.createIndex('source', 'source', {unique: false});
     }
-	if (!db.objectStoreNames.contains(indexedDbSettings.filesStore)) {
+    if (!db.objectStoreNames.contains(indexedDbSettings.filesStore)) {
         db.createObjectStore(indexedDbSettings.filesStore, {});
     }
 };
 
 /** Functions for episodes */
-var readEpisode = function(episodeUri) {
+var readEpisode = function(episodeUri, onReadCallback) {
     "use strict";
-    var episode;
+    var request;
     if (episodeUri) {
-        //Read Episode from local DOM-Storage
-        episode = JSON.parse(localStorage.getItem('episode.' + episodeUri));
-        if (!episode) {
-            episode = { 'uri': episodeUri };
-        }
-        //Convert "updated" to date object 
-        episode.updated = new Date(episode.updated);
-        //Generate "playback" object if not exists
-        if (!episode.playback) {
-            episode.playback = {'played': false, 'currentTime': 0};
-        }
+        request = window.indexedDB.open(indexedDbSettings.name, indexedDbSettings.version);
+        request.onupgradeneeded = updateIndexedDB;
+        request.onblocked = function() {
+            logHandler("Database blocked", 'debug');
+        };
+        request.onsuccess = function () {
+            logHandler("Success creating/accessing IndexedDB database", 'debug');
+            var db, transaction, store, request;
+            db = this.result;
+            transaction = db.transaction([indexedDbSettings.episodesStore], 'readonly');
+            store = transaction.objectStore(indexedDbSettings.episodesStore);
+            request = store.get(episodeUri);
+            // Erfolgs-Event
+            request.onsuccess = function(event) {
+                var episode;
+                if (event.target.result) {
+                    logHandler('Episode ' + event.target.result.uri + ' readed from database', 'debug');
+                    episode = event.target.result;
+                } else {
+                    logHandler('Episode ' + episodeUri + ' not found in Database', 'debug');
+                    episode = {uri: episodeUri};
+                }
+                if (onReadCallback && typeof onReadCallback === 'function') {
+                    //Generate "playback" object if not exists
+                    if (!episode.playback) {
+                        episode.playback = {'played': false, 'currentTime': 0};
+                    }
+                    onReadCallback(episode);
+                }
+            };
+        };
+        request.onerror = function () {
+            logHandler("Error creating/accessing IndexedDB database", 'error');
+        };
     }
-    return episode;
 };
-var writeEpisode = function(episode) {
+var writeEpisode = function(episode, onWriteCallback) {
     "use strict";
+    var request;
+    request = window.indexedDB.open(indexedDbSettings.name, indexedDbSettings.version);
+    request.onupgradeneeded = updateIndexedDB;
+    request.onblocked = function() {
+        logHandler("Database blocked", 'debug');
+    };
+    request.onsuccess = function () {
+        logHandler("Success creating/accessing IndexedDB database", 'debug');
+        var db, transaction, store, request;
+        db = this.result;
+        transaction = db.transaction([indexedDbSettings.episodesStore], 'readwrite');
+        store = transaction.objectStore(indexedDbSettings.episodesStore);
+        request = store.put(episode);
+        // Erfolgs-Event
+        request.onsuccess = function(event) {
+            logHandler('Episode ' + event.target.result + ' saved', 'info');
+            if (onWriteCallback && typeof onWriteCallback === 'function') {
+                onWriteCallback(episode);
+            }
+        };
+    };
+    request.onerror = function () {
+        logHandler("Error creating/accessing IndexedDB database", 'error');
+    };
+
     //logHandler('Saving Episode with timecode ' + episode.playback.currentTime, 'debug');
     localStorage.setItem('episode.' + episode.uri, JSON.stringify(episode));
     actualiseEpisodeUI(episode);
@@ -204,20 +256,20 @@ var toggleEpisodeStatus = function(episode) {
     }
     writeEpisode(episode);
 };
-var activeEpisode = function() {
+var activeEpisode = function(onReadCallback) {
     "use strict";
     var activeEpisode = $('#playlist').find('.activeEpisode');
-    return readEpisode(activeEpisode.data('episodeUri'));
+    readEpisode(activeEpisode.data('episodeUri'), onReadCallback);
 };
-var previousEpisode = function() {
+var previousEpisode = function(onReadCallback) {
     "use strict";
     var activeEpisode = $('#playlist').find('.activeEpisode');
-    return readEpisode(activeEpisode.prev().data('episodeUri'));
+    readEpisode(activeEpisode.prev().data('episodeUri'), onReadCallback);
 };
-var nextEpisode = function() {
+var nextEpisode = function(onReadCallback) {
     "use strict";
     var activeEpisode = $('#playlist').find('.activeEpisode');
-    return readEpisode(activeEpisode.next().data('episodeUri'));
+    readEpisode(activeEpisode.next().data('episodeUri'), onReadCallback);
 };
 var renderEpisode = function(episode) {
     "use strict";
@@ -346,7 +398,7 @@ var downloadFile = function(episode, mimeType) {
 /** Functions for Sources/Feeds */
 var readSource = function(sourceUri, onReadCallback) {
     "use strict";
-    var source, request;
+    var request;
     request = window.indexedDB.open(indexedDbSettings.name, indexedDbSettings.version);
     request.onupgradeneeded = updateIndexedDB;
     request.onblocked = function() {
@@ -361,6 +413,7 @@ var readSource = function(sourceUri, onReadCallback) {
         request = store.get(sourceUri);
         // Erfolgs-Event
         request.onsuccess = function(event) {
+            var source;
             if (event.target.result) {
                 logHandler('Source ' + event.target.result.uri + ' readed from database', 'debug');
                 source = event.target.result;
@@ -389,7 +442,7 @@ var writeSource = function(source, onWriteCallback) {
         db = this.result;
         transaction = db.transaction([indexedDbSettings.sourcesStore], 'readwrite');
         store = transaction.objectStore(indexedDbSettings.sourcesStore);
-        request = store.put(source, source.uri);
+        request = store.put(source);
         // Erfolgs-Event
         request.onsuccess = function(event) {
             logHandler('Source ' + event.target.result + ' saved', 'info');
@@ -426,9 +479,9 @@ var deleteSource = function(source, onDeleteCallback) {
     };
     request.onerror = function () { logHandler("Error creating/accessing IndexedDB database", 'error'); };
 };
-var parseSource = function(xml, source) {
+var parseSource = function(xml, source, onDownloadCallback) {
     "use strict";
-    var episode, tracks = [];
+    var request, tracks = [];
     logHandler('Parsing source file "' + source.uri + '" starts now', 'debug');
     //RSS-Feed
     if ($(xml).has('rss[version="2.0"]')) {
@@ -436,49 +489,81 @@ var parseSource = function(xml, source) {
         source.link = $(xml).find('channel > link').text();
         source.title = $(xml).find('channel > title').text();
         source.description = $(xml).find('channel > description').text();
-        //RSS-Entries
-        // $(xml).find('item').has('enclosure').slice(0, 5).each(function() {
-            // episode = readEpisode($(this).find('link:first').text());
-            // episode.title = $(this).find('title:first').text();
-            // episode.mediaUrl = $(this).find('enclosure:first').attr('url');
-            // episode.updated = new Date($(this).find('pubDate:first').text());
-            // episode.source = source.title;
-            // tracks.push(episode);
-        // });
-        //Im gegensatzt zu obigen auskomentierten Lösung berücksichtigt diese HTML-Links auf mp3-Dateien in der Description
-        $(xml).find('item').each(function() {
-            episode = readEpisode($(this).find('link:first').text());
-            episode.title = $(this).find('title:first').text();
-            if (/^\d/.test($(this).find('pubDate:first').text())) {
-                episode.updated = new Date("Sun " + $(this).find('pubDate:first').text());
-            } else {
-                episode.updated = new Date($(this).find('pubDate:first').text());
-            }
-            episode.source = source.title;
-            if ($(this).find('enclosure').length > 0) {
-                episode.mediaUrl = $(this).find('enclosure:first').attr('url');
-                tracks.push(episode);
-            } else if ($($(this).find('encoded').text()).find('a[href$=".mp3"]').length > 0) {
-                episode.mediaUrl = $($(this).find('encoded').text()).find('a[href$=".mp3"]').first().attr('href');
-                tracks.push(episode);
-            }
-        });
-        tracks.sort(sortEpisodes);
-        tracks = tracks.slice(tracks.length - 5, tracks.length);
+        //Merge result into existing episodes:
+        //Read all Episodes with given source from indexdDB 
+        request = window.indexedDB.open(indexedDbSettings.name, indexedDbSettings.version);
+        request.onupgradeneeded = updateIndexedDB;
+        request.onblocked = function() {
+            logHandler("Database blocked", 'debug');
+        };
+        request.onsuccess = function () {
+            logHandler("Success creating/accessing IndexedDB database", 'debug');
+            var db, transaction, store, index, cursorRequest, episodeList;
+            db = this.result;
+            transaction = db.transaction([indexedDbSettings.episodesStore], 'readonly');
+            store = transaction.objectStore(indexedDbSettings.episodesStore);
+            index = store.index('source');
+            cursorRequest = index.openCursor(IDBKeyRange.only(source.uri));
+            episodeList = [];
+            cursorRequest.onsuccess = function(event) {
+                var result = event.target.result;
+                if (result !== null) {
+                    episodeList.push(result.value);
+                    result.continue();
+                } else {
+                    //parse RSS-Entries
+                    // $(xml).find('item').has('enclosure').slice(0, 5).each(function() {
+                        // episode = readEpisode($(this).find('link:first').text());
+                        // episode.title = $(this).find('title:first').text();
+                        // episode.mediaUrl = $(this).find('enclosure:first').attr('url');
+                        // episode.updated = new Date($(this).find('pubDate:first').text());
+                        // episode.source = source.title;
+                        // tracks.push(episode);
+                    // });
+                    //Im gegensatzt zu obigen auskomentierten Lösung berücksichtigt diese HTML-Links auf mp3-Dateien in der Description
+                    $(xml).find('item').each(function() {
+                        var i, episode = {playback: { played: false } };
+                        for (i = 0; i < episodeList.length; i++) {
+                            if (episodeList[i].uri === $(this).find('link:first').text()) {
+                                episode = episodeList[i];
+                            }
+                        }
+                        episode.uri = $(this).find('link:first').text();
+                        episode.title = $(this).find('title:first').text();
+                        if (/^\d/.test($(this).find('pubDate:first').text())) {
+                            episode.updated = new Date("Sun " + $(this).find('pubDate:first').text());
+                        } else {
+                            episode.updated = new Date($(this).find('pubDate:first').text());
+                        }
+                        episode.source = source.uri;
+                        if ($(this).find('enclosure').length > 0) {
+                            episode.mediaUrl = $(this).find('enclosure:first').attr('url');
+                            tracks.push(episode);
+                        } else if ($($(this).find('encoded').text()).find('a[href$=".mp3"]').length > 0) {
+                            episode.mediaUrl = $($(this).find('encoded').text()).find('a[href$=".mp3"]').first().attr('href');
+                            tracks.push(episode);
+                        }
+                    });
+                    tracks.sort(sortEpisodes);
+                    tracks = tracks.slice(tracks.length - 5, tracks.length);
+                }
+                logHandler('Parsing source file "' + source.uri + '" finished', 'info');
+                if (onDownloadCallback && typeof onDownloadCallback === 'function') {
+                    onDownloadCallback({'source': source, 'episodes': tracks});
+                }
+            };
+        };
+        request.onerror = function () {
+            logHandler("Error creating/accessing IndexedDB database", 'error');
+        };
     }
-    logHandler('Parsing source file "' + source.uri + '" finished', 'info');
-    return {'source': source, 'episodes': tracks};
 };
 var downloadSource = function(source, onDownloadCallback) {
     "use strict";
-    var successfunction, errorfunction, parserresult;
-    parserresult = {'source': source, 'episodes': []};
+    var successfunction, errorfunction;
     successfunction = function(data) {
         logHandler('Download of source "' + source.uri + '" is finished', 'debug');
-        parserresult = parseSource(data, source);
-        if (onDownloadCallback && typeof onDownloadCallback === 'function') {
-            onDownloadCallback(parserresult);
-        }
+        parseSource(data, source, onDownloadCallback);
     };
     errorfunction = function() {
         if (localStorage.getItem("configuration.proxyUrl")) {
@@ -514,12 +599,12 @@ var readSourceList = function(onReadCallback) {
         logHandler("Success creating/accessing IndexedDB database", 'debug');
         var db, transaction, store, cursorRequest, sourcelist;
         db = this.result;
-        transaction = db.transaction([indexedDbSettings.sourcesStore], 'readwrite');
+        transaction = db.transaction([indexedDbSettings.sourcesStore], 'readonly');
         store = transaction.objectStore(indexedDbSettings.sourcesStore);
         cursorRequest = store.openCursor();
         sourcelist = [];
-        cursorRequest.onsuccess = function(evt) {
-            var result = evt.target.result;
+        cursorRequest.onsuccess = function(event) {
+            var result = event.target.result;
             if (result !== null) {
                 sourcelist.push(result.value);
                 result.continue();
@@ -564,22 +649,38 @@ var renderSourceList = function(sourcelist) {
 };
 
 /** Load and Render Playlist*/
-var readPlaylist = function(showAll) {
+var readPlaylist = function(showAll, onReadCallback) {
     "use strict";
     if (!showAll) {
         showAll = false;
     }
-    var i, episode, playlist = [];
-    for (i = 0; i < localStorage.length; i++) {
-        if (localStorage.key(i).slice(0, 8) === 'episode.') {
-            episode = readEpisode(localStorage.key(i).substring(8));
-            if (episode.playback.played === false || showAll === true) {
-                playlist.push(episode);
+    var request;
+    request = window.indexedDB.open(indexedDbSettings.name, indexedDbSettings.version);
+    request.onupgradeneeded = updateIndexedDB;
+    request.onblocked = function() { logHandler("Database blocked", 'debug'); };
+    request.onsuccess = function () {
+        logHandler("Success creating/accessing IndexedDB database", 'debug');
+        var db, transaction, store, cursorRequest, playlist = [];
+        db = this.result;
+        transaction = db.transaction([indexedDbSettings.episodesStore], 'readonly');
+        store = transaction.objectStore(indexedDbSettings.episodesStore);
+        cursorRequest = store.openCursor();
+        playlist = [];
+        cursorRequest.onsuccess = function(event) {
+            var result = event.target.result;
+            if (result !== null) {
+                if (result.value.playback.played === false || showAll === true) {
+                    playlist.push(result.value);
+                }
+                result.continue();
+            } else {
+                if (onReadCallback && typeof onReadCallback === 'function') {
+                    playlist.sort(sortEpisodes);
+                    onReadCallback(playlist);
+                }
             }
-        }
-    }
-    playlist.sort(sortEpisodes);
-    return playlist;
+        };
+    };
 };
 var renderPlaylist = function(playlist) {
     "use strict";
@@ -797,10 +898,10 @@ $(document).ready(function() {
     });
     //Player UI Events
     $('#player #playPreviousEpisode').on('click', function() {
-        playEpisode(previousEpisode());
+        previousEpisode(playEpisode);
     });
     $('#player #playNextEpisode').on('click', function() {
-        playEpisode(nextEpisode());
+        nextEpisode(playEpisode);
     });
     $('#player #jumpBackwards').on('click', function() {
         var audioTag = $('#player audio')[0];
@@ -816,35 +917,35 @@ $(document).ready(function() {
         event.stopPropagation();
         //Play episode
         $('#player audio')[0].autoplay = true;
-        playEpisode(readEpisode($(this).data('episodeUri')));
+        readEpisode($(this).data('episodeUri'), playEpisode);
     });
     $('#playlist').on('click', '.download', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        var episode;
-        episode = readEpisode($(this).closest('li').data('episodeUri'));
-        logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info');
-        downloadFile(episode, 'audio/mp3');
+        readEpisode($(this).closest('li').data('episodeUri'), function(episode) {
+            logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info');
+            downloadFile(episode, 'audio/mp3');
+        });
     });
     $('#playlist').on('click', '.delete', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        var episode;
-        episode = readEpisode($(this).closest('li').data('episodeUri'));
-        logHandler('Deleting file "' + episode.offlineMediaUrl + '" starts now', 'info');
-        deleteFile(episode);
+        readEpisode($(this).closest('li').data('episodeUri'), function(episode) {
+            logHandler('Deleting file "' + episode.offlineMediaUrl + '" starts now', 'info');
+            deleteFile(episode);
+        });
     });
     $('#playlist').on('click', '.status', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        var episode;
-        episode = readEpisode($(this).closest('li').data('episodeUri'));
-        toggleEpisodeStatus(episode);
-        if (episode.playback.played) {
-            $(this).text("Status: played");
-        } else {
-            $(this).text("Status: new");
-        }
+        readEpisode($(this).closest('li').data('episodeUri'), function(episode) {
+            toggleEpisodeStatus(episode);
+            if (episode.playback.played) {
+                $(this).text("Status: played");
+            } else {
+                $(this).text("Status: new");
+            }
+        });
     });
     $('#playlist').on('click', '.origin', function(event) {
         event.stopPropagation();
@@ -854,17 +955,25 @@ $(document).ready(function() {
     $('#playlist #updatePlaylist').on('click', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        var i, j, computeResult;
+        var i, computeResult;
         computeResult = function(parserresult) {
-            var playlistUI;
+            var j, playlistUI, playlistEntryUI, filterUI;
             //Update source in storage
             writeSource(parserresult.source);
             //Save Episodes to local storage and render it out
             playlistUI = $('#playlist .entries');
+            filterUI = function() { return $(this).data('episodeUri') === parserresult.episodes[j].uri; };
             for (j = 0; j < parserresult.episodes.length; j++) {
                 //Save all Episodes in the parser result
                 writeEpisode(parserresult.episodes[j]);
-                playlistUI.append(renderEpisode(parserresult.episodes[j]));
+                if (!parserresult.episodes[j].playback.played) {
+                    playlistEntryUI = renderEpisode(parserresult.episodes[j]);
+                    if ($('#playlist li').filter(filterUI).length > 0) {
+                        $('#playlist li').filter(filterUI).replaceWith(playlistEntryUI);
+                    } else {
+                        playlistUI.append(playlistEntryUI);
+                    }
+                }
             }
         };
         readSourceList(function(sources) {
@@ -876,7 +985,7 @@ $(document).ready(function() {
     $('#playlist #showFullPlaylist').on('click', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        renderPlaylist(readPlaylist(true));
+        readPlaylist(true, renderPlaylist);
     });
     //Sources UI Events
     $('#sources').on('click', '.updateSource', function(event) {
@@ -884,15 +993,24 @@ $(document).ready(function() {
         event.stopPropagation();
         readSource($(this).attr("href"), function(source) {
             downloadSource(source, function(parserresult) {
-                var i;
+                var i, playlistUI, playlistEntryUI, filterUI;
                 //Update source in storage
                 writeSource(parserresult.source);
                 //Save Episodes to local storage
+                playlistUI = $('#playlist .entries');
+                filterUI = function() { return $(this).data('episodeUri') === parserresult.episodes[i].uri; };
                 for (i = 0; i < parserresult.episodes.length; i++) {
                     //Save all Episodes in the parser result
                     writeEpisode(parserresult.episodes[i]);
+                    if (!parserresult.episodes[i].playback.played) {
+                        playlistEntryUI = renderEpisode(parserresult.episodes[i]);
+                        if ($('#playlist li').filter(filterUI).length > 0) {
+                            $('#playlist li').filter(filterUI).replaceWith(playlistEntryUI);
+                        } else {
+                            playlistUI.append(playlistEntryUI);
+                        }
+                    }
                 }
-                renderPlaylist(readPlaylist());
             });
         });
     });
@@ -974,7 +1092,7 @@ $(document).ready(function() {
         }
     });
     $('#configuration #exportConfiguration').on('click', function() {
-        var i, key, config, button;
+        var i, j, key, config, button;
         button = this;
         config = {'Episodes': {}, 'Sources': {}, 'Settings': {}};
         //Read config from localStorage
@@ -993,23 +1111,23 @@ $(document).ready(function() {
             for (i = 0; i < sourcelist.length; i++) {
                 config.Sources['source.' + sourcelist[i].uri] = sourcelist[i];
             }
-            $(button).parent().find('#SerialisedConfigurationInput').val(JSON.stringify(config));
-            $(button).parent().find('#SerialisedConfigurationInput')[0].select();
+            readPlaylist(true, function(episodelist) {
+                for (j = 0; j < episodelist.length; j++) {
+                    config.Episodes['episode.' + episodelist[j].uri] = episodelist[j];
+                }
+                $(button).parent().find('#SerialisedConfigurationInput').val(JSON.stringify(config));
+                $(button).parent().find('#SerialisedConfigurationInput')[0].select();
+            });
         });
     });
     $('#configuration #importConfiguration').on('click', function() {
-        var config, property, request;
+        var config, settingProperty, request;
         //Import Localstorage objects
         localStorage.clear();
         config = JSON.parse($(this).parent().find('#SerialisedConfigurationInput').val());
-        for (property in config.Episodes) {
-            if (config.Episodes.hasOwnProperty(property)) {
-                localStorage.setItem(property, config.Episodes[property]);
-            }
-        }
-        for (property in config.Settings) {
-            if (config.Settings.hasOwnProperty(property)) {
-                localStorage.setItem(property, config.Settings[property]);
+        for (settingProperty in config.Settings) {
+            if (config.Settings.hasOwnProperty(settingProperty)) {
+                localStorage.setItem(settingProperty, config.Settings[settingProperty]);
             }
         }
         //import objects to indexedDB
@@ -1018,20 +1136,30 @@ $(document).ready(function() {
         request.onblocked = function() {
             logHandler("Database blocked", 'debug');
         };
+        request.onerror = function () { logHandler("Error creating/accessing IndexedDB database", 'error'); };
         request.onsuccess = function () {
             logHandler("Success creating/accessing IndexedDB database", 'debug');
-            var db, transaction, store;
+            var db, transaction, store, sourceProperty, episodeProperty;
             db = this.result;
+            // import sources
             transaction = db.transaction([indexedDbSettings.sourcesStore], 'readwrite');
             store = transaction.objectStore(indexedDbSettings.sourcesStore);
             store.clear();
-            for (property in config.Sources) {
-                if (config.Sources.hasOwnProperty(property)) {
-                    writeSource(config.Sources[property]);
+            for (sourceProperty in config.Sources) {
+                if (config.Sources.hasOwnProperty(sourceProperty)) {
+                    writeSource(config.Sources[sourceProperty]);
+                }
+            }
+            // import episodes
+            transaction = db.transaction([indexedDbSettings.episodesStore], 'readwrite');
+            store = transaction.objectStore(indexedDbSettings.episodesStore);
+            store.clear();
+            for (episodeProperty in config.Episodes) {
+                if (config.Episodes.hasOwnProperty(episodeProperty)) {
+                    writeEpisode(config.Episodes[episodeProperty]);
                 }
             }
         };
-        request.onerror = function () { logHandler("Error creating/accessing IndexedDB database", 'error'); };
     });
     $('#statusbar').on('click', function(event) {
         event.preventDefault();
@@ -1045,7 +1173,7 @@ $(document).ready(function() {
     //Render lists and settings
     renderConfiguration();
     readSourceList(renderSourceList);
-    renderPlaylist(readPlaylist());
+    readPlaylist(false, renderPlaylist);
     //Initialise player
     playEpisode(getLastPlayedEpisode());
 });
