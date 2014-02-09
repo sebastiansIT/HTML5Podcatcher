@@ -286,44 +286,49 @@ var renderEpisode = function(episode) {
         entryFunctionsUI.append('<a class="status" href="#">Status: new</a>');
     }
     entryFunctionsUI.append('<a class="origin" href="' + episode.uri + '">Internet</a>');
-    if (window.requestFileSystem) {
-        if (episode.offlineMediaUrl) {
-            entryFunctionsUI.append('<a class="delete" href="' + episode.offlineMediaUrl + '">Delete</a>');
-        } else if (episode.mediaUrl) {
-            entryFunctionsUI.append('<a class="download" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
-        }
-    }
+	if (episode.isFileSavedOffline) {
+		entryFunctionsUI.append('<a class="delete" href="' + episode.mediaUrl + '">Delete</a>');
+	} else if (episode.mediaUrl) {
+		entryFunctionsUI.append('<a class="download" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
+	}
     entryUI.append(entryFunctionsUI);
     return entryUI;
 };
 
 /** Functions for files */
-var saveFile = function(episode, arraybuffer, mimeType) {
+var saveFile = function(episode, arraybuffer, mimeType, onWriteCallback) {
     "use strict";
-    logHandler('Saving file "' + episode.mediaUrl + '" to local file system starts now', 'debug');
-    var blob, parts, fileName;
+    logHandler('Saving file "' + episode.mediaUrl + '" to IndexedDB starts now', 'debug');
+    var blob, request;
     blob = new Blob([arraybuffer], {type: mimeType});
-    parts = episode.mediaUrl.split('/');
-    fileName = parts[parts.length - 1];
-    // Write file to the root directory.
-    window.requestFileSystem(fileSystemStatus, fileSystemSize, function(filesystem) {
-        filesystem.root.getFile(fileName, {create: true, exclusive: false}, function(fileEntry) {
-            fileEntry.createWriter(function(writer) {
-                writer.onwrite = function(event) {
-                    progressHandler(event, 'Write', episode);
-                };
-                writer.onwriteend = function() { //success
-                    episode.offlineMediaUrl = fileEntry.toURL();
-                    writeEpisode(episode);
-                    logHandler('Saving file "' + episode.mediaUrl + '" to local file system finished', 'info');
-                };
-                writer.onerror = function(event) {
-                    logHandler('Error on saving file "' + episode.mediaUrl + '" to local file system (' + event + ')', 'error');
-                };
-                writer.write(blob);
-            }, errorHandler);
-        }, errorHandler);
-    }, errorHandler);
+    request = window.indexedDB.open(indexedDbSettings.name, indexedDbSettings.version);
+    request.onupgradeneeded = updateIndexedDB;
+    request.onblocked = function() {
+        logHandler("Database blocked", 'debug');
+    };
+    request.onsuccess = function () {
+        logHandler("Success creating/accessing IndexedDB database", 'debug');
+        var db, transaction, store, request;
+        db = this.result;
+        transaction = db.transaction([indexedDbSettings.filesStore], 'readwrite');
+        store = transaction.objectStore(indexedDbSettings.filesStore);
+        request = store.put(blob, episode.mediaUrl);
+        // Erfolgs-Event
+        request.onsuccess = function(event) {
+            episode.isFileSavedOffline = true;
+            writeEpisode(episode);
+			logHandler('Saving file "' + episode.mediaUrl + '" to IndexedDB finished', 'info');
+            if (onWriteCallback && typeof onWriteCallback === 'function') {
+                onWriteCallback(episode);
+            }
+        };
+		request.onerror = function () {
+			logHandler('Error saving file "' + episode.mediaUrl + '" to IndexedDB (' + event + ')', 'error');
+		};
+    };
+    request.onerror = function () {
+        logHandler("Error creating/accessing IndexedDB database", 'error');
+    };
 };
 var deleteFile = function(episode) {
     "use strict";
@@ -347,7 +352,7 @@ var deleteFile = function(episode) {
         }
     });
 };
-var downloadFile = function(episode, mimeType) {
+var downloadFile = function(episode, mimeType, onWriteCallback) {
     "use strict";
     var xhr = new XMLHttpRequest();
     xhr.open('GET', episode.mediaUrl, true);
@@ -384,7 +389,7 @@ var downloadFile = function(episode, mimeType) {
     xhr.onload = function() {
         if (this.status === 200) {
             logHandler('Download of file "' + episode.mediaUrl + '" is finished', 'debug');
-            saveFile(episode, xhr.response, mimeType);
+            saveFile(episode, xhr.response, mimeType, onWriteCallback);
         } else {
             logHandler('Error Downloading file "' + episode.mediaUrl + '": ' + this.statusText + ' (' + this.status + ')', 'error');
         }
@@ -507,7 +512,7 @@ var parseSource = function(xml, source, onDownloadCallback) {
             episodeList = [];
             cursorRequest.onsuccess = function(event) {
                 var result = event.target.result;
-                if (result !== null) {
+                if (result) {
                     episodeList.push(result.value);
                     result.continue();
                 } else {
@@ -605,7 +610,7 @@ var readSourceList = function(onReadCallback) {
         sourcelist = [];
         cursorRequest.onsuccess = function(event) {
             var result = event.target.result;
-            if (result !== null) {
+            if (result) {
                 sourcelist.push(result.value);
                 result.continue();
             } else {
@@ -668,7 +673,7 @@ var readPlaylist = function(showAll, onReadCallback) {
         playlist = [];
         cursorRequest.onsuccess = function(event) {
             var result = event.target.result;
-            if (result !== null) {
+            if (result) {
                 if (result.value.playback.played === false || showAll === true) {
                     playlist.push(result.value);
                 }
@@ -689,26 +694,7 @@ var renderPlaylist = function(playlist) {
     playlistUI.empty();
     if (playlist && playlist.length > 0) {
         for (i = 0; i < playlist.length; i++) {
-            entryUI = $('<li>');
-            entryUI.data('episodeUri', playlist[i].uri);
-            entryUI.append('<h3 class="title"><a href="' + playlist[i].uri + '">' + playlist[i].title + '</a></h3>');
-            entryUI.append('<span class="source">' + playlist[i].source + '</span>');
-            entryUI.append('<time datetime="' + playlist[i].updated.toISOString() + '" class="updated">' + playlist[i].updated.toLocaleDateString() + " " + playlist[i].updated.toLocaleTimeString() + '</span>');
-            entryFunctionsUI = $('<span class="functions">');
-            if (playlist[i].playback.played) {
-                entryFunctionsUI.append('<a class="status" href="#">Status: played</a>');
-            } else {
-                entryFunctionsUI.append('<a class="status" href="#">Status: new</a>');
-            }
-            entryFunctionsUI.append('<a class="origin" href="' + playlist[i].uri + '">Internet</a>');
-            if (window.requestFileSystem) {
-                if (playlist[i].offlineMediaUrl) {
-                    entryFunctionsUI.append('<a class="delete" href="' + playlist[i].offlineMediaUrl + '">Delete</a>');
-                } else if (playlist[i].mediaUrl) {
-                    entryFunctionsUI.append('<a class="download" href="' + playlist[i].mediaUrl + '" download="' + playlist[i].mediaUrl.slice(playlist[i].mediaUrl.lastIndexOf()) + '">Download</a>');
-                }
-            }
-            entryUI.append(entryFunctionsUI);
+            entryUI = renderEpisode(playlist[i]);
             playlistUI.append(entryUI);
         }
     } else {
@@ -922,9 +908,12 @@ $(document).ready(function() {
     $('#playlist').on('click', '.download', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        readEpisode($(this).closest('li').data('episodeUri'), function(episode) {
+		var episodeUI = $(this).closest('li');
+        readEpisode(episodeUI.data('episodeUri'), function(episode) {
             logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info');
-            downloadFile(episode, 'audio/mp3');
+            downloadFile(episode, 'audio/mp3', function(episode){
+				episodeUI.replaceWith(renderEpisode(episode));
+			});
         });
     });
     $('#playlist').on('click', '.delete', function(event) {
