@@ -690,7 +690,7 @@ $(document).ready(function() {
         var episode;
         episode = readEpisode($(this).closest('li').data('episodeUri'));
         logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info');
-        downloadFile(episode, 'audio/mp3');
+        downloadFile(episode, 'audio/mpeg');
     });
     $('#playlist').on('click', '.delete', function(event) {
         event.preventDefault();
