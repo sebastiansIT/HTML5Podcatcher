@@ -29,7 +29,7 @@
 /*global $ */
 
 /** Global Variables/Objects */
-var version = "Alpha 0.14.0";
+var version = "Alpha 0.14.1";
 var indexedDbSettings = {
     name: 'HTML5Podcatcher',
     version: '4',
@@ -779,7 +779,7 @@ var activateEpisode = function(episode, activatedCallback) {
     $('#player audio').off('timeupdate');
     logHandler("Timeupdate off", 'debug');
     if (episode) {
-        if (episode.isFileSavedOffline && !episode.offlineMediaUrl) {
+		if (episode.isFileSavedOffline && !episode.offlineMediaUrl) {
             openFile(episode, activateEpisode);
             return;
         }
@@ -974,7 +974,13 @@ $(document).ready(function() {
         $('#player audio').each(function(audiotag) {
             audiotag.autoplay = true;
         });
-        readEpisode($(this).data('episodeUri'), playEpisode);
+        readEpisode($(this).data('episodeUri'), function(episode) {
+			if (episode.offlineMediaUrl) {
+				window.URL.revokeObjectURL(episode.offlineMediaUrl);
+				episode.offlineMediaUrl = undefined;
+			}
+			playEpisode(episode);
+		});
     });
     $('#playlist').on('click', '.download', function(event) {
         event.preventDefault();
