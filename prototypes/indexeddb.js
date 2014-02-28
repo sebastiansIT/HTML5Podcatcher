@@ -756,20 +756,21 @@ var renderConfiguration = function() {
         $('#httpProxyInput').val(localStorage.getItem("configuration.proxyUrl"));
     }
 };
-var getLastPlayedEpisode = function() {
+var getLastPlayedEpisode = function(onReadCallback) {
     "use strict";
-    var lastPlayedEpisode, playlist, i;
-    lastPlayedEpisode = $('#playlist li:first-child').data('episodeUri');
-    playlist = readPlaylist();
-    if (playlist && playlist.length > 0) {
-        for (i = 0; i < playlist.length; i++) {
-            if (playlist[i].uri === localStorage.getItem('configuration.lastPlayed')) {
-                lastPlayedEpisode = playlist[i].uri;
-                break;
+    var lastPlayedEpisode = $('#playlist li:first-child').data('episodeUri');
+    readPlaylist(false, function(playlist) {
+        var i;
+        if (playlist && playlist.length > 0) {
+            for (i = 0; i < playlist.length; i++) {
+                if (playlist[i].uri === localStorage.getItem('configuration.lastPlayed')) {
+                    lastPlayedEpisode = playlist[i].uri;
+                    break;
+                }
             }
         }
-    }
-    return readEpisode(lastPlayedEpisode);
+        readEpisode(lastPlayedEpisode, onReadCallback);
+    });
 };
 
 /** Functions for playback */
@@ -779,8 +780,10 @@ var activateEpisode = function(episode, activatedCallback) {
     $('#player audio').off('timeupdate');
     logHandler("Timeupdate off", 'debug');
     if (episode) {
-		if (episode.isFileSavedOffline && !episode.offlineMediaUrl) {
-            openFile(episode, activateEpisode);
+        if (episode.isFileSavedOffline && !episode.offlineMediaUrl) {
+            openFile(episode, function(episode) {
+                activateEpisode(episode, activatedCallback);
+            });
             return;
         }
         if (episode.offlineMediaUrl) {
@@ -900,6 +903,7 @@ var playEpisode = function(episode) {
     if (episode) {
         activateEpisode(episode, function(episode) {
             localStorage.setItem('configuration.lastPlayed', episode.uri);
+            $('#player audio')[0].autoplay = true;
             $('#player audio')[0].load();
         });
     }
@@ -975,12 +979,12 @@ $(document).ready(function() {
             audiotag.autoplay = true;
         });
         readEpisode($(this).data('episodeUri'), function(episode) {
-			if (episode.offlineMediaUrl) {
-				window.URL.revokeObjectURL(episode.offlineMediaUrl);
-				episode.offlineMediaUrl = undefined;
-			}
-			playEpisode(episode);
-		});
+            if (episode.offlineMediaUrl) {
+                window.URL.revokeObjectURL(episode.offlineMediaUrl);
+                episode.offlineMediaUrl = undefined;
+            }
+            playEpisode(episode);
+        });
     });
     $('#playlist').on('click', '.download', function(event) {
         event.preventDefault();
@@ -988,7 +992,7 @@ $(document).ready(function() {
         var episodeUI = $(this).closest('li');
         readEpisode(episodeUI.data('episodeUri'), function(episode) {
             logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info');
-            downloadFile(episode, 'audio/mp3', function(episode) {
+            downloadFile(episode, 'audio/mpeg', function(episode) {
                 episodeUI.replaceWith(renderEpisode(episode));
             });
         });
@@ -1241,5 +1245,5 @@ $(document).ready(function() {
     readSourceList(renderSourceList);
     readPlaylist(false, renderPlaylist);
     //Initialise player
-    playEpisode(getLastPlayedEpisode());
+    getLastPlayedEpisode(activateEpisode);
 });
