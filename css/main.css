@@ -61,7 +61,7 @@ body > footer.fullscreen {
 	height:100%;
 }
 
-audio { width: 100%; height: 3em; }
+audio { width: 100%; }
 progress { width:5em; }
 
 .entries { 

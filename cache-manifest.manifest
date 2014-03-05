@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see http://www.gnu.org/licenses/.
 
-# Version 0.12.14 Alpha
+# Version 0.14.0 Alpha
 # Change Log: 
 ## 0.12.11
 ### Fix a Bug on setting the last played episode after page load
@@ -27,6 +27,12 @@
 ### skip episodes with errors (i.e. download failed because of network failures)
 ## 0.12.14
 ### Fix a Bug: switch to next/previous episode buttons does not work
+## 0.12.15
+### Use Mime-Type audio/mpeg instead of audio/mp3 to generate blobs after downloading file
+## 0.13.0
+### Alternative Version using IndexedDB API instead of Local Storage
+## 0.14.0
+### Using IndexeDB to store Files in Firefox
 
 CACHE:
 ./podcatcher.html

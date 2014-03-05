@@ -26,16 +26,16 @@
 /*global applicationCache */
 /*global $ */
 
-/** Global Variables/Objects */
-var version = "Alpha 0.12.14";
-var downloadTimeout = 600000;
-var fileSystemSize = 1024 * 1024 * 500; /*500 MB */
-var fileSystemStatus = window.PERSISTENT; //window.TEMPORARY;
 // Take care of vendor prefixes.
 window.URL = window.URL || window.webkitURL;
 window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
 window.resolveLocalFileSystemURL = window.resolveLocalFileSystemURL || window.webkitResolveLocalFileSystemURL;
 navigator.persistentStorage = navigator.persistentStorage || navigator.webkitPersistentStorage;
+
+/** Global Variables/Objects */
+var downloadTimeout = 600000;
+var fileSystemSize = 1024 * 1024 * 500; /*500 MB */
+var fileSystemStatus = window.PERSISTENT; //window.TEMPORARY;
 
 /** User interface functions */
 var findEpisodeUI = function(episode) {
@@ -176,7 +176,7 @@ var toggleEpisodeStatus = function(episode) {
     episode.playback.played = !episode.playback.played;
     episode.playback.currentTime = 0;
     if (episode.offlineMediaUrl) {
-        deleteFile(episode);
+        POD.storage.deleteFile(episode);
     }
     writeEpisode(episode);
 };
@@ -197,55 +197,6 @@ var nextEpisode = function() {
 };
 
 /** Functions for files */
-var saveFile = function(episode, arraybuffer, mimeType) {
-    "use strict";
-    logHandler('Saving file "' + episode.mediaUrl + '" to local file system starts now', 'debug');
-    var blob, parts, fileName;
-    blob = new Blob([arraybuffer], {type: mimeType});
-    parts = episode.mediaUrl.split('/');
-    fileName = parts[parts.length - 1];
-    // Write file to the root directory.
-    window.requestFileSystem(fileSystemStatus, fileSystemSize, function(filesystem) {
-        filesystem.root.getFile(fileName, {create: true, exclusive: false}, function(fileEntry) {
-            fileEntry.createWriter(function(writer) {
-                writer.onwrite = function(event) {
-                    progressHandler(event, 'Write', episode);
-                };
-                writer.onwriteend = function() { //success
-                    episode.offlineMediaUrl = fileEntry.toURL();
-                    writeEpisode(episode);
-                    logHandler('Saving file "' + episode.mediaUrl + '" to local file system finished', 'info');
-                };
-                writer.onerror = function(event) {
-                    logHandler('Error on saving file "' + episode.mediaUrl + '" to local file system (' + event + ')', 'error');
-                };
-                writer.write(blob);
-            }, errorHandler);
-        }, errorHandler);
-    }, errorHandler);
-};
-var deleteFile = function(episode) {
-    "use strict";
-    window.resolveLocalFileSystemURL(episode.offlineMediaUrl, function(fileEntry) { //success
-        fileEntry.remove(function() { //success
-            var url;
-            url = episode.offlineMediaUrl;
-            episode.offlineMediaUrl = undefined;
-            writeEpisode(episode);
-            logHandler('Deleting file "' + url + '" finished', 'info');
-        }, errorHandler);
-    }, function(event) { //error
-        if (event.code === event.NOT_FOUND_ERR) {
-            var url;
-            url = episode.offlineMediaUrl;
-            episode.offlineMediaUrl = undefined;
-            writeEpisode(episode);
-            logHandler('File "' + url + '"not found. But that\'s OK', 'info');
-        } else {
-            errorHandler(event);
-        }
-    });
-};
 var downloadFile = function(episode, mimeType) {
     "use strict";
     var xhr = new XMLHttpRequest();
@@ -270,7 +221,7 @@ var downloadFile = function(episode, mimeType) {
         xhrProxy.onload = function() {
             if (this.status === 200) {
                 logHandler('Download of file "' + episode.mediaUrl + '" via proxy is finished', 'debug');
-                saveFile(episode, xhrProxy.response, mimeType);
+                POD.storage.saveFile(episode, xhrProxy.response, mimeType);
             } else {
                 logHandler('Error Downloading file "' + episode.mediaUrl + '" via proxy: ' + this.statusText + ' (' + this.status + ')', 'error');
             }
@@ -283,7 +234,7 @@ var downloadFile = function(episode, mimeType) {
     xhr.onload = function() {
         if (this.status === 200) {
             logHandler('Download of file "' + episode.mediaUrl + '" is finished', 'debug');
-            saveFile(episode, xhr.response, mimeType);
+            POD.storage.saveFile(episode, xhr.response, mimeType);
         } else {
             logHandler('Error Downloading file "' + episode.mediaUrl + '": ' + this.statusText + ' (' + this.status + ')', 'error');
         }
@@ -615,6 +566,226 @@ var playEpisode = function(episode) {
     }
 };
 
+var POD = {
+    version: "Alpha 0.14.0",
+    storage: {
+        indexedDbStorage: {
+            settings: {
+                name: 'HTML5Podcatcher',
+                version: '4',
+                sourcesStore: 'sources',
+                episodesStore: 'episodes',
+                filesStore: 'files'
+            },
+            updateIndexedDB: function(event) {
+                "use strict";
+                logHandler("Database Update from Version " + event.oldVersion + " to Version " + event.newVersion, 'info');
+                var db, episodeStore;
+                db = this.result;
+                if (!db.objectStoreNames.contains(this.settings.sourcesStore)) {
+                    db.createObjectStore(this.settings.sourcesStore, { keyPath: 'uri' });
+                }
+                if (!db.objectStoreNames.contains(this.settings.episodesStore)) {
+                    episodeStore = db.createObjectStore(this.settings.episodesStore, { keyPath: 'uri' });
+                    episodeStore.createIndex('source', 'source', {unique: false});
+                }
+                if (!db.objectStoreNames.contains(this.settings.filesStore)) {
+                    db.createObjectStore(this.settings.filesStore, {});
+                }
+            },
+            saveFile: function(episode, arraybuffer, mimeType, onWriteCallback) {
+                "use strict";
+                logHandler('Saving file "' + episode.mediaUrl + '" to IndexedDB starts now', 'debug');
+                var blob, request;
+                blob = new Blob([arraybuffer], {type: mimeType});
+                request = window.indexedDB.open(this.settings.name, this.settings.version);
+                request.onupgradeneeded = this.updateIndexedDB;
+                request.onblocked = function() {
+                    logHandler("Database blocked", 'debug');
+                };
+                request.onsuccess = function () {
+                    logHandler("Success creating/accessing IndexedDB database", 'debug');
+                    var db, transaction, store, request;
+                    db = this.result;
+                    transaction = db.transaction([POD.storage.indexedDbStorage.settings.filesStore], 'readwrite');
+                    store = transaction.objectStore(POD.storage.indexedDbStorage.settings.filesStore);
+                    request = store.put(blob, episode.mediaUrl);
+                    // Erfolgs-Event
+                    request.onsuccess = function() {
+                        episode.isFileSavedOffline = true;
+                        writeEpisode(episode);
+                        logHandler('Saving file "' + episode.mediaUrl + '" to IndexedDB finished', 'info');
+                        if (onWriteCallback && typeof onWriteCallback === 'function') {
+                            onWriteCallback(episode);
+                        }
+                    };
+                    request.onerror = function (event) {
+                        logHandler('Error saving file "' + episode.mediaUrl + '" to IndexedDB (' + event + ')', 'error');
+                    };
+                };
+                request.onerror = function () {
+                    logHandler("Error creating/accessing IndexedDB database", 'error');
+                };
+            },
+            deleteFile: function(episode, onDeleteCallback) {
+                "use strict";
+                var request;
+                window.URL.revokeObjectURL(episode.offlineMediaUrl);
+                request = window.indexedDB.open(this.settings.name, this.settings.version);
+                request.onupgradeneeded = this.updateIndexedDB;
+                request.onblocked = function() {
+                    logHandler("Database blocked", 'debug');
+                };
+                request.onsuccess = function () {
+                    logHandler("Success creating/accessing IndexedDB database", 'debug');
+                    var db, transaction, store, request;
+                    db = this.result;
+                    transaction = db.transaction([POD.storage.indexedDbStorage.settings.filesStore], 'readwrite');
+                    store = transaction.objectStore(POD.storage.indexedDbStorage.settings.filesStore);
+                    request = store.delete(episode.mediaUrl);
+                    // Erfolgs-Event
+                    request.onsuccess = function() {
+                        episode.isFileSavedOffline = false;
+                        episode.offlineMediaUrl = undefined;
+                        writeEpisode(episode);
+                        logHandler('Deleting file "' + episode.mediaUrl + '" from IndexedDB finished', 'info');
+                        if (onDeleteCallback && typeof onDeleteCallback === 'function') {
+                            onDeleteCallback(episode);
+                        }
+                    };
+                    request.onerror = function (event) {
+                        logHandler('Error deleting file "' + episode.mediaUrl + '" from IndexedDB (' + event + ')', 'error');
+                    };
+                };
+                request.onerror = function () {
+                    logHandler("Error creating/accessing IndexedDB database", 'error');
+                };
+            },
+            openFile: function(episode, onReadCallback) {
+                "use strict";
+                logHandler('Opening file "' + episode.mediaUrl + '" from IndexedDB starts now', 'debug');
+                var request;
+                request = window.indexedDB.open(this.settings.name, this.settings.version);
+                request.onupgradeneeded = this.updateIndexedDB;
+                request.onblocked = function() {
+                    logHandler("Database blocked", 'debug');
+                };
+                request.onsuccess = function () {
+                    logHandler("Success creating/accessing IndexedDB database", 'debug');
+                    var db, transaction, store, request;
+                    db = this.result;
+                    transaction = db.transaction([POD.storage.indexedDbStorage.settings.filesStore], 'readonly');
+                    store = transaction.objectStore(POD.storage.indexedDbStorage.settings.filesStore);
+                    request = store.get(episode.mediaUrl);
+                    // Erfolgs-Event
+                    request.onsuccess = function(event) {
+                        var objectUrl, file;
+                        file = event.target.result;
+                        objectUrl = window.URL.createObjectURL(file);
+                        episode.offlineMediaUrl = objectUrl;
+                        if (onReadCallback && typeof onReadCallback === 'function') {
+                            onReadCallback(episode);
+                        }
+                    };
+                    request.onerror = function (event) {
+                        logHandler('Error opening file "' + episode.mediaUrl + '" from IndexedDB (' + event + ')', 'error');
+                    };
+                };
+                request.onerror = function () {
+                    logHandler("Error creating/accessing IndexedDB database", 'error');
+                };
+            }
+        },//end IndexedDbStorage
+        fileSystemStorage: {
+            saveFile: function(episode, arraybuffer, mimeType, onWriteCallback) {
+                "use strict";
+                logHandler('Saving file "' + episode.mediaUrl + '" to local file system starts now', 'debug');
+                var blob, parts, fileName;
+                blob = new Blob([arraybuffer], {type: mimeType});
+                parts = episode.mediaUrl.split('/');
+                fileName = parts[parts.length - 1];
+                // Write file to the root directory.
+                window.requestFileSystem(fileSystemStatus, fileSystemSize, function(filesystem) {
+                    filesystem.root.getFile(fileName, {create: true, exclusive: false}, function(fileEntry) {
+                        fileEntry.createWriter(function(writer) {
+                            writer.onwrite = function(event) {
+                                progressHandler(event, 'Write', episode);
+                            };
+                            writer.onwriteend = function() { //success
+                                episode.offlineMediaUrl = fileEntry.toURL();
+                                writeEpisode(episode);
+                                logHandler('Saving file "' + episode.mediaUrl + '" to local file system finished', 'info');
+                                if (onWriteCallback && typeof onWriteCallback === 'function') {
+                                    onWriteCallback(episode);
+                                }
+                            };
+                            writer.onerror = function(event) {
+                                logHandler('Error on saving file "' + episode.mediaUrl + '" to local file system (' + event + ')', 'error');
+                            };
+                            writer.write(blob);
+                        }, errorHandler);
+                    }, errorHandler);
+                }, errorHandler);
+            },
+            deleteFile: function(episode, onDeleteCallback) {
+                "use strict";
+                window.resolveLocalFileSystemURL(episode.offlineMediaUrl, function(fileEntry) { //success
+                    fileEntry.remove(function() { //success
+                        var url;
+                        url = episode.offlineMediaUrl;
+                        episode.offlineMediaUrl = undefined;
+                        writeEpisode(episode);
+                        logHandler('Deleting file "' + url + '" finished', 'info');
+                        if (onDeleteCallback && typeof onDeleteCallback === 'function') {
+                            onDeleteCallback(episode);
+                        }
+                    }, errorHandler);
+                }, function(event) { //error
+                    if (event.code === event.NOT_FOUND_ERR) {
+                        var url;
+                        url = episode.offlineMediaUrl;
+                        episode.offlineMediaUrl = undefined;
+                        writeEpisode(episode);
+                        logHandler('File "' + url + '"not found. But that\'s OK', 'info');
+                    } else {
+                        errorHandler(event);
+                    }
+                });
+            },
+            openFile: function(episode, onReadCallback) {
+                "use strict";
+                if (onReadCallback && typeof onReadCallback === 'function') {
+                    onReadCallback(episode);
+                }
+            }
+        },//end FileSystemStorage
+        saveFile: function(episode, arraybuffer, mimeType, onWriteCallback) {
+            "use strict";
+            if (window.requestFileSystem) {
+                this.fileSystemStorage.saveFile(episode, arraybuffer, mimeType, onWriteCallback);
+            } else {
+                this.indexedDbStorage.saveFile(episode, arraybuffer, mimeType, onWriteCallback);
+            }
+        },
+        deleteFile: function(episode, onDeleteCallback) {
+            "use strict";
+            if (window.requestFileSystem) {
+                this.fileSystemStorage.deleteFile(episode, onDeleteCallback);
+            } else {
+                this.indexedDbStorage.deleteFile(episode, onDeleteCallback);
+            }
+        },
+        openFile: function(episode, onReadCallback) {
+            "use strict";
+            if (window.requestFileSystem) {
+                this.fileSystemStorage.openFile(episode, onReadCallback);
+            } else {
+                this.indexedDbStorage.openFile(episode, onReadCallback);
+            }
+        }
+    }
+};
+
 /** Central 'ready' event handler */
 $(document).ready(function() {
     "use strict";
@@ -698,7 +869,7 @@ $(document).ready(function() {
         var episode;
         episode = readEpisode($(this).closest('li').data('episodeUri'));
         logHandler('Deleting file "' + episode.offlineMediaUrl + '" starts now', 'info');
-        deleteFile(episode);
+        POD.storage.deleteFile(episode);
     });
     $('#playlist').on('click', '.status', function(event) {
         event.preventDefault();
