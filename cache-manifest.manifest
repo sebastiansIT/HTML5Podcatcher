@@ -35,6 +35,8 @@
 ### Using IndexeDB to store Files in Firefox
 ## 0.14.1
 ### Using own copy of jQuery
+## 0.14.1
+### Fixing the rendering of Episodes: The Download link is now shown on Firefox (IndexedDB)
 
 CACHE:
 ./podcatcher.html

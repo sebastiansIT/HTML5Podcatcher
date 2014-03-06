@@ -195,6 +195,32 @@ var nextEpisode = function() {
     var activeEpisode = $('#playlist').find('.activeEpisode');
     return readEpisode(activeEpisode.next().data('episodeUri'));
 };
+var renderEpisode = function(episode) {
+    "use strict";
+    var entryUI, entryFunctionsUI;
+    entryUI = $('<li>');
+    entryUI.data('episodeUri', episode.uri);
+    entryUI.append('<h3 class="title"><a href="' + episode.uri + '">' + episode.title + '</a></h3>');
+    entryUI.append('<span class="source">' + episode.source + '</span>');
+    entryUI.append('<time datetime="' + episode.updated.toISOString() + '" class="updated">' + episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString() + '</span>');
+    entryFunctionsUI = $('<span class="functions">');
+    if (episode.playback.played) {
+        entryFunctionsUI.append('<a class="status" href="#">Status: played</a>');
+    } else {
+        entryFunctionsUI.append('<a class="status" href="#">Status: new</a>');
+    }
+    entryFunctionsUI.append('<a class="origin" href="' + episode.uri + '">Internet</a>');
+    if (POD.storage.isFileStorageAvailable()) {
+		if (episode.isFileSavedOffline) {
+			entryFunctionsUI.append('<a class="delete" href="' + episode.mediaUrl + '">Delete</a>');
+		} else if (episode.mediaUrl) {
+			entryFunctionsUI.append('<a class="download" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
+		}
+	}
+    entryUI.append(entryFunctionsUI);
+    return entryUI;
+};
+
 
 /** Functions for files */
 var downloadFile = function(episode, mimeType) {
@@ -400,31 +426,12 @@ var readPlaylist = function(showAll) {
 };
 var renderPlaylist = function(playlist) {
     "use strict";
-    var playlistUI, entryUI, entryFunctionsUI, i;
+    var playlistUI, entryUI, i;
     playlistUI = $('#playlist .entries');
     playlistUI.empty();
     if (playlist && playlist.length > 0) {
         for (i = 0; i < playlist.length; i++) {
-            entryUI = $('<li>');
-            entryUI.data('episodeUri', playlist[i].uri);
-            entryUI.append('<h3 class="title"><a href="' + playlist[i].uri + '">' + playlist[i].title + '</a></h3>');
-            entryUI.append('<span class="source">' + playlist[i].source + '</span>');
-            entryUI.append('<time datetime="' + playlist[i].updated.toISOString() + '" class="updated">' + playlist[i].updated.toLocaleDateString() + " " + playlist[i].updated.toLocaleTimeString() + '</span>');
-            entryFunctionsUI = $('<span class="functions">');
-            if (playlist[i].playback.played) {
-                entryFunctionsUI.append('<a class="status" href="#">Status: played</a>');
-            } else {
-                entryFunctionsUI.append('<a class="status" href="#">Status: new</a>');
-            }
-            entryFunctionsUI.append('<a class="origin" href="' + playlist[i].uri + '">Internet</a>');
-            if (window.requestFileSystem) {
-                if (playlist[i].offlineMediaUrl) {
-                    entryFunctionsUI.append('<a class="delete" href="' + playlist[i].offlineMediaUrl + '">Delete</a>');
-                } else if (playlist[i].mediaUrl) {
-                    entryFunctionsUI.append('<a class="download" href="' + playlist[i].mediaUrl + '" download="' + playlist[i].mediaUrl.slice(playlist[i].mediaUrl.lastIndexOf()) + '">Download</a>');
-                }
-            }
-            entryUI.append(entryFunctionsUI);
+            entryUI = renderEpisode(playlist[i]);
             playlistUI.append(entryUI);
         }
     } else {
@@ -567,7 +574,7 @@ var playEpisode = function(episode) {
 };
 
 var POD = {
-    version: "Alpha 0.14.0",
+    version: "Alpha 0.14.2",
     storage: {
         indexedDbStorage: {
             settings: {
@@ -759,7 +766,10 @@ var POD = {
                 }
             }
         },//end FileSystemStorage
-        saveFile: function(episode, arraybuffer, mimeType, onWriteCallback) {
+        isFileStorageAvailable: function() {
+			 return window.requestFileSystem || window.indexedDB;
+		},
+		saveFile: function(episode, arraybuffer, mimeType, onWriteCallback) {
             "use strict";
             if (window.requestFileSystem) {
                 this.fileSystemStorage.saveFile(episode, arraybuffer, mimeType, onWriteCallback);
