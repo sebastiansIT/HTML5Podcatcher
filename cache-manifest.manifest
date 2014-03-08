@@ -35,8 +35,12 @@
 ### Using IndexeDB to store Files in Firefox
 ## 0.14.1
 ### Using own copy of jQuery
-## 0.14.1
+## 0.14.2
 ### Fixing the rendering of Episodes: The Download link is now shown on Firefox (IndexedDB)
+## 0.14.3
+### Use openFile() when activating a Episode to generate the Object-URL
+## 0.14.4
+### Add Callback Functions to PlayEpisode() and ActivateEpisode() to handle the asyncron calls of the IndexedDB API
 
 CACHE:
 ./podcatcher.html

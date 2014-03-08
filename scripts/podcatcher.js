@@ -211,12 +211,12 @@ var renderEpisode = function(episode) {
     }
     entryFunctionsUI.append('<a class="origin" href="' + episode.uri + '">Internet</a>');
     if (POD.storage.isFileStorageAvailable()) {
-		if (episode.isFileSavedOffline) {
-			entryFunctionsUI.append('<a class="delete" href="' + episode.mediaUrl + '">Delete</a>');
-		} else if (episode.mediaUrl) {
-			entryFunctionsUI.append('<a class="download" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
-		}
-	}
+        if (episode.isFileSavedOffline) {
+            entryFunctionsUI.append('<a class="delete" href="' + episode.mediaUrl + '">Delete</a>');
+        } else if (episode.mediaUrl) {
+            entryFunctionsUI.append('<a class="download" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
+        }
+    }
     entryUI.append(entryFunctionsUI);
     return entryUI;
 };
@@ -464,117 +464,126 @@ var getLastPlayedEpisode = function() {
 };
 
 /** Functions for playback */
-var activateEpisode = function(episode) {
+var activateEpisode = function(episode, onActivatedCallback) {
     "use strict";
     var mediaUrl, audioTag, mp3SourceTag;
     $('#player audio').off('timeupdate');
     logHandler("Timeupdate off", 'debug');
     if (episode) {
-        if (episode.offlineMediaUrl) {
-            mediaUrl =  episode.offlineMediaUrl;
-        } else {
-            mediaUrl = episode.mediaUrl;
-        }
-        if ($('#player audio').length > 0) {
-            audioTag = $('#player audio')[0];
-            $(audioTag).find('source[type="audio/mpeg"]').attr('src', mediaUrl);
-            $(audioTag).attr('title', episode.title);
-        } else {
-            $('#mediacontrol > p').remove();
-            audioTag = $('<audio controls="controls" preload="metadata">');
-            mp3SourceTag = $('<source type="audio/mpeg" />');
-            mp3SourceTag.attr('src', mediaUrl);
-            audioTag.append(mp3SourceTag);
-            audioTag.attr('title', episode.title);
-            $('#mediacontrol').prepend(audioTag);
-            //Attach player events
-            $('#player audio').on('loadstart', function() {
-                logHandler("==============================================", 'debug');
-                logHandler("Start loading " + activeEpisode().title, 'debug');
-            });
-            $('#player audio').on('loadedmetadata', function() {
-                logHandler("Load metadata of " + activeEpisode().title, 'debug');
-            });
-            $('#player audio').on('canplay', function() {
-                logHandler(activeEpisode().title + " is ready to play", 'debug');
-            });
-            $('#player audio').on('canplaythrough', function() {
-                logHandler(activeEpisode().title + " is realy ready to play (\"canplaythrough\")", 'debug');
-            });
-            $('#player audio').on('playing', function() {
-                logHandler(activeEpisode().title + " is playing", 'info');
-                this.autoplay = true;
-            });
-            $('#player audio').on('ended', function() {
-                logHandler(activeEpisode().title + " is ended", 'debug');
-                var episode = activeEpisode();
-                toggleEpisodeStatus(episode);
-                //Plays next Episode in Playlist
-                playEpisode(nextEpisode());
-            });
-            $('#player audio, #player audio source').on('error', function(e) {
-                var errormessage, readystate;
-                errormessage = e.toString();
-                readystate = $(this).parent()[0].readyState;
-                if (readystate === 0) {
-                    errormessage = "Can't load file";
-                } else if ($(this).parent()[0].error) {
-                    switch (e.target.error.code) {
-                    case e.target.error.MEDIA_ERR_ABORTED:
-                        errormessage = 'You aborted the video playback.';
-                        break;
-                    case e.target.error.MEDIA_ERR_NETWORK:
-                        errormessage = 'A network error caused the audio download to fail.';
-                        break;
-                    case e.target.error.MEDIA_ERR_DECODE:
-                        errormessage = 'The audio playback was aborted due to a corruption problem or because the video used features your browser did not support.';
-                        break;
-                    case e.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
-                        errormessage = 'The video audio not be loaded, either because the server or network failed or because the format is not supported.';
-                        break;
-                    default:
-                        errormessage = 'An unknown error occurred.';
-                        break;
-                    }
-                }
-                logHandler(errormessage, 'error');
-                playEpisode(nextEpisode());
-            });
-            $('#player audio').on('durationchange', function(event) {
-                logHandler("Duration of " + activeEpisode().title + " is changed to " + event.currentTarget.duration + ".", 'debug');
-                var episode = activeEpisode();
-                if (episode && this.duration > episode.playback.currentTime && this.currentTime <= episode.playback.currentTime) {
-                    logHandler("CurrentTime will set to " + episode.playback.currentTime + " seconds", 'debug');
-                    this.currentTime = episode.playback.currentTime;
-                    $(this).on('timeupdate', function(event) {
-                        //logHandler("Timeupdate reached", 'debug');
-                        var episode = activeEpisode();
-                        if (episode && (event.target.currentTime > (episode.playback.currentTime + 10) || event.target.currentTime < (episode.playback.currentTime - 10))) {
-                            episode.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10;
-                            writeEpisode(episode);
-                            logHandler('Current timecode is ' + episode.playback.currentTime + '.', 'debug');
+        POD.storage.openFile(episode, function(episode) {
+            if (episode.offlineMediaUrl) {
+                mediaUrl =  episode.offlineMediaUrl;
+            } else {
+                mediaUrl = episode.mediaUrl;
+            }
+            if ($('#player audio').length > 0) {
+                audioTag = $('#player audio')[0];
+                $(audioTag).find('source[type="audio/mpeg"]').attr('src', mediaUrl);
+                $(audioTag).attr('title', episode.title);
+            } else {
+                $('#mediacontrol > p').remove();
+                audioTag = $('<audio controls="controls" preload="metadata">');
+                mp3SourceTag = $('<source type="audio/mpeg" />');
+                mp3SourceTag.attr('src', mediaUrl);
+                audioTag.append(mp3SourceTag);
+                audioTag.attr('title', episode.title);
+                $('#mediacontrol').prepend(audioTag);
+                //Attach player events
+                $('#player audio').on('loadstart', function() {
+                    logHandler("==============================================", 'debug');
+                    logHandler("Start loading " + activeEpisode().title, 'debug');
+                });
+                $('#player audio').on('loadedmetadata', function() {
+                    logHandler("Load metadata of " + activeEpisode().title, 'debug');
+                });
+                $('#player audio').on('canplay', function() {
+                    logHandler(activeEpisode().title + " is ready to play", 'debug');
+                });
+                $('#player audio').on('canplaythrough', function() {
+                    logHandler(activeEpisode().title + " is realy ready to play (\"canplaythrough\")", 'debug');
+                });
+                $('#player audio').on('playing', function() {
+                    logHandler(activeEpisode().title + " is playing", 'info');
+                    this.autoplay = true;
+                });
+                $('#player audio').on('ended', function() {
+                    logHandler(activeEpisode().title + " is ended", 'debug');
+                    var episode = activeEpisode();
+                    toggleEpisodeStatus(episode);
+                    //Plays next Episode in Playlist
+                    playEpisode(nextEpisode());
+                });
+                $('#player audio, #player audio source').on('error', function(e) {
+                    var errormessage, readystate;
+                    errormessage = e.toString();
+                    readystate = $(this).parent()[0].readyState;
+                    if (readystate === 0) {
+                        errormessage = "Can't load file";
+                    } else if ($(this).parent()[0].error) {
+                        switch (e.target.error.code) {
+                        case e.target.error.MEDIA_ERR_ABORTED:
+                            errormessage = 'You aborted the video playback.';
+                            break;
+                        case e.target.error.MEDIA_ERR_NETWORK:
+                            errormessage = 'A network error caused the audio download to fail.';
+                            break;
+                        case e.target.error.MEDIA_ERR_DECODE:
+                            errormessage = 'The audio playback was aborted due to a corruption problem or because the video used features your browser did not support.';
+                            break;
+                        case e.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                            errormessage = 'The video audio not be loaded, either because the server or network failed or because the format is not supported.';
+                            break;
+                        default:
+                            errormessage = 'An unknown error occurred.';
+                            break;
                         }
-                    });
-                    logHandler("Timeupdate on", 'debug');
-                }
-            });
-        }
-        //Styling
-        $('#playlist').find('.activeEpisode').removeClass('activeEpisode');
-        $('#playlist li').filter(function() { return $(this).data('episodeUri') === episode.uri; }).addClass('activeEpisode');
+                    }
+                    logHandler(errormessage, 'error');
+                    playEpisode(nextEpisode());
+                });
+                $('#player audio').on('durationchange', function(event) {
+                    logHandler("Duration of " + activeEpisode().title + " is changed to " + event.currentTarget.duration + ".", 'debug');
+                    var episode = activeEpisode();
+                    if (episode && this.duration > episode.playback.currentTime && this.currentTime <= episode.playback.currentTime) {
+                        logHandler("CurrentTime will set to " + episode.playback.currentTime + " seconds", 'debug');
+                        this.currentTime = episode.playback.currentTime;
+                        $(this).on('timeupdate', function(event) {
+                            //logHandler("Timeupdate reached", 'debug');
+                            var episode = activeEpisode();
+                            if (episode && (event.target.currentTime > (episode.playback.currentTime + 10) || event.target.currentTime < (episode.playback.currentTime - 10))) {
+                                episode.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10;
+                                writeEpisode(episode);
+                                logHandler('Current timecode is ' + episode.playback.currentTime + '.', 'debug');
+                            }
+                        });
+                        logHandler("Timeupdate on", 'debug');
+                    }
+                });
+            }
+            //Styling
+            $('#playlist').find('.activeEpisode').removeClass('activeEpisode');
+            $('#playlist li').filter(function() { return $(this).data('episodeUri') === episode.uri; }).addClass('activeEpisode');
+            if (onActivatedCallback && typeof onActivatedCallback === 'function') {
+                onActivatedCallback(episode);
+            }
+        });
     }
 };
-var playEpisode = function(episode) {
+var playEpisode = function(episode, onPlaybackStartedCallback) {
     "use strict";
     if (episode) {
-        activateEpisode(episode);
-        localStorage.setItem('configuration.lastPlayed', episode.uri);
-        $('#player audio')[0].load();
+        activateEpisode(episode, function(episode) {
+            localStorage.setItem('configuration.lastPlayed', episode.uri);
+            $('#player audio')[0].load();
+            if (onPlaybackStartCallback && typeof onPlaybackStartCallback === 'function') {
+                onPlaybackStartCallback(episode);
+            }
+        });
     }
 };
 
 var POD = {
-    version: "Alpha 0.14.2",
+    version: "Alpha 0.14.4",
     storage: {
         indexedDbStorage: {
             settings: {
@@ -670,37 +679,39 @@ var POD = {
             },
             openFile: function(episode, onReadCallback) {
                 "use strict";
-                logHandler('Opening file "' + episode.mediaUrl + '" from IndexedDB starts now', 'debug');
-                var request;
-                request = window.indexedDB.open(this.settings.name, this.settings.version);
-                request.onupgradeneeded = this.updateIndexedDB;
-                request.onblocked = function() {
-                    logHandler("Database blocked", 'debug');
-                };
-                request.onsuccess = function () {
-                    logHandler("Success creating/accessing IndexedDB database", 'debug');
-                    var db, transaction, store, request;
-                    db = this.result;
-                    transaction = db.transaction([POD.storage.indexedDbStorage.settings.filesStore], 'readonly');
-                    store = transaction.objectStore(POD.storage.indexedDbStorage.settings.filesStore);
-                    request = store.get(episode.mediaUrl);
-                    // Erfolgs-Event
-                    request.onsuccess = function(event) {
-                        var objectUrl, file;
-                        file = event.target.result;
-                        objectUrl = window.URL.createObjectURL(file);
-                        episode.offlineMediaUrl = objectUrl;
-                        if (onReadCallback && typeof onReadCallback === 'function') {
-                            onReadCallback(episode);
-                        }
+                if (episode.isFileSavedOffline) {
+                    logHandler('Opening file "' + episode.mediaUrl + '" from IndexedDB starts now', 'debug');
+                    var request;
+                    request = window.indexedDB.open(this.settings.name, this.settings.version);
+                    request.onupgradeneeded = this.updateIndexedDB;
+                    request.onblocked = function() {
+                        logHandler("Database blocked", 'debug');
                     };
-                    request.onerror = function (event) {
-                        logHandler('Error opening file "' + episode.mediaUrl + '" from IndexedDB (' + event + ')', 'error');
+                    request.onsuccess = function () {
+                        logHandler("Success creating/accessing IndexedDB database", 'debug');
+                        var db, transaction, store, request;
+                        db = this.result;
+                        transaction = db.transaction([POD.storage.indexedDbStorage.settings.filesStore], 'readonly');
+                        store = transaction.objectStore(POD.storage.indexedDbStorage.settings.filesStore);
+                        request = store.get(episode.mediaUrl);
+                        // Erfolgs-Event
+                        request.onsuccess = function(event) {
+                            var objectUrl, file;
+                            file = event.target.result;
+                            objectUrl = window.URL.createObjectURL(file);
+                            episode.offlineMediaUrl = objectUrl;
+                            if (onReadCallback && typeof onReadCallback === 'function') {
+                                onReadCallback(episode);
+                            }
+                        };
+                        request.onerror = function (event) {
+                            logHandler('Error opening file "' + episode.mediaUrl + '" from IndexedDB (' + event + ')', 'error');
+                        };
                     };
-                };
-                request.onerror = function () {
-                    logHandler("Error creating/accessing IndexedDB database", 'error');
-                };
+                    request.onerror = function () {
+                        logHandler("Error creating/accessing IndexedDB database", 'error');
+                    };
+                }
             }
         },//end IndexedDbStorage
         fileSystemStorage: {
@@ -767,9 +778,10 @@ var POD = {
             }
         },//end FileSystemStorage
         isFileStorageAvailable: function() {
-			 return window.requestFileSystem || window.indexedDB;
-		},
-		saveFile: function(episode, arraybuffer, mimeType, onWriteCallback) {
+            "use strict";
+            return window.requestFileSystem || window.indexedDB;
+        },
+        saveFile: function(episode, arraybuffer, mimeType, onWriteCallback) {
             "use strict";
             if (window.requestFileSystem) {
                 this.fileSystemStorage.saveFile(episode, arraybuffer, mimeType, onWriteCallback);
