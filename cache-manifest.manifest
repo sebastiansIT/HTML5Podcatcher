@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see http://www.gnu.org/licenses/.
 
-# Version 0.14.0 Alpha
+# Version 0.14.8 Alpha
 # Change Log: 
 ## 0.12.11
 ### Fix a Bug on setting the last played episode after page load
@@ -41,6 +41,14 @@
 ### Use openFile() when activating a Episode to generate the Object-URL
 ## 0.14.4
 ### Add Callback Functions to PlayEpisode() and ActivateEpisode() to handle the asyncron calls of the IndexedDB API
+## 0.14.5
+### Fix a Bug width rendering a Episode after downloading this episodes file and structuring some code in namespace UI
+## 0.14.6
+### Fixed a Bug: Dosn't delete files from IndexedDB when episode status is switched
+## 0.14.7
+### Fixed a Bug: For IE changed the indexeddb-Shema-Version from String to number
+## 0.14.8
+### Fixed a Bug: Missused "this" in updateIndexedDB()
 
 CACHE:
 ./podcatcher.html
