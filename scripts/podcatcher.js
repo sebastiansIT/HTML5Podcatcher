@@ -195,7 +195,7 @@ var nextEpisode = function() {
 };
 
 /** Functions for files */
-var downloadFile = function(episode, mimeType) {
+var downloadFileXXX = function(episode, mimeType, onDownloadCallback) {
     "use strict";
     var xhr = new XMLHttpRequest();
     xhr.open('GET', episode.mediaUrl, true);
@@ -232,7 +232,7 @@ var downloadFile = function(episode, mimeType) {
     xhr.onload = function() {
         if (this.status === 200) {
             logHandler('Download of file "' + episode.mediaUrl + '" is finished', 'debug');
-            POD.storage.saveFile(episode, xhr.response, mimeType);
+            POD.storage.saveFile(episode, xhr.response, mimeType, onDownloadCallback);
         } else {
             logHandler('Error Downloading file "' + episode.mediaUrl + '": ' + this.statusText + ' (' + this.status + ')', 'error');
         }
@@ -540,7 +540,7 @@ var playEpisode = function(episode, onPlaybackStartedCallback) {
 };
 
 var POD = {
-    version: "Alpha 0.14.8",
+    version: "Alpha 0.14.9",
     storage: {
         indexedDbStorage: {
             settings: {
@@ -788,7 +788,7 @@ var POD = {
                 xhrProxy.onload = function() {
                     if (this.status === 200) {
                         logHandler('Download of file "' + episode.mediaUrl + '" via proxy is finished', 'debug');
-                        POD.storage.saveFile(episode, xhrProxy.response, mimeType);
+                        POD.storage.saveFile(episode, xhrProxy.response, mimeType, onDownloadCallback);
                     } else {
                         logHandler('Error Downloading file "' + episode.mediaUrl + '" via proxy: ' + this.statusText + ' (' + this.status + ')', 'error');
                     }
@@ -801,10 +801,7 @@ var POD = {
             xhr.onload = function() {
                 if (this.status === 200) {
                     logHandler('Download of file "' + episode.mediaUrl + '" is finished', 'debug');
-                    POD.storage.saveFile(episode, xhr.response, mimeType);
-                    if (onDownloadCallback && typeof onDownloadCallback === 'function') {
-                        onDownloadCallback(episode);
-                    }
+                    POD.storage.saveFile(episode, xhr.response, mimeType, onDownloadCallback);
                 } else {
                     logHandler('Error Downloading file "' + episode.mediaUrl + '": ' + this.statusText + ' (' + this.status + ')', 'error');
                 }

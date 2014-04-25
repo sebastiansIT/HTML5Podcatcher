@@ -49,6 +49,9 @@
 ### Fixed a Bug: For IE changed the indexeddb-Shema-Version from String to number
 ## 0.14.8
 ### Fixed a Bug: Missused "this" in updateIndexedDB()
+## 0.14.9
+### Fixed a Bug: missing callback call in POD.web.downloadFile()
+
 
 CACHE:
 ./podcatcher.html
