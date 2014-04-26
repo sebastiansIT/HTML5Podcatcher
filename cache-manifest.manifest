@@ -51,6 +51,8 @@
 ### Fixed a Bug: Missused "this" in updateIndexedDB()
 ## 0.14.9
 ### Fixed a Bug: missing callback call in POD.web.downloadFile()
+## 0.14.10
+### Fixed a Bug: set download flag when file system API used
 
 
 CACHE:

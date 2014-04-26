@@ -194,55 +194,6 @@ var nextEpisode = function() {
     return readEpisode(activeEpisode.next().data('episodeUri'));
 };
 
-/** Functions for files */
-var downloadFileXXX = function(episode, mimeType, onDownloadCallback) {
-    "use strict";
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', episode.mediaUrl, true);
-    xhr.responseType = 'arraybuffer';
-    xhr.timeout = downloadTimeout;
-    xhr.addEventListener("progress", function(event) {
-        progressHandler(event, 'Download', episode);
-    }, false);
-    xhr.addEventListener("abort", logHandler, false);
-    xhr.addEventListener("error", function() {
-        logHandler('Direct download failed. Try proxy: ' + localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl), 'warning');
-        var xhrProxy = new XMLHttpRequest();
-        xhrProxy.open('GET', localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl), true);
-        xhrProxy.responseType = 'arraybuffer';
-        xhrProxy.timeout = downloadTimeout;
-        xhrProxy.addEventListener("progress", function(event) {
-            progressHandler(event, 'Download', episode);
-        }, false);
-        xhrProxy.addEventListener("abort", logHandler, false);
-        xhrProxy.addEventListener("error", errorHandler, false);
-        xhrProxy.onload = function() {
-            if (this.status === 200) {
-                logHandler('Download of file "' + episode.mediaUrl + '" via proxy is finished', 'debug');
-                POD.storage.saveFile(episode, xhrProxy.response, mimeType);
-            } else {
-                logHandler('Error Downloading file "' + episode.mediaUrl + '" via proxy: ' + this.statusText + ' (' + this.status + ')', 'error');
-            }
-        };
-        xhrProxy.ontimeout = function() {
-            logHandler("Timeout after " + (xhrProxy.timeout / 60000) + " minutes.", "error");
-        };
-        xhrProxy.send(null);
-    }, false);
-    xhr.onload = function() {
-        if (this.status === 200) {
-            logHandler('Download of file "' + episode.mediaUrl + '" is finished', 'debug');
-            POD.storage.saveFile(episode, xhr.response, mimeType, onDownloadCallback);
-        } else {
-            logHandler('Error Downloading file "' + episode.mediaUrl + '": ' + this.statusText + ' (' + this.status + ')', 'error');
-        }
-    };
-    xhr.ontimeout = function() {
-        logHandler("Timeout after " + (xhr.timeout / 60000) + " minutes.", "error");
-    };
-    xhr.send(null);
-};
-
 /** Functions for Sources/Feeds */
 var readSource = function(sourceUri) {
     "use strict";
@@ -540,7 +491,7 @@ var playEpisode = function(episode, onPlaybackStartedCallback) {
 };
 
 var POD = {
-    version: "Alpha 0.14.9",
+    version: "Alpha 0.14.10",
     storage: {
         indexedDbStorage: {
             settings: {
@@ -687,7 +638,8 @@ var POD = {
                                 progressHandler(event, 'Write', episode);
                             };
                             writer.onwriteend = function() { //success
-                                episode.offlineMediaUrl = fileEntry.toURL();
+                                episode.isFileSavedOffline = true;
+								episode.offlineMediaUrl = fileEntry.toURL();
                                 writeEpisode(episode);
                                 logHandler('Saving file "' + episode.mediaUrl + '" to local file system finished', 'info');
                                 if (onWriteCallback && typeof onWriteCallback === 'function') {
@@ -708,6 +660,7 @@ var POD = {
                     fileEntry.remove(function() { //success
                         var url;
                         url = episode.offlineMediaUrl;
+						episode.isFileSavedOffline = false;
                         episode.offlineMediaUrl = undefined;
                         writeEpisode(episode);
                         logHandler('Deleting file "' + url + '" finished', 'info');
