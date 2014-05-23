@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html>
+<html manifest="cache-manifest.manifest">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -8,22 +8,48 @@
         <meta name="description" content="A HTML5 podcast player!">
         <meta name="viewport" content="width=device-width">
 
-        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-
-        <!--<link rel="stylesheet" href="css/normalize.css">
-        <link rel="stylesheet" href="css/main.css">-->
-        <!--<script src="js/vendor/modernizr-2.6.2.min.js"></script>-->
+		<script src="scripts/jquery-2.1.0.min.js"></script>
+		<script>
+		$(document).ready(function() {
+			"use strict";
+			
+			//test file system api
+			var infoFileSystemAPI = document.getElementById("SupportFilesystemAPI");
+			if (window.requestFileSystem && window.URL) {
+				infoFileSystemAPI.innerHTML = "Your browser does support the HTML5 filesystem API."
+			}
+			else {
+				infoFileSystemAPI.innerHTML = "Your browser <strong>does not</strong> support the HTML5 filesystem API."
+			}
+			
+			//event handler for key settings
+			$('#previousTrackKey1, #nextTrackKey1, #playTrackKey1').on('keydown', function(event){
+				$(this).val(event.keyCode || event.key);
+			});
+		});
+		</script>
     </head>
     <body>
-		<p id="SupportFilesystemAPI" class="message" style="display:none">Your Browser don't supports HTML 5 Filesystem API</p>
+		<h2>Supported API's</h2>
+		<p id="SupportFilesystemAPI" class="message">?</p>
 
+		<h2>Key Settings</h2>
+		<form>
+			<label for="previousTrackKey1">Previous Track</label>
+			<input id="previousTrackKey1" placeholder="press key for previous track" /><br />
+			<label for="nextTrackKey1">Next Track</label>
+			<input id="nextTrackKey1" placeholder="press key for next track" /><br />
+			<label for="playTrackKey1">Play/Stop Track</label>
+			<input id="playTrackKey1" placeholder="press key for start/stop" /><br />
+		</form>
+		
 		<p><a href="#" onclick="showFileSystemEntries(); return false;">List Files</a></p>
 		<p><a href="#" onclick="deleteFileSystemEntries(); return false;">Delete Files</a></p>
 		<ul id="filelist"></ul>
 
 		<h2>Test MP3-Playback</h2>
 		<audio controls="controls">
-		   <source src="http://workingdraft.de/podpress_trac/web/1/0/Revision1_-Sencha-Animator-Webfernsehen-und-Firesheep.mp3" type='audio/mpeg; codecs="mp3"'>
+		   <source src="http://workingdraft.de/podpress_trac/web/1/0/Revision1_-Sencha-Animator-Webfernsehen-und-Firesheep.mp3" type='audio/mpeg; codecs="mp3"' />
 		</audio>
 		
 		<h2>Application Cache</h2>
@@ -110,12 +136,7 @@
 			  xhr.send(null);
 			};
 
-			if (window.requestFileSystem && window.URL) {
-			  //downloadImage('zwerg.png', 'image/png');
-			}
-			else {
-				document.getElementById("SupportFilesystemAPI");
-			}
+			
 
 			//List Content
 			function toArray(list) {
@@ -218,7 +239,6 @@
 					}, onError);
 				}, onError);
 			}
-			
 		</script>
 </body>
 </html>

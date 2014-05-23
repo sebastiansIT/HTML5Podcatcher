@@ -604,9 +604,9 @@ var POD = {
                         request = store.get(episode.mediaUrl);
                         // Erfolgs-Event
                         request.onsuccess = function(event) {
-                            var objectUrl, file;
-                            file = event.target.result;
-                            objectUrl = window.URL.createObjectURL(file);
+                            var objectUrl, blob;
+                            blob = event.target.result;
+                            objectUrl = window.URL.createObjectURL(blob);
                             episode.offlineMediaUrl = objectUrl;
                             if (onReadCallback && typeof onReadCallback === 'function') {
                                 onReadCallback(episode);
@@ -871,7 +871,7 @@ $(document).ready(function() {
         var audioTag = $('#player audio')[0];
         audioTag.currentTime = Math.min(audioTag.duration, audioTag.currentTime + 10);
     });
-    //Playlist UI Events
+	//Playlist UI Events
     $('#playlist').on('click', 'li', function(event) {
         event.preventDefault();
         event.stopPropagation();
