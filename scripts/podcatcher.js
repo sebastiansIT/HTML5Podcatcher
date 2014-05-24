@@ -491,7 +491,7 @@ var playEpisode = function(episode, onPlaybackStartedCallback) {
 };
 
 var POD = {
-    version: "Alpha 0.14.10",
+    version: "Alpha 0.15.0",
     storage: {
         indexedDbStorage: {
             settings: {
@@ -520,8 +520,8 @@ var POD = {
             saveFile: function(episode, arraybuffer, mimeType, onWriteCallback) {
                 "use strict";
                 logHandler('Saving file "' + episode.mediaUrl + '" to IndexedDB starts now', 'debug');
-                var blob, request;
-                blob = new Blob([arraybuffer], {type: mimeType});
+                var /*blob,*/ request;
+                //blob = new Blob([arraybuffer], {type: mimeType});
                 request = window.indexedDB.open(this.settings.name, this.settings.version);
                 request.onupgradeneeded = this.updateIndexedDB;
                 request.onblocked = function() {
@@ -533,10 +533,11 @@ var POD = {
                     db = this.result;
                     transaction = db.transaction([POD.storage.indexedDbStorage.settings.filesStore], 'readwrite');
                     store = transaction.objectStore(POD.storage.indexedDbStorage.settings.filesStore);
-                    request = store.put(blob, episode.mediaUrl);
+                    request = store.put(arraybuffer, episode.mediaUrl);
                     // Erfolgs-Event
                     request.onsuccess = function() {
                         episode.isFileSavedOffline = true;
+                        episode.FileMimeType = mimeType;
                         writeEpisode(episode);
                         logHandler('Saving file "' + episode.mediaUrl + '" to IndexedDB finished', 'info');
                         if (onWriteCallback && typeof onWriteCallback === 'function') {
@@ -605,7 +606,7 @@ var POD = {
                         // Erfolgs-Event
                         request.onsuccess = function(event) {
                             var objectUrl, blob;
-                            blob = event.target.result;
+                            blob = new Blob([event.target.result], {type: episode.FileMimeType});
                             objectUrl = window.URL.createObjectURL(blob);
                             episode.offlineMediaUrl = objectUrl;
                             if (onReadCallback && typeof onReadCallback === 'function') {
@@ -639,7 +640,7 @@ var POD = {
                             };
                             writer.onwriteend = function() { //success
                                 episode.isFileSavedOffline = true;
-								episode.offlineMediaUrl = fileEntry.toURL();
+                                episode.offlineMediaUrl = fileEntry.toURL();
                                 writeEpisode(episode);
                                 logHandler('Saving file "' + episode.mediaUrl + '" to local file system finished', 'info');
                                 if (onWriteCallback && typeof onWriteCallback === 'function') {
@@ -660,7 +661,7 @@ var POD = {
                     fileEntry.remove(function() { //success
                         var url;
                         url = episode.offlineMediaUrl;
-						episode.isFileSavedOffline = false;
+                        episode.isFileSavedOffline = false;
                         episode.offlineMediaUrl = undefined;
                         writeEpisode(episode);
                         logHandler('Deleting file "' + url + '" finished', 'info');
@@ -871,7 +872,7 @@ $(document).ready(function() {
         var audioTag = $('#player audio')[0];
         audioTag.currentTime = Math.min(audioTag.duration, audioTag.currentTime + 10);
     });
-	//Playlist UI Events
+    //Playlist UI Events
     $('#playlist').on('click', 'li', function(event) {
         event.preventDefault();
         event.stopPropagation();
@@ -955,12 +956,13 @@ $(document).ready(function() {
     $('#sources').on('click', '.deleteSource', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        var source, i;
+        var source, i, removeFunction;
+        removeFunction = function(element) { $(element).remove(); };
         source = readSource($(this).closest('li').data('sourceuri'));
         deleteSource(source);
         for (i = 0; i < $('#sources .entries li').length; i++) {
             if ($($('#sources .entries li')[i]).data('sourceuri') === source.uri) {
-                $($('#sources .entries li')[i]).slideUp(400, function() { $(this).remove(); });
+                $($('#sources .entries li')[i]).slideUp(400, removeFunction(this));
                 break;
             }
         }

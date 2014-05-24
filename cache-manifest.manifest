@@ -53,6 +53,8 @@
 ### Fixed a Bug: missing callback call in POD.web.downloadFile()
 ## 0.14.10
 ### Fixed a Bug: set download flag when file system API used
+##0.15.0
+### Changed indexedDbStorage.saveFile(): It saves now a ArrayBuffer instead of a BLOB.
 
 
 CACHE:
