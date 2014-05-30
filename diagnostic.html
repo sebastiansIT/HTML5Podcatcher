@@ -43,8 +43,9 @@
 			<input id="playTrackKey1" placeholder="press key for start/stop" /><br />
 		</form>
 		
-		<p><a href="#" onclick="showFileSystemEntries(); return false;">List Files</a></p>
-		<p><a href="#" onclick="deleteFileSystemEntries(); return false;">Delete Files</a></p>
+		<p><a href="#" onclick="showFileSystemEntries(); return false;">List Files (File System API)</a></p>
+		<p><a href="#" onclick="showIndexedDBEntries(); return false;">List Files (Indexed Database API)</a></p>
+		<p><a href="#" onclick="deleteFileSystemEntries(); return false;">Delete Files (File System API)</a></p>
 		<ul id="filelist"></ul>
 
 		<h2>Test MP3-Playback</h2>
@@ -218,6 +219,30 @@
 				window.requestFileSystem(window.PERSISTENT, 1024*1024*500, onDeleteFs, onError);
 			}
 
+			function showIndexDbEntries(element) {
+				event.preventDefault();
+				event.stopPropagation();
+				var request;
+				request = window.indexedDB.open('HTML5Podcatcher', 4.0);
+				request.onblocked = function() { logHandler("Database blocked", 'debug'); };
+				request.onsuccess = function () {
+					var db, transaction, store, cursorRequest;
+					db = this.result;
+					transaction = db.transaction(['files'], 'readonly');
+					store = transaction.objectStore('files');
+					cursorRequest = store.openCursor();
+					cursorRequest.onsuccess = function(event) {
+						var result = event.target.result;
+						if (result) {
+							$(element).append('<li>' + result.key + '</li>');
+							result.continue();
+						} else {
+							logHandler("No more Files in there");
+						}
+					};
+				};
+			})
+			
 			function saveZwerg() {
 				downloadImage('zwerg.png', 'image/png');
 			}

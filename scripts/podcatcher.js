@@ -491,7 +491,13 @@ var playEpisode = function(episode, onPlaybackStartedCallback) {
 };
 
 var POD = {
-    version: "Alpha 0.15.0",
+    version: "Alpha 0.16.0",
+    // Episode: function(data) {
+        // "use strict";
+        // data = JSON.parse(data);
+        // this.uri = data.uri;
+        // this.files = data.files || [];
+    // },
     storage: {
         indexedDbStorage: {
             settings: {
@@ -620,6 +626,10 @@ var POD = {
                     request.onerror = function () {
                         logHandler("Error creating/accessing IndexedDB database", 'error');
                     };
+                } else {
+                    if (onReadCallback && typeof onReadCallback === 'function') {
+                        onReadCallback(episode);
+                    }
                 }
             }
         },//end IndexedDbStorage
@@ -688,33 +698,46 @@ var POD = {
                 }
             }
         },//end FileSystemStorage
-        isFileStorageAvailable: function() {
+        //File Storage
+        openFile: function(episode, onReadCallback) {
             "use strict";
-            return window.requestFileSystem || window.indexedDB;
+            if (episode.isFileSavedOffline) {
+                if (window.indexedDB) {
+                    this.indexedDbStorage.openFile(episode, onReadCallback);
+                } else if (window.requestFileSystem) {
+                    this.fileSystemStorage.openFile(episode, onReadCallback);
+                } else {
+                    logHandler("Missing persistent file storage", "error");
+                }
+            } else {
+                if (onReadCallback && typeof onReadCallback === 'function') {
+                    onReadCallback(episode);
+                }
+            }
         },
         saveFile: function(episode, arraybuffer, mimeType, onWriteCallback) {
             "use strict";
-            if (window.requestFileSystem) {
+            if (window.indexedDB) {
+                this.indexedDbStorage.saveFile(episode, arraybuffer, mimeType, onWriteCallback);
+            } else if (window.requestFileSystem) {
                 this.fileSystemStorage.saveFile(episode, arraybuffer, mimeType, onWriteCallback);
             } else {
-                this.indexedDbStorage.saveFile(episode, arraybuffer, mimeType, onWriteCallback);
+                logHandler("Missing persistent file storage", "error");
             }
         },
         deleteFile: function(episode, onDeleteCallback) {
             "use strict";
-            if (window.requestFileSystem) {
+            if (window.indexedDB) {
+                this.indexedDbStorage.deleteFile(episode, onDeleteCallback);
+            } else if (window.requestFileSystem) {
                 this.fileSystemStorage.deleteFile(episode, onDeleteCallback);
             } else {
-                this.indexedDbStorage.deleteFile(episode, onDeleteCallback);
+                logHandler("Missing persistent file storage", "error");
             }
         },
-        openFile: function(episode, onReadCallback) {
+        isFileStorageAvailable: function() {
             "use strict";
-            if (window.requestFileSystem) {
-                this.fileSystemStorage.openFile(episode, onReadCallback);
-            } else {
-                this.indexedDbStorage.openFile(episode, onReadCallback);
-            }
+            return window.requestFileSystem || window.indexedDB;
         }
     },
     web: {
@@ -767,7 +790,6 @@ var POD = {
         }
     }
 };
-
 var UI =  {
     renderEpisode: function(episode) {
         "use strict";
@@ -872,12 +894,31 @@ $(document).ready(function() {
         var audioTag = $('#player audio')[0];
         audioTag.currentTime = Math.min(audioTag.duration, audioTag.currentTime + 10);
     });
+    $(document).on('keydown', function(event) {
+        if (event.key === 'MediaNextTrack' || event.keyCode === 176) {
+            playEpisode(nextEpisode());
+        } else if (event.key === 'MediaPreviousTrack' || event.keyCode === 177) {
+            playEpisode(previousEpisode());
+        } else if (event.key === 'MediaPlayPause' || event.keyCode === 179) {
+            if ($('#player audio').length) {
+                if ($('#player audio')[0].paused) {
+                    $('#player audio')[0].play();
+                } else {
+                    $('#player audio')[0].pause();
+                }
+            }
+        } else if (event.key === 'MediaStop' || event.keyCode === 178) {
+            if ($('#player audio').length) {
+                $('#player audio')[0].pause();
+            }
+        }
+    });
     //Playlist UI Events
     $('#playlist').on('click', 'li', function(event) {
         event.preventDefault();
         event.stopPropagation();
         //Play episode
-        $('#player audio')[0].autoplay = true;
+        //$('#player audio')[0].autoplay = true;
         playEpisode(readEpisode($(this).data('episodeUri')));
     });
     $('#playlist').on('click', '.download', function(event) {
