@@ -64,6 +64,8 @@ body > footer.fullscreen {
 audio { width: 100%; }
 progress { width:5em; }
 
+textarea { width:100%; height: 10em; }
+
 .entries { 
 	list-style: none; 
 	padding:0;

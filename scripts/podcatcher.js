@@ -491,7 +491,7 @@ var playEpisode = function(episode, onPlaybackStartedCallback) {
 };
 
 var POD = {
-    version: "Alpha 0.16.0",
+    version: "Alpha 0.16.1",
     // Episode: function(data) {
         // "use strict";
         // data = JSON.parse(data);

@@ -61,6 +61,8 @@
 ## 0.15.3
 ## 0.16.0
 ### Added Key-Events for Multimedia-Keys (Next Track, Previous Track, Play, Pause, Stop)
+## 0.16.1
+### Removed inline styles
 
 CACHE:
 ./podcatcher.html
