@@ -491,7 +491,13 @@ var playEpisode = function(episode, onPlaybackStartedCallback) {
 };
 
 var POD = {
-    version: "Alpha 0.14.10",
+    version: "Alpha 0.16.0",
+    // Episode: function(data) {
+        // "use strict";
+        // data = JSON.parse(data);
+        // this.uri = data.uri;
+        // this.files = data.files || [];
+    // },
     storage: {
         indexedDbStorage: {
             settings: {
@@ -520,8 +526,8 @@ var POD = {
             saveFile: function(episode, arraybuffer, mimeType, onWriteCallback) {
                 "use strict";
                 logHandler('Saving file "' + episode.mediaUrl + '" to IndexedDB starts now', 'debug');
-                var blob, request;
-                blob = new Blob([arraybuffer], {type: mimeType});
+                var /*blob,*/ request;
+                //blob = new Blob([arraybuffer], {type: mimeType});
                 request = window.indexedDB.open(this.settings.name, this.settings.version);
                 request.onupgradeneeded = this.updateIndexedDB;
                 request.onblocked = function() {
@@ -533,10 +539,11 @@ var POD = {
                     db = this.result;
                     transaction = db.transaction([POD.storage.indexedDbStorage.settings.filesStore], 'readwrite');
                     store = transaction.objectStore(POD.storage.indexedDbStorage.settings.filesStore);
-                    request = store.put(blob, episode.mediaUrl);
+                    request = store.put(arraybuffer, episode.mediaUrl);
                     // Erfolgs-Event
                     request.onsuccess = function() {
                         episode.isFileSavedOffline = true;
+                        episode.FileMimeType = mimeType;
                         writeEpisode(episode);
                         logHandler('Saving file "' + episode.mediaUrl + '" to IndexedDB finished', 'info');
                         if (onWriteCallback && typeof onWriteCallback === 'function') {
@@ -604,9 +611,9 @@ var POD = {
                         request = store.get(episode.mediaUrl);
                         // Erfolgs-Event
                         request.onsuccess = function(event) {
-                            var objectUrl, file;
-                            file = event.target.result;
-                            objectUrl = window.URL.createObjectURL(file);
+                            var objectUrl, blob;
+                            blob = new Blob([event.target.result], {type: episode.FileMimeType});
+                            objectUrl = window.URL.createObjectURL(blob);
                             episode.offlineMediaUrl = objectUrl;
                             if (onReadCallback && typeof onReadCallback === 'function') {
                                 onReadCallback(episode);
@@ -619,6 +626,10 @@ var POD = {
                     request.onerror = function () {
                         logHandler("Error creating/accessing IndexedDB database", 'error');
                     };
+                } else {
+                    if (onReadCallback && typeof onReadCallback === 'function') {
+                        onReadCallback(episode);
+                    }
                 }
             }
         },//end IndexedDbStorage
@@ -639,7 +650,7 @@ var POD = {
                             };
                             writer.onwriteend = function() { //success
                                 episode.isFileSavedOffline = true;
-								episode.offlineMediaUrl = fileEntry.toURL();
+                                episode.offlineMediaUrl = fileEntry.toURL();
                                 writeEpisode(episode);
                                 logHandler('Saving file "' + episode.mediaUrl + '" to local file system finished', 'info');
                                 if (onWriteCallback && typeof onWriteCallback === 'function') {
@@ -660,7 +671,7 @@ var POD = {
                     fileEntry.remove(function() { //success
                         var url;
                         url = episode.offlineMediaUrl;
-						episode.isFileSavedOffline = false;
+                        episode.isFileSavedOffline = false;
                         episode.offlineMediaUrl = undefined;
                         writeEpisode(episode);
                         logHandler('Deleting file "' + url + '" finished', 'info');
@@ -687,33 +698,46 @@ var POD = {
                 }
             }
         },//end FileSystemStorage
-        isFileStorageAvailable: function() {
+        //File Storage
+        openFile: function(episode, onReadCallback) {
             "use strict";
-            return window.requestFileSystem || window.indexedDB;
+            if (episode.isFileSavedOffline) {
+                if (window.indexedDB) {
+                    this.indexedDbStorage.openFile(episode, onReadCallback);
+                } else if (window.requestFileSystem) {
+                    this.fileSystemStorage.openFile(episode, onReadCallback);
+                } else {
+                    logHandler("Missing persistent file storage", "error");
+                }
+            } else {
+                if (onReadCallback && typeof onReadCallback === 'function') {
+                    onReadCallback(episode);
+                }
+            }
         },
         saveFile: function(episode, arraybuffer, mimeType, onWriteCallback) {
             "use strict";
-            if (window.requestFileSystem) {
+            if (window.indexedDB) {
+                this.indexedDbStorage.saveFile(episode, arraybuffer, mimeType, onWriteCallback);
+            } else if (window.requestFileSystem) {
                 this.fileSystemStorage.saveFile(episode, arraybuffer, mimeType, onWriteCallback);
             } else {
-                this.indexedDbStorage.saveFile(episode, arraybuffer, mimeType, onWriteCallback);
+                logHandler("Missing persistent file storage", "error");
             }
         },
         deleteFile: function(episode, onDeleteCallback) {
             "use strict";
-            if (window.requestFileSystem) {
+            if (window.indexedDB) {
+                this.indexedDbStorage.deleteFile(episode, onDeleteCallback);
+            } else if (window.requestFileSystem) {
                 this.fileSystemStorage.deleteFile(episode, onDeleteCallback);
             } else {
-                this.indexedDbStorage.deleteFile(episode, onDeleteCallback);
+                logHandler("Missing persistent file storage", "error");
             }
         },
-        openFile: function(episode, onReadCallback) {
+        isFileStorageAvailable: function() {
             "use strict";
-            if (window.requestFileSystem) {
-                this.fileSystemStorage.openFile(episode, onReadCallback);
-            } else {
-                this.indexedDbStorage.openFile(episode, onReadCallback);
-            }
+            return window.requestFileSystem || window.indexedDB;
         }
     },
     web: {
@@ -766,7 +790,6 @@ var POD = {
         }
     }
 };
-
 var UI =  {
     renderEpisode: function(episode) {
         "use strict";
@@ -871,12 +894,31 @@ $(document).ready(function() {
         var audioTag = $('#player audio')[0];
         audioTag.currentTime = Math.min(audioTag.duration, audioTag.currentTime + 10);
     });
+    $(document).on('keydown', function(event) {
+        if (event.key === 'MediaNextTrack' || event.keyCode === 176) {
+            playEpisode(nextEpisode());
+        } else if (event.key === 'MediaPreviousTrack' || event.keyCode === 177) {
+            playEpisode(previousEpisode());
+        } else if (event.key === 'MediaPlayPause' || event.keyCode === 179) {
+            if ($('#player audio').length) {
+                if ($('#player audio')[0].paused) {
+                    $('#player audio')[0].play();
+                } else {
+                    $('#player audio')[0].pause();
+                }
+            }
+        } else if (event.key === 'MediaStop' || event.keyCode === 178) {
+            if ($('#player audio').length) {
+                $('#player audio')[0].pause();
+            }
+        }
+    });
     //Playlist UI Events
     $('#playlist').on('click', 'li', function(event) {
         event.preventDefault();
         event.stopPropagation();
         //Play episode
-        $('#player audio')[0].autoplay = true;
+        //$('#player audio')[0].autoplay = true;
         playEpisode(readEpisode($(this).data('episodeUri')));
     });
     $('#playlist').on('click', '.download', function(event) {
@@ -955,12 +997,13 @@ $(document).ready(function() {
     $('#sources').on('click', '.deleteSource', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        var source, i;
+        var source, i, removeFunction;
+        removeFunction = function(element) { $(element).remove(); };
         source = readSource($(this).closest('li').data('sourceuri'));
         deleteSource(source);
         for (i = 0; i < $('#sources .entries li').length; i++) {
             if ($($('#sources .entries li')[i]).data('sourceuri') === source.uri) {
-                $($('#sources .entries li')[i]).slideUp(400, function() { $(this).remove(); });
+                $($('#sources .entries li')[i]).slideUp(400, removeFunction(this));
                 break;
             }
         }
