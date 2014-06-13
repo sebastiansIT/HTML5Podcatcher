@@ -1,15 +1,19 @@
 ﻿{
 	"name": "HTML5 Podcatcher",
 	"description": "A Podctacher based on HTML5 and Javascript",
-	"launch_path": "/podcatcher.html",
-	"appcache_path": "/cache-manifest.manifest", 
-	"icons": {},
+	"version": "0.15.0",
+	"launch_path": "/podcatcher/podcatcher.html",
+	"appcache_path": "/podcatcher/cache-manifest.manifest", 
+	"icons": {
+		"60": "/podcatcher/img/logo60.png",
+		"128": "/podcatcher/img/logo128.png"
+	},
 	"default_locale": "en",
 	"chrome": {
 		"navigation": true
 	},
 	"developer": {
-		"name": "SebastiansIT"
-		"url: "http://human-injection.de"
+		"name": "SebastiansIT",
+		"url": "http://human-injection.de"
 	}
 }

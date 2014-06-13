@@ -1,3 +1,4 @@
 AddType text/cache-manifest manifest
+AddType application/x-web-app-manifest+json .webapp
 
 Header set Content-Security-Policy "default-src 'self'; script-src 'self' code.jquery.com; connect-src *; media-src *; style-src 'self'; img-src *"
