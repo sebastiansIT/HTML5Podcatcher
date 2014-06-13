@@ -63,9 +63,14 @@
 ### Added Key-Events for Multimedia-Keys (Next Track, Previous Track, Play, Pause, Stop)
 ## 0.16.1
 ### Removed inline styles
+## 0.16.2
+### Extends functionality of multimedia keys: add a fast forward when "next track" is hold more then 1 second and jump to start of current track instead of previous track when current playback time is greater than 10 seconds.
+## 0.16.3
+### File system API is back to highest Priority on Chromium (because IndexedDB + ObjectURL dosn't work) and Indexed DB stores blobs, not Arraybuffer, again
 
 CACHE:
 ./podcatcher.html
+./favicon.ico
 ./scripts/jquery-2.1.0.min.js
 ./scripts/podcatcher.js
 ./css/main.css

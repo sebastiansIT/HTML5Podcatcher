@@ -491,7 +491,7 @@ var playEpisode = function(episode, onPlaybackStartedCallback) {
 };
 
 var POD = {
-    version: "Alpha 0.16.1",
+    version: "Alpha 0.16.3",
     // Episode: function(data) {
         // "use strict";
         // data = JSON.parse(data);
@@ -526,8 +526,8 @@ var POD = {
             saveFile: function(episode, arraybuffer, mimeType, onWriteCallback) {
                 "use strict";
                 logHandler('Saving file "' + episode.mediaUrl + '" to IndexedDB starts now', 'debug');
-                var /*blob,*/ request;
-                //blob = new Blob([arraybuffer], {type: mimeType});
+                var blob, request;
+                blob = new Blob([arraybuffer], {type: mimeType});
                 request = window.indexedDB.open(this.settings.name, this.settings.version);
                 request.onupgradeneeded = this.updateIndexedDB;
                 request.onblocked = function() {
@@ -539,7 +539,7 @@ var POD = {
                     db = this.result;
                     transaction = db.transaction([POD.storage.indexedDbStorage.settings.filesStore], 'readwrite');
                     store = transaction.objectStore(POD.storage.indexedDbStorage.settings.filesStore);
-                    request = store.put(arraybuffer, episode.mediaUrl);
+                    request = store.put(blob, episode.mediaUrl);/*arraybuffer*/
                     // Erfolgs-Event
                     request.onsuccess = function() {
                         episode.isFileSavedOffline = true;
@@ -612,7 +612,8 @@ var POD = {
                         // Erfolgs-Event
                         request.onsuccess = function(event) {
                             var objectUrl, blob;
-                            blob = new Blob([event.target.result], {type: episode.FileMimeType});
+                            //blob = new Blob([event.target.result], {type: episode.FileMimeType});
+                            blob = event.target.result;
                             objectUrl = window.URL.createObjectURL(blob);
                             episode.offlineMediaUrl = objectUrl;
                             if (onReadCallback && typeof onReadCallback === 'function') {
@@ -702,10 +703,10 @@ var POD = {
         openFile: function(episode, onReadCallback) {
             "use strict";
             if (episode.isFileSavedOffline) {
-                if (window.indexedDB) {
-                    this.indexedDbStorage.openFile(episode, onReadCallback);
-                } else if (window.requestFileSystem) {
+                if (window.requestFileSystem) {
                     this.fileSystemStorage.openFile(episode, onReadCallback);
+                } else if (window.indexedDB) {
+                    this.indexedDbStorage.openFile(episode, onReadCallback);
                 } else {
                     logHandler("Missing persistent file storage", "error");
                 }
@@ -717,20 +718,20 @@ var POD = {
         },
         saveFile: function(episode, arraybuffer, mimeType, onWriteCallback) {
             "use strict";
-            if (window.indexedDB) {
-                this.indexedDbStorage.saveFile(episode, arraybuffer, mimeType, onWriteCallback);
-            } else if (window.requestFileSystem) {
+            if (window.requestFileSystem) {
                 this.fileSystemStorage.saveFile(episode, arraybuffer, mimeType, onWriteCallback);
+            } else if (window.indexedDB) {
+                this.indexedDbStorage.saveFile(episode, arraybuffer, mimeType, onWriteCallback);
             } else {
                 logHandler("Missing persistent file storage", "error");
             }
         },
         deleteFile: function(episode, onDeleteCallback) {
             "use strict";
-            if (window.indexedDB) {
-                this.indexedDbStorage.deleteFile(episode, onDeleteCallback);
-            } else if (window.requestFileSystem) {
+            if (window.requestFileSystem) {
                 this.fileSystemStorage.deleteFile(episode, onDeleteCallback);
+            } else if (window.indexedDB) {
+                this.indexedDbStorage.deleteFile(episode, onDeleteCallback);
             } else {
                 logHandler("Missing persistent file storage", "error");
             }
@@ -837,7 +838,7 @@ var UI =  {
 $(document).ready(function() {
     "use strict";
     //Update local storage to actual version of key-names (changed "track" to "episode")
-    var k, quota;
+    var k, quota, multiMediaKeyDownTimestemp;
     for (k = 0; k < localStorage.length; k++) {
         if (localStorage.key(k).slice(0, 6) === 'track.') {
             localStorage.setItem(localStorage.key(k).replace('track.', 'episode.'), localStorage.getItem(localStorage.key(k)));
@@ -896,9 +897,32 @@ $(document).ready(function() {
     });
     $(document).on('keydown', function(event) {
         if (event.key === 'MediaNextTrack' || event.keyCode === 176) {
-            playEpisode(nextEpisode());
+            var now = new Date();
+            if (!multiMediaKeyDownTimestemp) {
+                multiMediaKeyDownTimestemp = new Date();
+            } else if (now - multiMediaKeyDownTimestemp >= 1000) {
+                if ($('#player audio').length && $('#player audio')[0].playbackRate === 1) {
+                    $('#player audio')[0].playbackRate = 2;
+                }
+            }
+        }
+    });
+    $(document).on('keyup', function(event) {
+        if (event.key === 'MediaNextTrack' || event.keyCode === 176) {
+            var now = new Date();
+            if (now - multiMediaKeyDownTimestemp < 1000) {
+                playEpisode(nextEpisode());
+            } else {
+                if ($('#player audio').length && $('#player audio')[0].playbackRate !== 1) {
+                    $('#player audio')[0].playbackRate = 1;
+                }
+            }
         } else if (event.key === 'MediaPreviousTrack' || event.keyCode === 177) {
-            playEpisode(previousEpisode());
+            if ($('#player audio').length && $('#player audio')[0].currentTime >= 10) {
+                $('#player audio')[0].currentTime = 0;
+            } else {
+                playEpisode(previousEpisode());
+            }
         } else if (event.key === 'MediaPlayPause' || event.keyCode === 179) {
             if ($('#player audio').length) {
                 if ($('#player audio')[0].paused) {
@@ -912,6 +936,7 @@ $(document).ready(function() {
                 $('#player audio')[0].pause();
             }
         }
+        multiMediaKeyDownTimestemp = undefined;
     });
     //Playlist UI Events
     $('#playlist').on('click', 'li', function(event) {
