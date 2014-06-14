@@ -180,25 +180,29 @@ function openFile(episode, onReadCallback) {
 }
 function saveFile(episode, blob, onWriteCallback) {
     "use strict";
-var request;
-request = window.indexedDB.open('HTML5PodcatcherPrototyp', 5.0);
-request.onupgradeneeded = updateIndexedDB;
-request.onsuccess = function () {
-	var db, transaction, store, request;
-	db = this.result;
-	transaction = db.transaction(['Files'], 'readwrite');
-	store = transaction.objectStore('Files');
-	request = store.put(blob, episode.mediaUrl);
-	request.onsuccess = function() {
-		episode.isFileSavedOffline = true;
-		writeEpisode(episode);
-		if (onWriteCallback && typeof onWriteCallback === 'function') {
-			onWriteCallback(episode);
-		}
-	};
-	request.onerror = function(event) { errorHandler(event); };
-};
-request.onerror = function(event) { errorHandler(event); };
+    var request;
+    request = window.indexedDB.open('HTML5PodcatcherPrototyp', 5.0);
+    request.onupgradeneeded = updateIndexedDB;
+    request.onsuccess = function () {
+        var db, transaction, store, request;
+        db = this.result;
+        transaction = db.transaction(['Files'], 'readwrite');
+        store = transaction.objectStore('Files');
+        request = store.put(blob, episode.mediaUrl);
+        request.onsuccess = function() {
+            episode.isFileSavedOffline = true;
+            writeEpisode(episode);
+            if (onWriteCallback && typeof onWriteCallback === 'function') {
+                onWriteCallback(episode);
+            }
+        };
+        request.onerror = function(event) { 
+            logHandler(event.target.error.name + ' saving file "' + episode.mediaUrl + '" to IndexedDB (' + event.target.error.message + ')', 'error');
+        };
+    };
+    request.onerror = function(event) { 
+        logHandler(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error'); 
+    };
 }
 var deleteFile = function(episode, onDeleteCallback) {
     "use strict";
@@ -227,11 +231,11 @@ var deleteFile = function(episode, onDeleteCallback) {
             }
         };
         request.onerror = function (event) {
-            logHandler('Error deleting file "' + episode.mediaUrl + '" from IndexedDB (' + event + ')', 'error');
+            logHandler(event.target.error.name + ' deleting file "' + episode.mediaUrl + '" from IndexedDB (' + event.target.error.message + ')', 'error');
         };
     };
     request.onerror = function () {
-        logHandler("Error creating/accessing IndexedDB database", 'error');
+        logHandler(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error'); 
     };
 };
 var downloadFile = function(episode, mimeType, onDownloadCallback) {

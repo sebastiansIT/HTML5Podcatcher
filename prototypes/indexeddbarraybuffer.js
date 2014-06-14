@@ -173,9 +173,13 @@ function openFile(episode, onReadCallback) {
                     onReadCallback(episode);
                 }
             };
-            request.onerror = function(event) { errorHandler(event); };
+            request.onerror = function(event) { 
+                errorHandler(event); 
+            };
         };
-        request.onerror = function(event) { errorHandler(event); };
+        request.onerror = function(event) { 
+            errorHandler(event); 
+        };
     }
 }
 function saveFile(episode, arraybuffer, onWriteCallback) {
@@ -196,9 +200,13 @@ function saveFile(episode, arraybuffer, onWriteCallback) {
                 onWriteCallback(episode);
             }
         };
-        request.onerror = function(event) { errorHandler(event); };
+        request.onerror = function(event) { 
+            logHandler(event.target.error.name + ' while saving file "' + episode.mediaUrl + '" to IndexedDB (' + event.target.error.message + ')', 'error');
+        };
     };
-    request.onerror = function(event) { errorHandler(event); };
+    request.onerror = function(event) { 
+        logHandler(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error'); 
+    };
 }
 var deleteFile = function(episode, onDeleteCallback) {
     "use strict";
@@ -227,11 +235,11 @@ var deleteFile = function(episode, onDeleteCallback) {
             }
         };
         request.onerror = function (event) {
-            logHandler('Error deleting file "' + episode.mediaUrl + '" from IndexedDB (' + event + ')', 'error');
+            logHandler(event.target.error.name + ' deleting file "' + episode.mediaUrl + '" from IndexedDB (' + event.target.error.message + ')', 'error');
         };
     };
     request.onerror = function () {
-        logHandler("Error creating/accessing IndexedDB database", 'error');
+        logHandler(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
     };
 };
 var downloadFile = function(episode, mimeType, onDownloadCallback) {

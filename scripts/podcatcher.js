@@ -551,11 +551,11 @@ var POD = {
                         }
                     };
                     request.onerror = function (event) {
-                        logHandler('Error saving file "' + episode.mediaUrl + '" to IndexedDB (' + event + ')', 'error');
+                        logHandler(event.target.error.name + ' while saving file "' + episode.mediaUrl + '" to IndexedDB (' + event.target.error.message + ')', 'error');
                     };
                 };
                 request.onerror = function () {
-                    logHandler("Error creating/accessing IndexedDB database", 'error');
+                    logHandler(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error'); 
                 };
             },
             deleteFile: function(episode, onDeleteCallback) {
@@ -585,11 +585,11 @@ var POD = {
                         }
                     };
                     request.onerror = function (event) {
-                        logHandler('Error deleting file "' + episode.mediaUrl + '" from IndexedDB (' + event + ')', 'error');
+                        logHandler(event.target.error.name + ' while deleting file "' + episode.mediaUrl + '" from IndexedDB (' + event.target.error.message + ')', 'error');
                     };
                 };
                 request.onerror = function () {
-                    logHandler("Error creating/accessing IndexedDB database", 'error');
+                    logHandler(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error'); 
                 };
             },
             openFile: function(episode, onReadCallback) {
@@ -621,11 +621,11 @@ var POD = {
                             }
                         };
                         request.onerror = function (event) {
-                            logHandler('Error opening file "' + episode.mediaUrl + '" from IndexedDB (' + event + ')', 'error');
+                            logHandler(event.target.error.name + ' while opening file "' + episode.mediaUrl + '" from IndexedDB (' + event.target.error.message + ')', 'error');
                         };
                     };
                     request.onerror = function () {
-                        logHandler("Error creating/accessing IndexedDB database", 'error');
+                        logHandler(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error'); 
                     };
                 } else {
                     if (onReadCallback && typeof onReadCallback === 'function') {
