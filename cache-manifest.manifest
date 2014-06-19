@@ -67,6 +67,8 @@
 ### Extends functionality of multimedia keys: add a fast forward when "next track" is hold more then 1 second and jump to start of current track instead of previous track when current playback time is greater than 10 seconds.
 ## 0.16.3
 ### File system API is back to highest Priority on Chromium (because IndexedDB + ObjectURL dosn't work) and Indexed DB stores blobs, not Arraybuffer, again
+## 0.16.4
+### Refactoring all functions manipulating sources in Namespaces POD and UI; Added callback parameters to such functions
 
 CACHE:
 ./podcatcher.html
