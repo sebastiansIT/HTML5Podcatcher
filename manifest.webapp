@@ -1,16 +1,18 @@
 ﻿{
 	"name": "HTML5 Podcatcher",
 	"description": "A Podctacher based on HTML5 and Javascript",
-	"version": "0.15.0",
+	"version": "0.16.3",
+	"type": "web",
 	"launch_path": "/podcatcher/podcatcher.html",
 	"appcache_path": "/podcatcher/cache-manifest.manifest", 
 	"icons": {
+		"32": "/podcatcher/img/logo32.png",
 		"60": "/podcatcher/img/logo60.png",
 		"128": "/podcatcher/img/logo128.png"
 	},
 	"default_locale": "en",
 	"chrome": {
-		"navigation": true
+		"navigation": false
 	},
 	"developer": {
 		"name": "SebastiansIT",
