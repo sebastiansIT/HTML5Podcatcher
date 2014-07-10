@@ -25,6 +25,7 @@
 /*global localStorage */
 /*global applicationCache */
 /*global $ */
+/*global CustomEvent */
 
 // Take care of vendor prefixes.
 window.URL = window.URL || window.webkitURL;
@@ -144,7 +145,7 @@ var renderConfiguration = function() {
 };
 
 var POD = {
-    version: "Alpha 0.17.0",
+    version: "Alpha 0.17.1",
     storage: {
         indexedDbStorage: {
             settings: {
@@ -703,7 +704,12 @@ var POD = {
         writeSource: function(source, onWriteCallback) {
             "use strict";
             if (this.dataStorageEngine()) {
-                this.dataStorageEngine().writeSource(source, onWriteCallback);
+                this.dataStorageEngine().writeSource(source, function(source) {
+                    if (onWriteCallback && typeof onWriteCallback === 'function') {
+                        onWriteCallback(source);
+                    }
+                    document.dispatchEvent(new CustomEvent('writeSource', {"detail": {'source': source}}));
+                });
             }
         },
         deleteSource: function(source, onDeleteCallback) {
@@ -728,7 +734,12 @@ var POD = {
         writeEpisode: function(episode, onWriteCallback) {
             "use strict";
             if (this.dataStorageEngine()) {
-                this.dataStorageEngine().writeEpisode(episode, onWriteCallback);
+                this.dataStorageEngine().writeEpisode(episode, function(episode) {
+                    if (onWriteCallback && typeof onWriteCallback === 'function') {
+                        onWriteCallback(episode);
+                    }
+                    document.dispatchEvent(new CustomEvent('writeEpisode', {"detail": {'episode': episode}}));
+                });
             }
         },
         //File Storage
@@ -899,6 +910,7 @@ var POD = {
                 source.link = $(xml).find('channel > link').text();
                 source.title = $(xml).find('channel > title').text();
                 source.description = $(xml).find('channel > description').text();
+                POD.storage.writeSource(source);
                 //RSS-Entries
                 $(xml).find('item').each(function() {
                     var item = $(this);
@@ -916,14 +928,15 @@ var POD = {
                             } else if ($(item.find('encoded').text()).find('a[href$=".mp3"]').length > 0) {
                                 episode.mediaUrl = $(item.find('encoded').text()).find('a[href$=".mp3"]').first().attr('href');
                             }
-                            tracks.push(episode);
+                            POD.storage.writeEpisode(episode);
+                            //tracks.push(episode);
                         } else {
                             logHandler('Can\'t find episode url in datasource', 'error');
                         }
                     });
                 });
-                tracks.sort(POD.sortEpisodes);
-                tracks = tracks.slice(tracks.length - 5, tracks.length);
+                //tracks.sort(POD.sortEpisodes);
+                //tracks = tracks.slice(tracks.length - 5, tracks.length);
             }
             logHandler('Parsing source file "' + source.uri + '" finished', 'info');
             return {'source': source, 'episodes': tracks};
@@ -992,7 +1005,7 @@ var UI =  {
         "use strict";
         var entryUI, entryFunctionsUI;
         entryUI = $('<li>');
-        entryUI.data('sourceuri', source.uri);
+        entryUI.data('sourceUri', source.uri);
         entryUI.append('<h3 class="title">' + source.title + '<h3>');
         entryUI.append('<p class="description">' + source.description + '</p>');
         entryUI.append('<p class="uri"><a href="' + source.uri + '">' + source.uri + '</a></p>');
@@ -1328,19 +1341,19 @@ $(document).ready(function() {
     $('#playlist #updatePlaylist').on('click', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        var i, j, parserresult;
+        var i/*, j, parserresult*/;
         POD.storage.readSources(function(sources) {
             for (i = 0; i < sources.length; i++) {
-                parserresult = POD.web.downloadSource(sources[i]);
+                /*parserresult = */POD.web.downloadSource(sources[i]);
                 //Update source in storage
-                POD.storage.writeSource(parserresult.source);
+                //POD.storage.writeSource(parserresult.source);
                 //Save Episodes to local storage
-                for (j = 0; j < parserresult.episodes.length; j++) {
+                /*for (j = 0; j < parserresult.episodes.length; j++) {
                     //Save all Episodes in the parser result
                     POD.storage.writeEpisode(parserresult.episodes[j]);
-                }
+                }*/
             }
-            POD.storage.readPlaylist(false, UI.renderPlaylist);
+            //POD.storage.readPlaylist(false, UI.renderPlaylist);
         });
     });
     $('#playlist #showFullPlaylist').on('click', function(event) {
@@ -1348,21 +1361,36 @@ $(document).ready(function() {
         event.stopPropagation();
         POD.storage.readPlaylist(true, UI.renderPlaylist);
     });
+    document.addEventListener('writeEpisode', function(event) {
+        var i, episode, episodeUI;
+        episode = event.detail.episode;
+        episodeUI = UI.renderEpisode(episode);
+        for (i = 0; i < $('#playlist').find('.entries li').length; i++) {
+            if ($($('#playlist').find('.entries li')[i]).data('episodeUri') === episode.uri) {
+                $($('#playlist').find('.entries li')[i]).slideUp().html(episodeUI.html()).slideDown();
+                return;
+            }
+        }
+        //if not listed befor
+        episodeUI.hide();
+        $('#playlist').find('.entries').append(episodeUI);
+        episodeUI.fadeIn();
+    }, false);
     //Sources UI Events
     $('#sources').on('click', '.updateSource', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        var i, parserresult;
+        /*var i, parserresult;*/
         POD.storage.readSource($(this).attr("href"), function(source) {
-            parserresult = POD.web.downloadSource(source);
+            /*parserresult = */POD.web.downloadSource(source);
             //Update source in storage
-            POD.storage.writeSource(parserresult.source);
+            //POD.storage.writeSource(parserresult.source);
             //Save Episodes to local storage
-            for (i = 0; i < parserresult.episodes.length; i++) {
+            /*for (i = 0; i < parserresult.episodes.length; i++) {
                 //Save all Episodes in the parser result
                 POD.storage.writeEpisode(parserresult.episodes[i]);
             }
-            POD.storage.readPlaylist(false, UI.renderPlaylist);
+            POD.storage.readPlaylist(false, UI.renderPlaylist);*/
         });
     });
     $('#sources').on('click', '.deleteSource', function(event) {
@@ -1370,10 +1398,10 @@ $(document).ready(function() {
         event.stopPropagation();
         var i, removeFunction;
         removeFunction = function(element) { $(element).remove(); };
-        POD.storage.readSource($(this).closest('li').data('sourceuri'), function(source) {
+        POD.storage.readSource($(this).closest('li').data('sourceUri'), function(source) {
             POD.storage.deleteSource(source, function(source) {
                 for (i = 0; i < $('#sources .entries li').length; i++) {
-                    if ($($('#sources .entries li')[i]).data('sourceuri') === source.uri) {
+                    if ($($('#sources .entries li')[i]).data('sourceUri') === source.uri) {
                         $($('#sources .entries li')[i]).slideUp(400, removeFunction(this));
                         break;
                     }
@@ -1389,15 +1417,15 @@ $(document).ready(function() {
     $('#sources #addSourceForm').on('submit', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        var parserresult, entryUI, i;
+        var parserresult/*, entryUI, i*/;
         if ($('#addSourceUrlInput')[0].checkValidity()) {
             POD.storage.readSource($('#addSourceUrlInput').val(), function(source) {
                 parserresult = POD.web.downloadSource(source);
                 if (parserresult) {
-                    POD.storage.writeSource(parserresult.source);
+                    /*POD.storage.writeSource(parserresult.source);
                     entryUI = UI.renderSource(parserresult.source);
                     for (i = 0; i < $('#sources .entries li').length; i++) {
-                        if ($($('#sources .entries li')[i]).data('sourceuri') === parserresult.source.uri) {
+                        if ($($('#sources .entries li')[i]).data('sourceUri') === parserresult.source.uri) {
                             $($('#sources .entries li')[i]).slideUp().html(entryUI.html()).slideDown();
                             i = -1;
                             break;
@@ -1415,13 +1443,28 @@ $(document).ready(function() {
                         logHandler('Added new source "' + parserresult.source.uri + '" sucessfully', 'info');
                     } else {
                         logHandler('Adding new source "' + $('#addSourceUrlInput').val() + '" throws an error', 'info');
-                    }
+                    }*/
                 } else {
                     logHandler('Please insert a URL of a RSS/Atom feed', 'error');
                 }
             });
         }
     });
+    document.addEventListener('writeSource', function(event) {
+        var i, source, sourceUI;
+        source = event.detail.source;
+        sourceUI = UI.renderSource(source);
+        for (i = 0; i < $('#sources').find('.entries li').length; i++) {
+            if ($($('#sources').find('.entries li')[i]).data('sourceUri') === source.uri) {
+                $($('#sources').find('.entries li')[i]).slideUp().html(sourceUI.html()).slideDown();
+                return;
+            }
+        }
+        //if not listed befor
+        sourceUI.hide();
+        $('#sources').find('.entries').append(sourceUI);
+        sourceUI.fadeIn();
+    }, false);
     //Configuration UI Events
     $('#configuration #memorySizeForm').on('submit', function(event) {
         event.preventDefault();
