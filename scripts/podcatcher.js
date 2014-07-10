@@ -690,85 +690,53 @@ var POD = {
         //Source Storage
         readSource: function(sourceUri, onReadCallback) {
             "use strict";
-            if (window.indexedDB) {
-                this.indexedDbStorage.readSource(sourceUri, onReadCallback);
-            } else if (window.localStorage) {
-                this.webStorage.readSource(sourceUri, onReadCallback);
-            } else {
-                logHandler("Missing persistent storage", "error");
+            if (this.dataStorageEngine()) {
+                this.dataStorageEngine().readSource(sourceUri, onReadCallback);
             }
         },
         readSources: function(onReadCallback) {
             "use strict";
-            if (window.indexedDB) {
-                this.indexedDbStorage.readSources(onReadCallback);
-            } else if (window.localStorage) {
-                this.webStorage.readSources(onReadCallback);
-            } else {
-                logHandler("Missing persistent storage", "error");
+            if (this.dataStorageEngine()) {
+                this.dataStorageEngine().readSources(onReadCallback);
             }
         },
         writeSource: function(source, onWriteCallback) {
             "use strict";
-            if (window.indexedDB) {
-                this.indexedDbStorage.writeSource(source, onWriteCallback);
-            } else if (window.localStorage) {
-                this.webStorage.writeSource(source, onWriteCallback);
-            } else {
-                logHandler("Missing persistent storage", "error");
+            if (this.dataStorageEngine()) {
+                this.dataStorageEngine().writeSource(source, onWriteCallback);
             }
         },
         deleteSource: function(source, onDeleteCallback) {
             "use strict";
-            if (window.indexedDB) {
-                this.indexedDbStorage.deleteSources(source, onDeleteCallback);
-            } else if (window.localStorage) {
-                this.webStorage.deleteSources(source, onDeleteCallback);
-            } else {
-                logHandler("Missing persistent storage", "error");
+            if (this.dataStorageEngine()) {
+                this.dataStorageEngine().deleteSources(source, onDeleteCallback);
             }
         },
         //Episode Storage
         readEpisode: function(episodeUri, onReadCallback) {
             "use strict";
-            if (window.indexedDB) {
-                this.indexedDbStorage.readEpisode(episodeUri, onReadCallback);
-            } else if (window.localStorage) {
-                this.webStorage.readEpisode(episodeUri, onReadCallback);
-            } else {
-                logHandler("Missing persistent storage", "error");
+            if (this.dataStorageEngine()) {
+                this.dataStorageEngine().readEpisode(episodeUri, onReadCallback);
             }
         },
         readPlaylist: function(showAll, onReadCallback) {
             "use strict";
-            if (window.indexedDB) {
-                this.indexedDbStorage.readPlaylist(showAll, onReadCallback);
-            } else if (window.localStorage) {
-                this.webStorage.readPlaylist(showAll, onReadCallback);
-            } else {
-                logHandler("Missing persistent storage", "error");
+            if (this.dataStorageEngine()) {
+                this.dataStorageEngine().readPlaylist(showAll, onReadCallback);
             }
         },
         writeEpisode: function(episode, onWriteCallback) {
             "use strict";
-            if (window.indexedDB) {
-                this.indexedDbStorage.writeEpisode(episode, onWriteCallback);
-            } else if (window.localStorage) {
-                this.webStorage.writeEpisode(episode, onWriteCallback);
-            } else {
-                logHandler("Missing persistent storage", "error");
+            if (this.dataStorageEngine()) {
+                this.dataStorageEngine().writeEpisode(episode, onWriteCallback);
             }
         },
         //File Storage
         openFile: function(episode, onReadCallback) {
             "use strict";
             if (episode.isFileSavedOffline) {
-                if (window.requestFileSystem) {
-                    this.fileSystemStorage.openFile(episode, onReadCallback);
-                } else if (window.indexedDB) {
-                    this.indexedDbStorage.openFile(episode, onReadCallback);
-                } else {
-                    logHandler("Missing persistent file storage", "error");
+                if (this.fileStorageEngine()) {
+                    this.fileStorageEngine().openFile(episode, onReadCallback);
                 }
             } else {
                 if (onReadCallback && typeof onReadCallback === 'function') {
@@ -778,27 +746,40 @@ var POD = {
         },
         saveFile: function(episode, arraybuffer, mimeType, onWriteCallback) {
             "use strict";
-            if (window.requestFileSystem) {
-                this.fileSystemStorage.saveFile(episode, arraybuffer, mimeType, onWriteCallback);
-            } else if (window.indexedDB) {
-                this.indexedDbStorage.saveFile(episode, arraybuffer, mimeType, onWriteCallback);
-            } else {
-                logHandler("Missing persistent file storage", "error");
+            if (this.fileStorageEngine()) {
+                this.fileStorageEngine().saveFile(episode, arraybuffer, mimeType, onWriteCallback);
             }
         },
         deleteFile: function(episode, onDeleteCallback) {
             "use strict";
-            if (window.requestFileSystem) {
-                this.fileSystemStorage.deleteFile(episode, onDeleteCallback);
-            } else if (window.indexedDB) {
-                this.indexedDbStorage.deleteFile(episode, onDeleteCallback);
-            } else {
-                logHandler("Missing persistent file storage", "error");
+            if (this.fileStorageEngine()) {
+                this.fileStorageEngine().deleteFile(episode, onDeleteCallback);
             }
         },
         isFileStorageAvailable: function() {
             "use strict";
-            return window.requestFileSystem || window.indexedDB;
+            return this.fileStorageEngine();
+        },
+        //Storage Engine Selection
+        dataStorageEngine: function() {
+            "use strict";
+            if (window.indexedDB) {
+                return this.indexedDbStorage;
+            } else if (window.localStorage) {
+                return this.webStorage;
+            } else {
+                logHandler("Missing persistent data storage", "error");
+            }
+        },
+        fileStorageEngine: function() {
+            "use strict";
+            if (window.requestFileSystem) {
+                return this.fileSystemStorage;
+            } else if (window.indexedDB) {
+                return this.indexedDbStorage;
+            } else {
+                logHandler("Missing persistent file storage", "error");
+            }
         },
         //Migration betwean storage engines
         migradeData: function(oldStorageEngine, newStorageEngine) {
@@ -935,7 +916,7 @@ var POD = {
                             } else if ($(item.find('encoded').text()).find('a[href$=".mp3"]').length > 0) {
                                 episode.mediaUrl = $(item.find('encoded').text()).find('a[href$=".mp3"]').first().attr('href');
                             }
-							tracks.push(episode);
+                            tracks.push(episode);
                         } else {
                             logHandler('Can\'t find episode url in datasource', 'error');
                         }
