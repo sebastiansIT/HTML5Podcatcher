@@ -14,7 +14,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="New document 1">
+   sodipodi:docname="podcatcher.svg"
+   inkscape:export-filename="D:\Sebastian\Documents\F_Projekt\human-injection.de\HTML5Podcatcher\img\logo32.png"
+   inkscape:export-xdpi="5.625"
+   inkscape:export-ydpi="5.625">
   <title
      id="title5318">HTML5 Podcatcher</title>
   <defs
@@ -24,10 +27,10 @@
      pagecolor="#ffffff"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="0.0"
+     inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.98994949"
-     inkscape:cx="210.85759"
+     inkscape:cx="54.789021"
      inkscape:cy="195.09646"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -54,7 +57,35 @@
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
         <dc:title>HTML5 Podcatcher</dc:title>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Sebastian Spautz</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title></dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:description>Logo für den HTML5 Podcatcher</dc:description>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/by-sa/3.0/" />
       </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/by-sa/3.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Notice" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#Attribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://creativecommons.org/ns#ShareAlike" />
+      </cc:License>
     </rdf:RDF>
   </metadata>
   <g
@@ -95,7 +126,7 @@
        sodipodi:rx="200"
        sodipodi:ry="200"
        d="m 450,262 a 200,200 0 1 1 -400,0 200,200 0 1 1 400,0 z"
-       transform="matrix(1.1605848,0.16170855,-0.16146252,1.1623533,8.585543,451.32705)"
+       transform="matrix(1.167861,0.16247479,-0.16247479,1.167861,6.6031434,449.7639)"
        inkscape:label="#greencircle" />
     <path
        sodipodi:type="arc"
@@ -105,7 +136,7 @@
        sodipodi:cy="285.21429"
        sodipodi:rx="86.785713"
        sodipodi:ry="74.64286"
-       d="m 308.57143,285.21429 a 86.785713,74.64286 0 1 1 -173.57142,0 86.785713,74.64286 0 1 1 173.57142,0 z"
+       d="m 308.57143,285.21429 c 0,41.22412 -38.85528,74.64286 -86.78571,74.64286 -47.93043,0 -86.78571,-33.41874 -86.78571,-74.64286 0,-41.22411 38.85528,-74.64286 86.78571,-74.64286 47.93043,0 86.78571,33.41875 86.78571,74.64286 z"
        transform="matrix(0.56171932,-0.09904627,0.09854202,0.55885955,24.669446,741.10621)" />
     <path
        style="fill:#004600;fill-opacity:1;fill-rule:nonzero;stroke:none"

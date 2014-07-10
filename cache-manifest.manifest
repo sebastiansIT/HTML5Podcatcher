@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see http://www.gnu.org/licenses/.
 
-# Version 0.14.8 Alpha
+# Version 0.17.0 Alpha
 # Change Log: 
 ## 0.12.11
 ### Fix a Bug on setting the last played episode after page load
@@ -69,6 +69,16 @@
 ### File system API is back to highest Priority on Chromium (because IndexedDB + ObjectURL dosn't work) and Indexed DB stores blobs, not Arraybuffer, again
 ## 0.16.4
 ### Refactoring all functions manipulating sources in Namespaces POD and UI; Added callback parameters to such functions
+## 0.16.5
+### Bugfix Function Call WriteSourceS() instead of WriteSource()
+## 0.16.6
+### Extends RSS parser: Now checks for guid-Elements to get the episode url
+## 0.16.7
+### New Icons for Apple Web-Clip and Firefox OS
+## 0.16.8
+### Refactoring all functions manipulating episodes and the playlist in Namespaces POD and UI; Added callback parameters to such functions
+## 0.17.0
+### Implement storage of sources and episodes width Indexed Database API
 
 CACHE:
 ./podcatcher.html

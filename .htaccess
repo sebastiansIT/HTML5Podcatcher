@@ -4,6 +4,9 @@ AddType application/x-web-app-manifest+json .webapp
 Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src *; media-src *; style-src 'self'; img-src *"
 
 <IfModule mod_expires.c>
-   ExpiresActive On
+   ExpiresActive Off
    ExpiresDefault "access"
+   Header unset ETag
+   Header set Cache-Control "max-age=0"
+   Header set Pragma "no-cache"
 </IfModule>
