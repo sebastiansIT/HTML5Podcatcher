@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see http://www.gnu.org/licenses/.
 
-# Version 0.17.3 Alpha
+# Version 0.17.4 Alpha
 # Change Log: 
 ## 0.12.11
 ### Fix a Bug on setting the last played episode after page load
@@ -85,6 +85,8 @@
 ### Rewrite parser function. Now the parser is indipendent from storage and return a result. This result is now stored and filtered in the download function.
 ## 0.17.3
 ### cleanup code a litle bit
+## 0.17.4
+### Polyfill custom event constructor for Internet Explorer
 
 CACHE:
 ./podcatcher.html
