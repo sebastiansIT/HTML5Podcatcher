@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see http://www.gnu.org/licenses/.
 
-# Version 0.17.0 Alpha
+# Version 0.17.3 Alpha
 # Change Log: 
 ## 0.12.11
 ### Fix a Bug on setting the last played episode after page load
@@ -79,6 +79,12 @@
 ### Refactoring all functions manipulating episodes and the playlist in Namespaces POD and UI; Added callback parameters to such functions
 ## 0.17.0
 ### Implement storage of sources and episodes width Indexed Database API
+## 0.17.1
+### Add custom events "WriteEpisode" and "WriteSource" that fires after writing a episode or source to storage; Change parseSource: this Function saves the source and its episodes automatic to database.
+## 0.17.2
+### Rewrite parser function. Now the parser is indipendent from storage and return a result. This result is now stored and filtered in the download function.
+## 0.17.3
+### cleanup code a litle bit
 
 CACHE:
 ./podcatcher.html

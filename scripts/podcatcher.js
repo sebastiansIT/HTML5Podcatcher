@@ -33,43 +33,6 @@ window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileS
 window.resolveLocalFileSystemURL = window.resolveLocalFileSystemURL || window.webkitResolveLocalFileSystemURL;
 navigator.persistentStorage = navigator.persistentStorage || navigator.webkitPersistentStorage;
 
-/** Global Variables/Objects */
-var downloadTimeout = 600000;
-var fileSystemSize = 1024 * 1024 * 500; /*500 MB */
-var fileSystemStatus = window.PERSISTENT; //window.TEMPORARY;
-
-/** User interface functions */
-var findEpisodeUI = function(episode) {
-    "use strict";
-    var episodeUI;
-    $('#playlist .entries li').each(function() {
-        if ($(this).data('episodeUri') === episode.uri) {
-            episodeUI = this;
-            return false;
-        }
-    });
-    return episodeUI;
-};
-var actualiseEpisodeUI = function(episode) {
-    "use strict";
-    var episodeUI;
-    episodeUI = findEpisodeUI(episode);
-    // Status
-    if (episode.playback.played) {
-        $(episodeUI).find('.status').text("Status: played");
-    } else {
-        $(episodeUI).find('.status').text("Status: new");
-    }
-    // Download/Delete link
-    if (episode.offlineMediaUrl) {
-        $(episodeUI).find('.download').replaceWith('<a class="delete" href="' + episode.offlineMediaUrl + '">Delete</a>');
-    } else {
-        $(episodeUI).find('.delete').replaceWith('<a class="download" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
-    }
-    $(episodeUI).find('progress').remove();
-    return false;
-};
-
 /** Helper Functions */
 var escapeHtml = function(text) {
     "use strict";
@@ -98,54 +61,9 @@ var successHandler = function(event) {
     "use strict";
     logHandler(event, 'info');
 };
-var progressHandler = function(progressEvent, prefix, episode) {
-    "use strict"; //xmlHttpRequestProgressEvent
-    var progressbar, percentComplete, episodeUI;
-    episodeUI = findEpisodeUI(episode);
-    if ($(episodeUI).find('progress').length) {
-        progressbar = $(episodeUI).find('progress');
-    } else {
-        progressbar = $('<progress min="0" max="1">&helip;</progress>');
-        $(episodeUI).find('.download').hide().after(progressbar);
-    }
-    if (progressEvent.lengthComputable) {
-        percentComplete = progressEvent.loaded / progressEvent.total;
-        console.log(prefix + ': ' + (percentComplete * 100).toFixed(2) + '%');
-        $(episodeUI).find('progress').attr('value', percentComplete).text((percentComplete * 100).toFixed(2) + '%');
-    } else {
-        console.log(prefix + '...');
-        $(episodeUI).find('progress').removeAttr('value').text('&helip;');
-    }
-};
-var requestFileSystemQuota = function(quota) {
-    "use strict";
-    if (navigator.persistentStorage) {
-        navigator.persistentStorage.requestQuota(quota, function(grantedBytes) {
-            logHandler('You gain access to ' + grantedBytes / 1024 / 1024 + ' MiB of memory', 'debug');
-            navigator.persistentStorage.queryUsageAndQuota(function (usage, quota) {
-                localStorage.setItem("configuration.quota", quota);
-                var availableSpace = quota - usage;
-                $('#memorySizeInput').val(quota / 1024 / 1024).attr('min', Math.ceil(usage / 1024 / 1024)).css('background', 'linear-gradient( 90deg, rgba(0,100,0,0.45) ' + Math.ceil((usage / quota) * 100) + '%, transparent ' + Math.ceil((usage / quota) * 100) + '%, transparent )');
-                if (availableSpace <= (1024 * 1024 * 50)) {
-                    logHandler('You are out of space! Please allow more then ' + Math.ceil(quota / 1024 / 1024) + ' MiB of space', 'warning');
-                } else {
-                    logHandler('There is ' + Math.floor(availableSpace / 1024 / 1024) + ' MiB of ' + Math.floor(quota / 1024 / 1024) + ' MiB memory available', 'info');
-                }
-            }, errorHandler);
-        }, errorHandler);
-    }
-};
-
-/** Functions for configuration */
-var renderConfiguration = function() {
-    "use strict";
-    if (localStorage.getItem("configuration.proxyUrl")) {
-        $('#httpProxyInput').val(localStorage.getItem("configuration.proxyUrl"));
-    }
-};
 
 var POD = {
-    version: "Alpha 0.17.1",
+    version: "Alpha 0.17.3",
     storage: {
         indexedDbStorage: {
             settings: {
@@ -328,9 +246,10 @@ var POD = {
                                 episode = event.target.result;
                             } else {
                                 episode = {uri: episodeUri};
-                                if (!episode.playback) {
-                                    episode.playback = {'played': false, 'currentTime': 0};
-                                }
+                            }
+                            //generate playback object if not exists
+                            if (!episode.playback) {
+                                episode.playback = {'played': false, 'currentTime': 0};
                             }
                             if (onReadCallback && typeof onReadCallback === 'function') {
                                 //Generate "playback" object if not exists
@@ -419,7 +338,7 @@ var POD = {
                 };
             },
             //File Storage
-            saveFile: function(episode, arraybuffer, mimeType, onWriteCallback) {
+            saveFile: function(episode, arraybuffer, mimeType, onWriteCallback, onProgressCallback) {
                 "use strict";
                 logHandler('Saving file "' + episode.mediaUrl + '" to IndexedDB starts now', 'debug');
                 var blob, request;
@@ -531,7 +450,11 @@ var POD = {
             }
         },//end IndexedDbStorage
         fileSystemStorage: {
-            saveFile: function(episode, arraybuffer, mimeType, onWriteCallback) {
+            settings: {
+                fileSystemSize: 1024 * 1024 * 500, /*500 MB */
+                fileSystemStatus: window.PERSISTENT
+            },
+            saveFile: function(episode, arraybuffer, mimeType, onWriteCallback, onProgressCallback) {
                 "use strict";
                 logHandler('Saving file "' + episode.mediaUrl + '" to local file system starts now', 'debug');
                 var blob, parts, fileName;
@@ -539,11 +462,13 @@ var POD = {
                 parts = episode.mediaUrl.split('/');
                 fileName = parts[parts.length - 1];
                 // Write file to the root directory.
-                window.requestFileSystem(fileSystemStatus, fileSystemSize, function(filesystem) {
+                window.requestFileSystem(this.settings.fileSystemStatus, this.settings.fileSystemSize, function(filesystem) {
                     filesystem.root.getFile(fileName, {create: true, exclusive: false}, function(fileEntry) {
                         fileEntry.createWriter(function(writer) {
                             writer.onwrite = function(event) {
-                                progressHandler(event, 'Write', episode);
+                                if (onProgressCallback && typeof onProgressCallback === 'function') {
+                                    onProgressCallback(event, 'Write', episode);
+                                }
                             };
                             writer.onwriteend = function() { //success
                                 episode.isFileSavedOffline = true;
@@ -592,6 +517,24 @@ var POD = {
                 "use strict";
                 if (onReadCallback && typeof onReadCallback === 'function') {
                     onReadCallback(episode);
+                }
+            },
+            requestFileSystemQuota: function(quota) {
+                "use strict";
+                if (navigator.persistentStorage) {
+                    navigator.persistentStorage.requestQuota(quota, function(grantedBytes) {
+                        logHandler('You gain access to ' + grantedBytes / 1024 / 1024 + ' MiB of memory', 'debug');
+                        navigator.persistentStorage.queryUsageAndQuota(function (usage, quota) {
+                            localStorage.setItem("configuration.quota", quota);
+                            var availableSpace = quota - usage;
+                            $('#memorySizeInput').val(quota / 1024 / 1024).attr('min', Math.ceil(usage / 1024 / 1024)).css('background', 'linear-gradient( 90deg, rgba(0,100,0,0.45) ' + Math.ceil((usage / quota) * 100) + '%, transparent ' + Math.ceil((usage / quota) * 100) + '%, transparent )');
+                            if (availableSpace <= (1024 * 1024 * 50)) {
+                                logHandler('You are out of space! Please allow more then ' + Math.ceil(quota / 1024 / 1024) + ' MiB of space', 'warning');
+                            } else {
+                                logHandler('There is ' + Math.floor(availableSpace / 1024 / 1024) + ' MiB of ' + Math.floor(quota / 1024 / 1024) + ' MiB memory available', 'info');
+                            }
+                        }, errorHandler);
+                    }, errorHandler);
                 }
             }
         },//end FileSystemStorage
@@ -685,7 +628,6 @@ var POD = {
                 if (onWriteCallback && typeof onWriteCallback === 'function') {
                     onWriteCallback(episode);
                 }
-                actualiseEpisodeUI(episode);
             }
         },//end WebStorage
         //Source Storage
@@ -755,10 +697,10 @@ var POD = {
                 }
             }
         },
-        saveFile: function(episode, arraybuffer, mimeType, onWriteCallback) {
+        saveFile: function(episode, arraybuffer, mimeType, onWriteCallback, onProgressCallback) {
             "use strict";
             if (this.fileStorageEngine()) {
-                this.fileStorageEngine().saveFile(episode, arraybuffer, mimeType, onWriteCallback);
+                this.fileStorageEngine().saveFile(episode, arraybuffer, mimeType, onWriteCallback, onProgressCallback);
             }
         },
         deleteFile: function(episode, onDeleteCallback) {
@@ -767,30 +709,34 @@ var POD = {
                 this.fileStorageEngine().deleteFile(episode, onDeleteCallback);
             }
         },
-        isFileStorageAvailable: function() {
-            "use strict";
-            return this.fileStorageEngine();
-        },
         //Storage Engine Selection
         dataStorageEngine: function() {
             "use strict";
+            var engine;
             if (window.indexedDB) {
-                return this.indexedDbStorage;
+                engine = this.indexedDbStorage;
             } else if (window.localStorage) {
-                return this.webStorage;
+                engine = this.webStorage;
             } else {
                 logHandler("Missing persistent data storage", "error");
             }
+            return engine;
         },
         fileStorageEngine: function() {
             "use strict";
+            var engine;
             if (window.requestFileSystem) {
-                return this.fileSystemStorage;
+                engine = this.fileSystemStorage;
             } else if (window.indexedDB) {
-                return this.indexedDbStorage;
+                engine = this.indexedDbStorage;
             } else {
                 logHandler("Missing persistent file storage", "error");
             }
+            return engine;
+        },
+        isFileStorageAvailable: function() {
+            "use strict";
+            return this.fileStorageEngine();
         },
         //Migration betwean storage engines
         migradeData: function(oldStorageEngine, newStorageEngine) {
@@ -818,20 +764,45 @@ var POD = {
         }
     },
     web: {
+        settings: {
+            downloadTimeout: 600000
+        },
         downloadSource: function(source) {
             "use strict";
             var successfunction, errorfunction, parserresult;
             parserresult = {'source': source, 'episodes': []};
             successfunction = function(data) {
+                var newestEpisodes, mergeFunction, i;
                 logHandler('Download of source "' + source.uri + '" is finished', 'debug');
+                mergeFunction = function(mergeEpisode) {
+                    POD.storage.readEpisode(mergeEpisode.uri, function(existingEpisode) {
+                        existingEpisode.title = mergeEpisode.title;
+                        existingEpisode.updated = mergeEpisode.updated;
+                        existingEpisode.mediaUrl = mergeEpisode.mediaUrl;
+                        existingEpisode.source = mergeEpisode.source;
+                        //ATTENTION! never change playback information if episode updated from internet
+                        POD.storage.writeEpisode(existingEpisode);
+                    });
+                };
                 parserresult = POD.parser.parseSource(data, source);
+                //compute parser result
+                // 1. merge existing data with actual one
+                // TODO this and writing a multi episode write method
+                // 2. filter top 5 episodes and check if unread
+                newestEpisodes = parserresult.episodes.slice(parserresult.episodes.length - 5, parserresult.episodes.length);
+                // 3. save top 5 episodes with actualised data
+                for (i = 0; i < newestEpisodes.length; i++) {
+                    mergeFunction(newestEpisodes[i]);
+                }
+                // 4. Save Source
+                POD.storage.writeSource(source);
             };
             errorfunction = function() {
                 if (localStorage.getItem("configuration.proxyUrl")) {
                     logHandler('Direct download failed. Try proxy: ' + localStorage.getItem("configuration.proxyUrl").replace("$url$", source.uri), 'warning');
                     $.ajax({
                         'url': localStorage.getItem("configuration.proxyUrl").replace("$url$", source.uri),
-                        'async': false,
+                        'async': true,
                         'dataType': 'xml',
                         'success': successfunction,
                         'error': errorHandler
@@ -842,23 +813,24 @@ var POD = {
             try {
                 $.ajax({
                     'url': source.uri,
-                    'async': false,
+                    'async': true,
                     'dataType': 'xml',
                     'beforeSend': function(jqXHR, settings) { jqXHR.requestURL = settings.url; },
                     'success': successfunction,
                     'error': errorfunction
                 });
             } catch (ignore) {}
-            return parserresult;
         },
-        downloadFile: function(episode, mimeType, onDownloadCallback) {
+        downloadFile: function(episode, mimeType, onDownloadCallback, onProgressCallback) {
             "use strict";
             var xhr = new XMLHttpRequest();
             xhr.open('GET', episode.mediaUrl, true);
             xhr.responseType = 'arraybuffer';
-            xhr.timeout = downloadTimeout;
+            xhr.timeout = POD.web.settings.downloadTimeout;
             xhr.addEventListener("progress", function(event) {
-                progressHandler(event, 'Download', episode);
+                if (onProgressCallback && typeof onProgressCallback === 'function') {
+                    onProgressCallback(event, 'Download', episode);
+                }
             }, false);
             xhr.addEventListener("abort", logHandler, false);
             xhr.addEventListener("error", function() {
@@ -866,9 +838,11 @@ var POD = {
                 var xhrProxy = new XMLHttpRequest();
                 xhrProxy.open('GET', localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl), true);
                 xhrProxy.responseType = 'arraybuffer';
-                xhrProxy.timeout = downloadTimeout;
+                xhrProxy.timeout = POD.web.settings.downloadTimeout;
                 xhrProxy.addEventListener("progress", function(event) {
-                    progressHandler(event, 'Download', episode);
+                    if (onProgressCallback && typeof onProgressCallback === 'function') {
+                        onProgressCallback(event, 'Download', episode);
+                    }
                 }, false);
                 xhrProxy.addEventListener("abort", logHandler, false);
                 xhrProxy.addEventListener("error", errorHandler, false);
@@ -888,7 +862,7 @@ var POD = {
             xhr.onload = function() {
                 if (this.status === 200) {
                     logHandler('Download of file "' + episode.mediaUrl + '" is finished', 'debug');
-                    POD.storage.saveFile(episode, xhr.response, mimeType, onDownloadCallback);
+                    POD.storage.saveFile(episode, xhr.response, mimeType, onDownloadCallback, onProgressCallback);
                 } else {
                     logHandler('Error Downloading file "' + episode.mediaUrl + '": ' + this.statusText + ' (' + this.status + ')', 'error');
                 }
@@ -902,7 +876,7 @@ var POD = {
     parser: {
         parseSource: function(xml, source) {
             "use strict";
-            var tracks = [];
+            var episodes = [];
             logHandler('Parsing source file "' + source.uri + '" starts now', 'debug');
             //RSS-Feed
             if ($(xml).has('rss[version="2.0"]')) {
@@ -910,11 +884,26 @@ var POD = {
                 source.link = $(xml).find('channel > link').text();
                 source.title = $(xml).find('channel > title').text();
                 source.description = $(xml).find('channel > description').text();
-                POD.storage.writeSource(source);
                 //RSS-Entries
                 $(xml).find('item').each(function() {
-                    var item = $(this);
-                    POD.storage.readEpisode(item.find('link, guid').first().text(), function(episode) {
+                    var item, episode;
+                    item = $(this);
+                    episode = {};
+                    episode.uri = item.find('link, guid').first().text();
+                    episode.title = item.find('title:first').text();
+                    if (/^\d/.test(item.find('pubDate:first').text())) {
+                        episode.updated = new Date("Sun " + item.find('pubDate:first').text());
+                    } else {
+                        episode.updated = new Date(item.find('pubDate:first').text());
+                    }
+                    episode.source = source.title;
+                    if (item.find('enclosure').length > 0) {
+                        episode.mediaUrl = item.find('enclosure:first').attr('url');
+                    } else if ($(item.find('encoded').text()).find('a[href$=".mp3"]').length > 0) {
+                        episode.mediaUrl = $(item.find('encoded').text()).find('a[href$=".mp3"]').first().attr('href');
+                    }
+                    episodes.push(episode);
+                    /*POD.storage.readEpisode(item.find('link, guid').first().text(), function(episode) {
                         if (episode) {
                             episode.title = item.find('title:first').text();
                             if (/^\d/.test(item.find('pubDate:first').text())) {
@@ -933,21 +922,20 @@ var POD = {
                         } else {
                             logHandler('Can\'t find episode url in datasource', 'error');
                         }
-                    });
+                    });*/
                 });
-                //tracks.sort(POD.sortEpisodes);
-                //tracks = tracks.slice(tracks.length - 5, tracks.length);
+                episodes.sort(POD.sortEpisodes);
             }
             logHandler('Parsing source file "' + source.uri + '" finished', 'info');
-            return {'source': source, 'episodes': tracks};
+            return {'source': source, 'episodes': episodes};
         }
     },
-    toggleEpisodeStatus: function(episode, onWriteCallback) {
+    toggleEpisodeStatus: function(episode) {
         "use strict";
         episode.playback.played = !episode.playback.played;
         episode.playback.currentTime = 0;
         POD.storage.deleteFile(episode);
-        POD.storage.writeEpisode(episode, onWriteCallback);
+        POD.storage.writeEpisode(episode);
     },
     sortEpisodes: function(firstEpisode, secondEpisode) {
         "use strict";
@@ -961,6 +949,42 @@ var POD = {
     }
 };
 var UI =  {
+    findEpisodeUI: function(episode) {
+        "use strict";
+        var episodeUI;
+        $('#playlist .entries li').each(function() {
+            if ($(this).data('episodeUri') === episode.uri) {
+                episodeUI = this;
+                return false;
+            }
+        });
+        return episodeUI;
+    },
+    actualiseEpisodeUI: function(episode) {
+        "use strict";
+        var episodeUI;
+        episodeUI = UI.findEpisodeUI(episode);
+        // Status
+        if (episode.playback.played) {
+            $(episodeUI).find('.status').text("Status: played");
+        } else {
+            $(episodeUI).find('.status').text("Status: new");
+        }
+        // Download/Delete link
+        if (episode.offlineMediaUrl) {
+            $(episodeUI).find('.download').replaceWith('<a class="delete" href="' + episode.offlineMediaUrl + '">Delete</a>');
+        } else {
+            $(episodeUI).find('.delete').replaceWith('<a class="download" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
+        }
+        $(episodeUI).find('progress').remove();
+        return false;
+    },
+    renderConfiguration: function() {
+        "use strict";
+        if (localStorage.getItem("configuration.proxyUrl")) {
+            $('#httpProxyInput').val(localStorage.getItem("configuration.proxyUrl"));
+        }
+    },
     renderEpisode: function(episode) {
         "use strict";
         var entryUI, entryFunctionsUI;
@@ -1061,10 +1085,30 @@ var UI =  {
             }
             POD.storage.readEpisode(lastPlayedEpisode, onReadCallback);
         });
+    },
+    progressHandler: function(progressEvent, prefix, episode) {
+        "use strict"; //xmlHttpRequestProgressEvent
+        var progressbar, percentComplete, episodeUI;
+        episodeUI = UI.findEpisodeUI(episode);
+        if ($(episodeUI).find('progress').length) {
+            progressbar = $(episodeUI).find('progress');
+        } else {
+            progressbar = $('<progress min="0" max="1">&helip;</progress>');
+            $(episodeUI).find('.download').hide().after(progressbar);
+        }
+        if (progressEvent.lengthComputable) {
+            percentComplete = progressEvent.loaded / progressEvent.total;
+            console.log(prefix + ': ' + (percentComplete * 100).toFixed(2) + '%');
+            $(episodeUI).find('progress').attr('value', percentComplete).text((percentComplete * 100).toFixed(2) + '%');
+        } else {
+            console.log(prefix + '...');
+            $(episodeUI).find('progress').removeAttr('value').text('&helip;');
+        }
     }
 };
 
 /** Functions for playback */
+
 var activateEpisode = function(episode, onActivatedCallback) {
     "use strict";
     var mediaUrl, audioTag, mp3SourceTag;
@@ -1308,7 +1352,7 @@ $(document).ready(function() {
             logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info');
             POD.web.downloadFile(episode, 'audio/mpeg', function(episode) {
                 episodeUI.replaceWith(UI.renderEpisode(episode));
-            });
+            }, UI.progressHandler);
         });
     });
     $('#playlist').on('click', '.delete', function(event) {
@@ -1322,15 +1366,8 @@ $(document).ready(function() {
     $('#playlist').on('click', '.status', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        var statusLink = $(this);
         POD.storage.readEpisode($(this).closest('li').data('episodeUri'), function(episode) {
-            POD.toggleEpisodeStatus(episode, function(episode) {
-                if (episode.playback.played) {
-                    statusLink.text("Status: played");
-                } else {
-                    statusLink.text("Status: new");
-                }
-            });
+            POD.toggleEpisodeStatus(episode);
         });
     });
     $('#playlist').on('click', '.origin', function(event) {
@@ -1341,17 +1378,10 @@ $(document).ready(function() {
     $('#playlist #updatePlaylist').on('click', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        var i/*, j, parserresult*/;
+        var i;
         POD.storage.readSources(function(sources) {
             for (i = 0; i < sources.length; i++) {
-                /*parserresult = */POD.web.downloadSource(sources[i]);
-                //Update source in storage
-                //POD.storage.writeSource(parserresult.source);
-                //Save Episodes to local storage
-                /*for (j = 0; j < parserresult.episodes.length; j++) {
-                    //Save all Episodes in the parser result
-                    POD.storage.writeEpisode(parserresult.episodes[j]);
-                }*/
+                POD.web.downloadSource(sources[i]);
             }
             //POD.storage.readPlaylist(false, UI.renderPlaylist);
         });
@@ -1365,32 +1395,27 @@ $(document).ready(function() {
         var i, episode, episodeUI;
         episode = event.detail.episode;
         episodeUI = UI.renderEpisode(episode);
+        //find episode in HTML markup
         for (i = 0; i < $('#playlist').find('.entries li').length; i++) {
             if ($($('#playlist').find('.entries li')[i]).data('episodeUri') === episode.uri) {
-                $($('#playlist').find('.entries li')[i]).slideUp().html(episodeUI.html()).slideDown();
+                //Actualise episodes markup
+                $($('#playlist').find('.entries li')[i]).html(episodeUI.html());
                 return;
             }
         }
-        //if not listed befor
-        episodeUI.hide();
-        $('#playlist').find('.entries').append(episodeUI);
-        episodeUI.fadeIn();
+        //show unlisend episode if not listed before
+        if (episode.playback.played) {
+            episodeUI.hide();
+            $('#playlist').find('.entries').append(episodeUI);
+            episodeUI.fadeIn();
+        }
     }, false);
     //Sources UI Events
     $('#sources').on('click', '.updateSource', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        /*var i, parserresult;*/
         POD.storage.readSource($(this).attr("href"), function(source) {
-            /*parserresult = */POD.web.downloadSource(source);
-            //Update source in storage
-            //POD.storage.writeSource(parserresult.source);
-            //Save Episodes to local storage
-            /*for (i = 0; i < parserresult.episodes.length; i++) {
-                //Save all Episodes in the parser result
-                POD.storage.writeEpisode(parserresult.episodes[i]);
-            }
-            POD.storage.readPlaylist(false, UI.renderPlaylist);*/
+            POD.web.downloadSource(source);
         });
     });
     $('#sources').on('click', '.deleteSource', function(event) {
@@ -1417,36 +1442,9 @@ $(document).ready(function() {
     $('#sources #addSourceForm').on('submit', function(event) {
         event.preventDefault();
         event.stopPropagation();
-        var parserresult/*, entryUI, i*/;
         if ($('#addSourceUrlInput')[0].checkValidity()) {
             POD.storage.readSource($('#addSourceUrlInput').val(), function(source) {
-                parserresult = POD.web.downloadSource(source);
-                if (parserresult) {
-                    /*POD.storage.writeSource(parserresult.source);
-                    entryUI = UI.renderSource(parserresult.source);
-                    for (i = 0; i < $('#sources .entries li').length; i++) {
-                        if ($($('#sources .entries li')[i]).data('sourceUri') === parserresult.source.uri) {
-                            $($('#sources .entries li')[i]).slideUp().html(entryUI.html()).slideDown();
-                            i = -1;
-                            break;
-                        }
-                    }
-                    if (i !== -1) {
-                        entryUI.hide();
-                        $('#sources .entries').append(entryUI);
-                        entryUI.fadeIn();
-                        for (i = 0; i < parserresult.episodes.length; i++) {
-                            //Save all Episodes in the parser result
-                            POD.storage.writeEpisode(parserresult.episodes[i]);
-                        }
-                        POD.storage.readPlaylist(false, UI.renderPlaylist);
-                        logHandler('Added new source "' + parserresult.source.uri + '" sucessfully', 'info');
-                    } else {
-                        logHandler('Adding new source "' + $('#addSourceUrlInput').val() + '" throws an error', 'info');
-                    }*/
-                } else {
-                    logHandler('Please insert a URL of a RSS/Atom feed', 'error');
-                }
+                POD.web.downloadSource(source);
             });
         }
     });
@@ -1460,7 +1458,7 @@ $(document).ready(function() {
                 return;
             }
         }
-        //if not listed befor
+        //show source if not listed before
         sourceUI.hide();
         $('#sources').find('.entries').append(sourceUI);
         sourceUI.fadeIn();
@@ -1470,7 +1468,7 @@ $(document).ready(function() {
         event.preventDefault();
         event.stopPropagation();
         if ($('#memorySizeInput')[0].checkValidity()) {
-            requestFileSystemQuota($('#memorySizeInput').val() * 1024 * 1024);
+            POD.storage.fileSystemStorage.requestFileSystemQuota($('#memorySizeInput').val() * 1024 * 1024);
         } else {
             logHandler('Please insert a number', 'error');
         }
@@ -1526,17 +1524,20 @@ $(document).ready(function() {
         $(this).parent().toggleClass('fullscreen');
     });
     //Quota and Filesystem initialisation
-    quota = localStorage.getItem("configuration.quota");
-    if (!quota) { quota = 1024 * 1024 * 200; }
-    requestFileSystemQuota(quota);
+    if (POD.storage.fileStorageEngine() === POD.storage.fileSystemStorage) {
+        $('#memorySizeForm').show();
+        quota = localStorage.getItem("configuration.quota");
+        if (!quota) { quota = 1024 * 1024 * 200; }
+        POD.storage.fileSystemStorage.requestFileSystemQuota(quota);
+    } else {
+        $('#memorySizeForm').hide();
+    }
     //Render lists and settings
-    renderConfiguration();
+    UI.renderConfiguration();
     POD.storage.readSources(function(sources) {
         UI.renderSourceList(sources);
         POD.storage.readPlaylist(false, UI.renderPlaylist);
         //Initialise player
         UI.getLastPlayedEpisode(playEpisode);
-        //set up player to last played state
-        //playEpisode(readEpisode(localStorage.getItem('configuration.lastPlayed')));
     });
 });
