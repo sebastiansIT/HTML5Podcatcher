@@ -34,7 +34,6 @@ window.resolveLocalFileSystemURL = window.resolveLocalFileSystemURL || window.we
 navigator.persistentStorage = navigator.persistentStorage || navigator.webkitPersistentStorage;
 // Polyfills
 (function () {
-    "use strict";
     // Custom Event Constructor for IE 9, 10 and 11
     // Polyfill from https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent#Polyfill
     try {
@@ -81,7 +80,7 @@ var successHandler = function (event) {
 };
 
 var POD = {
-    version: "Alpha 0.0.0",
+    version: "Alpha {{ VERSION }}",
     storage: {
         indexedDbStorage: {
             settings: {
@@ -1401,7 +1400,6 @@ $(document).ready(function () {
             for (i = 0; i < sources.length; i++) {
                 POD.web.downloadSource(sources[i]);
             }
-            //POD.storage.readPlaylist(false, UI.renderPlaylist);
         });
     });
     $('#playlist #showFullPlaylist').on('click', function (event) {
@@ -1422,7 +1420,7 @@ $(document).ready(function () {
             }
         }
         //show unlisend episode if not listed before
-        if (episode.playback.played) {
+        if (!episode.playback.played) {
             episodeUI.hide();
             $('#playlist').find('.entries').append(episodeUI);
             episodeUI.fadeIn();

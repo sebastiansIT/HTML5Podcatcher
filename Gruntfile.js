@@ -2,6 +2,7 @@
     //Load Tasks
     grunt.loadNpmTasks('grunt-string-replace');
     grunt.loadNpmTasks('grunt-jslint');
+	grunt.loadNpmTasks('grunt-contrib-copy');
     //Config Tasks
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -15,10 +16,6 @@
                 options: {
                     replacements: [{
                         pattern: /{{ VERSION }}/g,
-                        replacement: '<%= pkg.version %>'
-                    },
-                    {
-                        pattern: /0.0.0/g,
                         replacement: '<%= pkg.version %>'
                     }]
                 }
@@ -45,8 +42,22 @@
 					//junit: 'out/client-junit.xml'
                 }
             }
-        }
+        },
+		'copy': {
+			main: {
+				files: [
+				  // includes files within path
+				  {expand: true, src: ['css/*.css'], dest: 'build/', filter: 'isFile'},
+				  {expand: true, src: ['img/*.png'], dest: 'build/', filter: 'isFile'},
+				  {expand: true, src: ['scripts/*min.js'], dest: 'build/', filter: 'isFile'},
+				  {src: 'img/favicon.ico', dest: 'build/favicon.ico'},
+				  {src: '.htaccess', dest: 'build/.htaccess'},
+				  {expand: true, src: ['manifest.webapp'], dest: 'build/', filter: 'isFile'},
+				  {expand: true, src: ['*.py'], dest: 'build/', filter: 'isFile'}
+				]
+			}
+		}
     });
     //Register Tasks
-    grunt.registerTask('default', ['jslint', 'string-replace']);
+    grunt.registerTask('default', ['jslint', 'copy', 'string-replace']);
 };

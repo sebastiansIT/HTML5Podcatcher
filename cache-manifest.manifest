@@ -87,6 +87,8 @@
 ### cleanup code a litle bit
 ## 0.17.4
 ### Polyfill custom event constructor for Internet Explorer
+## 0.17.5
+### Bugfix: don't render new Episodes after update
 
 CACHE:
 ./podcatcher.html
