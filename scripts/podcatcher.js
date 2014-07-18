@@ -34,25 +34,25 @@ window.resolveLocalFileSystemURL = window.resolveLocalFileSystemURL || window.we
 navigator.persistentStorage = navigator.persistentStorage || navigator.webkitPersistentStorage;
 // Polyfills
 (function () {
-  // Custom Event Constructor for IE 9, 10 and 11
-  // Polyfill from https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent#Polyfill
-  try {
-	new CustomEvent('CustomEventConstructorTest', {"detail": undefined});
-  }
-  catch (exception) {
-	function CustomEvent ( event, params ) {
-		params = params || { bubbles: false, cancelable: false, detail: undefined };
-		var evt = document.createEvent( 'CustomEvent' );
-		evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
-		return evt;
-	};
-	CustomEvent.prototype = window.Event.prototype;
-	window.CustomEvent = CustomEvent;
-  }
-})();
+    "use strict";
+    // Custom Event Constructor for IE 9, 10 and 11
+    // Polyfill from https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent#Polyfill
+    try {
+        new CustomEvent('CustomEventConstructorTest', {"detail": undefined});
+    } catch (exception) {
+        function CustomEvent(event, params) {
+            params = params || { bubbles: false, cancelable: false, detail: undefined };
+            var evt = document.createEvent('CustomEvent');
+            evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+            return evt;
+        }
+        CustomEvent.prototype = window.Event.prototype;
+        window.CustomEvent = CustomEvent;
+    }
+}());
 
 /** Helper Functions */
-var escapeHtml = function(text) {
+var escapeHtml = function (text) {
     "use strict";
     return text
         .replace(/&/g, "&amp;")
@@ -61,27 +61,27 @@ var escapeHtml = function(text) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 };
-var logHandler = function(message, loglevel) {
+var logHandler = function (message, loglevel) {
     "use strict";
     console.log(loglevel + ': ' + message);
     $('#statusbar').prepend('<span class=' + loglevel + '>' + message + '</span></br>');
 };
-var errorHandler = function(event) {
+var errorHandler = function (event) {
     "use strict";
     var eventstring = event.toString() + ' {';
-    $.each(event, function(i, n) {
+    $.each(event, function (i, n) {
         eventstring += i + ': "' + n + '"; ';
     });
     eventstring += '}';
     logHandler(escapeHtml(eventstring), 'error');
 };
-var successHandler = function(event) {
+var successHandler = function (event) {
     "use strict";
     logHandler(event, 'info');
 };
 
 var POD = {
-    version: "Alpha 0.17.4",
+    version: "Alpha 0.0.0",
     storage: {
         indexedDbStorage: {
             settings: {
@@ -91,7 +91,7 @@ var POD = {
                 episodesStore: 'episodes',
                 filesStore: 'files'
             },
-            updateIndexedDB: function(event) {
+            updateIndexedDB: function (event) {
                 "use strict";
                 logHandler("Database Update from Version " + event.oldVersion + " to Version " + event.newVersion, 'info');
                 //Migrate from Local Storage API
@@ -112,15 +112,15 @@ var POD = {
                 }
             },
             //Source Storage
-            readSource: function(sourceUri, onReadCallback) {
+            readSource: function (sourceUri, onReadCallback) {
                 "use strict";
-                var request;
-                request = window.indexedDB.open(this.settings.name, this.settings.version);
-                request.onupgradeneeded = this.updateIndexedDB;
-                request.onblocked = function() {
+                var requestOpenDB;
+                requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+                requestOpenDB.onupgradeneeded = this.updateIndexedDB;
+                requestOpenDB.onblocked = function () {
                     logHandler("Database blocked", 'debug');
                 };
-                request.onsuccess = function () {
+                requestOpenDB.onsuccess = function () {
                     logHandler("Success creating/accessing IndexedDB database", 'debug');
                     var db, transaction, store, request;
                     db = this.result;
@@ -128,7 +128,7 @@ var POD = {
                     store = transaction.objectStore(POD.storage.indexedDbStorage.settings.sourcesStore);
                     request = store.get(sourceUri);
                     // Erfolgs-Event
-                    request.onsuccess = function(event) {
+                    request.onsuccess = function (event) {
                         var source;
                         if (event.target.result) {
                             logHandler('Source ' + event.target.result.uri + ' readed from database', 'debug');
@@ -144,16 +144,16 @@ var POD = {
                         logHandler(event.target.error.name + ' while reading source "' + sourceUri + '" from IndexedDB (' + event.target.error.message + ')', 'error');
                     };
                 };
-                request.onerror = function (event) {
+                requestOpenDB.onerror = function (event) {
                     logHandler(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
                 };
             },
-            readSources: function(onReadCallback) {
+            readSources: function (onReadCallback) {
                 "use strict";
                 var request;
                 request = window.indexedDB.open(this.settings.name, this.settings.version);
                 request.onupgradeneeded = this.updateIndexedDB;
-                request.onblocked = function() { logHandler("Database blocked", 'debug'); };
+                request.onblocked = function () { logHandler("Database blocked", 'debug'); };
                 request.onsuccess = function () {
                     logHandler("Success creating/accessing IndexedDB database", 'debug');
                     var db, transaction, store, cursorRequest, sourcelist;
@@ -162,7 +162,7 @@ var POD = {
                     store = transaction.objectStore(POD.storage.indexedDbStorage.settings.sourcesStore);
                     cursorRequest = store.openCursor();
                     sourcelist = [];
-                    cursorRequest.onsuccess = function(event) {
+                    cursorRequest.onsuccess = function (event) {
                         var result = event.target.result;
                         if (result) {
                             sourcelist.push(result.value);
@@ -181,15 +181,15 @@ var POD = {
                     logHandler(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
                 };
             },
-            writeSource: function(source, onWriteCallback) {
+            writeSource: function (source, onWriteCallback) {
                 "use strict";
-                var request;
-                request = window.indexedDB.open(this.settings.name, this.settings.version);
-                request.onupgradeneeded = this.updateIndexedDB;
-                request.onblocked = function() {
+                var requestOpenDB;
+                requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+                requestOpenDB.onupgradeneeded = this.updateIndexedDB;
+                requestOpenDB.onblocked = function () {
                     logHandler("Database blocked", 'debug');
                 };
-                request.onsuccess = function () {
+                requestOpenDB.onsuccess = function () {
                     logHandler("Success creating/accessing IndexedDB database", 'debug');
                     var db, transaction, store, request;
                     db = this.result;
@@ -197,7 +197,7 @@ var POD = {
                     store = transaction.objectStore(POD.storage.indexedDbStorage.settings.sourcesStore);
                     request = store.put(source);
                     // Erfolgs-Event
-                    request.onsuccess = function(event) {
+                    request.onsuccess = function (event) {
                         logHandler('Source ' + event.target.result + ' saved', 'info');
                         if (onWriteCallback && typeof onWriteCallback === 'function') {
                             onWriteCallback(source);
@@ -207,25 +207,25 @@ var POD = {
                         logHandler(event.target.error.name + ' while saving source "' + source.uri + '" to IndexedDB (' + event.target.error.message + ')', 'error');
                     };
                 };
-                request.onerror = function (event) {
+                requestOpenDB.onerror = function (event) {
                     logHandler(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
                 };
             },
-            deleteSource: function(source, onDeleteCallback) {
+            deleteSource: function (source, onDeleteCallback) {
                 "use strict";
-                var request = window.indexedDB.open(this.settings.name, this.settings.version);
-                request.onupgradeneeded = this.updateIndexedDB;
-                request.onblocked = function() {
+                var requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+                requestOpenDB.onupgradeneeded = this.updateIndexedDB;
+                requestOpenDB.onblocked = function () {
                     logHandler("Database blocked", 'debug');
                 };
-                request.onsuccess = function () {
+                requestOpenDB.onsuccess = function () {
                     logHandler("Success creating/accessing IndexedDB database", 'debug');
                     var db, transaction, store, request;
                     db = this.result;
                     transaction = db.transaction([POD.storage.indexedDbStorage.settings.sourcesStore], 'readwrite');
                     store = transaction.objectStore(POD.storage.indexedDbStorage.settings.sourcesStore);
                     request = store.delete(source.uri);
-                    request.onsuccess = function() {
+                    request.onsuccess = function () {
                         logHandler('Source ' + source.uri + ' deleted from database', 'debug');
                         if (onDeleteCallback && typeof onDeleteCallback === 'function') {
                             onDeleteCallback(source);
@@ -235,21 +235,21 @@ var POD = {
                         logHandler(event.target.error.name + ' while deleting source "' + source.uri + '" from IndexedDB (' + event.target.error.message + ')', 'error');
                     };
                 };
-                request.onerror = function (event) {
+                requestOpenDB.onerror = function (event) {
                     logHandler(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
                 };
             },
             //Episode Storage
-            readEpisode: function(episodeUri, onReadCallback) {
+            readEpisode: function (episodeUri, onReadCallback) {
                 "use strict";
-                var request;
+                var requestOpenDB;
                 if (episodeUri) {
-                    request = window.indexedDB.open(this.settings.name, this.settings.version);
-                    request.onupgradeneeded = this.updateIndexedDB;
-                    request.onblocked = function() {
+                    requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+                    requestOpenDB.onupgradeneeded = this.updateIndexedDB;
+                    requestOpenDB.onblocked = function () {
                         logHandler("Database blocked", 'debug');
                     };
-                    request.onsuccess = function () {
+                    requestOpenDB.onsuccess = function () {
                         logHandler("Success creating/accessing IndexedDB database", 'debug');
                         var db, transaction, store, request;
                         db = this.result;
@@ -257,7 +257,7 @@ var POD = {
                         store = transaction.objectStore(POD.storage.indexedDbStorage.settings.episodesStore);
                         request = store.get(episodeUri);
                         // Erfolgs-Event
-                        request.onsuccess = function(event) {
+                        request.onsuccess = function (event) {
                             var episode;
                             if (event.target.result) {
                                 logHandler('Episode ' + event.target.result.uri + ' readed from database', 'debug');
@@ -281,12 +281,12 @@ var POD = {
                             logHandler(event.target.error.name + ' while reading episode "' + episodeUri + '" from IndexedDB (' + event.target.error.message + ')', 'error');
                         };
                     };
-                    request.onerror = function (event) {
+                    requestOpenDB.onerror = function (event) {
                         logHandler(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
                     };
                 }
             },
-            readPlaylist: function(showAll, onReadCallback) {
+            readPlaylist: function (showAll, onReadCallback) {
                 "use strict";
                 if (!showAll) {
                     showAll = false;
@@ -294,7 +294,7 @@ var POD = {
                 var request;
                 request = window.indexedDB.open(this.settings.name, this.settings.version);
                 request.onupgradeneeded = this.updateIndexedDB;
-                request.onblocked = function() { logHandler("Database blocked", 'debug'); };
+                request.onblocked = function () { logHandler("Database blocked", 'debug'); };
                 request.onsuccess = function () {
                     logHandler("Success creating/accessing IndexedDB database", 'debug');
                     var db, transaction, store, cursorRequest, playlist = [];
@@ -303,7 +303,7 @@ var POD = {
                     store = transaction.objectStore(POD.storage.indexedDbStorage.settings.episodesStore);
                     cursorRequest = store.openCursor();
                     playlist = [];
-                    cursorRequest.onsuccess = function(event) {
+                    cursorRequest.onsuccess = function (event) {
                         var result = event.target.result;
                         if (result) {
                             if (result.value.playback.played === false || showAll === true) {
@@ -325,15 +325,15 @@ var POD = {
                     logHandler(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
                 };
             },
-            writeEpisode: function(episode, onWriteCallback) {
+            writeEpisode: function (episode, onWriteCallback) {
                 "use strict";
-                var request;
-                request = window.indexedDB.open(this.settings.name, this.settings.version);
-                request.onupgradeneeded = this.updateIndexedDB;
-                request.onblocked = function() {
+                var requestOpenDB;
+                requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+                requestOpenDB.onupgradeneeded = this.updateIndexedDB;
+                requestOpenDB.onblocked = function () {
                     logHandler("Database blocked", 'debug');
                 };
-                request.onsuccess = function () {
+                requestOpenDB.onsuccess = function () {
                     logHandler("Success creating/accessing IndexedDB database", 'debug');
                     var db, transaction, store, request;
                     db = this.result;
@@ -341,7 +341,7 @@ var POD = {
                     store = transaction.objectStore(POD.storage.indexedDbStorage.settings.episodesStore);
                     request = store.put(episode);
                     // Erfolgs-Event
-                    request.onsuccess = function(event) {
+                    request.onsuccess = function (event) {
                         logHandler('Episode ' + event.target.result + ' saved', 'info');
                         if (onWriteCallback && typeof onWriteCallback === 'function') {
                             onWriteCallback(episode);
@@ -351,22 +351,22 @@ var POD = {
                         logHandler(event.target.error.name + ' while saving episode "' + episode.uri + '" to IndexedDB (' + event.target.error.message + ')', 'error');
                     };
                 };
-                request.onerror = function (event) {
+                requestOpenDB.onerror = function (event) {
                     logHandler(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
                 };
             },
             //File Storage
-            saveFile: function(episode, arraybuffer, mimeType, onWriteCallback, onProgressCallback) {
+            saveFile: function (episode, arraybuffer, mimeType, onWriteCallback, onProgressCallback) {
                 "use strict";
                 logHandler('Saving file "' + episode.mediaUrl + '" to IndexedDB starts now', 'debug');
-                var blob, request;
+                var blob, requestOpenDB;
                 blob = new Blob([arraybuffer], {type: mimeType});
-                request = window.indexedDB.open(this.settings.name, this.settings.version);
-                request.onupgradeneeded = this.updateIndexedDB;
-                request.onblocked = function() {
+                requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+                requestOpenDB.onupgradeneeded = this.updateIndexedDB;
+                requestOpenDB.onblocked = function () {
                     logHandler("Database blocked", 'debug');
                 };
-                request.onsuccess = function () {
+                requestOpenDB.onsuccess = function () {
                     logHandler("Success creating/accessing IndexedDB database", 'debug');
                     var db, transaction, store, request;
                     db = this.result;
@@ -374,7 +374,7 @@ var POD = {
                     store = transaction.objectStore(POD.storage.indexedDbStorage.settings.filesStore);
                     request = store.put(blob, episode.mediaUrl);
                     // Erfolgs-Event
-                    request.onsuccess = function() {
+                    request.onsuccess = function () {
                         episode.isFileSavedOffline = true;
                         episode.FileMimeType = mimeType;
                         POD.storage.writeEpisode(episode);
@@ -387,20 +387,20 @@ var POD = {
                         logHandler(event.target.error.name + ' while saving file "' + episode.mediaUrl + '" to IndexedDB (' + event.target.error.message + ')', 'error');
                     };
                 };
-                request.onerror = function (event) {
+                requestOpenDB.onerror = function (event) {
                     logHandler(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
                 };
             },
-            deleteFile: function(episode, onDeleteCallback) {
+            deleteFile: function (episode, onDeleteCallback) {
                 "use strict";
-                var request;
+                var requestOpenDB;
                 window.URL.revokeObjectURL(episode.offlineMediaUrl);
-                request = window.indexedDB.open(this.settings.name, this.settings.version);
-                request.onupgradeneeded = this.updateIndexedDB;
-                request.onblocked = function() {
+                requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+                requestOpenDB.onupgradeneeded = this.updateIndexedDB;
+                requestOpenDB.onblocked = function () {
                     logHandler("Database blocked", 'debug');
                 };
-                request.onsuccess = function () {
+                requestOpenDB.onsuccess = function () {
                     logHandler("Success creating/accessing IndexedDB database", 'debug');
                     var db, transaction, store, request;
                     db = this.result;
@@ -408,7 +408,7 @@ var POD = {
                     store = transaction.objectStore(POD.storage.indexedDbStorage.settings.filesStore);
                     request = store.delete(episode.mediaUrl);
                     // Erfolgs-Event
-                    request.onsuccess = function() {
+                    request.onsuccess = function () {
                         episode.isFileSavedOffline = false;
                         episode.offlineMediaUrl = undefined;
                         POD.storage.writeEpisode(episode);
@@ -421,21 +421,21 @@ var POD = {
                         logHandler(event.target.error.name + ' while deleting file "' + episode.mediaUrl + '" from IndexedDB (' + event.target.error.message + ')', 'error');
                     };
                 };
-                request.onerror = function (event) {
+                requestOpenDB.onerror = function (event) {
                     logHandler(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
                 };
             },
-            openFile: function(episode, onReadCallback) {
+            openFile: function (episode, onReadCallback) {
                 "use strict";
                 if (episode.isFileSavedOffline) {
                     logHandler('Opening file "' + episode.mediaUrl + '" from IndexedDB starts now', 'debug');
-                    var request;
-                    request = window.indexedDB.open(this.settings.name, this.settings.version);
-                    request.onupgradeneeded = this.updateIndexedDB;
-                    request.onblocked = function() {
+                    var requestOpenDB;
+                    requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+                    requestOpenDB.onupgradeneeded = this.updateIndexedDB;
+                    requestOpenDB.onblocked = function () {
                         logHandler("Database blocked", 'debug');
                     };
-                    request.onsuccess = function () {
+                    requestOpenDB.onsuccess = function () {
                         logHandler("Success creating/accessing IndexedDB database", 'debug');
                         var db, transaction, store, request;
                         db = this.result;
@@ -443,7 +443,7 @@ var POD = {
                         store = transaction.objectStore(POD.storage.indexedDbStorage.settings.filesStore);
                         request = store.get(episode.mediaUrl);
                         // Erfolgs-Event
-                        request.onsuccess = function(event) {
+                        request.onsuccess = function (event) {
                             var objectUrl, blob;
                             //blob = new Blob([event.target.result], {type: episode.FileMimeType});
                             blob = event.target.result;
@@ -457,7 +457,7 @@ var POD = {
                             logHandler(event.target.error.name + ' while opening file "' + episode.mediaUrl + '" from IndexedDB (' + event.target.error.message + ')', 'error');
                         };
                     };
-                    request.onerror = function (event) {
+                    requestOpenDB.onerror = function (event) {
                         logHandler(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
                     };
                 } else {
@@ -472,7 +472,7 @@ var POD = {
                 fileSystemSize: 1024 * 1024 * 500, /*500 MB */
                 fileSystemStatus: window.PERSISTENT
             },
-            saveFile: function(episode, arraybuffer, mimeType, onWriteCallback, onProgressCallback) {
+            saveFile: function (episode, arraybuffer, mimeType, onWriteCallback, onProgressCallback) {
                 "use strict";
                 logHandler('Saving file "' + episode.mediaUrl + '" to local file system starts now', 'debug');
                 var blob, parts, fileName;
@@ -480,15 +480,15 @@ var POD = {
                 parts = episode.mediaUrl.split('/');
                 fileName = parts[parts.length - 1];
                 // Write file to the root directory.
-                window.requestFileSystem(this.settings.fileSystemStatus, this.settings.fileSystemSize, function(filesystem) {
-                    filesystem.root.getFile(fileName, {create: true, exclusive: false}, function(fileEntry) {
-                        fileEntry.createWriter(function(writer) {
-                            writer.onwrite = function(event) {
+                window.requestFileSystem(this.settings.fileSystemStatus, this.settings.fileSystemSize, function (filesystem) {
+                    filesystem.root.getFile(fileName, {create: true, exclusive: false}, function (fileEntry) {
+                        fileEntry.createWriter(function (writer) {
+                            writer.onwrite = function (event) {
                                 if (onProgressCallback && typeof onProgressCallback === 'function') {
                                     onProgressCallback(event, 'Write', episode);
                                 }
                             };
-                            writer.onwriteend = function() { //success
+                            writer.onwriteend = function () { //success
                                 episode.isFileSavedOffline = true;
                                 episode.offlineMediaUrl = fileEntry.toURL();
                                 POD.storage.writeEpisode(episode);
@@ -497,7 +497,7 @@ var POD = {
                                     onWriteCallback(episode);
                                 }
                             };
-                            writer.onerror = function(event) {
+                            writer.onerror = function (event) {
                                 logHandler('Error on saving file "' + episode.mediaUrl + '" to local file system (' + event + ')', 'error');
                             };
                             writer.write(blob);
@@ -505,10 +505,10 @@ var POD = {
                     }, errorHandler);
                 }, errorHandler);
             },
-            deleteFile: function(episode, onDeleteCallback) {
+            deleteFile: function (episode, onDeleteCallback) {
                 "use strict";
-                window.resolveLocalFileSystemURL(episode.offlineMediaUrl, function(fileEntry) { //success
-                    fileEntry.remove(function() { //success
+                window.resolveLocalFileSystemURL(episode.offlineMediaUrl, function (fileEntry) { //success
+                    fileEntry.remove(function () { //success
                         var url;
                         url = episode.offlineMediaUrl;
                         episode.isFileSavedOffline = false;
@@ -519,7 +519,7 @@ var POD = {
                             onDeleteCallback(episode);
                         }
                     }, errorHandler);
-                }, function(event) { //error
+                }, function (event) { //error
                     if (event.code === event.NOT_FOUND_ERR) {
                         var url;
                         url = episode.offlineMediaUrl;
@@ -531,16 +531,16 @@ var POD = {
                     }
                 });
             },
-            openFile: function(episode, onReadCallback) {
+            openFile: function (episode, onReadCallback) {
                 "use strict";
                 if (onReadCallback && typeof onReadCallback === 'function') {
                     onReadCallback(episode);
                 }
             },
-            requestFileSystemQuota: function(quota) {
+            requestFileSystemQuota: function (quota) {
                 "use strict";
                 if (navigator.persistentStorage) {
-                    navigator.persistentStorage.requestQuota(quota, function(grantedBytes) {
+                    navigator.persistentStorage.requestQuota(quota, function (grantedBytes) {
                         logHandler('You gain access to ' + grantedBytes / 1024 / 1024 + ' MiB of memory', 'debug');
                         navigator.persistentStorage.queryUsageAndQuota(function (usage, quota) {
                             localStorage.setItem("configuration.quota", quota);
@@ -557,7 +557,7 @@ var POD = {
             }
         },//end FileSystemStorage
         webStorage: {
-            readSource: function(sourceUri, onReadCallback) {
+            readSource: function (sourceUri, onReadCallback) {
                 "use strict";
                 var source;
                 source = JSON.parse(localStorage.getItem('source.' + sourceUri));
@@ -569,10 +569,10 @@ var POD = {
                 }
             },
             /* Get a Array with all Sources from the persistent storage */
-            readSources: function(onReadCallback) {
+            readSources: function (onReadCallback) {
                 "use strict";
                 var pushFunction, i, sourceArray = [];
-                pushFunction = function(source) {
+                pushFunction = function (source) {
                     sourceArray.push(source);
                 };
                 for (i = 0; i < localStorage.length; i++) {
@@ -584,21 +584,21 @@ var POD = {
                     onReadCallback(sourceArray);
                 }
             },
-            writeSource: function(source, onWriteCallback) {
+            writeSource: function (source, onWriteCallback) {
                 "use strict";
                 localStorage.setItem('source.' + source.uri, JSON.stringify(source));
                 if (onWriteCallback && typeof onWriteCallback === 'function') {
                     onWriteCallback(source);
                 }
             },
-            deleteSource: function(source, onDeleteCallback) {
+            deleteSource: function (source, onDeleteCallback) {
                 "use strict";
                 localStorage.removeItem('source.' + source.uri);
                 if (onDeleteCallback && typeof onDeleteCallback === 'function') {
                     onDeleteCallback(source);
                 }
             },
-            readEpisode: function(episodeUri, onReadCallback) {
+            readEpisode: function (episodeUri, onReadCallback) {
                 "use strict";
                 var episode;
                 if (episodeUri) {
@@ -618,13 +618,13 @@ var POD = {
                     onReadCallback(episode);
                 }
             },
-            readPlaylist: function(showAll, onReadCallback) {
+            readPlaylist: function (showAll, onReadCallback) {
                 "use strict";
                 if (!showAll) {
                     showAll = false;
                 }
                 var i, filter, playlist = [];
-                filter = function(episode) {
+                filter = function (episode) {
                     if (episode.playback.played === false || showAll === true) {
                         playlist.push(episode);
                     }
@@ -640,7 +640,7 @@ var POD = {
                     onReadCallback(playlist);
                 }
             },
-            writeEpisode: function(episode, onWriteCallback) {
+            writeEpisode: function (episode, onWriteCallback) {
                 "use strict";
                 localStorage.setItem('episode.' + episode.uri, JSON.stringify(episode));
                 if (onWriteCallback && typeof onWriteCallback === 'function') {
@@ -649,22 +649,22 @@ var POD = {
             }
         },//end WebStorage
         //Source Storage
-        readSource: function(sourceUri, onReadCallback) {
+        readSource: function (sourceUri, onReadCallback) {
             "use strict";
             if (this.dataStorageEngine()) {
                 this.dataStorageEngine().readSource(sourceUri, onReadCallback);
             }
         },
-        readSources: function(onReadCallback) {
+        readSources: function (onReadCallback) {
             "use strict";
             if (this.dataStorageEngine()) {
                 this.dataStorageEngine().readSources(onReadCallback);
             }
         },
-        writeSource: function(source, onWriteCallback) {
+        writeSource: function (source, onWriteCallback) {
             "use strict";
             if (this.dataStorageEngine()) {
-                this.dataStorageEngine().writeSource(source, function(source) {
+                this.dataStorageEngine().writeSource(source, function (source) {
                     if (onWriteCallback && typeof onWriteCallback === 'function') {
                         onWriteCallback(source);
                     }
@@ -672,29 +672,29 @@ var POD = {
                 });
             }
         },
-        deleteSource: function(source, onDeleteCallback) {
+        deleteSource: function (source, onDeleteCallback) {
             "use strict";
             if (this.dataStorageEngine()) {
                 this.dataStorageEngine().deleteSources(source, onDeleteCallback);
             }
         },
         //Episode Storage
-        readEpisode: function(episodeUri, onReadCallback) {
+        readEpisode: function (episodeUri, onReadCallback) {
             "use strict";
             if (this.dataStorageEngine()) {
                 this.dataStorageEngine().readEpisode(episodeUri, onReadCallback);
             }
         },
-        readPlaylist: function(showAll, onReadCallback) {
+        readPlaylist: function (showAll, onReadCallback) {
             "use strict";
             if (this.dataStorageEngine()) {
                 this.dataStorageEngine().readPlaylist(showAll, onReadCallback);
             }
         },
-        writeEpisode: function(episode, onWriteCallback) {
+        writeEpisode: function (episode, onWriteCallback) {
             "use strict";
             if (this.dataStorageEngine()) {
-                this.dataStorageEngine().writeEpisode(episode, function(episode) {
+                this.dataStorageEngine().writeEpisode(episode, function (episode) {
                     if (onWriteCallback && typeof onWriteCallback === 'function') {
                         onWriteCallback(episode);
                     }
@@ -703,7 +703,7 @@ var POD = {
             }
         },
         //File Storage
-        openFile: function(episode, onReadCallback) {
+        openFile: function (episode, onReadCallback) {
             "use strict";
             if (episode.isFileSavedOffline) {
                 if (this.fileStorageEngine()) {
@@ -715,20 +715,20 @@ var POD = {
                 }
             }
         },
-        saveFile: function(episode, arraybuffer, mimeType, onWriteCallback, onProgressCallback) {
+        saveFile: function (episode, arraybuffer, mimeType, onWriteCallback, onProgressCallback) {
             "use strict";
             if (this.fileStorageEngine()) {
                 this.fileStorageEngine().saveFile(episode, arraybuffer, mimeType, onWriteCallback, onProgressCallback);
             }
         },
-        deleteFile: function(episode, onDeleteCallback) {
+        deleteFile: function (episode, onDeleteCallback) {
             "use strict";
             if (this.fileStorageEngine()) {
                 this.fileStorageEngine().deleteFile(episode, onDeleteCallback);
             }
         },
         //Storage Engine Selection
-        dataStorageEngine: function() {
+        dataStorageEngine: function () {
             "use strict";
             var engine;
             if (window.indexedDB) {
@@ -740,7 +740,7 @@ var POD = {
             }
             return engine;
         },
-        fileStorageEngine: function() {
+        fileStorageEngine: function () {
             "use strict";
             var engine;
             if (window.requestFileSystem) {
@@ -752,28 +752,28 @@ var POD = {
             }
             return engine;
         },
-        isFileStorageAvailable: function() {
+        isFileStorageAvailable: function () {
             "use strict";
             return this.fileStorageEngine();
         },
         //Migration betwean storage engines
-        migradeData: function(oldStorageEngine, newStorageEngine) {
+        migradeData: function (oldStorageEngine, newStorageEngine) {
             "use strict";
-            oldStorageEngine.readSources(function(sourcesList) {
+            oldStorageEngine.readSources(function (sourcesList) {
                 var i;
                 for (i = 0; i < sourcesList.length; i++) {
                     newStorageEngine.writeSource(sourcesList[i], POD.web.downloadSource);
                     oldStorageEngine.deleteSource(sourcesList[i]);
                 }
             });
-            newStorageEngine.readPlaylist(false, function(episodeList) {
+            newStorageEngine.readPlaylist(false, function (episodeList) {
                 var i;
                 for (i = 0; i < episodeList.length; i++) {
                     episodeList[i].playback.played = true;
                     newStorageEngine.writeEpisode(episodeList[i]);
                 }
             });
-            oldStorageEngine.readPlaylist(false, function(episodeList) {
+            oldStorageEngine.readPlaylist(false, function (episodeList) {
                 var i;
                 for (i = 0; i < episodeList.length; i++) {
                     newStorageEngine.writeEpisode(episodeList[i]);
@@ -785,15 +785,15 @@ var POD = {
         settings: {
             downloadTimeout: 600000
         },
-        downloadSource: function(source) {
+        downloadSource: function (source) {
             "use strict";
             var successfunction, errorfunction, parserresult;
             parserresult = {'source': source, 'episodes': []};
-            successfunction = function(data) {
+            successfunction = function (data) {
                 var newestEpisodes, mergeFunction, i;
                 logHandler('Download of source "' + source.uri + '" is finished', 'debug');
-                mergeFunction = function(mergeEpisode) {
-                    POD.storage.readEpisode(mergeEpisode.uri, function(existingEpisode) {
+                mergeFunction = function (mergeEpisode) {
+                    POD.storage.readEpisode(mergeEpisode.uri, function (existingEpisode) {
                         existingEpisode.title = mergeEpisode.title;
                         existingEpisode.updated = mergeEpisode.updated;
                         existingEpisode.mediaUrl = mergeEpisode.mediaUrl;
@@ -815,7 +815,7 @@ var POD = {
                 // 4. Save Source
                 POD.storage.writeSource(source);
             };
-            errorfunction = function() {
+            errorfunction = function () {
                 if (localStorage.getItem("configuration.proxyUrl")) {
                     logHandler('Direct download failed. Try proxy: ' + localStorage.getItem("configuration.proxyUrl").replace("$url$", source.uri), 'warning');
                     $.ajax({
@@ -833,38 +833,38 @@ var POD = {
                     'url': source.uri,
                     'async': true,
                     'dataType': 'xml',
-                    'beforeSend': function(jqXHR, settings) { jqXHR.requestURL = settings.url; },
+                    'beforeSend': function (jqXHR, settings) { jqXHR.requestURL = settings.url; },
                     'success': successfunction,
                     'error': errorfunction
                 });
             } catch (ignore) {}
         },
-        downloadFile: function(episode, mimeType, onDownloadCallback, onProgressCallback) {
+        downloadFile: function (episode, mimeType, onDownloadCallback, onProgressCallback) {
             "use strict";
             var xhr = new XMLHttpRequest();
             xhr.open('GET', episode.mediaUrl, true);
             xhr.responseType = 'arraybuffer';
             xhr.timeout = POD.web.settings.downloadTimeout;
-            xhr.addEventListener("progress", function(event) {
+            xhr.addEventListener("progress", function (event) {
                 if (onProgressCallback && typeof onProgressCallback === 'function') {
                     onProgressCallback(event, 'Download', episode);
                 }
             }, false);
             xhr.addEventListener("abort", logHandler, false);
-            xhr.addEventListener("error", function() {
+            xhr.addEventListener("error", function () {
                 logHandler('Direct download failed. Try proxy: ' + localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl), 'warning');
                 var xhrProxy = new XMLHttpRequest();
                 xhrProxy.open('GET', localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl), true);
                 xhrProxy.responseType = 'arraybuffer';
                 xhrProxy.timeout = POD.web.settings.downloadTimeout;
-                xhrProxy.addEventListener("progress", function(event) {
+                xhrProxy.addEventListener("progress", function (event) {
                     if (onProgressCallback && typeof onProgressCallback === 'function') {
                         onProgressCallback(event, 'Download', episode);
                     }
                 }, false);
                 xhrProxy.addEventListener("abort", logHandler, false);
                 xhrProxy.addEventListener("error", errorHandler, false);
-                xhrProxy.onload = function() {
+                xhrProxy.onload = function () {
                     if (this.status === 200) {
                         logHandler('Download of file "' + episode.mediaUrl + '" via proxy is finished', 'debug');
                         POD.storage.saveFile(episode, xhrProxy.response, mimeType, onDownloadCallback);
@@ -872,12 +872,12 @@ var POD = {
                         logHandler('Error Downloading file "' + episode.mediaUrl + '" via proxy: ' + this.statusText + ' (' + this.status + ')', 'error');
                     }
                 };
-                xhrProxy.ontimeout = function() {
+                xhrProxy.ontimeout = function () {
                     logHandler("Timeout after " + (xhrProxy.timeout / 60000) + " minutes.", "error");
                 };
                 xhrProxy.send(null);
             }, false);
-            xhr.onload = function() {
+            xhr.onload = function () {
                 if (this.status === 200) {
                     logHandler('Download of file "' + episode.mediaUrl + '" is finished', 'debug');
                     POD.storage.saveFile(episode, xhr.response, mimeType, onDownloadCallback, onProgressCallback);
@@ -885,14 +885,14 @@ var POD = {
                     logHandler('Error Downloading file "' + episode.mediaUrl + '": ' + this.statusText + ' (' + this.status + ')', 'error');
                 }
             };
-            xhr.ontimeout = function() {
+            xhr.ontimeout = function () {
                 logHandler("Timeout after " + (xhr.timeout / 60000) + " minutes.", "error");
             };
             xhr.send(null);
         }
     },
     parser: {
-        parseSource: function(xml, source) {
+        parseSource: function (xml, source) {
             "use strict";
             var episodes = [];
             logHandler('Parsing source file "' + source.uri + '" starts now', 'debug');
@@ -903,7 +903,7 @@ var POD = {
                 source.title = $(xml).find('channel > title').text();
                 source.description = $(xml).find('channel > description').text();
                 //RSS-Entries
-                $(xml).find('item').each(function() {
+                $(xml).find('item').each(function () {
                     var item, episode;
                     item = $(this);
                     episode = {};
@@ -921,7 +921,7 @@ var POD = {
                         episode.mediaUrl = $(item.find('encoded').text()).find('a[href$=".mp3"]').first().attr('href');
                     }
                     episodes.push(episode);
-                    /*POD.storage.readEpisode(item.find('link, guid').first().text(), function(episode) {
+                    /*POD.storage.readEpisode(item.find('link, guid').first().text(), function (episode) {
                         if (episode) {
                             episode.title = item.find('title:first').text();
                             if (/^\d/.test(item.find('pubDate:first').text())) {
@@ -948,14 +948,14 @@ var POD = {
             return {'source': source, 'episodes': episodes};
         }
     },
-    toggleEpisodeStatus: function(episode) {
+    toggleEpisodeStatus: function (episode) {
         "use strict";
         episode.playback.played = !episode.playback.played;
         episode.playback.currentTime = 0;
         POD.storage.deleteFile(episode);
         POD.storage.writeEpisode(episode);
     },
-    sortEpisodes: function(firstEpisode, secondEpisode) {
+    sortEpisodes: function (firstEpisode, secondEpisode) {
         "use strict";
         if (firstEpisode.updated < secondEpisode.updated) {
             return -1;
@@ -967,10 +967,10 @@ var POD = {
     }
 };
 var UI =  {
-    findEpisodeUI: function(episode) {
+    findEpisodeUI: function (episode) {
         "use strict";
         var episodeUI;
-        $('#playlist .entries li').each(function() {
+        $('#playlist .entries li').each(function () {
             if ($(this).data('episodeUri') === episode.uri) {
                 episodeUI = this;
                 return false;
@@ -978,7 +978,7 @@ var UI =  {
         });
         return episodeUI;
     },
-    actualiseEpisodeUI: function(episode) {
+    actualiseEpisodeUI: function (episode) {
         "use strict";
         var episodeUI;
         episodeUI = UI.findEpisodeUI(episode);
@@ -997,13 +997,13 @@ var UI =  {
         $(episodeUI).find('progress').remove();
         return false;
     },
-    renderConfiguration: function() {
+    renderConfiguration: function () {
         "use strict";
         if (localStorage.getItem("configuration.proxyUrl")) {
             $('#httpProxyInput').val(localStorage.getItem("configuration.proxyUrl"));
         }
     },
-    renderEpisode: function(episode) {
+    renderEpisode: function (episode) {
         "use strict";
         var entryUI, entryFunctionsUI;
         entryUI = $('<li>');
@@ -1028,7 +1028,7 @@ var UI =  {
         entryUI.append(entryFunctionsUI);
         return entryUI;
     },
-    renderPlaylist: function(playlist) {
+    renderPlaylist: function (playlist) {
         "use strict";
         var playlistUI, entryUI, i;
         playlistUI = $('#playlist .entries');
@@ -1043,7 +1043,7 @@ var UI =  {
             playlistUI.append(entryUI);
         }
     },
-    renderSource: function(source) {
+    renderSource: function (source) {
         "use strict";
         var entryUI, entryFunctionsUI;
         entryUI = $('<li>');
@@ -1058,7 +1058,7 @@ var UI =  {
         entryUI.append(entryFunctionsUI);
         return entryUI;
     },
-    renderSourceList: function(sourcelist) {
+    renderSourceList: function (sourcelist) {
         "use strict";
         var sourcelistUI, entryUI, i;
         sourcelistUI = $('#sources .entries');
@@ -1073,26 +1073,26 @@ var UI =  {
             sourcelistUI.append(entryUI);
         }
     },
-    activeEpisode: function(onReadCallback) {
+    activeEpisode: function (onReadCallback) {
         "use strict";
         var activeEpisode = $('#playlist').find('.activeEpisode');
         POD.storage.readEpisode(activeEpisode.data('episodeUri'), onReadCallback);
     },
-    previousEpisode: function(onReadCallback) {
+    previousEpisode: function (onReadCallback) {
         "use strict";
         var activeEpisode = $('#playlist').find('.activeEpisode');
         POD.storage.readEpisode(activeEpisode.prev().data('episodeUri'), onReadCallback);
     },
-    nextEpisode: function(onReadCallback) {
+    nextEpisode: function (onReadCallback) {
         "use strict";
         var activeEpisode = $('#playlist').find('.activeEpisode');
         POD.storage.readEpisode(activeEpisode.next().data('episodeUri'), onReadCallback);
     },
-    getLastPlayedEpisode: function(onReadCallback) {
+    getLastPlayedEpisode: function (onReadCallback) {
         "use strict";
         var lastPlayedEpisode, i;
         lastPlayedEpisode = $('#playlist li:first-child').data('episodeUri');
-        POD.storage.readPlaylist(false, function(playlist) {
+        POD.storage.readPlaylist(false, function (playlist) {
             if (playlist && playlist.length > 0) {
                 for (i = 0; i < playlist.length; i++) {
                     if (playlist[i].uri === localStorage.getItem('configuration.lastPlayed')) {
@@ -1104,7 +1104,7 @@ var UI =  {
             POD.storage.readEpisode(lastPlayedEpisode, onReadCallback);
         });
     },
-    progressHandler: function(progressEvent, prefix, episode) {
+    progressHandler: function (progressEvent, prefix, episode) {
         "use strict"; //xmlHttpRequestProgressEvent
         var progressbar, percentComplete, episodeUI;
         episodeUI = UI.findEpisodeUI(episode);
@@ -1127,13 +1127,13 @@ var UI =  {
 
 /** Functions for playback */
 
-var activateEpisode = function(episode, onActivatedCallback) {
+var activateEpisode = function (episode, onActivatedCallback) {
     "use strict";
     var mediaUrl, audioTag, mp3SourceTag;
     $('#player audio').off('timeupdate');
     logHandler("Timeupdate off", 'debug');
     if (episode) {
-        POD.storage.openFile(episode, function(episode) {
+        POD.storage.openFile(episode, function (episode) {
             if (episode.offlineMediaUrl) {
                 mediaUrl =  episode.offlineMediaUrl;
             } else {
@@ -1152,35 +1152,35 @@ var activateEpisode = function(episode, onActivatedCallback) {
                 audioTag.attr('title', episode.title);
                 $('#mediacontrol').prepend(audioTag);
                 //Attach player events
-                $('#player audio').on('loadstart', function() {
+                $('#player audio').on('loadstart', function () {
                     logHandler("==============================================", 'debug');
-                    UI.activeEpisode(function(episode) { logHandler("Start loading " + episode.title, 'debug'); });
+                    UI.activeEpisode(function (episode) { logHandler("Start loading " + episode.title, 'debug'); });
                 });
-                $('#player audio').on('loadedmetadata', function() {
-                    UI.activeEpisode(function(episode) { logHandler("Load metadata of " + episode.title, 'debug'); });
+                $('#player audio').on('loadedmetadata', function () {
+                    UI.activeEpisode(function (episode) { logHandler("Load metadata of " + episode.title, 'debug'); });
                 });
-                $('#player audio').on('canplay', function() {
-                    UI.activeEpisode(function(episode) { logHandler(episode.title + " is ready to play", 'debug'); });
+                $('#player audio').on('canplay', function () {
+                    UI.activeEpisode(function (episode) { logHandler(episode.title + " is ready to play", 'debug'); });
                 });
-                $('#player audio').on('canplaythrough', function() {
-                    UI.activeEpisode(function(episode) { logHandler(episode.title + " is realy ready to play (\"canplaythrough\")", 'debug'); });
+                $('#player audio').on('canplaythrough', function () {
+                    UI.activeEpisode(function (episode) { logHandler(episode.title + " is realy ready to play (\"canplaythrough\")", 'debug'); });
                 });
-                $('#player audio').on('playing', function(event) {
+                $('#player audio').on('playing', function (event) {
                     var audioElement = event.target;
-                    UI.activeEpisode(function(episode) {
+                    UI.activeEpisode(function (episode) {
                         logHandler(episode.title + " is playing", 'info');
                         audioElement.autoplay = true;
                     });
                 });
-                $('#player audio').on('ended', function() {
-                    UI.activeEpisode(function(episode) {
+                $('#player audio').on('ended', function () {
+                    UI.activeEpisode(function (episode) {
                         logHandler(episode.title + " is ended", 'debug');
                         POD.toggleEpisodeStatus(episode);
                         //Plays next Episode in Playlist
                         UI.nextEpisode(playEpisode);
                     });
                 });
-                $('#player audio, #player audio source').on('error', function(e) {
+                $('#player audio, #player audio source').on('error', function (e) {
                     var errormessage, readystate;
                     errormessage = e.toString();
                     readystate = $(this).parent()[0].readyState;
@@ -1208,14 +1208,14 @@ var activateEpisode = function(episode, onActivatedCallback) {
                     logHandler(errormessage, 'error');
                     UI.nextEpisode(playEpisode);
                 });
-                $('#player audio').on('durationchange', function(event) {
+                $('#player audio').on('durationchange', function (event) {
                     var audioElement = event.target;
-                    UI.activeEpisode(function(episode) {
+                    UI.activeEpisode(function (episode) {
                         logHandler("Duration of " + episode.title + " is changed to " + event.currentTarget.duration + ".", 'debug');
                         if (episode && audioElement.duration > episode.playback.currentTime && audioElement.currentTime <= episode.playback.currentTime) {
                             logHandler("CurrentTime will set to " + episode.playback.currentTime + " seconds", 'debug');
                             audioElement.currentTime = episode.playback.currentTime;
-                            $(audioElement).on('timeupdate', function(event) {
+                            $(audioElement).on('timeupdate', function (event) {
                                 if (episode && (event.target.currentTime > (episode.playback.currentTime + 10) || event.target.currentTime < (episode.playback.currentTime - 10))) {
                                     episode.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10;
                                     POD.storage.writeEpisode(episode);
@@ -1229,17 +1229,17 @@ var activateEpisode = function(episode, onActivatedCallback) {
             }
             //Styling
             $('#playlist').find('.activeEpisode').removeClass('activeEpisode');
-            $('#playlist li').filter(function() { return $(this).data('episodeUri') === episode.uri; }).addClass('activeEpisode');
+            $('#playlist li').filter(function () { return $(this).data('episodeUri') === episode.uri; }).addClass('activeEpisode');
             if (onActivatedCallback && typeof onActivatedCallback === 'function') {
                 onActivatedCallback(episode);
             }
         });
     }
 };
-var playEpisode = function(episode, onPlaybackStartedCallback) {
+var playEpisode = function (episode, onPlaybackStartedCallback) {
     "use strict";
     if (episode) {
-        activateEpisode(episode, function(episode) {
+        activateEpisode(episode, function (episode) {
             localStorage.setItem('configuration.lastPlayed', episode.uri);
             $('#player audio')[0].load();
             if (onPlaybackStartedCallback && typeof onPlaybackStartedCallback === 'function') {
@@ -1250,7 +1250,7 @@ var playEpisode = function(episode, onPlaybackStartedCallback) {
 };
 
 /** Central 'ready' event handler */
-$(document).ready(function() {
+$(document).ready(function () {
     "use strict";
     //Update local storage to actual version of key-names (changed "track" to "episode")
     var k, quota, multiMediaKeyDownTimestemp;
@@ -1261,56 +1261,56 @@ $(document).ready(function() {
         }
     }
     //Application Cache Events
-    $(applicationCache).on('checking', function() {
+    $(applicationCache).on('checking', function () {
         logHandler("Application cache checks for updates (Cache status: " + applicationCache.status + ")", 'debug');
         $('#applicationCacheLog').prepend('<span>' + "Application cache check for updates" + '</span></br>');
     });
-    $(applicationCache).on('noupdate', function() {
+    $(applicationCache).on('noupdate', function () {
         logHandler("Application cache founds no update (Cache status: " + applicationCache.status + ")", 'debug');
         $('#applicationCacheLog').prepend('<span>' + "Application cache founds no update" + '</span></br>');
     });
-    $(applicationCache).on('downloading', function() {
+    $(applicationCache).on('downloading', function () {
         logHandler("Application cache download updated files (Cache status: " + applicationCache.status + ")", 'debug');
         $('#applicationCacheLog').prepend('<span>' + "Application cache download updated files" + '</span></br>');
     });
-    $(applicationCache).on('progress', function() {
+    $(applicationCache).on('progress', function () {
         logHandler("Application cache downloading files (Cache status: " + applicationCache.status + ")", 'debug');
         $('#applicationCacheLog').prepend('<span>' + "Application cache downloading files" + '</span></br>');
     });
-    $(applicationCache).on('cached', function() {
+    $(applicationCache).on('cached', function () {
         logHandler("Application cached (Cache status: " + applicationCache.status + ")", 'debug');
         $('#applicationCacheLog').prepend('<span>' + "Application cached" + '</span></br>');
     });
-    $(applicationCache).on('updateready', function() {
+    $(applicationCache).on('updateready', function () {
         logHandler("Application cache is updated (Cache status: " + applicationCache.status + ")", 'info');
         $('#applicationCacheLog').prepend('<span>' + "Application cache is updated" + '</span></br>');
         applicationCache.swapCache();
         alert("An update of HTML5 Podcatcher is available. Please reload to activate the new Version.");
     });
-    $(applicationCache).on('obsolete', function() {
+    $(applicationCache).on('obsolete', function () {
         logHandler("Application cache is corrupted and will be deletet (Cache status: " + applicationCache.status + ")", 'debug');
         $('#applicationCacheLog').prepend('<span>' + "Application cache is corrupted and will be deletet" + '</span></br>');
     });
-    $(applicationCache).on('error', function() {
+    $(applicationCache).on('error', function () {
         logHandler("Error downloading manifest or resources (Cache status: " + applicationCache.status + ")", 'error');
         $('#applicationCacheLog').prepend('<span>' + "Error downloading manifest or resources" + '</span></br>');
     });
     //Player UI Events
-    $('#player #playPreviousEpisode').on('click', function() {
+    $('#player #playPreviousEpisode').on('click', function () {
         UI.previousEpisode(playEpisode);
     });
-    $('#player #playNextEpisode').on('click', function() {
+    $('#player #playNextEpisode').on('click', function () {
         UI.nextEpisode(playEpisode);
     });
-    $('#player #jumpBackwards').on('click', function() {
+    $('#player #jumpBackwards').on('click', function () {
         var audioTag = $('#player audio')[0];
         audioTag.currentTime = Math.max(0, audioTag.currentTime - 10);
     });
-    $('#player #jumpForwards').on('click', function() {
+    $('#player #jumpForwards').on('click', function () {
         var audioTag = $('#player audio')[0];
         audioTag.currentTime = Math.min(audioTag.duration, audioTag.currentTime + 10);
     });
-    $(document).on('keydown', function(event) {
+    $(document).on('keydown', function (event) {
         if (event.key === 'MediaNextTrack' || event.keyCode === 176) {
             var now = new Date();
             if (!multiMediaKeyDownTimestemp) {
@@ -1322,7 +1322,7 @@ $(document).ready(function() {
             }
         }
     });
-    $(document).on('keyup', function(event) {
+    $(document).on('keyup', function (event) {
         if (event.key === 'MediaNextTrack' || event.keyCode === 176) {
             var now = new Date();
             if (now - multiMediaKeyDownTimestemp < 1000) {
@@ -1338,7 +1338,7 @@ $(document).ready(function() {
             } else {
                 UI.previousEpisode(playEpisode);
             }
-        } else if (event.key === 'MediaPlayPause' || event.keyCode === 179) {
+        } else if (event.key === 'MediaPlayPause' || event.key === 'MediaPlay' || event.keyCode === 179) {
             if ($('#player audio').length) {
                 if ($('#player audio')[0].paused) {
                     $('#player audio')[0].play();
@@ -1354,62 +1354,62 @@ $(document).ready(function() {
         multiMediaKeyDownTimestemp = undefined;
     });
     //Playlist UI Events
-    $('#playlist').on('click', 'li', function(event) {
+    $('#playlist').on('click', 'li', function (event) {
         event.preventDefault();
         event.stopPropagation();
         //Play episode
         //$('#player audio')[0].autoplay = true;
         POD.storage.readEpisode($(this).data('episodeUri'), playEpisode);
     });
-    $('#playlist').on('click', '.download', function(event) {
+    $('#playlist').on('click', '.download', function (event) {
         event.preventDefault();
         event.stopPropagation();
         var episodeUI;
         episodeUI = $(this).closest('li');
-        POD.storage.readEpisode(episodeUI.data('episodeUri'), function(episode) {
+        POD.storage.readEpisode(episodeUI.data('episodeUri'), function (episode) {
             logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info');
-            POD.web.downloadFile(episode, 'audio/mpeg', function(episode) {
+            POD.web.downloadFile(episode, 'audio/mpeg', function (episode) {
                 episodeUI.replaceWith(UI.renderEpisode(episode));
             }, UI.progressHandler);
         });
     });
-    $('#playlist').on('click', '.delete', function(event) {
+    $('#playlist').on('click', '.delete', function (event) {
         event.preventDefault();
         event.stopPropagation();
-        POD.storage.readEpisode($(this).closest('li').data('episodeUri'), function(episode) {
+        POD.storage.readEpisode($(this).closest('li').data('episodeUri'), function (episode) {
             logHandler('Deleting file "' + episode.offlineMediaUrl + '" starts now', 'info');
             POD.storage.deleteFile(episode);
         });
     });
-    $('#playlist').on('click', '.status', function(event) {
+    $('#playlist').on('click', '.status', function (event) {
         event.preventDefault();
         event.stopPropagation();
-        POD.storage.readEpisode($(this).closest('li').data('episodeUri'), function(episode) {
+        POD.storage.readEpisode($(this).closest('li').data('episodeUri'), function (episode) {
             POD.toggleEpisodeStatus(episode);
         });
     });
-    $('#playlist').on('click', '.origin', function(event) {
+    $('#playlist').on('click', '.origin', function (event) {
         event.stopPropagation();
         event.preventDefault();
         window.open($(this).attr('href'), '_blank');
     });
-    $('#playlist #updatePlaylist').on('click', function(event) {
+    $('#playlist #updatePlaylist').on('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
         var i;
-        POD.storage.readSources(function(sources) {
+        POD.storage.readSources(function (sources) {
             for (i = 0; i < sources.length; i++) {
                 POD.web.downloadSource(sources[i]);
             }
             //POD.storage.readPlaylist(false, UI.renderPlaylist);
         });
     });
-    $('#playlist #showFullPlaylist').on('click', function(event) {
+    $('#playlist #showFullPlaylist').on('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
         POD.storage.readPlaylist(true, UI.renderPlaylist);
     });
-    document.addEventListener('writeEpisode', function(event) {
+    document.addEventListener('writeEpisode', function (event) {
         var i, episode, episodeUI;
         episode = event.detail.episode;
         episodeUI = UI.renderEpisode(episode);
@@ -1429,20 +1429,20 @@ $(document).ready(function() {
         }
     }, false);
     //Sources UI Events
-    $('#sources').on('click', '.updateSource', function(event) {
+    $('#sources').on('click', '.updateSource', function (event) {
         event.preventDefault();
         event.stopPropagation();
-        POD.storage.readSource($(this).attr("href"), function(source) {
+        POD.storage.readSource($(this).attr("href"), function (source) {
             POD.web.downloadSource(source);
         });
     });
-    $('#sources').on('click', '.deleteSource', function(event) {
+    $('#sources').on('click', '.deleteSource', function (event) {
         event.preventDefault();
         event.stopPropagation();
         var i, removeFunction;
-        removeFunction = function(element) { $(element).remove(); };
-        POD.storage.readSource($(this).closest('li').data('sourceUri'), function(source) {
-            POD.storage.deleteSource(source, function(source) {
+        removeFunction = function (element) { $(element).remove(); };
+        POD.storage.readSource($(this).closest('li').data('sourceUri'), function (source) {
+            POD.storage.deleteSource(source, function (source) {
                 for (i = 0; i < $('#sources .entries li').length; i++) {
                     if ($($('#sources .entries li')[i]).data('sourceUri') === source.uri) {
                         $($('#sources .entries li')[i]).slideUp(400, removeFunction(this));
@@ -1452,21 +1452,21 @@ $(document).ready(function() {
             });
         });
     });
-    $('#sources').on('click', '.link', function(event) {
+    $('#sources').on('click', '.link', function (event) {
         event.preventDefault();
         event.stopPropagation();
         window.open($(this).attr('href'), '_blank');
     });
-    $('#sources #addSourceForm').on('submit', function(event) {
+    $('#sources #addSourceForm').on('submit', function (event) {
         event.preventDefault();
         event.stopPropagation();
         if ($('#addSourceUrlInput')[0].checkValidity()) {
-            POD.storage.readSource($('#addSourceUrlInput').val(), function(source) {
+            POD.storage.readSource($('#addSourceUrlInput').val(), function (source) {
                 POD.web.downloadSource(source);
             });
         }
     });
-    document.addEventListener('writeSource', function(event) {
+    document.addEventListener('writeSource', function (event) {
         var i, source, sourceUI;
         source = event.detail.source;
         sourceUI = UI.renderSource(source);
@@ -1482,7 +1482,7 @@ $(document).ready(function() {
         sourceUI.fadeIn();
     }, false);
     //Configuration UI Events
-    $('#configuration #memorySizeForm').on('submit', function(event) {
+    $('#configuration #memorySizeForm').on('submit', function (event) {
         event.preventDefault();
         event.stopPropagation();
         if ($('#memorySizeInput')[0].checkValidity()) {
@@ -1491,7 +1491,7 @@ $(document).ready(function() {
             logHandler('Please insert a number', 'error');
         }
     });
-    $('#configuration #proxyForm').on('submit', function(event) {
+    $('#configuration #proxyForm').on('submit', function (event) {
         event.preventDefault();
         event.stopPropagation();
         if ($('#httpProxyInput')[0].checkValidity()) {
@@ -1500,7 +1500,7 @@ $(document).ready(function() {
             logHandler('Please insert a URL', 'error');
         }
     });
-    $('#configuration #exportConfiguration').on('click', function() {
+    $('#configuration #exportConfiguration').on('click', function () {
         var i, key, config;
         config = {'Episodes': {}, 'Sources': {}, 'Settings': {}};
         for (i = 0; i < localStorage.length; i++) {
@@ -1516,7 +1516,7 @@ $(document).ready(function() {
         $(this).parent().find('#SerialisedConfigurationInput').val(JSON.stringify(config));
         $(this).parent().find('#SerialisedConfigurationInput')[0].select();
     });
-    $('#configuration #importConfiguration').on('click', function() {
+    $('#configuration #importConfiguration').on('click', function () {
         var config, property;
         localStorage.clear();
         config = JSON.parse($(this).parent().find('#SerialisedConfigurationInput').val());
@@ -1536,7 +1536,7 @@ $(document).ready(function() {
             }
         }
     });
-    $('#statusbar').on('click', function(event) {
+    $('#statusbar').on('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
         $(this).parent().toggleClass('fullscreen');
@@ -1552,7 +1552,7 @@ $(document).ready(function() {
     }
     //Render lists and settings
     UI.renderConfiguration();
-    POD.storage.readSources(function(sources) {
+    POD.storage.readSources(function (sources) {
         UI.renderSourceList(sources);
         POD.storage.readPlaylist(false, UI.renderPlaylist);
         //Initialise player

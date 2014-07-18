@@ -17,7 +17,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see http://www.gnu.org/licenses/.
 
-# Version 0.17.4 Alpha
+# Version 0.0.0 Alpha
 # Change Log: 
 ## 0.12.11
 ### Fix a Bug on setting the last played episode after page load
