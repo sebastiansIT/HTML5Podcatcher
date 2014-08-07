@@ -10,7 +10,8 @@
             version: {
                 files: {
                     'build/podcatcher.html': 'podcatcher.html',
-                    'build/scripts/podcatcher.js': 'scripts/podcatcher.js',
+                    'build/scripts/normalise.js': 'scripts/normalise.js',
+					'build/scripts/podcatcher.js': 'scripts/podcatcher.js',
                     'build/cache-manifest.manifest': 'cache-manifest.manifest'
                 },
                 options: {

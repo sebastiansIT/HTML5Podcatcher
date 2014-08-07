@@ -27,29 +27,6 @@
 /*global $ */
 /*global CustomEvent */
 
-// Take care of vendor prefixes.
-window.URL = window.URL || window.webkitURL;
-window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
-window.resolveLocalFileSystemURL = window.resolveLocalFileSystemURL || window.webkitResolveLocalFileSystemURL;
-navigator.persistentStorage = navigator.persistentStorage || navigator.webkitPersistentStorage;
-// Polyfills
-(function () {
-    // Custom Event Constructor for IE 9, 10 and 11
-    // Polyfill from https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent#Polyfill
-    try {
-        new CustomEvent('CustomEventConstructorTest', {"detail": undefined});
-    } catch (exception) {
-        function CustomEvent(event, params) {
-            params = params || { bubbles: false, cancelable: false, detail: undefined };
-            var evt = document.createEvent('CustomEvent');
-            evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
-            return evt;
-        }
-        CustomEvent.prototype = window.Event.prototype;
-        window.CustomEvent = CustomEvent;
-    }
-}());
-
 /** Helper Functions */
 var escapeHtml = function (text) {
     "use strict";
@@ -822,7 +799,9 @@ var POD = {
                         'async': true,
                         'dataType': 'xml',
                         'success': successfunction,
-                        'error': errorHandler
+                        'error': function (jqXHR, textStatus, errorThrown) {
+                            logHandler("Download failed: " + textStatus + " (" + errorThrown + ")");
+                        }
                     });
                 }
             };
