@@ -62,7 +62,31 @@ body > footer.fullscreen {
 }
 
 audio { width: 100%; }
-progress { width:5em; }
+progress { width:100px; /* Don't use relative values because Chrome is bugy.*/ }
+
+button, .button {
+	display: inline-block;
+	margin: 0px 0.6em 0.6em 0px;
+	padding: 0.4em 0.8em;
+	background-color: #006400;
+	border:none;
+	border-radius: 25%;
+	box-shadow: 6px 6px 10px 0px rgba(50, 50, 50, 0.75);
+	color: #ffffff;
+	font-size: 0.85rem;
+	font-family: sans-serif;
+	font-weight: bold;
+	text-decoration: none;
+}
+button:active, .button:active {
+	box-shadow: inset 6px 6px 10px 0px rgba(50, 50, 50, 0.75);
+}
+button[disabled], .button[disabled] {
+	background-color: #aaaaaa;
+	box-shadow: unset;
+	color: #666666;
+	font-weight: normal;
+}
 
 textarea { width:100%; height: 10em; }
 
@@ -97,10 +121,8 @@ textarea { width:100%; height: 10em; }
 }
 .entries h3 { margin:0; }
 .entries .source ,
-.entries .updated{ 
+.entries .updated { 
 	display: block; 
 	padding-left: 1em;
 }
 .entries .functions { display: block; text-align: right; }
-.entries .functions .origin:after,
-.entries .functions .status:after { content: " | "; }

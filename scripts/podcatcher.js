@@ -781,7 +781,7 @@ var POD = {
                 parserresult = POD.parser.parseSource(data, source);
                 //compute parser result
                 // 1. merge existing data with actual one
-                // TODO this and writing a multi episode write method
+                // TODO writing a multi episode write method
                 // 2. filter top 5 episodes and check if unread
                 newestEpisodes = parserresult.episodes.slice(parserresult.episodes.length - 5, parserresult.episodes.length);
                 // 3. save top 5 episodes with actualised data
@@ -991,16 +991,16 @@ var UI =  {
         entryUI.append('<time datetime="' + episode.updated.toISOString() + '" class="updated">' + episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString() + '</span>');
         entryFunctionsUI = $('<span class="functions">');
         if (episode.playback.played) {
-            entryFunctionsUI.append('<a class="status" href="#">Status: played</a>');
+            entryFunctionsUI.append('<button type="button" class="status">Status: played</button>');
         } else {
-            entryFunctionsUI.append('<a class="status" href="#">Status: new</a>');
+            entryFunctionsUI.append('<button type="button" class="status">Status: new</button>');
         }
-        entryFunctionsUI.append('<a class="origin" href="' + episode.uri + '">Internet</a>');
+        entryFunctionsUI.append('<a class="origin button" href="' + episode.uri + '">Internet</a>');
         if (POD.storage.isFileStorageAvailable()) {
             if (episode.isFileSavedOffline) {
-                entryFunctionsUI.append('<a class="delete" href="' + episode.mediaUrl + '">Delete</a>');
+                entryFunctionsUI.append('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>');
             } else if (episode.mediaUrl) {
-                entryFunctionsUI.append('<a class="download" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
+                entryFunctionsUI.append('<a class="button downloadFile" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
             }
         }
         entryUI.append(entryFunctionsUI);
@@ -1030,9 +1030,9 @@ var UI =  {
         entryUI.append('<p class="description">' + source.description + '</p>');
         entryUI.append('<p class="uri"><a href="' + source.uri + '">' + source.uri + '</a></p>');
         entryFunctionsUI = $('<span class="functions">');
-        entryFunctionsUI.append('<a class="link" href="' + source.link + '">Internet</a> ');
-        entryFunctionsUI.append('<a class="updateSource" href="' + source.uri + '">Update</a> ');
-        entryFunctionsUI.append('<a class="deleteSource" href="' + source.uri + '">Delete</a>');
+        entryFunctionsUI.append('<a class="link button" href="' + source.link + '">Internet</a> ');
+        entryFunctionsUI.append('<button type="button" class="updateSource" href="' + source.uri + '">Update</button> ');
+        entryFunctionsUI.append('<button type="button" class="deleteSource" href="' + source.uri + '">Delete</button>');
         entryUI.append(entryFunctionsUI);
         return entryUI;
     },
@@ -1090,7 +1090,7 @@ var UI =  {
             progressbar = $(episodeUI).find('progress');
         } else {
             progressbar = $('<progress min="0" max="1">&helip;</progress>');
-            $(episodeUI).find('.download').hide().after(progressbar);
+            $(episodeUI).find('.downloadFile').hide().after(progressbar);
         }
         if (progressEvent.lengthComputable) {
             percentComplete = progressEvent.loaded / progressEvent.total;
@@ -1339,7 +1339,7 @@ $(document).ready(function () {
         //$('#player audio')[0].autoplay = true;
         POD.storage.readEpisode($(this).data('episodeUri'), playEpisode);
     });
-    $('#playlist').on('click', '.download', function (event) {
+    $('#playlist').on('click', '.downloadFile', function (event) {
         event.preventDefault();
         event.stopPropagation();
         var episodeUI;
@@ -1518,6 +1518,14 @@ $(document).ready(function () {
         event.stopPropagation();
         $(this).parent().toggleClass('fullscreen');
     });
+    window.addEventListener('online',  function () {
+        logHandler("Online now", 'info');
+        $('#updatePlaylist, .updateSource, .downloadFile').removeAttr('disabled');
+    }, false);
+    window.addEventListener('offline', function () {
+        logHandler("Offline now", 'info');
+        $('#updatePlaylist, .updateSource, .downloadFile').attr('disabled', 'disabled');
+    }, false);
     //Quota and Filesystem initialisation
     if (POD.storage.fileStorageEngine() === POD.storage.fileSystemStorage) {
         $('#memorySizeForm').show();
@@ -1532,6 +1540,9 @@ $(document).ready(function () {
     POD.storage.readSources(function (sources) {
         UI.renderSourceList(sources);
         POD.storage.readPlaylist(false, UI.renderPlaylist);
+        if (!navigator.onLine) {
+            $('#updatePlaylist, .updateSource, .downloadFile').attr('disabled', 'disabled');
+        }
         //Initialise player
         UI.getLastPlayedEpisode(playEpisode);
     });

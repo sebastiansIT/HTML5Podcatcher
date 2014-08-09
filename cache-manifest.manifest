@@ -89,6 +89,13 @@
 ### Polyfill custom event constructor for Internet Explorer
 ## 0.17.5
 ### Bugfix: don't render new Episodes after update
+## 0.18.0
+### Disable some functions if browser is offline (using navigator.onLine and online/offline-Events)
+### Add two lines to the NETWORK-Sektion of this file (special for Firefox)
+## 0.18.1
+### add more functions disabled when offline
+## 0.18.2
+### add new Style for buttons and Link-Buttons (links looking like a button)
 
 CACHE:
 ./podcatcher.html
@@ -99,4 +106,8 @@ CACHE:
 ./css/main.css
 
 NETWORK:
+# this is: "Load all not cached files from Network" (for Firefox;  see http://www.appcachefacts.info/)
+http://*
+https://*
+# this is: "Load all not cached files from Network" (for other browsers)
 *
