@@ -373,7 +373,9 @@ $(document).ready(function () {
         UI.logHandler("Application cache is updated (Cache status: " + applicationCache.status + ")", 'info');
         $('#applicationCacheLog').prepend('<span>' + "Application cache is updated" + '</span></br>');
         applicationCache.swapCache();
-        alert("An update of HTML5 Podcatcher is available. Please reload to activate the new Version.");
+		if (confirm("An update of HTML5 Podcatcher is available. Do you want to reload now?")) {
+            window.location.reload();
+        }
     });
     $(applicationCache).on('obsolete', function () {
         UI.logHandler("Application cache is corrupted and will be deletet (Cache status: " + applicationCache.status + ")", 'debug');
