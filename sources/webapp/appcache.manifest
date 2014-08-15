@@ -98,6 +98,8 @@
 ### add new Style for buttons and Link-Buttons (links looking like a button)
 ## 0.18.3
 ### Restructuring Code and Files
+## 0.18.4
+### Bug fix: Call deleteSources() instead of deleteSource()
 
 CACHE:
 ./podcatcher.html

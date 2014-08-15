@@ -622,7 +622,7 @@ var HTML5Podcatcher = {
         deleteSource: function (source, onDeleteCallback) {
             "use strict";
             if (this.dataStorageEngine()) {
-                this.dataStorageEngine().deleteSources(source, onDeleteCallback);
+                this.dataStorageEngine().deleteSource(source, onDeleteCallback);
             }
         },
         //Episode Storage
