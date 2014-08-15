@@ -96,12 +96,15 @@
 ### add more functions disabled when offline
 ## 0.18.2
 ### add new Style for buttons and Link-Buttons (links looking like a button)
+## 0.18.3
+### Restructuring Code and Files
 
 CACHE:
 ./podcatcher.html
 ./favicon.ico
-./scripts/jquery-2.1.0.min.js
+./scripts/jquery.min.js
 ./scripts/normalise.js
+./scripts/lowLevelApi.js
 ./scripts/podcatcher.js
 ./css/main.css
 

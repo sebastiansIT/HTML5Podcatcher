@@ -19,7 +19,7 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 -->
 
-<html manifest="cache-manifest.manifest">
+<html manifest="appcache.manifest">
     <head>
         <meta charset="utf-8">
         <title>Playlist &mdash; HTML5 Podcatcher</title>
@@ -36,7 +36,7 @@
     <body>
         <header role="banner"> 
 			<h1>HTML5 Podcatcher</h1>
-			<h2>Alpha {{ VERSION }}</h2>
+			<h2>{{ VERSION }} {{ VARIANT }}</h2>
 		</header>
 		<div class="main">
 			<section id="player">
@@ -101,8 +101,9 @@
 			<p id="statusbar"></p>
 			<!-- Impressum ec. -->
 		</footer>
-		<script src="scripts/jquery-2.1.0.min.js"></script>
+		<script src="scripts/jquery.min.js"></script>
 		<script src="scripts/normalise.js"></script>
+		<script src="scripts/lowLevelApi.js"></script>
 		<script src="scripts/podcatcher.js"></script>
     </body>
 </html>

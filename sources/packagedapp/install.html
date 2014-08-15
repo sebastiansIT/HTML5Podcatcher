@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<!--
+    Copyright 2013, 2014 Sebastian Spautz
+
+    This file is part of "HTML5 Podcatcher".
+    
+    "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    "HTML5 Podcatcher" is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see http://www.gnu.org/licenses/.
+-->
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Install Packaged App &mdash; Open Web App &mdash; HTML5 Podcatcher</title>
+        <meta name="description" content="Installation Page for the HTML5 Podcatcher.">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="shortcut icon" type="../image/x-icon" href="favicon.ico"/>
+        <link rel="stylesheet" href="../css/main.css" />
+    </head>
+    <body>
+        <header role="banner"> 
+			<h1>HTML5 Podcatcher</h1>
+			<h2>{{ VERSION }}</h2>
+		</header>
+		<div class="main">
+			<script>
+			  // This URL must be a full url.
+			  var manifestUrl = 'package.manifest';
+			  var req = navigator.mozApps.installPackage(manifestUrl);
+			  req.onsuccess = function() {
+				alert(this.result.origin);
+			  };
+			  req.onerror = function() {
+				alert(this.error.name);
+			  };
+			</script>
+		</div>
+		<footer>
+			<p id="statusbar"></p>
+		</footer>
+	</body>
+</html>
