@@ -100,6 +100,8 @@
 ### Restructuring Code and Files
 ## 0.18.4
 ### Bug fix: Call deleteSources() instead of deleteSource()
+## 0.18.5
+### Bug fix: Reset download state of an episode if downloaded file is not find in storage and log an error
 
 CACHE:
 ./podcatcher.html
