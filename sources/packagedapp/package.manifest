@@ -8,7 +8,7 @@
 		"systemXHR": {
 			"description": "Needs to load remote content like podcast feeds and audio files."
 		}
-	}
+	},
 	"icons": {
 		"60": "/img/logo60.png",
         "128": "/img/logo128.png",
@@ -18,5 +18,5 @@
 		"name": "SebastiansIT",
 		"url": "http://human-injection.de"
 	},
-	"package_path": "html5podcatcher.zip"
+	"package_path": "http://lab.human-injection.de/podcatcher/download/html5podcatcher.zip"
 }

@@ -1,4 +1,4 @@
-﻿/*  Copyright 2013 Sebastian Spautz
+﻿/*  Copyright 2013, 2014 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
     
@@ -23,8 +23,7 @@ body {
 
 body > header,
 body > footer {
-	position: fixed;
-    right: 0;
+	position: relative;
 	width: 100%;
 	padding:0.5rem 0;
 	background-color: darkgreen;
@@ -33,10 +32,21 @@ body > footer {
     text-align: left;    
 	z-index: 100;
 }
-body > header {
-	top: 0;
-	max-height:2rem;
+@media all and (min-height: 640px) {
+	body > header,
+	body > footer {
+		right: 0;
+		position: fixed;
+	}
+	body > header {
+		top: 0;
+		max-height:2rem;
+	}
+	body > footer {
+		bottom: 0;
+	}
 }
+
 body > header h1,
 body > header h2  {
 	display: inline-block;
@@ -51,11 +61,27 @@ body > header h2  {
 .main {
 	margin: 3rem 1rem 5rem 1rem;
 }
+nav {
+	float: right;
+	margin-right: 1rem;
+}
+nav ul {
+	list-style-type: none;
+	margin: 0;
+}
+nav a {
+	color: #EEEEEE;
+}
+
 body > footer {
-	bottom: 0;
 	max-height:3rem;
 	overflow:scroll;
+	box-sizing: padding-box;
 }
+body > footer > * {
+	margin:0 0.4em;
+}
+
 body > footer.fullscreen {
 	max-height:100%;
 	height:100%;
@@ -68,7 +94,7 @@ button, .button {
 	display: inline-block;
 	margin: 0px 0.6em 0.6em 0px;
 	padding: 0.4em 0.8em;
-	background-color: #006400;
+	background-color: #004600;
 	border:none;
 	border-radius: 25%;
 	box-shadow: 6px 6px 10px 0px rgba(50, 50, 50, 0.75);

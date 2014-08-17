@@ -77,29 +77,10 @@
 					</form>
 				</footer>
 			</section>
-			<section id="configuration">
-				<header><h2>Configuration</h2></header>
-				<form action="#" id="memorySizeForm">
-					<label for="memorySizeInput">Memory size (MiB):</label>
-					<input title="Allowed size for downloaded files in megabyte" type="number" required="required" min="100" step="20" value="500" name="memorySizeInput" id="memorySizeInput" />
-					<input type="submit" name="saveMemorySizeButton" id="saveMemorySizeButton" value="Save" />
-				</form>
-				<form action="#" id="proxyForm">
-					<label for="httpProxyInput">Proxy-URL</label>
-					<input type="url" name="httpProxyInput" id="httpProxyInput" />
-					<input type="submit" name="saveConfigurationButton" id="saveConfigurationButton" value="Save" />
-				</form>
-				<form action="#" id="ExportImportForm">
-					<label for="httpProxyInput">Import/Export Configuration</label>
-					<textarea name="SerialisedConfigurationInput" id="SerialisedConfigurationInput"></textarea>
-					<input type="button" name="importConfiguration" id="importConfiguration" value="Import" />
-					<input type="button" name="exportConfiguration" id="exportConfiguration" value="Export" />
-				</form>
-			</section>
 		</div>
 		<footer>
+			<nav role="navigation"><ul><li><a href="settings.html" title="Settings">Settings</a></li></ul></nav>
 			<p id="statusbar"></p>
-			<!-- Impressum ec. -->
 		</footer>
 		<script src="scripts/jquery.min.js"></script>
 		<script src="scripts/normalise.js"></script>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <!--
     Copyright 2014 Sebastian Spautz
@@ -36,7 +36,7 @@
 		<script src="scripts/normalise.js"></script>
 		<script src="scripts/lowLevelApi.js"></script>
 		<script src="scripts/globalUi.js"></script>
-		<script src="scripts/diagnostic.js"></script>
+		<script src="scripts/settings.js"></script>
     </head>
     <body>
         <header role="banner"> 
@@ -44,39 +44,34 @@
 			<h2>{{ VERSION }} {{ VARIANT }}</h2>
 		</header>
 		<div class="main">
-		<section>
-			<h2>Supported API's</h2>
-			<p id="SupportFilesystemAPI" class="message">?</p>
-		</section>
-		<section>
-			<h2>Key Settings</h2>
-			<form>
-			<label for="previousTrackKey1">Previous Track</label>
-			<input id="previousTrackKey1" placeholder="press key for previous track" /><br />
-			<label for="nextTrackKey1">Next Track</label>
-			<input id="nextTrackKey1" placeholder="press key for next track" /><br />
-			<label for="playTrackKey1">Play/Stop Track</label>
-			<input id="playTrackKey1" placeholder="press key for start/stop" /><br />
-		</form>
-		</section>
-		<section>
-			<h2>Files</h2>
-			<p><a href="#" onclick="showFileSystemEntries(); return false;">List Files (File System API)</a></p>
-			<p><a href="#" onclick="showIndexedDBEntries(); return false;">List Files (Indexed Database API)</a></p>
-			<p><a href="#" onclick="deleteFileSystemEntries(); return false;">Delete Files (File System API)</a></p>
-			<ul id="filelist"></ul>
-			<p><a href="chrome://settings/cookies">chrome://settings/cookies</a></p>
-		</section>
-		<section>
-			<h2>Test MP3-Playback</h2>
-			<audio controls="controls">
-		   <source src="http://workingdraft.de/podpress_trac/web/1/0/Revision1_-Sencha-Animator-Webfernsehen-und-Firesheep.mp3" type='audio/mpeg; codecs="mp3"' />
-		</audio>
-		</section>
-		<section>
-			<h2>Application Cache</h2>
-			<p><a href="chrome://appcache-internals/">chrome://appcache-internals/</a></p>
-		</section>
+			<section id="configuration">
+				<header><h2>Configuration</h2></header>
+				<section id="FileSystemAPI">
+					<header><h3>File System</h3></header>
+					<form action="#" id="memorySizeForm">
+						<label for="memorySizeInput">Memory size (MiB):</label>
+						<input title="Allowed size for downloaded files in megabyte" type="number" required="required" min="100" step="20" value="500" name="memorySizeInput" id="memorySizeInput" />
+						<input type="submit" name="saveMemorySizeButton" id="saveMemorySizeButton" value="Save" />
+					</form>
+				</section>
+				<section id="Proxy">
+					<header><h3>Proxy</h3></header>
+					<form action="#" id="proxyForm">
+						<label for="httpProxyInput">Proxy-URL</label>
+						<input type="url" name="httpProxyInput" id="httpProxyInput" />
+						<input type="submit" name="saveConfigurationButton" id="saveConfigurationButton" value="Save" />
+					</form>
+				<section id="ImportExport">
+					<header><h3>Import/Export</h3></header>
+					<form action="#" id="ExportImportForm">
+						<label for="SerialisedConfigurationInput">Import/Export Configuration</label>
+						<textarea name="SerialisedConfigurationInput" id="SerialisedConfigurationInput"></textarea>
+						<input type="button" name="importConfiguration" id="importConfiguration" value="Import" />
+						<input type="button" name="exportConfiguration" id="exportConfiguration" value="Export" />
+					</form>
+				</section>
+			</section>
+		</div>
 		<footer>
 			<!-- Impressum ec. -->
 			<nav role="navigation"><ul><li><a href="podcatcher.html" title="Playlist">Playlist</a></li></ul></nav>

@@ -20,6 +20,7 @@
 /*global document */
 /*global console */
 /*global alert */
+/*global confirm */
 /*global Blob */
 /*global XMLHttpRequest */
 /*global localStorage */
@@ -373,7 +374,7 @@ $(document).ready(function () {
         UI.logHandler("Application cache is updated (Cache status: " + applicationCache.status + ")", 'info');
         $('#applicationCacheLog').prepend('<span>' + "Application cache is updated" + '</span></br>');
         applicationCache.swapCache();
-		if (confirm("An update of HTML5 Podcatcher is available. Do you want to reload now?")) {
+        if (confirm("An update of HTML5 Podcatcher is available. Do you want to reload now?")) {
             window.location.reload();
         }
     });
@@ -570,61 +571,6 @@ $(document).ready(function () {
         $('#sources').find('.entries').append(sourceUI);
         sourceUI.fadeIn();
     }, false);
-    //Configuration UI Events
-    $('#configuration #memorySizeForm').on('submit', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        if ($('#memorySizeInput')[0].checkValidity()) {
-            POD.storage.fileSystemStorage.requestFileSystemQuota($('#memorySizeInput').val() * 1024 * 1024);
-        } else {
-            UI.logHandler('Please insert a number', 'error');
-        }
-    });
-    $('#configuration #proxyForm').on('submit', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        if ($('#httpProxyInput')[0].checkValidity()) {
-            localStorage.setItem("configuration.proxyUrl", $('#httpProxyInput').val());
-        } else {
-            UI.logHandler('Please insert a URL', 'error');
-        }
-    });
-    $('#configuration #exportConfiguration').on('click', function () {
-        var i, key, config;
-        config = {'Episodes': {}, 'Sources': {}, 'Settings': {}};
-        for (i = 0; i < localStorage.length; i++) {
-            key = localStorage.key(i);
-            if (key.slice(0, 7) === 'source.') {
-                config.Sources[key] = localStorage.getItem(key);
-            } else if (localStorage.key(i).slice(0, 8) === 'episode.') {
-                config.Episodes[key] = localStorage.getItem(key);
-            } else {
-                config.Settings[key] = localStorage.getItem(key);
-            }
-        }
-        $(this).parent().find('#SerialisedConfigurationInput').val(JSON.stringify(config));
-        $(this).parent().find('#SerialisedConfigurationInput')[0].select();
-    });
-    $('#configuration #importConfiguration').on('click', function () {
-        var config, property;
-        localStorage.clear();
-        config = JSON.parse($(this).parent().find('#SerialisedConfigurationInput').val());
-        for (property in config.Episodes) {
-            if (config.Episodes.hasOwnProperty(property)) {
-                localStorage.setItem(property, config.Episodes[property]);
-            }
-        }
-        for (property in config.Sources) {
-            if (config.Sources.hasOwnProperty(property)) {
-                localStorage.setItem(property, config.Sources[property]);
-            }
-        }
-        for (property in config.Settings) {
-            if (config.Settings.hasOwnProperty(property)) {
-                localStorage.setItem(property, config.Settings[property]);
-            }
-        }
-    });
     $('#statusbar').on('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
@@ -640,15 +586,11 @@ $(document).ready(function () {
     }, false);
     //Quota and Filesystem initialisation
     if (POD.storage.fileStorageEngine() === POD.storage.fileSystemStorage) {
-        $('#memorySizeForm').show();
         quota = localStorage.getItem("configuration.quota");
         if (!quota) { quota = 1024 * 1024 * 200; }
         POD.storage.fileSystemStorage.requestFileSystemQuota(quota);
-    } else {
-        $('#memorySizeForm').hide();
     }
-    //Render lists and settings
-    UI.renderConfiguration();
+    //Render lists
     POD.storage.readSources(function (sources) {
         UI.renderSourceList(sources);
         POD.storage.readPlaylist(false, UI.renderPlaylist);

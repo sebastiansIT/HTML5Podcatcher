@@ -1,6 +1,6 @@
 ﻿<!DOCTYPE html>
 <!--
-    Copyright 2013, 2014 Sebastian Spautz
+    Copyright 2014 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
     
@@ -23,8 +23,9 @@
         <title>Install Hosted App &mdash; Open Web App &mdash; HTML5 Podcatcher</title>
         <meta name="description" content="Installation Page for the HTML5 Podcatcher.">
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="shortcut icon" type="../image/x-icon" href="favicon.ico"/>
-        <link rel="stylesheet" href="../css/main.css" />
+		<link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
+        <link rel="stylesheet" href="css/main.css" />
+		<script src="scripts/install.js"></script>
     </head>
     <body>
         <header role="banner"> 
@@ -32,17 +33,7 @@
 			<h2>{{ VERSION }}</h2>
 		</header>
 		<div class="main">
-			<script>
-			  // This URL must be a full url.
-			  var manifestUrl = 'manifest.webapp';
-			  var req = navigator.mozApps.install(manifestUrl);
-			  req.onsuccess = function() {
-				alert(this.result.origin);
-			  };
-			  req.onerror = function() {
-				alert(this.error.name);
-			  };
-			</script>
+			<img src="img/logo512.png" />
 		</div>
 		<footer>
 			<p id="statusbar"></p>

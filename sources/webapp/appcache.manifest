@@ -103,11 +103,14 @@
 
 CACHE:
 ./podcatcher.html
+./settings.html
 ./favicon.ico
 ./scripts/jquery.min.js
 ./scripts/normalise.js
 ./scripts/lowLevelApi.js
+./scripts/globalUi.js
 ./scripts/podcatcher.js
+./scripts/settings.js
 ./css/main.css
 
 NETWORK:
