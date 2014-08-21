@@ -32,7 +32,7 @@ body > footer {
     text-align: left;    
 	z-index: 100;
 }
-@media all and (min-height: 640px) {
+@media all and (min-height: 390px) {
 	body > header,
 	body > footer {
 		right: 0;
@@ -87,6 +87,7 @@ body > footer.fullscreen {
 	height:100%;
 }
 
+img { max-width: 100%; }
 audio { width: 100%; }
 progress { width:100px; /* Don't use relative values because Chrome is bugy.*/ }
 

@@ -102,18 +102,29 @@
 ### Bug fix: Call deleteSources() instead of deleteSource()
 ## 0.18.5
 ### Bug fix: Reset download state of an episode if downloaded file is not find in storage and log an error
+## 0.18.6
+### Try to fix a bug in IE9, Safari and older FireFox-Versions; extends support for Open Web Apps, add log output with parser result; print error to log if RSS-Root-Tag not found; print xml-Response to log;
+## 0.18.7
+### fix URL's to apple-touch-icons
 
 CACHE:
+# HTML
 ./podcatcher.html
 ./settings.html
-./favicon.ico
+# SCRIPTS
 ./scripts/jquery.min.js
 ./scripts/normalise.js
 ./scripts/lowLevelApi.js
 ./scripts/globalUi.js
 ./scripts/podcatcher.js
 ./scripts/settings.js
+# STYLES
 ./css/main.css
+# IMAGES
+./favicon.ico
+./img/logo60.png
+./img/logo128.png
+./img/logo512.png
 
 NETWORK:
 # this is: "Load all not cached files from Network" (for Firefox;  see http://www.appcachefacts.info/)

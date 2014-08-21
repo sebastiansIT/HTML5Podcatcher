@@ -1,12 +1,15 @@
 ﻿{
 	"name": "HTML5 Podcatcher",
-	"description": "A Podctacher based on HTML5 and Javascript",
+	"description": "A Podcatcher based on HTML5 and Javascript",
 	"release_notes": "First testing release",
 	"version": "{{ VERSION }}",
 	"type": "privileged",
 	"permissions": {
 		"systemXHR": {
 			"description": "Needs to load remote content like podcast feeds and audio files."
+		},
+		"storage": {
+			"description": "Needs to save audio files."
 		}
 	},
 	"icons": {

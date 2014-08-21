@@ -20,17 +20,21 @@
 /*global navigator */
 /*global alert */
 /*global confirm */
+/*global document */
 
 // This URL must be a full url.
 var manifestUrl = 'http://lab.human-injection.de/podcatcher/download/package.manifest';
-if (confirm("Do you want to install \"HTML5 Posdcatcher\"?")) {
-    var req = navigator.mozApps.installPackage(manifestUrl);
-    req.onsuccess = function () {
-        "use strict";
-        alert(this.result.origin);
+document.addEventListener('DOMContentLoaded', function () {
+    "use strict";
+    document.getElementById('install').onclick = function (event) {
+        event.stopPropagation();
+        event.preventDefault();
+        var req = navigator.mozApps.installPackage(manifestUrl);
+        req.onsuccess = function () {
+            alert(this.result.origin);
+        };
+        req.onerror = function () {
+            alert(this.error.name);
+        };
     };
-    req.onerror = function () {
-        "use strict";
-        alert(this.error.name);
-    };
-}
+}, false);

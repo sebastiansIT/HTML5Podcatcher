@@ -332,6 +332,7 @@ var HTML5Podcatcher = {
                                 HTML5Podcatcher.logger("Can not find offline file " + episode.mediaUrl + " in Indexed DB. Reset download state.", 'error');
                                 episode.offlineMediaUrl = undefined;
                                 episode.isFileSavedOffline = false;
+                                HTML5Podcatcher.storage.writeEpisode(episode);
                             }
                             if (onReadCallback && typeof onReadCallback === 'function') {
                                 onReadCallback(episode);
@@ -740,11 +741,12 @@ var HTML5Podcatcher = {
         },
         downloadSource: function (source) {
             "use strict";
-            var successfunction, errorfunction, parserresult;
+            var successfunction, errorfunction, parserresult, xhr;
             parserresult = {'source': source, 'episodes': []};
-            successfunction = function (data) {
-                var newestEpisodes, mergeFunction, i;
+            successfunction = function () {
+                var data, newestEpisodes, mergeFunction, i;
                 HTML5Podcatcher.logger('Download of source "' + source.uri + '" is finished', 'debug');
+                data = this.responseXML;
                 mergeFunction = function (mergeEpisode) {
                     HTML5Podcatcher.storage.readEpisode(mergeEpisode.uri, function (existingEpisode) {
                         existingEpisode.title = mergeEpisode.title;
@@ -755,52 +757,77 @@ var HTML5Podcatcher = {
                         HTML5Podcatcher.storage.writeEpisode(existingEpisode);
                     });
                 };
-                parserresult = HTML5Podcatcher.parser.parseSource(data, source);
-                //compute parser result
-                // 1. merge existing data with actual one
-                // TODO writing a multi episode write method
-                // 2. filter top 5 episodes and check if unread
-                newestEpisodes = parserresult.episodes.slice(parserresult.episodes.length - 5, parserresult.episodes.length);
-                // 3. save top 5 episodes with actualised data
-                for (i = 0; i < newestEpisodes.length; i++) {
-                    mergeFunction(newestEpisodes[i]);
+                //Call XML-Parser 
+                if (!data) {
+                    HTML5Podcatcher.logger('No XML Document found instead found [' + this.response + "]", 'error');
+                } else {
+                    parserresult = HTML5Podcatcher.parser.parseSource(data, source);
+                    //compute parser result
+                    // 1. merge existing data with actual one
+                    // TODO writing a multi episode write method
+                    // 2. filter top 5 episodes and check if unread
+                    newestEpisodes = parserresult.episodes.slice(parserresult.episodes.length - 5, parserresult.episodes.length);
+                    // 3. save top 5 episodes with actualised data
+                    for (i = 0; i < newestEpisodes.length; i++) {
+                        mergeFunction(newestEpisodes[i]);
+                    }
+                    // 4. Save Source
+                    HTML5Podcatcher.storage.writeSource(source);
                 }
-                // 4. Save Source
-                HTML5Podcatcher.storage.writeSource(source);
             };
-            errorfunction = function (jqXHR) {
+            errorfunction = function (xhrError) {
                 if (localStorage.getItem("configuration.proxyUrl")) {
                     HTML5Podcatcher.logger('Direct download failed. Try proxy: ' + localStorage.getItem("configuration.proxyUrl").replace("$url$", source.uri), 'warning');
-                    jQuery.ajax({
+                    var proxyXhr = new XMLHttpRequest({ mozSystem: true });
+                    proxyXhr.open('GET', localStorage.getItem("configuration.proxyUrl").replace("$url$", source.uri), true);
+                    proxyXhr.addEventListener("error", function (xhrError) {
+                        HTML5Podcatcher.logger("Can't download Source: " + xhrError.error);
+                    });
+                    proxyXhr.addEventListener("abort", HTML5Podcatcher.logger, false);
+                    proxyXhr.onload = successfunction;
+                    proxyXhr.ontimeout = function () {
+                        HTML5Podcatcher.logger("Timeout after " + (proxyXhr.timeout / 60000) + " minutes.", "error");
+                    };
+                    proxyXhr.send();
+                    /*jQuery.ajax({
                         'url': localStorage.getItem("configuration.proxyUrl").replace("$url$", source.uri),
                         'async': true,
                         'dataType': 'xml',
                         'success': successfunction,
-                        'error': function (jqXHR) {
-                            HTML5Podcatcher.logger("Can't download Source: " + jqXHR.error);
+                        'error': function (xhrError) {
+                            HTML5Podcatcher.logger("Can't download Source: " + xhrError.error);
                         }
-                    });
+                    });*/
                 } else {
-                    HTML5Podcatcher.logger("Can't download Source: " + jqXHR.error);
+                    HTML5Podcatcher.logger("Can't download Source: " + xhrError.error);
                 }
             };
             //Load Feed and Parse Entries
             try {
-                jQuery.ajax({
+                xhr = new XMLHttpRequest({ mozSystem: true });
+                xhr.open('GET', source.uri, true);
+                xhr.addEventListener("error", errorfunction);
+                xhr.addEventListener("abort", HTML5Podcatcher.logger, false);
+                xhr.onload = successfunction;
+                xhr.ontimeout = function () {
+                    HTML5Podcatcher.logger("Timeout after " + (xhr.timeout / 60000) + " minutes.", "error");
+                };
+                xhr.send();
+                /*jQuery.ajax({
                     'url': source.uri,
                     'async': true,
                     'dataType': 'xml',
                     'beforeSend': function (jqXHR, settings) { jqXHR.requestURL = settings.url; },
                     'success': successfunction,
                     'error': errorfunction
-                });
+                });*/
             } catch (ex) {
                 HTML5Podcatcher.logger(ex, 'error');
             }
         },
         downloadFile: function (episode, mimeType, onDownloadCallback, onProgressCallback) {
             "use strict";
-            var xhr = new XMLHttpRequest();
+            var xhr = new XMLHttpRequest({ mozSystem: true });
             xhr.open('GET', episode.mediaUrl, true);
             xhr.responseType = 'arraybuffer';
             xhr.timeout = HTML5Podcatcher.web.settings.downloadTimeout;
@@ -882,8 +909,10 @@ var HTML5Podcatcher = {
                     episodes.push(episode);
                 });
                 episodes.sort(HTML5Podcatcher.sortEpisodes);
+            } else {
+                HTML5Podcatcher.logger('No root element (&lt;rss&gt;) found in response: ' + xml, 'error');
             }
-            HTML5Podcatcher.logger('Parsing source file "' + source.uri + '" finished', 'info');
+            HTML5Podcatcher.logger('Parsing source file "' + source.uri + '" finished (found ' + episodes.length + ' episodes for "' + source.title + '")', 'info');
             return {'source': source, 'episodes': episodes};
         }
     },
