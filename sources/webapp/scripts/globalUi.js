@@ -15,17 +15,11 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
-/*global navigator */
 /*global window */
-/*global document */
 /*global console */
-/*global alert */
 /*global confirm */
-/*global localStorage */
 /*global applicationCache */
 /*global $ */
-/*global POD */
-/*global UI */
 var GlobalUserInterfaceHelper = {
     escapeHtml: function (text) {
         "use strict";
@@ -57,27 +51,27 @@ var GlobalUserInterfaceHelper = {
     initApplicationCacheEvents: function () {
         "use strict";
         $(applicationCache).on('checking', function () {
-            UI.logHandler("Application cache checks for updates (Cache status: " + applicationCache.status + ")", 'debug');
+            GlobalUserInterfaceHelper.logHandler("Application cache checks for updates (Cache status: " + applicationCache.status + ")", 'debug');
             $('#applicationCacheLog').prepend('<span>' + "Application cache check for updates" + '</span></br>');
         });
         $(applicationCache).on('noupdate', function () {
-            UI.logHandler("Application cache founds no update (Cache status: " + applicationCache.status + ")", 'debug');
+            GlobalUserInterfaceHelper.logHandler("Application cache founds no update (Cache status: " + applicationCache.status + ")", 'debug');
             $('#applicationCacheLog').prepend('<span>' + "Application cache founds no update" + '</span></br>');
         });
         $(applicationCache).on('downloading', function () {
-            UI.logHandler("Application cache download updated files (Cache status: " + applicationCache.status + ")", 'debug');
+            GlobalUserInterfaceHelper.logHandler("Application cache download updated files (Cache status: " + applicationCache.status + ")", 'debug');
             $('#applicationCacheLog').prepend('<span>' + "Application cache download updated files" + '</span></br>');
         });
         $(applicationCache).on('progress', function () {
-            UI.logHandler("Application cache downloading files (Cache status: " + applicationCache.status + ")", 'debug');
+            GlobalUserInterfaceHelper.logHandler("Application cache downloading files (Cache status: " + applicationCache.status + ")", 'debug');
             $('#applicationCacheLog').prepend('<span>' + "Application cache downloading files" + '</span></br>');
         });
         $(applicationCache).on('cached', function () {
-            UI.logHandler("Application cached (Cache status: " + applicationCache.status + ")", 'debug');
+            GlobalUserInterfaceHelper.logHandler("Application cached (Cache status: " + applicationCache.status + ")", 'debug');
             $('#applicationCacheLog').prepend('<span>' + "Application cached" + '</span></br>');
         });
         $(applicationCache).on('updateready', function () {
-            UI.logHandler("Application cache is updated (Cache status: " + applicationCache.status + ")", 'info');
+            GlobalUserInterfaceHelper.logHandler("Application cache is updated (Cache status: " + applicationCache.status + ")", 'info');
             $('#applicationCacheLog').prepend('<span>' + "Application cache is updated" + '</span></br>');
             applicationCache.swapCache();
             if (confirm("An update of HTML5 Podcatcher is available. Do you want to reload now?")) {
@@ -85,22 +79,22 @@ var GlobalUserInterfaceHelper = {
             }
         });
         $(applicationCache).on('obsolete', function () {
-            UI.logHandler("Application cache is corrupted and will be deletet (Cache status: " + applicationCache.status + ")", 'error');
+            GlobalUserInterfaceHelper.logHandler("Application cache is corrupted and will be deletet (Cache status: " + applicationCache.status + ")", 'error');
             $('#applicationCacheLog').prepend('<span>' + "Application cache is corrupted and will be deletet" + '</span></br>');
         });
         $(applicationCache).on('error', function () {
-            UI.logHandler("Error downloading manifest or resources (Cache status: " + applicationCache.status + ")", 'error');
+            GlobalUserInterfaceHelper.logHandler("Error downloading manifest or resources (Cache status: " + applicationCache.status + ")", 'error');
             $('#applicationCacheLog').prepend('<span>' + "Error downloading manifest or resources" + '</span></br>');
         });
     },
     initConnectionStateEvents: function () {
         "use strict";
         window.addEventListener('online',  function () {
-            UI.logHandler("Online now", 'info');
+            GlobalUserInterfaceHelper.logHandler("Online now", 'info');
             $('#updatePlaylist, .updateSource, .downloadFile').removeAttr('disabled');
         }, false);
         window.addEventListener('offline', function () {
-            UI.logHandler("Offline now", 'info');
+            GlobalUserInterfaceHelper.logHandler("Offline now", 'info');
             $('#updatePlaylist, .updateSource, .downloadFile').attr('disabled', 'disabled');
         }, false);
     },
