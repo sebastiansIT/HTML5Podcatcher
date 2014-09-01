@@ -737,7 +737,8 @@ var HTML5Podcatcher = {
     },
     web: {
         settings: {
-            downloadTimeout: 600000
+            downloadTimeout: 600000,
+			proxyUrlPattern: undefined
         },
         downloadSource: function (source) {
             "use strict";
@@ -777,9 +778,9 @@ var HTML5Podcatcher = {
             };
             errorfunction = function (xhrError) {
                 if (localStorage.getItem("configuration.proxyUrl")) {
-                    HTML5Podcatcher.logger('Direct download failed. Try proxy: ' + localStorage.getItem("configuration.proxyUrl").replace("$url$", source.uri), 'warning');
+                    HTML5Podcatcher.logger('Direct download failed. Try proxy: ' + HTML5Podcatcher.web.settings.proxyUrlPattern.replace("$url$", source.uri), 'warning');
                     var proxyXhr = new XMLHttpRequest({ mozSystem: true });
-                    proxyXhr.open('GET', localStorage.getItem("configuration.proxyUrl").replace("$url$", source.uri), true);
+                    proxyXhr.open('GET', HTML5Podcatcher.web.settings.proxyUrlPattern.replace("$url$", source.uri), true);
                     proxyXhr.addEventListener("error", function (xhrError) {
                         HTML5Podcatcher.logger("Can't download Source: " + xhrError.error);
                     });
@@ -790,7 +791,7 @@ var HTML5Podcatcher = {
                     };
                     proxyXhr.send();
                     /*jQuery.ajax({
-                        'url': localStorage.getItem("configuration.proxyUrl").replace("$url$", source.uri),
+                        'url': proxyUrlPattern.replace("$url$", source.uri),
                         'async': true,
                         'dataType': 'xml',
                         'success': successfunction,
@@ -838,9 +839,9 @@ var HTML5Podcatcher = {
             }, false);
             xhr.addEventListener("abort", HTML5Podcatcher.logger, false);
             xhr.addEventListener("error", function () {
-                HTML5Podcatcher.logger('Direct download failed. Try proxy: ' + localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl), 'warning');
+                HTML5Podcatcher.logger('Direct download failed. Try proxy: ' + HTML5Podcatcher.web.settings.proxyUrlPattern.replace("$url$", episode.mediaUrl), 'warning');
                 var xhrProxy = new XMLHttpRequest();
-                xhrProxy.open('GET', localStorage.getItem("configuration.proxyUrl").replace("$url$", episode.mediaUrl), true);
+                xhrProxy.open('GET', HTML5Podcatcher.web.settings.proxyUrlPattern.replace("$url$", episode.mediaUrl), true);
                 xhrProxy.responseType = 'arraybuffer';
                 xhrProxy.timeout = HTML5Podcatcher.web.settings.downloadTimeout;
                 xhrProxy.addEventListener("progress", function (event) {

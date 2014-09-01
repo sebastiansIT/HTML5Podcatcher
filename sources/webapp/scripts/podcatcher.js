@@ -340,9 +340,10 @@ var playEpisode = function (episode, onPlaybackStartedCallback) {
 /** Central 'ready' event handler */
 $(document).ready(function () {
     "use strict";
-    //Update local storage to actual version of key-names (changed "track" to "episode")
     var k, quota, multiMediaKeyDownTimestemp;
     POD.settings.uiLogger = UI.logHandler;
+    POD.web.settings.proxyUrlPattern = localStorage.getItem("configuration.proxyUrl");
+    //Update local storage to actual version of key-names (changed "track" to "episode")
     for (k = 0; k < localStorage.length; k++) {
         if (localStorage.key(k).slice(0, 6) === 'track.') {
             localStorage.setItem(localStorage.key(k).replace('track.', 'episode.'), localStorage.getItem(localStorage.key(k)));
