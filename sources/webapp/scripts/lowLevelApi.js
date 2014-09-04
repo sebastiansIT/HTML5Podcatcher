@@ -738,7 +738,7 @@ var HTML5Podcatcher = {
     web: {
         settings: {
             downloadTimeout: 600000,
-			proxyUrlPattern: undefined
+            proxyUrlPattern: undefined
         },
         downloadSource: function (source) {
             "use strict";

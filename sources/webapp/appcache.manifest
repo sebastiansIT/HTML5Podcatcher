@@ -116,7 +116,7 @@ CACHE:
 ./scripts/normalise.js
 ./scripts/lowLevelApi.js
 ./scripts/globalUi.js
-./scripts/podcatcher.js
+./scripts/playlist.js
 ./scripts/settings.js
 # STYLES
 ./css/main.css

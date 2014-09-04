@@ -37,10 +37,10 @@ module.exports = function (grunt) {
                 ],
                 options: {
                     replacements: [{
-                        pattern: /{{ VERSION }}/g,
+                        pattern: /\{\{ VERSION \}\}/g,
                         replacement: '<%= pkg.version %>'
                     }, {
-                        pattern: /{{ VARIANT }}/g,
+                        pattern: /\{\{ VARIANT \}\}/g,
                         replacement: 'H'
                     }]
                 }
@@ -61,15 +61,15 @@ module.exports = function (grunt) {
                 options: {
                     replacements: [
                         {
-                            pattern: /{{ VERSION }}/g,
+                            pattern: /\{\{ VERSION \}\}/g,
                             replacement: '<%= pkg.version %>'
                         },
                         {
-                            pattern: /{{ VARIANT }}/g,
+                            pattern: /\{\{ VARIANT \}\}/g,
                             replacement: 'F'
                         },
                         { //remove App-Cache from Packaged apps
-                            pattern: / manifest="appcache.manifest"/g,
+                            pattern: / manifest="appcache\.manifest"/g,
                             replacement: ''
                         }]
                 }
