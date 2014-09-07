@@ -19,7 +19,7 @@
 body { 
   text-align:center; 
   margin:0;
-  color: #004600;
+  color: #000000;
 }
 
 body > header,
@@ -33,7 +33,7 @@ body > footer {
     text-align: left;    
 	z-index: 100;
 }
-@media all and (min-height: 390px) {
+@media all and (min-height: 360px) {
 	body > header,
 	body > footer {
 		right: 0;
@@ -61,6 +61,10 @@ body > header h2  {
 }
 .main {
 	margin: 3rem 1rem 5rem 1rem;
+}
+
+a {
+	color: #004600;
 }
 nav {
 	float: right;
@@ -92,7 +96,7 @@ img { max-width: 100%; }
 audio { width: 100%; }
 progress { width:100px; /* Don't use relative values because Chrome is bugy.*/ }
 
-button, .button {
+button, .button, .button:visited, .button:hover {
 	display: inline-block;
 	margin: 0px 0.6em 0.6em 0px;
 	padding: 0.4em 0.8em;
@@ -119,7 +123,7 @@ button[disabled], .button[disabled] {
 
 textarea { width:100%; height: 10em; }
 
-template, .tempalte {
+template, .template {
 	display: none;
 }
 

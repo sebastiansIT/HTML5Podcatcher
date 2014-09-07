@@ -46,9 +46,9 @@ GlobalUserInterfaceHelper.actualiseEpisodeUI = function (episode) {
     }
     // Download/Delete link
     if (episode.offlineMediaUrl) {
-        $(episodeUI).find('.downloadFile').replaceWith('<a class="delete" href="' + episode.offlineMediaUrl + '">Delete</a>');
+        $(episodeUI).find('.downloadFile').replaceWith('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>');
     } else {
-        $(episodeUI).find('.delete').replaceWith('<a class="download" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
+        $(episodeUI).find('.delete').replaceWith('<a class="download button" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/')+1) + '">Download</a>');
     }
     $(episodeUI).find('progress').remove();
     return false;
@@ -69,7 +69,7 @@ GlobalUserInterfaceHelper.renderEpisode = function (episode) {
     //entryUI.append('<h3 class="title"><a href="' + episode.uri + '">' + episode.title + '</a></h3>');
     entryUI.find('span.source').text(episode.source);
     //entryUI.append('<span class="source">' + episode.source + '</span>');
-    entryUI.find('time.updated').attr('datetime', episode.update.toISOString()).text(episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString());
+    entryUI.find('time.updated').attr('datetime', episode.updated.toISOString()).text(episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString());
     //entryUI.append('<time datetime="' + episode.updated.toISOString() + '" class="updated">' + episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString() + '</time>');
     //entryFunctionsUI = $('<span class="functions">');
     if (episode.playback.played) {
@@ -83,10 +83,10 @@ GlobalUserInterfaceHelper.renderEpisode = function (episode) {
     //entryFunctionsUI.append('<a class="origin button" href="' + episode.uri + '">Internet</a>');
     if (POD.storage.isFileStorageAvailable()) {
         if (episode.isFileSavedOffline) {
-            entryUI.find('.functions .downloadFile').replaceWith('<a class="delete" href="' + episode.offlineMediaUrl + '">Delete</a>');
+            entryUI.find('.functions .downloadFile').replaceWith('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>');
             //entryFunctionsUI.append('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>');
         } else if (episode.mediaUrl) {
-            entryUI.find('.functions .downloadFile').attr('href', episode.mediaUrl).attr('download', episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()));
+            entryUI.find('.functions .downloadFile').attr('href', episode.mediaUrl).attr('download', episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/')+1));
             //entryFunctionsUI.append('<a class="button downloadFile" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
         }
     }
