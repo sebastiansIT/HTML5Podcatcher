@@ -19,6 +19,7 @@
 body { 
   text-align:center; 
   margin:0;
+  color: #004600;
 }
 
 body > header,
@@ -26,7 +27,7 @@ body > footer {
 	position: relative;
 	width: 100%;
 	padding:0.5rem 0;
-	background-color: darkgreen;
+	background-color: #004600;
     color: #EEEEEE;
     line-height: 1em;
     text-align: left;    
@@ -96,6 +97,7 @@ button, .button {
 	margin: 0px 0.6em 0.6em 0px;
 	padding: 0.4em 0.8em;
 	background-color: #004600;
+	background-image: none;
 	border:none;
 	border-radius: 25%;
 	box-shadow: 6px 6px 10px 0px rgba(50, 50, 50, 0.75);
@@ -117,6 +119,10 @@ button[disabled], .button[disabled] {
 
 textarea { width:100%; height: 10em; }
 
+template, .tempalte {
+	display: none;
+}
+
 .entries { 
 	list-style: none; 
 	padding:0;
@@ -126,7 +132,7 @@ textarea { width:100%; height: 10em; }
 }
 .entries li {
 	background-color:white;
-	border: 2px solid black;
+	border: 2px solid #004600;
 	border-radius: 0.1em 0.1em 1.6em 1.6em ;
 	margin: -1.5em 0 0 0;
 	padding: 1.5em 1em 2.0em 1em;
@@ -134,6 +140,12 @@ textarea { width:100%; height: 10em; }
 }
 .entries li:last-child {
 	padding-bottom: 0.5em;
+}
+.entries li.emptyPlaceholder {
+	display:none;
+}
+.entries li.emptyPlaceholder:first-child:last-child { /* the only one child */
+	display:block;
 }
 .entries li p {
 	overflow:hidden;

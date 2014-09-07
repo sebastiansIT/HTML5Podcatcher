@@ -48,17 +48,29 @@
 				<header><h2>Player</h2></header>
 				<div id="mediacontrol"><p>Nothing to play!</p></div>
 				<form action="#">
-					<input id="playPreviousEpisode" name="playPreviousEpisode" type="button" value="|&lt;&lt;" title="Previous Episode" />
-					<input id="jumpBackwards" name="jumpBackwards" type="button" value="&lt;&lt;" title="Jump 10 seconds backwards" />
-					<input id="jumpForwards" name="jumpForwards" type="button" value="&gt;&gt;" title="Jump 10 seconds forwards" />
-					<input id="playNextEpisode" name="playNextEpisode" type="button" value="&gt&gt|" title="Next Episode" />
+					<button id="playPreviousEpisode" name="playPreviousEpisode" type="button" value="previous" title="Previous Episode">|&lt;&lt;</button>
+					<button id="jumpBackwards" name="jumpBackwards" type="button" value="backwards" title="Jump 10 seconds backwards">&lt;&lt;</button>
+					<button id="jumpForwards" name="jumpForwards" type="button" value="forward" title="Jump 10 seconds forwards">&gt;&gt;</button>
+					<button id="playNextEpisode" name="playNextEpisode" type="button" value="next" title="Next Episode">&gt;&gt;|</button>
 				</form>
 			</section>
 			<section id="playlist">
 				<header><h2>Playlist</h2></header>
 				<ul class="entries">
-					<li>
+					<li class="emptyPlaceholder">
 						no entries
+					</li>
+				</ul>
+				<ul clasS="template" id="episodeTemplate">
+					<li>
+						<h3 class="title"><a href="episode.url">episode.title</a></h3>
+						<span class="source">episode.source</span>
+						<time datetime="episode.updated" class="updated">episode.updated</time>
+						<span class="functions">
+							<button type="button" class="status">Status: played</button>
+							<a class="origin button" href="episode.uri">Internet</a>
+							<a class="button downloadFile" href="episode.mediaUrl" download="episode.mediaUrl.fileName">Download</a>
+						</span>
 					</li>
 				</ul>
 				<footer>
@@ -70,15 +82,27 @@
 			<section id="sources">
 				<header><h2>Sources</h2></header>
 				<ul class="entries">
-					<li>
+					<li class="emptyPlaceholder">
 						no entries
+					</li>
+				</ul>
+				<ul class="template" id="sourceTemplate">
+					<li>
+						<h3 class="title">source.title<h3>
+						<p class="description">source.description</p>
+						<p class="uri"><a href="source.uri">source.uri</a></p>
+						<span class="functions">
+							<a class="link button" href="source.link">Internet</a>
+							<button type="button" class="updateSource" href="source.uri">Update</button>
+							<button type="button" class="deleteSource" href="source.uri">Delete</button>
+						</span>
 					</li>
 				</ul>
 				<footer>
 					<form action="#" id="addSourceForm">
 						<label for="addSourceUrlInput">Add Podcast Feed</label>
 						<input type="url" name="addSourceUrlInput" id="addSourceUrlInput" required="required" />
-						<input type="submit" name="addSourceButton" id="addSourceButton" value="Add Feed" />
+						<button type="submit" name="addSourceButton" id="addSourceButton" value="Add Feed">Add Feed</button>
 					</form>
 				</footer>
 			</section>

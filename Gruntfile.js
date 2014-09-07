@@ -132,7 +132,7 @@ module.exports = function (grunt) {
                 },
                 options: {
                     failOnError : false,
-                    junit: 'test/jslint.result.xml'
+                    junit: 'tests/jslint.result.xml'
                 }
             }
         }

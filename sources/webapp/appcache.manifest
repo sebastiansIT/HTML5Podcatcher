@@ -106,6 +106,8 @@
 ### Try to fix a bug in IE9, Safari and older FireFox-Versions; extends support for Open Web Apps, add log output with parser result; print error to log if RSS-Root-Tag not found; print xml-Response to log;
 ## 0.18.7
 ### fix URL's to apple-touch-icons
+## 0.18.8
+### Use HTML-Templates instead of concatenated markup strings in javascript; some linting and refactoring
 
 CACHE:
 # HTML

@@ -46,7 +46,7 @@ GlobalUserInterfaceHelper.actualiseEpisodeUI = function (episode) {
     }
     // Download/Delete link
     if (episode.offlineMediaUrl) {
-        $(episodeUI).find('.download').replaceWith('<a class="delete" href="' + episode.offlineMediaUrl + '">Delete</a>');
+        $(episodeUI).find('.downloadFile').replaceWith('<a class="delete" href="' + episode.offlineMediaUrl + '">Delete</a>');
     } else {
         $(episodeUI).find('.delete').replaceWith('<a class="download" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
     }
@@ -61,27 +61,36 @@ GlobalUserInterfaceHelper.renderConfiguration = function () {
 };
 GlobalUserInterfaceHelper.renderEpisode = function (episode) {
     "use strict";
-    var entryUI, entryFunctionsUI;
-    entryUI = $('<li>');
+    var entryUI;
+    entryUI = $($('#episodeTemplate li')[0].cloneNode(true));
+    //entryUI = $('<li>');
     entryUI.data('episodeUri', episode.uri);
-    entryUI.append('<h3 class="title"><a href="' + episode.uri + '">' + episode.title + '</a></h3>');
-    entryUI.append('<span class="source">' + episode.source + '</span>');
-    entryUI.append('<time datetime="' + episode.updated.toISOString() + '" class="updated">' + episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString() + '</span>');
-    entryFunctionsUI = $('<span class="functions">');
+    entryUI.find('h3.title a').attr('href', episode.uri).text(episode.title);
+    //entryUI.append('<h3 class="title"><a href="' + episode.uri + '">' + episode.title + '</a></h3>');
+    entryUI.find('span.source').text(episode.source);
+    //entryUI.append('<span class="source">' + episode.source + '</span>');
+    entryUI.find('time.updated').attr('datetime', episode.update.toISOString()).text(episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString());
+    //entryUI.append('<time datetime="' + episode.updated.toISOString() + '" class="updated">' + episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString() + '</time>');
+    //entryFunctionsUI = $('<span class="functions">');
     if (episode.playback.played) {
-        entryFunctionsUI.append('<button type="button" class="status">Status: played</button>');
+        entryUI.find('.functions button.status').text("Status: played");
+        //entryFunctionsUI.append('<button type="button" class="status">Status: played</button>');
     } else {
-        entryFunctionsUI.append('<button type="button" class="status">Status: new</button>');
+        entryUI.find('.functions button.status').text("Status: new");
+        //entryFunctionsUI.append('<button type="button" class="status">Status: new</button>');
     }
-    entryFunctionsUI.append('<a class="origin button" href="' + episode.uri + '">Internet</a>');
+    entryUI.find('.functions a.origin').attr('href', episode.uri);
+    //entryFunctionsUI.append('<a class="origin button" href="' + episode.uri + '">Internet</a>');
     if (POD.storage.isFileStorageAvailable()) {
         if (episode.isFileSavedOffline) {
-            entryFunctionsUI.append('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>');
+            entryUI.find('.functions .downloadFile').replaceWith('<a class="delete" href="' + episode.offlineMediaUrl + '">Delete</a>');
+            //entryFunctionsUI.append('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>');
         } else if (episode.mediaUrl) {
-            entryFunctionsUI.append('<a class="button downloadFile" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
+            entryUI.find('.functions .downloadFile').attr('href', episode.mediaUrl).attr('download', episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()));
+            //entryFunctionsUI.append('<a class="button downloadFile" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
         }
     }
-    entryUI.append(entryFunctionsUI);
+    //entryUI.append(entryFunctionsUI);
     return entryUI;
 };
 GlobalUserInterfaceHelper.renderPlaylist = function (playlist) {
@@ -95,23 +104,30 @@ GlobalUserInterfaceHelper.renderPlaylist = function (playlist) {
             playlistUI.append(entryUI);
         }
     } else {
-        entryUI = $('<li>no entries</li>');
+        entryUI = $('<li class="emptyPlaceholder">no entries</li>');
         playlistUI.append(entryUI);
     }
 };
 GlobalUserInterfaceHelper.renderSource = function (source) {
     "use strict";
-    var entryUI, entryFunctionsUI;
-    entryUI = $('<li>');
+    var entryUI;
+    entryUI = $($('#sourceTemplate li')[0].cloneNode(true));
+    //entryUI = $('<li>');
     entryUI.data('sourceUri', source.uri);
-    entryUI.append('<h3 class="title">' + source.title + '<h3>');
-    entryUI.append('<p class="description">' + source.description + '</p>');
-    entryUI.append('<p class="uri"><a href="' + source.uri + '">' + source.uri + '</a></p>');
-    entryFunctionsUI = $('<span class="functions">');
-    entryFunctionsUI.append('<a class="link button" href="' + source.link + '">Internet</a> ');
-    entryFunctionsUI.append('<button type="button" class="updateSource" href="' + source.uri + '">Update</button> ');
-    entryFunctionsUI.append('<button type="button" class="deleteSource" href="' + source.uri + '">Delete</button>');
-    entryUI.append(entryFunctionsUI);
+    entryUI.find('h3.title').text(source.title);
+    //entryUI.append('<h3 class="title">' + source.title + '<h3>');
+    entryUI.find('p.description').text(source.description);
+    //entryUI.append('<p class="description">' + source.description + '</p>');
+    entryUI.find('p.uri a').attr('href', source.uri).text(source.uri);
+    //entryUI.append('<p class="uri"><a href="' + source.uri + '">' + source.uri + '</a></p>');
+    //entryFunctionsUI = $('<span class="functions">');
+    entryUI.find('.functions a.link').attr('href', source.link);
+    //entryFunctionsUI.append('<a class="link button" href="' + source.link + '">Internet</a> ');
+    entryUI.find('.functions button.updateSource').attr('href', source.uri);
+    //entryFunctionsUI.append('<button type="button" class="updateSource" href="' + source.uri + '">Update</button> ');
+    entryUI.find('.functions button.deleteSource').attr('href', 'source.uri');
+    //entryFunctionsUI.append('<button type="button" class="deleteSource" href="' + source.uri + '">Delete</button>');
+    //entryUI.append(entryFunctionsUI);
     return entryUI;
 };
 GlobalUserInterfaceHelper.renderSourceList = function (sourcelist) {
@@ -125,7 +141,7 @@ GlobalUserInterfaceHelper.renderSourceList = function (sourcelist) {
             sourcelistUI.append(entryUI);
         }
     } else {
-        entryUI = $('<li>no entries</li>');
+        entryUI = $('<li class="emptyPlaceholder">no entries</li>');
         sourcelistUI.append(entryUI);
     }
 };
