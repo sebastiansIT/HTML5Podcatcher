@@ -108,6 +108,8 @@
 ### fix URL's to apple-touch-icons
 ## 0.18.8
 ### Use HTML-Templates instead of concatenated markup strings in javascript; some linting and refactoring
+## 0.18.9
+### Removed dependencies from jQuery in lowLevelApi.js
 
 CACHE:
 # HTML

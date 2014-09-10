@@ -48,7 +48,7 @@ GlobalUserInterfaceHelper.actualiseEpisodeUI = function (episode) {
     if (episode.offlineMediaUrl) {
         $(episodeUI).find('.downloadFile').replaceWith('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>');
     } else {
-        $(episodeUI).find('.delete').replaceWith('<a class="download button" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/')+1) + '">Download</a>');
+        $(episodeUI).find('.delete').replaceWith('<a class="download button" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/') + 1) + '">Download</a>');
     }
     $(episodeUI).find('progress').remove();
     return false;
@@ -86,7 +86,7 @@ GlobalUserInterfaceHelper.renderEpisode = function (episode) {
             entryUI.find('.functions .downloadFile').replaceWith('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>');
             //entryFunctionsUI.append('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>');
         } else if (episode.mediaUrl) {
-            entryUI.find('.functions .downloadFile').attr('href', episode.mediaUrl).attr('download', episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/')+1));
+            entryUI.find('.functions .downloadFile').attr('href', episode.mediaUrl).attr('download', episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/') + 1));
             //entryFunctionsUI.append('<a class="button downloadFile" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
         }
     }
@@ -525,7 +525,15 @@ $(document).ready(function () {
     if (POD.storage.fileStorageEngine() === POD.storage.fileSystemStorage) {
         quota = localStorage.getItem("configuration.quota");
         if (!quota) { quota = 1024 * 1024 * 200; }
-        POD.storage.fileSystemStorage.requestFileSystemQuota(quota);
+        POD.storage.fileSystemStorage.requestFileSystemQuota(quota, function (usage, quota) {
+            localStorage.setItem("configuration.quota", quota);
+            //TODO transfer to settings.js
+            var quotaConfigurationMarkup;
+            quotaConfigurationMarkup = $('#memorySizeInput');
+            if (quotaConfigurationMarkup) {
+                quotaConfigurationMarkup.val(quota / 1024 / 1024).attr('min', Math.ceil(usage / 1024 / 1024)).css('background', 'linear-gradient( 90deg, rgba(0,100,0,0.45) ' + Math.ceil((usage / quota) * 100) + '%, transparent ' + Math.ceil((usage / quota) * 100) + '%, transparent )');
+            }
+        });
     }
     //Render lists
     POD.storage.readSources(function (sources) {

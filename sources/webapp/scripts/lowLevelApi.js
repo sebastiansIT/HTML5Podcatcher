@@ -23,7 +23,6 @@
 /*global XMLHttpRequest */
 /*global Blob */
 /*global localStorage */
-/*global jQuery */
 var HTML5Podcatcher = {
     version: "Alpha {{ VERSION }}",
     settings: {
@@ -491,19 +490,21 @@ var HTML5Podcatcher = {
                     onReadCallback(episode);
                 }
             },
-            requestFileSystemQuota: function (quota) {
+            requestFileSystemQuota: function (quota, onRequestCallback) {
                 "use strict";
                 if (navigator.persistentStorage) {
                     navigator.persistentStorage.requestQuota(quota, function (grantedBytes) {
                         HTML5Podcatcher.logger('You gain access to ' + grantedBytes / 1024 / 1024 + ' MiB of memory', 'debug');
                         navigator.persistentStorage.queryUsageAndQuota(function (usage, quota) {
-                            localStorage.setItem("configuration.quota", quota);
-                            var availableSpace = quota - usage;
-                            jQuery('#memorySizeInput').val(quota / 1024 / 1024).attr('min', Math.ceil(usage / 1024 / 1024)).css('background', 'linear-gradient( 90deg, rgba(0,100,0,0.45) ' + Math.ceil((usage / quota) * 100) + '%, transparent ' + Math.ceil((usage / quota) * 100) + '%, transparent )');
+                            var availableSpace;
+                            availableSpace = quota - usage;
                             if (availableSpace <= (1024 * 1024 * 50)) {
                                 HTML5Podcatcher.logger('You are out of space! Please allow more then ' + Math.ceil(quota / 1024 / 1024) + ' MiB of space', 'warning');
                             } else {
                                 HTML5Podcatcher.logger('There is ' + Math.floor(availableSpace / 1024 / 1024) + ' MiB of ' + Math.floor(quota / 1024 / 1024) + ' MiB memory available', 'info');
+                            }
+                            if (onRequestCallback && typeof onRequestCallback === 'function') {
+                                onRequestCallback(usage, quota);
                             }
                         }, HTML5Podcatcher.errorLogger);
                     }, HTML5Podcatcher.errorLogger);
@@ -881,37 +882,45 @@ var HTML5Podcatcher = {
     parser: {
         parseSource: function (xml, source) {
             "use strict";
-            var episodes = [];
+            var rootElement, contentElement, itemArray, i, item, episode, episodes = [];
             HTML5Podcatcher.logger('Parsing source file "' + source.uri + '" starts now', 'debug');
             //RSS-Feed
-            if (jQuery(xml).has('rss[version="2.0"]')) {
+            rootElement = xml.querySelector('rss[version="2.0"]');
+            if (rootElement) {
                 //RSS-Channel
-                source.link = jQuery(xml).find('channel > link').text();
-                source.title = jQuery(xml).find('channel > title').text();
-                source.description = jQuery(xml).find('channel > description').text();
+                source.link = rootElement.querySelector('channel > link').childNodes[0].nodeValue;
+                source.title = rootElement.querySelector('channel > title').childNodes[0].nodeValue;
+                source.description = rootElement.querySelector('channel > description').childNodes[0].nodeValue;
                 //RSS-Entries
-                jQuery(xml).find('item').each(function () {
-                    var item, episode;
-                    item = jQuery(this);
+                itemArray = rootElement.querySelectorAll('channel > item');
+                for (i = 0; i < itemArray.length; i++) {
+                    item = itemArray[i];
                     episode = {};
-                    episode.uri = item.find('link, guid').first().text();
-                    episode.title = item.find('title:first').text();
-                    if (/^\d/.test(item.find('pubDate:first').text())) {
-                        episode.updated = new Date("Sun " + item.find('pubDate:first').text());
+                    episode.uri = item.querySelector('link, guid').childNodes[0].nodeValue;
+                    episode.title = item.querySelector('title').childNodes[0].nodeValue;
+                    if (/^\d/.test(item.querySelector('pubDate').childNodes[0].nodeValue)) {
+                        episode.updated = new Date("Sun " + item.querySelector('pubDate').childNodes[0].nodeValue);
                     } else {
-                        episode.updated = new Date(item.find('pubDate:first').text());
+                        episode.updated = new Date(item.querySelector('pubDate').childNodes[0].nodeValue);
                     }
                     episode.source = source.title;
-                    if (item.find('enclosure').length > 0) {
-                        episode.mediaUrl = item.find('enclosure:first').attr('url');
-                    } else if (jQuery(item.find('encoded').text()).find('a[href$=".mp3"]').length > 0) {
-                        episode.mediaUrl = jQuery(item.find('encoded').text()).find('a[href$=".mp3"]').first().attr('href');
+                    // use files linked with enclosure elements or ...
+                    if (item.querySelector('enclosure') && (item.querySelector('enclosure').attributes.type.value.indexOf("audio") >= 0)) {
+                        episode.mediaUrl = item.querySelector('enclosure').attributes.url.value;
+                    // ... or use anker tags in the full content markup of the item
+                    } else if (item.querySelector('encoded').childNodes[0].nodeValue) {
+                        contentElement = document.createElement("encoded");
+                        contentElement.innerHTML = item.querySelector('encoded').childNodes[0].nodeValue;
+                        if (contentElement.querySelector('a[href$=".mp3"]')) {
+                            episode.mediaUrl = contentElement.querySelector('a[href$=".mp3"]').attributes.href.value;
+                        }
                     }
                     episodes.push(episode);
-                });
+                }
                 episodes.sort(HTML5Podcatcher.sortEpisodes);
             } else {
-                HTML5Podcatcher.logger('No root element (&lt;rss&gt;) found in response: ' + xml, 'error');
+                HTML5Podcatcher.logger('No root element (&lt;rss&gt;) found in parsed RSS response: ' + xml, 'error');
+                return undefined;
             }
             HTML5Podcatcher.logger('Parsing source file "' + source.uri + '" finished (found ' + episodes.length + ' episodes for "' + source.title + '")', 'info');
             return {'source': source, 'episodes': episodes};
