@@ -8,11 +8,12 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-curl');
     grunt.loadNpmTasks('grunt-zip');
+    grunt.loadNpmTasks('grunt-contrib-jasmine');
     //Config Tasks
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         clean: {
-            HostetWebApp: {
+            HostedWebApp: {
                 src: ['build/webapp']
             },
             FirefoxPackagedApp: {
@@ -20,7 +21,7 @@ module.exports = function (grunt) {
             }
         },
         'string-replace': { // configure the string replacement task for the hostet app
-            HostetWebApp: {
+            HostedWebApp: {
                 files: [
                     {src: 'sources/webapp/podcatcher.html',         dest: 'build/webapp/podcatcher.html'},
                     {src: 'sources/webapp/settings.html',           dest: 'build/webapp/settings.html'},
@@ -76,7 +77,7 @@ module.exports = function (grunt) {
             }
         },
         copy: {
-            HostetWebApp: {
+            HostedWebApp: {
                 files: [
                     // includes files within path
                     {expand: true,  cwd: 'sources/webapp/',    src: ['css/*.css'],                    dest: 'build/webapp/',             filter: 'isFile'},
@@ -99,7 +100,7 @@ module.exports = function (grunt) {
             }
         },
         curl: {
-            HostetWebApp: {
+            HostedWebApp: {
                 src: 'http://code.jquery.com/jquery-2.1.1.min.js',
                 dest: 'build/webapp/scripts/jquery.min.js'
             },
@@ -135,11 +136,23 @@ module.exports = function (grunt) {
                     junit: 'tests/jslint.result.xml'
                 }
             }
+        },
+        jasmine: {
+            client: {
+                src: 'sources/webapp/scripts/lowLevelApi.js',
+                options: {
+                    specs: 'tests/spec/lowLevelApiSpec.js',
+                    junit: {
+                        path: 'tests/jasmine.result',
+                        consolidate: true
+                    }
+                }
+            }
         }
     });
     //Register Tasks
-    grunt.registerTask('HostetWebApp',       ['clean:HostetWebApp', 'string-replace:HostetWebApp', 'copy:HostetWebApp', 'curl:HostetWebApp']);
-    grunt.registerTask('FirefoxPackagedApp', ['string-replace:FirefoxPackagedApp', 'copy:FirefoxPackagedApp', 'curl:FirefoxPackagedApp', 'zip:FirefoxPackagedApp']);//, 'clean:FirefoxPackagedApp']);
-    grunt.registerTask('Test',               ['jslint']);
-    grunt.registerTask('default',            ['Test', 'HostetWebApp', 'FirefoxPackagedApp']);
+    grunt.registerTask('HostedWebApp',       ['clean:HostedWebApp', 'string-replace:HostedWebApp', 'copy:HostedWebApp', 'curl:HostedWebApp']);
+    grunt.registerTask('FirefoxPackagedApp', ['string-replace:FirefoxPackagedApp', 'copy:FirefoxPackagedApp', 'curl:FirefoxPackagedApp', 'zip:FirefoxPackagedApp', 'clean:FirefoxPackagedApp']);
+    grunt.registerTask('test',               ['jslint', 'jasmine']);
+    grunt.registerTask('default',            ['test', 'HostedWebApp', 'FirefoxPackagedApp']);
 };

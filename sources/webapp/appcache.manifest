@@ -110,6 +110,10 @@
 ### Use HTML-Templates instead of concatenated markup strings in javascript; some linting and refactoring
 ## 0.18.9
 ### Removed dependencies from jQuery in lowLevelApi.js
+## 0.18.10
+### Rebind Events to audio element when switching to another Episode
+# 0.18.11
+### Fix a Bug in RSS-Parser: Link elements with Atom namespace are accepted now (the parsers crashed in the last version because atom:link is a emtpy tag and rss:link has the URL as it's content)
 
 CACHE:
 # HTML

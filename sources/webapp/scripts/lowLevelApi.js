@@ -882,15 +882,38 @@ var HTML5Podcatcher = {
     parser: {
         parseSource: function (xml, source) {
             "use strict";
-            var rootElement, contentElement, itemArray, i, item, episode, episodes = [];
+            var rootElement, currentElement, contentElement, itemArray, i, item, episode, episodes = [];
             HTML5Podcatcher.logger('Parsing source file "' + source.uri + '" starts now', 'debug');
             //RSS-Feed
             rootElement = xml.querySelector('rss[version="2.0"]');
             if (rootElement) {
                 //RSS-Channel
-                source.link = rootElement.querySelector('channel > link').childNodes[0].nodeValue;
-                source.title = rootElement.querySelector('channel > title').childNodes[0].nodeValue;
-                source.description = rootElement.querySelector('channel > description').childNodes[0].nodeValue;
+                // * URI (<link> or <atom:link rel="self">)
+                currentElement = rootElement.querySelector('channel > link');
+                if (currentElement) {
+                    if (currentElement.namespaceURI === 'http://www.w3.org/2005/Atom' && currentElement.attributes.rel.value === 'self') {
+                        source.link = currentElement.attributes.href.value;
+                    } else {
+                        source.link = currentElement.childNodes[0].nodeValue;
+                    }
+                } else {
+                    HTML5Podcatcher.logger('No link element (&lt;link&gt; or &lt;atom:link rel="self"&gt;) found in parsed RSS response: ' + xml, 'error');
+                    return undefined;
+                }
+                // * Title (<title>)
+                currentElement = rootElement.querySelector('channel > title');
+                if (currentElement) {
+                    source.title = currentElement.childNodes[0].nodeValue;
+                } else {
+                    source.title = source.link;
+                }
+                // * Description (<description>)
+                currentElement = rootElement.querySelector('channel > description');
+                if (currentElement) {
+                    source.description = currentElement.childNodes[0].nodeValue;
+                } else {
+                    source.description = '';
+                }
                 //RSS-Entries
                 itemArray = rootElement.querySelectorAll('channel > item');
                 for (i = 0; i < itemArray.length; i++) {
