@@ -1,8 +1,6 @@
-<img src="resources/images/logoPodcatcher.svg?raw=true" title="Logo of HTML5 Podcatcher" style="float:left; width:200px" />
-
 # HTML5 Podcatcher #
 
-A podcast player based on web technology.
+<img src="sources/webapp/img/logo256.png?raw=true" title="Logo of HTML5 Podcatcher" style="float:left;" /> A podcast player based on web technology.
 
 This is a experimental implementation of an podcast player. Primary 
 targets are playback of audio files, loading and parsing podcast feeds 
