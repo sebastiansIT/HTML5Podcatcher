@@ -1,6 +1,6 @@
 {
     "name": "HTML5Podcatcher",
-    "version": "0.18.11",
+    "version": "0.18.12",
     "description": "A HTML5 based podcast player.",
     "main": "Gruntfile.js",
     "devDependencies": {

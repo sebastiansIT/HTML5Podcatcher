@@ -58,6 +58,7 @@ $(document).ready(function () {
         }
     });
     $('#configuration #exportConfiguration').on('click', function () {
+        //TODO make new width Storage Provider architecture
         var i, key, config;
         config = {'Episodes': {}, 'Sources': {}, 'Settings': {}};
         for (i = 0; i < localStorage.length; i++) {
@@ -74,6 +75,7 @@ $(document).ready(function () {
         $(this).parent().find('#SerialisedConfigurationInput')[0].select();
     });
     $('#configuration #importConfiguration').on('click', function () {
+        //TODO make new width Storage Provider architecture
         var config, property;
         localStorage.clear();
         config = JSON.parse($(this).parent().find('#SerialisedConfigurationInput').val());

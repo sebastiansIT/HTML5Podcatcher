@@ -22,7 +22,9 @@
 ## Older entries see
 ### ChangeLog.md
 ## 0.18.11
-### Fix a Bug in RSS-Parser: Link elements with Atom namespace are accepted now (the parsers crashed in the last version because atom:link is a emtpy tag and rss:link has the URL as it's content)
+### Fix a Bug in RSS-Parser: Link elements with Atom namespace are accepted now 
+## 0.18.12
+### Fix Bugs in Parser and UI: empty description elements; missing encoded tags and changing feed uri and website url in some cases; Remove Download Button if no audio-file available
 
 CACHE:
 # HTML

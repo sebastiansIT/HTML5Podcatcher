@@ -45,10 +45,14 @@ GlobalUserInterfaceHelper.actualiseEpisodeUI = function (episode) {
         $(episodeUI).find('.status').text("Status: new");
     }
     // Download/Delete link
-    if (episode.offlineMediaUrl) {
-        $(episodeUI).find('.downloadFile').replaceWith('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>');
+    if (POD.storage.isFileStorageAvailable() && episode.mediaUrl) {
+        if (episode.offlineMediaUrl) {
+            $(episodeUI).find('.downloadFile').replaceWith('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>');
+        } else {
+            $(episodeUI).find('.delete').replaceWith('<a class="download button" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/') + 1) + '">Download</a>');
+        }
     } else {
-        $(episodeUI).find('.delete').replaceWith('<a class="download button" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/') + 1) + '">Download</a>');
+        $(episodeUI).find('.functions .downloadFile').remove();
     }
     $(episodeUI).find('progress').remove();
     return false;
@@ -81,7 +85,7 @@ GlobalUserInterfaceHelper.renderEpisode = function (episode) {
     }
     entryUI.find('.functions a.origin').attr('href', episode.uri);
     //entryFunctionsUI.append('<a class="origin button" href="' + episode.uri + '">Internet</a>');
-    if (POD.storage.isFileStorageAvailable()) {
+    if (POD.storage.isFileStorageAvailable() && episode.mediaUrl) {
         if (episode.isFileSavedOffline) {
             entryUI.find('.functions .downloadFile').replaceWith('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>');
             //entryFunctionsUI.append('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>');
@@ -89,6 +93,8 @@ GlobalUserInterfaceHelper.renderEpisode = function (episode) {
             entryUI.find('.functions .downloadFile').attr('href', episode.mediaUrl).attr('download', episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/') + 1));
             //entryFunctionsUI.append('<a class="button downloadFile" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
         }
+    } else {
+        entryUI.find('.functions .downloadFile').remove();
     }
     //entryUI.append(entryFunctionsUI);
     return entryUI;

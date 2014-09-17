@@ -389,35 +389,39 @@ var HTML5Podcatcher = {
                 "use strict";
                 var requestOpenDB;
                 window.URL.revokeObjectURL(episode.offlineMediaUrl);
-                requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
-                requestOpenDB.onupgradeneeded = this.updateIndexedDB;
-                requestOpenDB.onblocked = function () {
-                    HTML5Podcatcher.logger("Database blocked", 'debug');
-                };
-                requestOpenDB.onsuccess = function () {
-                    HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug');
-                    var db, transaction, store, request;
-                    db = this.result;
-                    transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore], 'readwrite');
-                    store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore);
-                    request = store.delete(episode.mediaUrl);
-                    // Erfolgs-Event
-                    request.onsuccess = function () {
-                        episode.isFileSavedOffline = false;
-                        episode.offlineMediaUrl = undefined;
-                        HTML5Podcatcher.storage.writeEpisode(episode);
-                        HTML5Podcatcher.logger('Deleting file "' + episode.mediaUrl + '" from IndexedDB finished', 'info');
-                        if (onDeleteCallback && typeof onDeleteCallback === 'function') {
-                            onDeleteCallback(episode);
-                        }
+                if (episode && episode.mediaUrl) {
+                    requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+                    requestOpenDB.onupgradeneeded = this.updateIndexedDB;
+                    requestOpenDB.onblocked = function () {
+                        HTML5Podcatcher.logger("Database blocked", 'debug');
                     };
-                    request.onerror = function (event) {
-                        HTML5Podcatcher.logger(event.target.error.name + ' while deleting file "' + episode.mediaUrl + '" from IndexedDB (' + event.target.error.message + ')', 'error');
+                    requestOpenDB.onsuccess = function () {
+                        HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug');
+                        var db, transaction, store, request;
+                        db = this.result;
+                        transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore], 'readwrite');
+                        store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore);
+                        request = store.delete(episode.mediaUrl);
+                        // Erfolgs-Event
+                        request.onsuccess = function () {
+                            episode.isFileSavedOffline = false;
+                            episode.offlineMediaUrl = undefined;
+                            HTML5Podcatcher.storage.writeEpisode(episode);
+                            HTML5Podcatcher.logger('Deleting file "' + episode.mediaUrl + '" from IndexedDB finished', 'info');
+                            if (onDeleteCallback && typeof onDeleteCallback === 'function') {
+                                onDeleteCallback(episode);
+                            }
+                        };
+                        request.onerror = function (event) {
+                            HTML5Podcatcher.logger(event.target.error.name + ' while deleting file "' + episode.mediaUrl + '" from IndexedDB (' + event.target.error.message + ')', 'error');
+                        };
                     };
-                };
-                requestOpenDB.onerror = function (event) {
-                    HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
-                };
+                    requestOpenDB.onerror = function (event) {
+                        HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
+                    };
+                } else {
+                    HTML5Podcatcher.logger('Nothing to delete from IndexedDB', 'info');
+                }
             }
         },//end IndexedDbStorage
         fileSystemStorage: {
@@ -882,23 +886,21 @@ var HTML5Podcatcher = {
     parser: {
         parseSource: function (xml, source) {
             "use strict";
-            var rootElement, currentElement, contentElement, itemArray, i, item, episode, episodes = [];
+            var rootElement, currentElementList, currentElement, contentElement, itemArray, i, item, episode, episodes = [];
             HTML5Podcatcher.logger('Parsing source file "' + source.uri + '" starts now', 'debug');
             //RSS-Feed
             rootElement = xml.querySelector('rss[version="2.0"]');
             if (rootElement) {
                 //RSS-Channel
                 // * URI (<link> or <atom:link rel="self">)
-                currentElement = rootElement.querySelector('channel > link');
-                if (currentElement) {
-                    if (currentElement.namespaceURI === 'http://www.w3.org/2005/Atom' && currentElement.attributes.rel.value === 'self') {
-                        source.link = currentElement.attributes.href.value;
-                    } else {
+                currentElementList = rootElement.querySelectorAll('channel > link');
+                for (i = 0; i < currentElementList.length; i++) {
+                    currentElement = currentElementList[i];
+                    if (currentElement.namespaceURI !== 'http://www.w3.org/2005/Atom') {
                         source.link = currentElement.childNodes[0].nodeValue;
+                    } else {
+                        source.link = source.uri;
                     }
-                } else {
-                    HTML5Podcatcher.logger('No link element (&lt;link&gt; or &lt;atom:link rel="self"&gt;) found in parsed RSS response: ' + xml, 'error');
-                    return undefined;
                 }
                 // * Title (<title>)
                 currentElement = rootElement.querySelector('channel > title');
@@ -909,7 +911,7 @@ var HTML5Podcatcher = {
                 }
                 // * Description (<description>)
                 currentElement = rootElement.querySelector('channel > description');
-                if (currentElement) {
+                if (currentElement && currentElement.childNodes.length > 0) {
                     source.description = currentElement.childNodes[0].nodeValue;
                 } else {
                     source.description = '';
@@ -931,7 +933,7 @@ var HTML5Podcatcher = {
                     if (item.querySelector('enclosure') && (item.querySelector('enclosure').attributes.type.value.indexOf("audio") >= 0)) {
                         episode.mediaUrl = item.querySelector('enclosure').attributes.url.value;
                     // ... or use anker tags in the full content markup of the item
-                    } else if (item.querySelector('encoded').childNodes[0].nodeValue) {
+                    } else if (item.querySelector('encoded') && item.querySelector('encoded').childNodes[0].nodeValue) {
                         contentElement = document.createElement("encoded");
                         contentElement.innerHTML = item.querySelector('encoded').childNodes[0].nodeValue;
                         if (contentElement.querySelector('a[href$=".mp3"]')) {
