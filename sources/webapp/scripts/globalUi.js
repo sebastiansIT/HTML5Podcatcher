@@ -19,8 +19,20 @@
 /*global console */
 /*global confirm */
 /*global applicationCache */
+/*global localStorage */
 /*global $ */
 var GlobalUserInterfaceHelper = {
+    formatTimeCode: function (timecode) {
+        "use strict";
+        var hours, minutes, seconds;
+        hours = Math.floor(timecode / 3600);
+        minutes = Math.floor((timecode % 3600) / 60);
+        seconds = timecode % 60;
+        hours = (hours < 10) ? "0" + hours : hours;
+        minutes = (minutes < 10) ? "0" + minutes : minutes;
+        seconds = (seconds < 10) ? "0" + seconds : seconds;
+        return hours + ':' + minutes + ':' + seconds;
+    },
     escapeHtml: function (text) {
         "use strict";
         return text
@@ -32,6 +44,9 @@ var GlobalUserInterfaceHelper = {
     },
     logHandler: function (message, loglevel) {
         "use strict";
+        if (loglevel.indexOf(":") >= 0) {
+            loglevel = loglevel.substring(0, loglevel.indexOf(":"));
+        }
         console.log(loglevel + ': ' + message);
         $('#statusbar').prepend('<span class=' + loglevel + '>' + message + '</span></br>');
     },
@@ -47,6 +62,16 @@ var GlobalUserInterfaceHelper = {
     successHandler: function (event) {
         "use strict";
         this.logHandler(event, 'info');
+    },
+    settings: {
+        set: function (key, value) {
+            "use strict";
+            localStorage.setItem('settings.' + key, value);
+        },
+        get: function (key) {
+            "use strict";
+            return localStorage.getItem('settings.' + key);
+        }
     },
     initApplicationCacheEvents: function () {
         "use strict";

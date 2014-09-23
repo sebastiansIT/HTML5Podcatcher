@@ -25,6 +25,11 @@
 ### Fix a Bug in RSS-Parser: Link elements with Atom namespace are accepted now 
 ## 0.18.12
 ### Fix Bugs in Parser and UI: empty description elements; missing encoded tags and changing feed uri and website url in some cases; Remove Download Button if no audio-file available
+## 0.18.12
+### New implementation of import and export of the complete configuration
+## 0.19.13
+### Variate the implementation of the multimedia-event "duration changed"
+### Refactor DownloadSource() and remove usage of local storage API from this function
 
 CACHE:
 # HTML

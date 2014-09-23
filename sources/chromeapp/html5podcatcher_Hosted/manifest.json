@@ -1,0 +1,30 @@
+﻿{
+    "name": "HTML5 Podcatcher",
+    "short_name": "Podcatcher",
+    "description": "A Podcatcher based on HTML5 and Javascript",
+    "version": "0.19.8",
+    
+    "manifest_version": 2,
+    "offline_enabled": true,
+    "minimum_chrome_version": "37.0",
+    
+    "app": {
+        "urls": [
+          "*://lab.human-injection.de/podcatcher/"
+        ],
+        "launch": {
+            "web_url": "http://lab.human-injection.de/podcatcher/podcatcher.html",
+            "container": "tab"
+        }
+    },
+    "permissions": [
+        "unlimitedStorage",
+		"http://*/*",
+		"https://*/*"
+    ],
+    "icons": {
+        "128": "img/logo128.png"
+    },
+    
+    "author": "Sebastian Spautz"
+}

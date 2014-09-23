@@ -1,0 +1,26 @@
+﻿{
+    "name": "HTML5 Podcatcher",
+    "short_name": "Podcatcher",
+    "description": "A Podcatcher based on HTML5 and Javascript",
+    "version": "0.19.8",
+    
+    "manifest_version": 2,
+    "offline_enabled": true,
+    "minimum_chrome_version": "37.0",
+    
+    "app": {
+        "background": {
+			"scripts": ["scripts/background.js"]
+		}
+    },
+    "permissions": [
+        "unlimitedStorage",
+		"http://*/*",
+		"https://*/*"
+    ],
+    "icons": {
+        "128": "img/logo128.png"
+    },
+    
+    "author": "Sebastian Spautz"
+}

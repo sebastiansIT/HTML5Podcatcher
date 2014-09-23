@@ -57,12 +57,6 @@ GlobalUserInterfaceHelper.actualiseEpisodeUI = function (episode) {
     $(episodeUI).find('progress').remove();
     return false;
 };
-GlobalUserInterfaceHelper.renderConfiguration = function () {
-    "use strict";
-    if (localStorage.getItem("configuration.proxyUrl")) {
-        $('#httpProxyInput').val(localStorage.getItem("configuration.proxyUrl"));
-    }
-};
 GlobalUserInterfaceHelper.renderEpisode = function (episode) {
     "use strict";
     var entryUI;
@@ -173,7 +167,7 @@ GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
     POD.storage.readPlaylist(false, function (playlist) {
         if (playlist && playlist.length > 0) {
             for (i = 0; i < playlist.length; i++) {
-                if (playlist[i].uri === localStorage.getItem('configuration.lastPlayed')) {
+                if (playlist[i].uri === UI.settings.get('lastPlayed')) {
                     lastPlayedEpisode = playlist[i].uri;
                     break;
                 }
@@ -207,7 +201,7 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
     "use strict";
     var mediaUrl, audioTag, mp3SourceTag;
     $('#player audio').off('timeupdate');
-    GlobalUserInterfaceHelper.logHandler("Timeupdate off", 'debug');
+    GlobalUserInterfaceHelper.logHandler("Timeupdate off", 'debug:playback');
     if (episode) {
         POD.storage.openFile(episode, function (episode) {
             if (episode.offlineMediaUrl) {
@@ -232,27 +226,27 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
             //Bind or rebind event handler for the audio element
             $('#player audio').on('loadstart', function () {
                 GlobalUserInterfaceHelper.logHandler("==============================================", 'debug');
-                GlobalUserInterfaceHelper.activeEpisode(function (episode) { GlobalUserInterfaceHelper.logHandler("Start loading " + episode.title, 'debug'); });
+                GlobalUserInterfaceHelper.activeEpisode(function (episode) { GlobalUserInterfaceHelper.logHandler("Start loading " + episode.title, 'debug:playback'); });
             });
             $('#player audio').on('loadedmetadata', function () {
-                GlobalUserInterfaceHelper.activeEpisode(function (episode) { GlobalUserInterfaceHelper.logHandler("Load metadata of " + episode.title, 'debug'); });
+                GlobalUserInterfaceHelper.activeEpisode(function (episode) { GlobalUserInterfaceHelper.logHandler("Load metadata of " + episode.title, 'debug:playback'); });
             });
             $('#player audio').on('canplay', function () {
-                GlobalUserInterfaceHelper.activeEpisode(function (episode) { GlobalUserInterfaceHelper.logHandler(episode.title + " is ready to play", 'debug'); });
+                GlobalUserInterfaceHelper.activeEpisode(function (episode) { GlobalUserInterfaceHelper.logHandler(episode.title + " is ready to play", 'debug:playback'); });
             });
             $('#player audio').on('canplaythrough', function () {
-                GlobalUserInterfaceHelper.activeEpisode(function (episode) { GlobalUserInterfaceHelper.logHandler(episode.title + " is realy ready to play (\"canplaythrough\")", 'debug'); });
+                GlobalUserInterfaceHelper.activeEpisode(function (episode) { GlobalUserInterfaceHelper.logHandler(episode.title + " is realy ready to play (\"canplaythrough\")", 'debug:playback'); });
             });
             $('#player audio').on('playing', function (event) {
                 var audioElement = event.target;
                 GlobalUserInterfaceHelper.activeEpisode(function (episode) {
-                    GlobalUserInterfaceHelper.logHandler(episode.title + " is playing", 'info');
+                    GlobalUserInterfaceHelper.logHandler(episode.title + " is playing", 'info:playback');
                     audioElement.autoplay = true;
                 });
             });
             $('#player audio').on('ended', function () {
                 GlobalUserInterfaceHelper.activeEpisode(function (episode) {
-                    GlobalUserInterfaceHelper.logHandler(episode.title + " is ended", 'debug');
+                    GlobalUserInterfaceHelper.logHandler(episode.title + " is ended", 'debug:playback');
                     POD.toggleEpisodeStatus(episode);
                     //Plays next Episode in Playlist
                     GlobalUserInterfaceHelper.nextEpisode(GlobalUserInterfaceHelper.playEpisode);
@@ -283,21 +277,22 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
                         break;
                     }
                 }
-                GlobalUserInterfaceHelper.logHandler(errormessage, 'error');
+                GlobalUserInterfaceHelper.logHandler(errormessage, 'error:playback');
                 GlobalUserInterfaceHelper.nextEpisode(GlobalUserInterfaceHelper.playEpisode);
             });
             $('#player audio').on('durationchange', function (event) {
                 var audioElement = event.target;
                 GlobalUserInterfaceHelper.activeEpisode(function (episode) {
-                    GlobalUserInterfaceHelper.logHandler("Duration of " + episode.title + " is changed to " + event.currentTarget.duration + ".", 'debug');
-                    if (episode && audioElement.duration > episode.playback.currentTime && audioElement.currentTime <= episode.playback.currentTime) {
-                        GlobalUserInterfaceHelper.logHandler("CurrentTime will set to " + episode.playback.currentTime + " seconds", 'debug');
+                    GlobalUserInterfaceHelper.logHandler("Duration of " + episode.title + " is changed to " + UI.formatTimeCode(event.currentTarget.duration) + ".", 'debug:playback');
+                    if (episode && audioElement.duration > episode.playback.currentTime) { //&& audioElement.currentTime <= episode.playback.currentTime) {
+                        $(audioElement).off('durationchange');
+                        GlobalUserInterfaceHelper.logHandler("CurrentTime will set to " + UI.formatTimeCode(episode.playback.currentTime) + " seconds", 'debug');
                         audioElement.currentTime = episode.playback.currentTime;
                         $(audioElement).on('timeupdate', function (event) {
                             if (episode && (event.target.currentTime > (episode.playback.currentTime + 10) || event.target.currentTime < (episode.playback.currentTime - 10))) {
                                 episode.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10;
                                 POD.storage.writeEpisode(episode);
-                                GlobalUserInterfaceHelper.logHandler('Current timecode is ' + episode.playback.currentTime + '.', 'debug');
+                                GlobalUserInterfaceHelper.logHandler('Current timecode is ' + UI.formatTimeCode(episode.playback.currentTime) + '.', 'debug');
                             }
                         });
                         GlobalUserInterfaceHelper.logHandler("Timeupdate on", 'debug');
@@ -317,7 +312,7 @@ GlobalUserInterfaceHelper.playEpisode = function (episode, onPlaybackStartedCall
     "use strict";
     if (episode) {
         GlobalUserInterfaceHelper.activateEpisode(episode, function (episode) {
-            localStorage.setItem('configuration.lastPlayed', episode.uri);
+            UI.settings.set('lastPlayed', episode.uri);
             $('#player audio')[0].load();
             if (onPlaybackStartedCallback && typeof onPlaybackStartedCallback === 'function') {
                 onPlaybackStartedCallback(episode);
@@ -331,11 +326,14 @@ $(document).ready(function () {
     "use strict";
     var k, quota, multiMediaKeyDownTimestemp;
     POD.settings.uiLogger = UI.logHandler;
-    POD.web.settings.proxyUrlPattern = localStorage.getItem("configuration.proxyUrl");
-    //Update local storage to actual version of key-names (changed "track" to "episode")
+    POD.web.settings.proxyUrlPattern = UI.settings.get("proxyUrl");
+    //Update local storage to actual version of key-names (changed "track" to "episode"; changed "configuration" to "settings")
     for (k = 0; k < localStorage.length; k++) {
         if (localStorage.key(k).slice(0, 6) === 'track.') {
             localStorage.setItem(localStorage.key(k).replace('track.', 'episode.'), localStorage.getItem(localStorage.key(k)));
+            localStorage.removeItem(localStorage.key(k));
+        } else if (localStorage.key(k).slice(0, 14) === 'configuration.') {
+            localStorage.setItem(localStorage.key(k).replace('configuration.', 'settings.'), localStorage.getItem(localStorage.key(k)));
             localStorage.removeItem(localStorage.key(k));
         }
     }
@@ -530,16 +528,11 @@ $(document).ready(function () {
     UI.initConnectionStateEvents();
     //Quota and Filesystem initialisation
     if (POD.storage.fileStorageEngine() === POD.storage.fileSystemStorage) {
-        quota = localStorage.getItem("configuration.quota");
+        quota = UI.settings.get("quota");
         if (!quota) { quota = 1024 * 1024 * 200; }
         POD.storage.fileSystemStorage.requestFileSystemQuota(quota, function (usage, quota) {
-            localStorage.setItem("configuration.quota", quota);
-            //TODO transfer to settings.js
-            var quotaConfigurationMarkup;
-            quotaConfigurationMarkup = $('#memorySizeInput');
-            if (quotaConfigurationMarkup) {
-                quotaConfigurationMarkup.val(quota / 1024 / 1024).attr('min', Math.ceil(usage / 1024 / 1024)).css('background', 'linear-gradient( 90deg, rgba(0,100,0,0.45) ' + Math.ceil((usage / quota) * 100) + '%, transparent ' + Math.ceil((usage / quota) * 100) + '%, transparent )');
-            }
+            GlobalUserInterfaceHelper.logHandler("Usage: " + usage + " MiB of " + quota + 'MiB File Storage', 'info');
+            UI.settings.set("quota", quota);
         });
     }
     //Render lists

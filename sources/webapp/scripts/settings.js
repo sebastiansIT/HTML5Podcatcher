@@ -26,7 +26,69 @@
 /*global $ */
 /*global POD */
 /*global UI */
-
+UI.export = function (onExportCallback) {
+    "use strict";
+    var config, i, key;
+    config = {'Episodes': {}, 'Sources': {}, 'Settings': {}};
+    for (i = 0; i < localStorage.length; i++) {
+        key = localStorage.key(i);
+        //Export Local Storage
+        if (key.slice(0, 7) === 'source.') {
+            config.Sources[key] = localStorage.getItem(key);
+        } else if (localStorage.key(i).slice(0, 8) === 'episode.') {
+            config.Episodes[key] = localStorage.getItem(key);
+        } else if (localStorage.key(i).slice(0, 14) === 'configuration.') {
+            config.Settings[localStorage.key(i).slice(15)] = localStorage.getItem(key);
+        } else if (localStorage.key(i).slice(0, 9) === 'settings.') {
+            config.Settings[localStorage.key(i).slice(10)] = localStorage.getItem(key);
+        }
+    }
+    //Export active storage engine data
+    POD.storage.readSources(function (sourceArray) {
+        for (i = 0; i < sourceArray.length; i++) {
+            config.Sources[sourceArray[i].uri] = sourceArray[i];
+        }
+        POD.storage.readPlaylist(true, function (episodeArray) {
+            for (i = 0; i < episodeArray.length; i++) {
+                config.Episodes[episodeArray[i].uri] = episodeArray[i];
+            }
+            if (onExportCallback && typeof onExportCallback === 'function') {
+                onExportCallback(config);
+            }
+        });
+    });
+};
+UI.import = function (config, onImportCallback) {
+    "use strict";
+    var property, episodeCounter = 0, sourceCounter = 0, sourceImportedFunction, episodeImportedFunction;
+    sourceImportedFunction = function () {
+        sourceCounter--;
+    };
+    episodeImportedFunction = function () {
+        episodeCounter--;
+    };
+    for (property in config.Settings) {
+        if (config.Settings.hasOwnProperty(property)) {
+            UI.settings.set(property, config.Settings[property]);
+        }
+    }
+    for (property in config.Sources) {
+        if (config.Sources.hasOwnProperty(property)) {
+            sourceCounter++;
+            POD.storage.writeSource(config.Sources[property], sourceImportedFunction);
+        }
+    }
+    for (property in config.Episodes) {
+        if (config.Episodes.hasOwnProperty(property)) {
+            episodeCounter++;
+            POD.storage.writeEpisode(config.Episodes[property], episodeImportedFunction);
+        }
+    }
+    while (episodeCounter || sourceCounter) { }
+    if (onImportCallback && typeof onImportCallback === 'function') {
+        onImportCallback(config);
+    }
+};
 /** Central 'ready' event handler */
 $(document).ready(function () {
     "use strict";
@@ -52,60 +114,47 @@ $(document).ready(function () {
         event.preventDefault();
         event.stopPropagation();
         if ($('#httpProxyInput')[0].checkValidity()) {
-            localStorage.setItem("configuration.proxyUrl", $('#httpProxyInput').val());
+            UI.settings.set("proxyUrl", $('#httpProxyInput').val());
         } else {
             UI.logHandler('Please insert a URL', 'error');
         }
     });
     $('#configuration #exportConfiguration').on('click', function () {
-        //TODO make new width Storage Provider architecture
-        var i, key, config;
-        config = {'Episodes': {}, 'Sources': {}, 'Settings': {}};
-        for (i = 0; i < localStorage.length; i++) {
-            key = localStorage.key(i);
-            if (key.slice(0, 7) === 'source.') {
-                config.Sources[key] = localStorage.getItem(key);
-            } else if (localStorage.key(i).slice(0, 8) === 'episode.') {
-                config.Episodes[key] = localStorage.getItem(key);
-            } else {
-                config.Settings[key] = localStorage.getItem(key);
-            }
-        }
-        $(this).parent().find('#SerialisedConfigurationInput').val(JSON.stringify(config));
-        $(this).parent().find('#SerialisedConfigurationInput')[0].select();
+        var button = this;
+        $(button).attr('disabled', 'disabled');
+        UI.export(function (config) {
+            $(button).parent().find('#SerialisedConfigurationInput').val(JSON.stringify(config));
+            $(button).parent().find('#SerialisedConfigurationInput')[0].select();
+            $(button).removeAttr('disabled');
+        });
     });
     $('#configuration #importConfiguration').on('click', function () {
-        //TODO make new width Storage Provider architecture
-        var config, property;
-        localStorage.clear();
+        var config, button;
+        button = this;
+        $(button).attr('disabled', 'disabled');
         config = JSON.parse($(this).parent().find('#SerialisedConfigurationInput').val());
-        for (property in config.Episodes) {
-            if (config.Episodes.hasOwnProperty(property)) {
-                localStorage.setItem(property, config.Episodes[property]);
-            }
-        }
-        for (property in config.Sources) {
-            if (config.Sources.hasOwnProperty(property)) {
-                localStorage.setItem(property, config.Sources[property]);
-            }
-        }
-        for (property in config.Settings) {
-            if (config.Settings.hasOwnProperty(property)) {
-                localStorage.setItem(property, config.Settings[property]);
-            }
-        }
+        UI.import(config, function () {
+            $(button).removeAttr('disabled');
+        });
     });
     //Quota and Filesystem initialisation
     if (POD.storage.fileStorageEngine() === POD.storage.fileSystemStorage) {
         $('#FileSystemAPI').show();
-        quota = localStorage.getItem("configuration.quota");
+        quota = UI.settings.get("quota");
         if (!quota) { quota = 1024 * 1024 * 200; }
-        POD.storage.fileSystemStorage.requestFileSystemQuota(quota);
+        POD.storage.fileSystemStorage.requestFileSystemQuota(quota, function (usage, quota) {
+            UI.settings.set("quota", quota);
+            var quotaConfigurationMarkup;
+            quotaConfigurationMarkup = $('#memorySizeInput');
+            if (quotaConfigurationMarkup) {
+                quotaConfigurationMarkup.val(quota / 1024 / 1024).attr('min', Math.ceil(usage / 1024 / 1024)).css('background', 'linear-gradient( 90deg, rgba(0,100,0,0.45) ' + Math.ceil((usage / quota) * 100) + '%, transparent ' + Math.ceil((usage / quota) * 100) + '%, transparent )');
+            }
+        });
     } else {
         $('#FileSystemAPI').hide();
     }
     //Render lists and settings
-    if (localStorage.getItem("configuration.proxyUrl")) {
-        $('#httpProxyInput').val(localStorage.getItem("configuration.proxyUrl"));
+    if (UI.settings.get("proxyUrl")) {
+        $('#httpProxyInput').val(UI.settings.get("proxyUrl"));
     }
 });
