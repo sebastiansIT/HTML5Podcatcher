@@ -32,7 +32,7 @@ module.exports = function (grunt) {
                     {src: 'sources/webapp/scripts/playlist.js',   dest: 'build/webapp/scripts/playlist.js'},
                     {src: 'sources/webapp/scripts/settings.js',     dest: 'build/webapp/scripts/settings.js'},
                     {src: 'sources/webapp/scripts/diagnostic.js',   dest: 'build/webapp/scripts/diagnostic.js'},
-                    {src: 'sources/webapp/appcache.manifest',       dest: 'build/webapp/appcache.manifest'},
+                    {src: 'sources/webapp/manifest.appcache',       dest: 'build/webapp/manifest.appcache'},
                     {src: 'sources/hostedapp/manifest.webapp',      dest: 'build/webapp/manifest.webapp'},
                     {src: 'sources/hostedapp/install.html',         dest: 'build/webapp/install.html'}
                 ],
@@ -70,7 +70,7 @@ module.exports = function (grunt) {
                             replacement: 'F'
                         },
                         { //remove App-Cache from Packaged apps
-                            pattern: / manifest="appcache\.manifest"/g,
+                            pattern: / manifest="manifest\.appcache"/g,
                             replacement: ''
                         }]
                 }

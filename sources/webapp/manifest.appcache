@@ -48,11 +48,8 @@ CACHE:
 ./favicon.ico
 ./img/logo60.png
 ./img/logo128.png
+./img/logo192.png
 ./img/logo512.png
 
 NETWORK:
-# this is: "Load all not cached files from Network" (for Firefox;  see http://www.appcachefacts.info/)
-http://*
-https://*
-# this is: "Load all not cached files from Network" (for other browsers)
 *

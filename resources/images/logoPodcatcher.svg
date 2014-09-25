@@ -14,10 +14,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="podcatcher.svg"
-   inkscape:export-filename="D:\Sebastian\Documents\F_Projekt\human-injection.de\HTML5Podcatcher\img\logo32.png"
-   inkscape:export-xdpi="5.625"
-   inkscape:export-ydpi="5.625">
+   sodipodi:docname="logoPodcatcher.svg"
+   inkscape:export-filename="..\sources\webapp\img\logo192.png"
+   inkscape:export-xdpi="33.75"
+   inkscape:export-ydpi="33.75">
   <title
      id="title5318">HTML5 Podcatcher</title>
   <defs
@@ -64,7 +64,7 @@
         </dc:creator>
         <dc:rights>
           <cc:Agent>
-            <dc:title></dc:title>
+            <dc:title />
           </cc:Agent>
         </dc:rights>
         <dc:description>Logo für den HTML5 Podcatcher</dc:description>
@@ -125,7 +125,7 @@
        sodipodi:cy="262"
        sodipodi:rx="200"
        sodipodi:ry="200"
-       d="m 450,262 a 200,200 0 1 1 -400,0 200,200 0 1 1 400,0 z"
+       d="M 450,262 C 450,372.45695 360.45695,462 250,462 139.54305,462 50,372.45695 50,262 50,151.54305 139.54305,62 250,62 c 110.45695,0 200,89.54305 200,200 z"
        transform="matrix(1.167861,0.16247479,-0.16247479,1.167861,6.6031434,449.7639)"
        inkscape:label="#greencircle" />
     <path

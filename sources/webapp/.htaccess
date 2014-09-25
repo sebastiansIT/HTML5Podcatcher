@@ -1,4 +1,4 @@
-AddType text/cache-manifest .manifest
+AddType text/cache-manifest .appcache
 AddType application/x-web-app-manifest+json .webapp
 
 Header set Content-Security-Policy "default-src *; script-src 'self'; connect-src *; media-src *; style-src 'self' 'unsafe-inline'; img-src *"
