@@ -26,7 +26,8 @@
 window.URL = window.URL || window.webkitURL;
 window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
 window.resolveLocalFileSystemURL = window.resolveLocalFileSystemURL || window.webkitResolveLocalFileSystemURL;
-navigator.persistentStorage = navigator.persistentStorage || navigator.webkitPersistentStorage;
+window.navigator.persistentStorage = window.navigator.persistentStorage || window.navigator.webkitPersistentStorage;
+window.navigator.connection = window.navigator.connection || window.navigator.mozConnection;
 
 // Polyfills
 (function () {

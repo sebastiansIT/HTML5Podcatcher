@@ -30,6 +30,10 @@
 ## 0.19.13
 ### Variate the implementation of the multimedia-event "duration changed"
 ### Refactor DownloadSource() and remove usage of local storage API from this function
+## 0.19.14
+### Fix a bug in export function
+## 0.20.0
+### Add functions to clear storage and save multiple episodes or sources to storage
 
 CACHE:
 # HTML
@@ -53,3 +57,5 @@ CACHE:
 
 NETWORK:
 *
+
+# VALIDATE this manifest on http://manifest-validator.com/

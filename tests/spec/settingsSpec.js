@@ -21,7 +21,7 @@
 (function () {
     'use strict';
     describe("HTML5 Podcatcher Settings Spec", function () {
-        var fakeSettingsStorage = {}, fakeSourceStorage = {}, fakeEpisodeStorage = {}, testData;
+        var fakeSourceStorage = {}, fakeEpisodeStorage = {}, testData;
         testData = {
             Settings: {
                 settingA: 'A',
@@ -36,31 +36,34 @@
                 "https://podcast.web.site.new/news1" : { uri: "https://podcast.web.site.new/news1", title: "News One Title" }
             }
         };
+        localStorage.clear();
         describe("Import configuration", function () {
             var originalTimeout;
             beforeEach(function () {
-                spyOn(UI.settings, "set").and.callFake(function (key, value) {
-                    fakeSettingsStorage[key] = value;
+                spyOn(HTML5Podcatcher.storage, "writeSources").and.callFake(function (sources, callback) {
+                    var i;
+                    for (i = 0; i < sources.length; i++) {
+                        fakeSourceStorage[sources[i].uri] = sources[i];
+                    }
+                    callback(sources);
                 });
-				spyOn(HTML5Podcatcher.storage, "writeSource").and.callFake(function (source, callback) {
-                    fakeSourceStorage[source.uri] = source;
-                    callback(source);
-                });
-                spyOn(HTML5Podcatcher.storage, "writeEpisode").and.callFake(function (episode, callback) {
-                    fakeEpisodeStorage[episode.uri] = episode;
-                    callback(episode);
+                spyOn(HTML5Podcatcher.storage, "writeEpisodes").and.callFake(function (episodes, callback) {
+                    var i;
+                    for (i = 0; i < episodes.length; i++) {
+                        fakeEpisodeStorage[episodes[i].uri] = episodes[i];
+                    }
+                    callback(episodes);
                 });
                 originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
                 jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
             });
-            it("should insert a object containing list of settings, sources and episodes in the apps storage", function (done) {
+            it("should insert a object (containing list of settings, sources and episodes) in the apps storage", function (done) {
                 UI.import(testData, function () {
-                    expect(Object.keys(fakeSettingsStorage).length).toEqual(2);
+                    expect(localStorage.length).toEqual(2);
                     expect(fakeSourceStorage["https://podcast.web.site/feed/"]).toBeDefined();
                     expect(fakeEpisodeStorage["https://podcast.web.site.new/episode2"].title).toEqual("Episode Two Title");
-                    expect(UI.settings.set.calls.count()).toEqual(2);
-                    expect(HTML5Podcatcher.storage.writeSource.calls.count()).toEqual(1);
-                    expect(HTML5Podcatcher.storage.writeEpisode.calls.count()).toEqual(3);
+                    expect(HTML5Podcatcher.storage.writeSources.calls.count()).toEqual(1);
+                    expect(HTML5Podcatcher.storage.writeEpisodes.calls.count()).toEqual(1);
                     done();
                 });
             });
@@ -80,6 +83,7 @@
                 UI.export(function (config) {
                     expect(config).toBeDefined();
                     expect(config.Settings).toBeDefined();
+                    expect(config.Settings.settingA).toEqual('A');
                     expect(config.Episodes).toBeDefined();
                     expect(config.Sources).toBeDefined();
                     expect(HTML5Podcatcher.storage.readSources).toHaveBeenCalled();
@@ -91,5 +95,6 @@
                 jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
             });
         });
+        localStorage.clear();
     });
 }());

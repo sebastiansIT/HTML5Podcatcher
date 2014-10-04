@@ -15,7 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
-/*global window */
+/*global window, navigator */
 /*global console */
 /*global confirm */
 /*global applicationCache */
@@ -122,6 +122,13 @@ var GlobalUserInterfaceHelper = {
             GlobalUserInterfaceHelper.logHandler("Offline now", 'info');
             $('#updatePlaylist, .updateSource, .downloadFile').attr('disabled', 'disabled');
         }, false);
+        /*if (navigator.connection.type) {
+            // New version      
+            GlobalUserInterfaceHelper.logHandler("Connection changed to " + navigator.connection.type + " width a maximal downlink speed of " + navigator.connection.downlinkMax + " MiB", 'info');
+            navigator.connection.addEventListener('typechange', function () {
+                GlobalUserInterfaceHelper.logHandler("Connection changed to " + navigator.connection.type + " width a maximal downlink speed of " + navigator.connection.downlinkMax + " MiB", 'info');
+            }, false);
+        }*/
     },
     initGeneralUIEvents: function () {
         "use strict";

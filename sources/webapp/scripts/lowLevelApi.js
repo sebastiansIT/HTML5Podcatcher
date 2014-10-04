@@ -29,6 +29,7 @@ var HTML5Podcatcher = {
         uiLogger: undefined
     },
     storage: {
+        //Storage Provider: Indexed DB
         indexedDbStorage: {
             settings: {
                 name: 'HTML5Podcatcher',
@@ -56,6 +57,19 @@ var HTML5Podcatcher = {
                 if (!db.objectStoreNames.contains(HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore)) {
                     db.createObjectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore, {});
                 }
+            },
+            cleanStorage: function (onDeleteCallback) {
+                "use strict";
+                var requestDeleteDB = window.indexedDB.deleteDatabase(this.settings.name);
+                requestDeleteDB.onsuccess = function () {
+                    HTML5Podcatcher.logger("Indexed database deleted", 'info');
+                    if (onDeleteCallback && typeof onDeleteCallback === 'function') {
+                        onDeleteCallback();
+                    }
+                };
+                requestDeleteDB.onerror = function (event) {
+                    HTML5Podcatcher.logger(event.target.error.name + " deleting IndexedDB database (" + event.target.error.message + ")", 'error');
+                };
             },
             //Source Storage
             readSource: function (sourceUri, onReadCallback) {
@@ -157,6 +171,48 @@ var HTML5Podcatcher = {
                     HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
                 };
             },
+            writeSources: function (sources, onWriteCallback) {
+                "use strict";
+                var requestOpenDB;
+                requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+                requestOpenDB.onupgradeneeded = this.updateIndexedDB;
+                requestOpenDB.onblocked = function () {
+                    HTML5Podcatcher.logger("Database blocked", 'debug');
+                };
+                requestOpenDB.onsuccess = function () {
+                    HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug');
+                    var db, transaction, store, request, i, saveFunction;
+                    db = this.result;
+                    i = 0;
+                    transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.sourcesStore], 'readwrite');
+                    store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.sourcesStore);
+                    saveFunction = function () {
+                        request = store.put(sources[i]);
+                        request.onsuccess = function (event) {
+                            HTML5Podcatcher.logger('Source ' + event.target.result + ' saved', 'info');
+                            i++;
+                            if (i < sources.length) {
+                                saveFunction();
+                            } else if (onWriteCallback && typeof onWriteCallback === 'function') {
+                                onWriteCallback(sources);
+                            }
+                        };
+                        request.onerror = function (event) {
+                            HTML5Podcatcher.logger(event.target.error.name + ' while saving source "' + sources[i].uri + '" to IndexedDB (' + event.target.error.message + ')', 'error');
+                            sources.splice(i, 1);
+                            if (i < sources.length) {
+                                saveFunction();
+                            } else if (onWriteCallback && typeof onWriteCallback === 'function') {
+                                onWriteCallback(sources);
+                            }
+                        };
+                    };
+                    saveFunction();
+                };
+                requestOpenDB.onerror = function (event) {
+                    HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
+                };
+            },
             deleteSource: function (source, onDeleteCallback) {
                 "use strict";
                 var requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
@@ -211,6 +267,10 @@ var HTML5Podcatcher = {
                             } else {
                                 episode = {uri: episodeUri};
                             }
+                            //checks episode.updated to be a Date object
+                            if (!(episode.updated instanceof Date)) {
+                                episode.updated = new Date(episode.updated);
+                            }
                             //generate playback object if not exists
                             if (!episode.playback) {
                                 episode.playback = {'played': false, 'currentTime': 0};
@@ -251,7 +311,11 @@ var HTML5Podcatcher = {
                     playlist = [];
                     cursorRequest.onsuccess = function (event) {
                         var result = event.target.result;
+                        //checks episode.updated to be a Date object
                         if (result) {
+                            if (!(result.value.updated instanceof Date)) {
+                                result.value.updated = new Date(result.value.updated);
+                            }
                             if (result.value.playback.played === false || showAll === true) {
                                 playlist.push(result.value);
                             }
@@ -296,6 +360,48 @@ var HTML5Podcatcher = {
                     request.onerror = function (event) {
                         HTML5Podcatcher.logger(event.target.error.name + ' while saving episode "' + episode.uri + '" to IndexedDB (' + event.target.error.message + ')', 'error');
                     };
+                };
+                requestOpenDB.onerror = function (event) {
+                    HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
+                };
+            },
+            writeEpisodes: function (episodes, onWriteCallback) {
+                "use strict";
+                var requestOpenDB;
+                requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+                requestOpenDB.onupgradeneeded = this.updateIndexedDB;
+                requestOpenDB.onblocked = function () {
+                    HTML5Podcatcher.logger("Database blocked", 'debug');
+                };
+                requestOpenDB.onsuccess = function () {
+                    HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug');
+                    var db, transaction, store, request, i, saveFunction;
+                    db = this.result;
+                    i = 0;
+                    transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore], 'readwrite');
+                    store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore);
+                    saveFunction = function () {
+                        request = store.put(episodes[i]);
+                        request.onsuccess = function (event) {
+                            HTML5Podcatcher.logger('Episode ' + event.target.result + ' saved', 'info');
+                            i++;
+                            if (i < episodes.length) {
+                                saveFunction();
+                            } else if (onWriteCallback && typeof onWriteCallback === 'function') {
+                                onWriteCallback(episodes);
+                            }
+                        };
+                        request.onerror = function (event) {
+                            HTML5Podcatcher.logger(event.target.error.name + ' while saving episode "' + episodes[i].uri + '" to IndexedDB (' + event.target.error.message + ')', 'error');
+                            episodes.splice(i, 1);
+                            if (i < episodes.length) {
+                                saveFunction();
+                            } else if (onWriteCallback && typeof onWriteCallback === 'function') {
+                                onWriteCallback(episodes);
+                            }
+                        };
+                    };
+                    saveFunction();
                 };
                 requestOpenDB.onerror = function (event) {
                     HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
@@ -424,6 +530,7 @@ var HTML5Podcatcher = {
                 }
             }
         },//end IndexedDbStorage
+        //Storage Provider: File System Storage (Files only)
         fileSystemStorage: {
             settings: {
                 fileSystemSize: 1024 * 1024 * 500, /*500 MB */
@@ -515,7 +622,15 @@ var HTML5Podcatcher = {
                 }
             }
         },//end FileSystemStorage
+        //Storage Provider: Local Storage API (Data only)
         webStorage: {
+            cleanStorage: function (onDeleteCallback) {
+                "use strict";
+                localStorage.clear();
+                if (onDeleteCallback && typeof onDeleteCallback === 'function') {
+                    onDeleteCallback();
+                }
+            },
             readSource: function (sourceUri, onReadCallback) {
                 "use strict";
                 var source;
@@ -548,6 +663,16 @@ var HTML5Podcatcher = {
                 localStorage.setItem('source.' + source.uri, JSON.stringify(source));
                 if (onWriteCallback && typeof onWriteCallback === 'function') {
                     onWriteCallback(source);
+                }
+            },
+            writeSources: function (sources, onWriteCallback) {
+                "use strict";
+                var i;
+                for (i = 0; i < sources.length; i++) {
+                    this.writeSource(sources[i]);
+                }
+                if (onWriteCallback && typeof onWriteCallback === 'function') {
+                    onWriteCallback(sources);
                 }
             },
             deleteSource: function (source, onDeleteCallback) {
@@ -605,8 +730,25 @@ var HTML5Podcatcher = {
                 if (onWriteCallback && typeof onWriteCallback === 'function') {
                     onWriteCallback(episode);
                 }
+            },
+            writeEpisodes: function (episodes, onWriteCallback) {
+                "use strict";
+                var i;
+                for (i = 0; i < episodes.length; i++) {
+                    this.writeEpisode(episodes[i]);
+                }
+                if (onWriteCallback && typeof onWriteCallback === 'function') {
+                    onWriteCallback(episodes);
+                }
             }
         },//end WebStorage
+        //Public Storage Interface
+        cleanStorage: function (onDeleteCallback) {
+            "use strict";
+            if (this.dataStorageEngine()) {
+                this.dataStorageEngine().cleanStorage(onDeleteCallback);
+            }
+        },
         //Source Storage
         readSource: function (sourceUri, onReadCallback) {
             "use strict";
@@ -628,6 +770,17 @@ var HTML5Podcatcher = {
                         onWriteCallback(source);
                     }
                     document.dispatchEvent(new CustomEvent('writeSource', {"detail": {'source': source}}));
+                });
+            }
+        },
+        writeSources: function (sources, onWriteCallback) {
+            "use strict";
+            if (this.dataStorageEngine()) {
+                this.dataStorageEngine().writeSources(sources, function (sources) {
+                    if (onWriteCallback && typeof onWriteCallback === 'function') {
+                        onWriteCallback(sources);
+                    }
+                    document.dispatchEvent(new CustomEvent('writeSources', {"detail": {'sources': sources}}));
                 });
             }
         },
@@ -658,6 +811,17 @@ var HTML5Podcatcher = {
                         onWriteCallback(episode);
                     }
                     document.dispatchEvent(new CustomEvent('writeEpisode', {"detail": {'episode': episode}}));
+                });
+            }
+        },
+        writeEpisodes: function (episodes, onWriteCallback) {
+            "use strict";
+            if (this.dataStorageEngine()) {
+                this.dataStorageEngine().writeEpisodes(episodes, function (episodes) {
+                    if (onWriteCallback && typeof onWriteCallback === 'function') {
+                        onWriteCallback(episodes);
+                    }
+                    document.dispatchEvent(new CustomEvent('writeEpisodes', {"detail": {'episodes': episodes}}));
                 });
             }
         },

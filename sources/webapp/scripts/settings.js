@@ -38,9 +38,9 @@ UI.export = function (onExportCallback) {
         } else if (localStorage.key(i).slice(0, 8) === 'episode.') {
             config.Episodes[key] = localStorage.getItem(key);
         } else if (localStorage.key(i).slice(0, 14) === 'configuration.') {
-            config.Settings[localStorage.key(i).slice(15)] = localStorage.getItem(key);
+            config.Settings[localStorage.key(i).slice(14)] = localStorage.getItem(key);
         } else if (localStorage.key(i).slice(0, 9) === 'settings.') {
-            config.Settings[localStorage.key(i).slice(10)] = localStorage.getItem(key);
+            config.Settings[localStorage.key(i).slice(9)] = localStorage.getItem(key);
         }
     }
     //Export active storage engine data
@@ -60,13 +60,7 @@ UI.export = function (onExportCallback) {
 };
 UI.import = function (config, onImportCallback) {
     "use strict";
-    var property, episodeCounter = 0, sourceCounter = 0, sourceImportedFunction, episodeImportedFunction;
-    sourceImportedFunction = function () {
-        sourceCounter--;
-    };
-    episodeImportedFunction = function () {
-        episodeCounter--;
-    };
+    var property, episodes = [], sources = [];
     for (property in config.Settings) {
         if (config.Settings.hasOwnProperty(property)) {
             UI.settings.set(property, config.Settings[property]);
@@ -74,20 +68,21 @@ UI.import = function (config, onImportCallback) {
     }
     for (property in config.Sources) {
         if (config.Sources.hasOwnProperty(property)) {
-            sourceCounter++;
-            POD.storage.writeSource(config.Sources[property], sourceImportedFunction);
+            sources.push(config.Sources[property]);
         }
     }
     for (property in config.Episodes) {
         if (config.Episodes.hasOwnProperty(property)) {
-            episodeCounter++;
-            POD.storage.writeEpisode(config.Episodes[property], episodeImportedFunction);
+            episodes.push(config.Episodes[property]);
         }
     }
-    while (episodeCounter || sourceCounter) { }
-    if (onImportCallback && typeof onImportCallback === 'function') {
-        onImportCallback(config);
-    }
+    POD.storage.writeSources(sources, function () {
+        POD.storage.writeEpisodes(episodes, function () {
+            if (onImportCallback && typeof onImportCallback === 'function') {
+                onImportCallback(config);
+            }
+        });
+    });
 };
 /** Central 'ready' event handler */
 $(document).ready(function () {

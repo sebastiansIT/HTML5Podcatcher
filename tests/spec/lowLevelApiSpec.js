@@ -15,12 +15,65 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
-/*global describe, it, expect */
+/*global jasmine, describe, it, expect, beforeEach, afterEach */
 /*global HTML5Podcatcher */
 /*global DOMParser */
 (function () {
     'use strict';
     describe("HTML5 Podcatcher Low Level API", function () {
+        describe("Storage Provider", function () {
+            var originalTimeout;
+            beforeEach(function () {
+                originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+                jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+            });
+            it("can clean all data in the storage subsystem", function (done) {
+                HTML5Podcatcher.storage.cleanStorage(function () {
+					HTML5Podcatcher.storage.readPlaylist(true, function (readedEpisodes) {
+                        HTML5Podcatcher.storage.readSources(function (readedSources) {
+                            expect(readedEpisodes.length).toEqual(0);
+                            expect(readedSources.length).toEqual(0);
+                            done();
+                        });
+                    });
+                });
+            });
+            describe("Episode Storage", function () {
+                var episodes = [
+                    {"uri": "https://podcast.web.site.new/episode1", "playback": {"played": false, "currentTime": 10}, "title": "Episode One Title", "updated": new Date("Fri, 05 Sep 2014 06:00:20 +0000"), "mediaUrl": "https://podcast.web.site.new/files/episode1.mp3", "source": "Podcast", "isFileSavedOffline": true},
+                    {"uri": "https://podcast.web.site.new/episode2", "playback": {"played": true, "currentTime": 70}, "title": "Episode Two Title", "updated": new Date("12 Sep 2014 17:20:50 +0000"), "mediaUrl": "https://podcast.web.site.new/files/episode2.mp3", "source": "Podcast", "isFileSavedOffline": false}
+                ];
+                it("should save and read an array of episodes without any errors", function (done) {
+                    HTML5Podcatcher.storage.writeEpisodes(episodes, function (writenEpisodes) {
+                        HTML5Podcatcher.storage.readPlaylist(true, function (playlist) {
+                            expect(writenEpisodes).toEqual(episodes);
+                            expect(playlist).toEqual(episodes);
+                            done();
+                        });
+                    });
+                });
+            });
+            describe("Source Storage", function () {
+                var sources = [
+                    {"uri": "https://podcast.web.site.new/", "link": "https://podcast.web.site.new/", "title": "Podcast", "description": "The never existing example podcast."},
+                    {"uri": "https://podcast2.web.site.new/", "link": "https://podcast2.web.site.new/", "title": "Podcast 2", "description": "The second never existing example podcast."}
+                ];
+                it("should save and read an array of sources without any errors", function (done) {
+                    HTML5Podcatcher.storage.writeSources(sources, function (writenSources) {
+                        HTML5Podcatcher.storage.readSources(function (readedSources) {
+                            expect(writenSources.length).toEqual(2);
+                            expect(writenSources).toEqual(sources);
+                            expect(readedSources.length).toEqual(2);
+                            expect(readedSources).toEqual(sources);
+                            done();
+                        });
+                    });
+                });
+            });
+            afterEach(function () {
+                jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+            });
+        });
         describe("Parser", function () {
             var xml, source;
             source = { uri: "http://podcast.web.site/feed/", link: "http://podcast.web.site/", title: "Podcast", description: "The not existing example podcast." };
@@ -97,12 +150,12 @@
                     result = HTML5Podcatcher.parser.parseSource(xmlWithFailure, source);
                     expect(result.source.description).toEqual('');
                 });
-				it("should return a empty string as description when description element is empty", function () {
+                it("should return a empty string as description when description element is empty", function () {
                     var result, xmlWithFailure;
                     xmlWithFailure = (new DOMParser()).parseFromString('<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom"><channel>\n'
                         + '\t<link>https://podcast.web.site.new/</link>\n'
                         + '\t<title>Podcast (changed title)</title>\n'
-						+ '\t<description></description>\n'
+                        + '\t<description></description>\n'
                         + '</channel></rss>', "text/xml");
                     result = HTML5Podcatcher.parser.parseSource(xmlWithFailure, source);
                     expect(result.source.description).toEqual('');
