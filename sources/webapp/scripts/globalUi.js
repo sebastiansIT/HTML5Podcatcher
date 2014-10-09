@@ -47,7 +47,22 @@ var GlobalUserInterfaceHelper = {
         if (loglevel.indexOf(":") >= 0) {
             loglevel = loglevel.substring(0, loglevel.indexOf(":"));
         }
-        console.log(loglevel + ': ' + message);
+        switch (loglevel) {
+        case "debug":
+            console.debug(message);
+            break;
+        case "info":
+            console.info(message);
+            break;
+        case "warn":
+            console.warn(message);
+            break;
+        case "error":
+            console.error(message);
+            break;
+        default:
+            console.log(loglevel + ': ' + message);
+        }
         $('#statusbar').prepend('<span class=' + loglevel + '>' + message + '</span></br>');
     },
     errorHandler: function (event) {

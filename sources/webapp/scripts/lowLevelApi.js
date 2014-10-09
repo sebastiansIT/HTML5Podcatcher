@@ -1131,7 +1131,22 @@ var HTML5Podcatcher = {
         if (HTML5Podcatcher.settings.uiLogger && typeof HTML5Podcatcher.settings.uiLogger === 'function') {
             HTML5Podcatcher.settings.uiLogger(message, level);
         } else {
-            console.log(level + ': ' + message);
+            switch (level) {
+            case "debug":
+                console.debug(message);
+                break;
+            case "info":
+                console.info(message);
+                break;
+            case "warn":
+                console.warn(message);
+                break;
+            case "error":
+                console.error(message);
+                break;
+            default:
+                console.log(level + ': ' + message);
+            }
         }
     },
     errorLogger: function (message) {
