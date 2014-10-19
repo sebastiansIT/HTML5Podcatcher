@@ -209,6 +209,8 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
             } else {
                 mediaUrl = episode.mediaUrl;
             }
+            //Add media fragment to playback URI
+            mediaUrl = mediaUrl + "#t=" + episode.playback.currentTime;
             if ($('#player audio').length > 0) {
                 audioTag = $('#player audio')[0];
                 $(audioTag).off();
@@ -284,10 +286,12 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
                 var audioElement = event.target;
                 GlobalUserInterfaceHelper.activeEpisode(function (episode) {
                     GlobalUserInterfaceHelper.logHandler("Duration of " + episode.title + " is changed to " + UI.formatTimeCode(event.currentTarget.duration) + ".", 'debug:playback');
-                    if (episode && audioElement.duration > episode.playback.currentTime) { //&& audioElement.currentTime <= episode.playback.currentTime) {
+                    if (episode && audioElement.duration > episode.playback.currentTime) {
                         $(audioElement).off('durationchange');
-                        GlobalUserInterfaceHelper.logHandler("CurrentTime will set to " + UI.formatTimeCode(episode.playback.currentTime) + " seconds", 'debug');
-                        audioElement.currentTime = episode.playback.currentTime;
+                        if (audioElement.currentTime <= episode.playback.currentTime) {
+                            GlobalUserInterfaceHelper.logHandler("CurrentTime will set to " + UI.formatTimeCode(episode.playback.currentTime) + " seconds", 'debug');
+                            audioElement.currentTime = episode.playback.currentTime;
+                        }
                         $(audioElement).on('timeupdate', function (event) {
                             if (episode && (event.target.currentTime > (episode.playback.currentTime + 10) || event.target.currentTime < (episode.playback.currentTime - 10))) {
                                 episode.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10;

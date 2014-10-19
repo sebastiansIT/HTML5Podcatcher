@@ -12,7 +12,7 @@
 		}
 	},
     "launch_path": "/podcatcher/podcatcher.html",
-    "appcache_path": "/podcatcher/appcache.manifest", 
+    "appcache_path": "/podcatcher/manifest.appcache", 
     "icons": {
         "60": "/podcatcher/img/logo60.png",
         "128": "/podcatcher/img/logo128.png",

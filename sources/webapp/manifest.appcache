@@ -34,6 +34,8 @@
 ### Fix a bug in export function
 ## 0.20.0
 ### Add functions to clear storage and save multiple episodes or sources to storage
+## 0.20.1
+### Use Media Fragment URI Recomendation to address the starting playback time
 
 CACHE:
 # HTML

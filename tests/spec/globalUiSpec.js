@@ -21,9 +21,27 @@
 (function () {
     'use strict';
     describe("HTML5 Podcatcher UI", function () {
+        describe("Utilities", function () {
+            it("should format a number of seconds as a human readable string in format hh:mm:ss", function () {
+                var formatedTimeCode = GlobalUserInterfaceHelper.formatTimeCode(3600);
+                expect(formatedTimeCode).toEqual("01:00:00");
+            });
+            it("should throw an error if trying to format a negativ number as a human readable timecode", function () {
+                var test = function() {
+					return GlobalUserInterfaceHelper.formatTimeCode(-3600);
+				};
+				expect(test).toThrow();
+            });
+            it("should throw an error if trying to format a string as a human readable timecode", function () {
+                var test = function() {
+					return GlobalUserInterfaceHelper.formatTimeCode("no time");
+				};
+				expect(test).toThrow();
+            });
+        });
         describe("Settings API", function () {
             localStorage.clear();
-            it("should return the same value it is set before.", function () {
+            it("should return the same value it is set before", function () {
                 GlobalUserInterfaceHelper.settings.set("test", "test value");
                 expect(GlobalUserInterfaceHelper.settings.get("test")).toEqual("test value");
             });

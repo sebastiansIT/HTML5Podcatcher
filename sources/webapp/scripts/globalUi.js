@@ -24,6 +24,14 @@
 var GlobalUserInterfaceHelper = {
     formatTimeCode: function (timecode) {
         "use strict";
+        //Validate Parameter to be a number
+        if (isNaN(+timecode)) {
+            throw new TypeError("Timecode needs to be a positiv integer");
+        }
+        //Validate Parameter to be a positiv number
+        if (timecode < 0) {
+            throw new RangeError("Timecode needs to be a positiv integer");
+        }
         var hours, minutes, seconds;
         hours = Math.floor(timecode / 3600);
         minutes = Math.floor((timecode % 3600) / 60);
