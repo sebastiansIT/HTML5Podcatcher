@@ -56,6 +56,7 @@
                 });
                 originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
                 jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+                localStorage.clear();
             });
             it("should insert a object (containing list of settings, sources and episodes) in the apps storage", function (done) {
                 UI.import(testData, function () {

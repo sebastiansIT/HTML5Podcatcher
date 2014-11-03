@@ -37,27 +37,30 @@
 ## 0.20.1
 ### Use Media Fragment URI Recomendation to address the starting playback time
 
+# VALIDATE this manifest on http://manifest-validator.com/
+
 CACHE:
 # HTML
-./podcatcher.html
-./settings.html
+podcatcher.html
+settings.html
 # SCRIPTS
-./scripts/jquery.min.js
-./scripts/normalise.js
-./scripts/lowLevelApi.js
-./scripts/globalUi.js
-./scripts/playlist.js
-./scripts/settings.js
+scripts/jquery.min.js
+scripts/normalise.js
+scripts/lowLevelApi.js
+scripts/storage/indexedDbProvider.js
+scripts/storage/fileSystemProvider.js
+scripts/storage/webStorageProvider.js
+scripts/globalUi.js
+scripts/playlist.js
+scripts/settings.js
 # STYLES
-./css/main.css
+css/main.css
 # IMAGES
-./favicon.ico
-./img/logo60.png
-./img/logo128.png
-./img/logo192.png
-./img/logo512.png
+favicon.ico
+img/logo60.png
+img/logo128.png
+img/logo192.png
+img/logo512.png
 
 NETWORK:
 *
-
-# VALIDATE this manifest on http://manifest-validator.com/

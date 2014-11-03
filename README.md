@@ -2,11 +2,9 @@
 
 <img src="sources/webapp/img/logo90.png?raw=true" title="Logo of HTML5 Podcatcher" style="float:left;" /> A podcast player based on web technology.
 
-This is a experimental implementation of an podcast player. Primary 
-targets are playback of audio files, loading and parsing podcast feeds 
-and save audio files from the internet. Secondary targets are a completely  
-client side/browser side implementation and offline availability of the app, 
-the data and the audio files.
+This is a experimental implementation of an podcast player. Primary targets are playback of audio files, loading and 
+parsing podcast feeds and save audio files from the internet. Secondary targets are a completely client side/browser 
+side implementation and offline availability of the app, the data and the audio files.
 
 I use different APIs and technologies, specified in the HTML5 universe, to reach this target:
 

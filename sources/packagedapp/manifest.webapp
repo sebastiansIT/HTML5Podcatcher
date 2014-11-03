@@ -11,7 +11,7 @@
 			"description": "Needs to save audio files."
 		}
 	},
-	"launch_path": "/podcatcher.html",
+	"launch_path": "/playlist.html",
 	"icons": {
 		"60": "/img/logo60.png",
         "128": "/img/logo128.png",

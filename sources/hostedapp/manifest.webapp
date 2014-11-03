@@ -11,12 +11,12 @@
 			"description": "Needs to save audio files."
 		}
 	},
-    "launch_path": "/podcatcher/podcatcher.html",
-    "appcache_path": "/podcatcher/manifest.appcache", 
+    "launch_path": "/playlist.html",
+    "appcache_path": "/manifest.appcache", 
     "icons": {
-        "60": "/podcatcher/img/logo60.png",
-        "128": "/podcatcher/img/logo128.png",
-        "512": "/podcatcher/img/logo512.png"
+        "60": "/img/logo60.png",
+        "128": "/img/logo128.png",
+        "512": "/img/logo512.png"
     },
     "default_locale": "en",
     "chrome": {

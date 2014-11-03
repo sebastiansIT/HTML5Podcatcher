@@ -85,7 +85,7 @@ UI.import = function (config, onImportCallback) {
     });
 };
 /** Central 'ready' event handler */
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function () {
     "use strict";
     var quota;
     POD.settings.uiLogger = UI.logHandler;
@@ -152,4 +152,4 @@ $(document).ready(function () {
     if (UI.settings.get("proxyUrl")) {
         $('#httpProxyInput').val(UI.settings.get("proxyUrl"));
     }
-});
+}, false);

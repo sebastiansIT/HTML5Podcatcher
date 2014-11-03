@@ -23,18 +23,11 @@ module.exports = function (grunt) {
         'string-replace': { // configure the string replacement task for the hostet app
             HostedWebApp: {
                 files: [
-                    {src: 'sources/webapp/podcatcher.html',         dest: 'build/webapp/podcatcher.html'},
-                    {src: 'sources/webapp/settings.html',           dest: 'build/webapp/settings.html'},
-                    {src: 'sources/webapp/diagnostic.html',         dest: 'build/webapp/diagnostic.html'},
-                    {src: 'sources/webapp/scripts/normalise.js',    dest: 'build/webapp/scripts/normalise.js'},
-                    {src: 'sources/webapp/scripts/lowLevelApi.js',  dest: 'build/webapp/scripts/lowLevelApi.js'},
-                    {src: 'sources/webapp/scripts/globalUi.js',     dest: 'build/webapp/scripts/globalUi.js'},
-                    {src: 'sources/webapp/scripts/playlist.js',   dest: 'build/webapp/scripts/playlist.js'},
-                    {src: 'sources/webapp/scripts/settings.js',     dest: 'build/webapp/scripts/settings.js'},
-                    {src: 'sources/webapp/scripts/diagnostic.js',   dest: 'build/webapp/scripts/diagnostic.js'},
-                    {src: 'sources/webapp/manifest.appcache',       dest: 'build/webapp/manifest.appcache'},
-                    {src: 'sources/hostedapp/manifest.webapp',      dest: 'build/webapp/manifest.webapp'},
-                    {src: 'sources/hostedapp/install.html',         dest: 'build/webapp/install.html'}
+                    {cwd: 'sources/webapp/', src: '*.html',          dest: 'build/webapp/', expand: 'true'},
+                    {cwd: 'sources/webapp/', src: 'scripts/**/*.js', dest: 'build/webapp/', expand: 'true'},
+                    {src: 'sources/webapp/manifest.appcache',        dest: 'build/webapp/manifest.appcache'},
+                    {src: 'sources/hostedapp/manifest.webapp',       dest: 'build/webapp/manifest.webapp'},
+                    {src: 'sources/hostedapp/install.html',          dest: 'build/webapp/install.html'}
                 ],
                 options: {
                     replacements: [{
@@ -48,13 +41,9 @@ module.exports = function (grunt) {
             },
             FirefoxPackagedApp: { // configure the string replacement task for the packaged app
                 files: [
-                    {src: 'sources/webApp/podcatcher.html',        dest: 'build/packagedapp/temp/podcatcher.html'},
+                    {src: 'sources/webApp/playlist.html',        dest: 'build/packagedapp/temp/playlist.html'},
                     {src: 'sources/webApp/settings.html',          dest: 'build/packagedapp/temp/settings.html'},
-                    {src: 'sources/webApp/scripts/normalise.js',   dest: 'build/packagedapp/temp/scripts/normalise.js'},
-                    {src: 'sources/webApp/scripts/lowLevelApi.js', dest: 'build/packagedapp/temp/scripts/lowLevelApi.js'},
-                    {src: 'sources/webapp/scripts/globalUi.js',    dest: 'build/packagedapp/temp/scripts/globalUi.js'},
-                    {src: 'sources/webApp/scripts/playlist.js',  dest: 'build/packagedapp/temp/scripts/playlist.js'},
-                    {src: 'sources/webapp/scripts/settings.js',    dest: 'build/packagedapp/temp/scripts/settings.js'},
+                    {cwd: 'sources/webApp/', src: 'scripts/**/*.js', dest: 'build/packagedapp/temp/', expand: 'true'},
                     {src: 'sources/packagedapp/manifest.webapp',   dest: 'build/packagedapp/temp/manifest.webapp'},
                     {src: 'sources/packagedapp/package.manifest',  dest: 'build/packagedapp/package.manifest'},
                     {src: 'sources/packagedapp/install.html',      dest: 'build/packagedapp/install.html'}
@@ -121,6 +110,7 @@ module.exports = function (grunt) {
                 src: [
                     'gruntfile.js',
                     'sources/webapp/scripts/*.js',
+                    'sources/webapp/scripts/storage/*.js',
                     'sources/hostedapp/scripts/*.js'
                 ],
                 exclude: [
@@ -139,9 +129,17 @@ module.exports = function (grunt) {
         },
         jasmine: {
             client: {
-                src: 'sources/webapp/scripts/lowLevelApi.js',
+                src: [
+                    'sources/webapp/scripts/lowLevelApi.js',
+                    'sources/webapp/scripts/storage/*.js',
+                    'sources/webapp/scripts/globalUi.js',
+                    'sources/webapp/scripts/settings.js',
+                    'http://code.jquery.com/jquery-2.1.1.min.js'
+                ],
                 options: {
-                    specs: 'tests/spec/lowLevelApiSpec.js',
+                    specs: [
+                        'tests/spec/*.js'
+                    ],
                     junit: {
                         path: 'tests/jasmine.result',
                         consolidate: true
@@ -152,7 +150,7 @@ module.exports = function (grunt) {
     });
     //Register Tasks
     grunt.registerTask('HostedWebApp',       ['clean:HostedWebApp', 'string-replace:HostedWebApp', 'copy:HostedWebApp', 'curl:HostedWebApp']);
-    grunt.registerTask('FirefoxPackagedApp', ['string-replace:FirefoxPackagedApp', 'copy:FirefoxPackagedApp', 'curl:FirefoxPackagedApp', 'zip:FirefoxPackagedApp', 'clean:FirefoxPackagedApp']);
+    grunt.registerTask('FirefoxPackagedApp', ['string-replace:FirefoxPackagedApp', 'copy:FirefoxPackagedApp', 'curl:FirefoxPackagedApp', 'zip:FirefoxPackagedApp']); //, 'clean:FirefoxPackagedApp'
     grunt.registerTask('test',               ['jslint', 'jasmine']);
     grunt.registerTask('default',            ['test', 'HostedWebApp', 'FirefoxPackagedApp']);
 };
