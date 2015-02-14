@@ -164,7 +164,11 @@ var HTML5Podcatcher = {
         },
         isFileStorageAvailable: function () {
             "use strict";
-            return this.fileStorageEngine();
+            var returnvalue = false;
+            if (this.fileStorageEngine()) {
+                returnvalue = true;
+            }
+            return returnvalue;
         },
         //Migration betwean storage engines
         migradeData: function (oldStorageEngine, newStorageEngine) {
