@@ -1,4 +1,4 @@
-﻿/*  Copyright 2014 Sebastian Spautz
+﻿/*  Copyright 2014, 2015 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -89,6 +89,30 @@ document.addEventListener('DOMContentLoaded', function () {
     "use strict";
     var quota;
     POD.settings.uiLogger = UI.logHandler;
+    POD.settings.uiLogger("Opens Settings View", "debug");
+    // -- Initialise UI -- //
+    //Init Proxy-Settings
+    if (UI.settings.get("proxyUrl")) {
+        $('#httpProxyInput').val(UI.settings.get("proxyUrl"));
+    }
+    //Init Quota and Filesystem initialisation
+    if (POD.storage.fileStorageEngine() === POD.storage.fileSystemStorage) {
+        $('#FileSystemAPI').show();
+        quota = UI.settings.get("quota");
+        if (!quota) { quota = 1024 * 1024 * 200; }
+        POD.storage.fileSystemStorage.requestFileSystemQuota(quota, function (usage, quota) {
+            UI.settings.set("quota", quota);
+            var quotaConfigurationMarkup;
+            quotaConfigurationMarkup = $('#memorySizeInput');
+            if (quotaConfigurationMarkup) {
+                quotaConfigurationMarkup.val(quota / 1024 / 1024).attr('min', Math.ceil(usage / 1024 / 1024)).css('background', 'linear-gradient( 90deg, rgba(0,100,0,0.45) ' + Math.ceil((usage / quota) * 100) + '%, transparent ' + Math.ceil((usage / quota) * 100) + '%, transparent )');
+            }
+        });
+    } else {
+        $('#FileSystemAPI').hide();
+    }
+    
+    // -- Register Eventhandler -- //
     //General UI Events
     UI.initGeneralUIEvents();
     //Application Cache Events
@@ -105,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
             UI.logHandler('Please insert a number', 'error');
         }
     });
-    $('#configuration #proxyForm').on('submit', function (event) {
+    $('#saveProxyConfigurationButton').on('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
         if ($('#httpProxyInput')[0].checkValidity()) {
@@ -132,24 +156,4 @@ document.addEventListener('DOMContentLoaded', function () {
             $(button).removeAttr('disabled');
         });
     });
-    //Quota and Filesystem initialisation
-    if (POD.storage.fileStorageEngine() === POD.storage.fileSystemStorage) {
-        $('#FileSystemAPI').show();
-        quota = UI.settings.get("quota");
-        if (!quota) { quota = 1024 * 1024 * 200; }
-        POD.storage.fileSystemStorage.requestFileSystemQuota(quota, function (usage, quota) {
-            UI.settings.set("quota", quota);
-            var quotaConfigurationMarkup;
-            quotaConfigurationMarkup = $('#memorySizeInput');
-            if (quotaConfigurationMarkup) {
-                quotaConfigurationMarkup.val(quota / 1024 / 1024).attr('min', Math.ceil(usage / 1024 / 1024)).css('background', 'linear-gradient( 90deg, rgba(0,100,0,0.45) ' + Math.ceil((usage / quota) * 100) + '%, transparent ' + Math.ceil((usage / quota) * 100) + '%, transparent )');
-            }
-        });
-    } else {
-        $('#FileSystemAPI').hide();
-    }
-    //Render lists and settings
-    if (UI.settings.get("proxyUrl")) {
-        $('#httpProxyInput').val(UI.settings.get("proxyUrl"));
-    }
 }, false);

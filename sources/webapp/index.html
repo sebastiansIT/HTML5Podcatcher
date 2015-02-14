@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+
+<!--
+    Copyright 2013, 2014 Sebastian Spautz
+
+    This file is part of "HTML5 Podcatcher".
+    
+    "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    "HTML5 Podcatcher" is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see http://www.gnu.org/licenses/.
+-->
+
+<html manifest="manifest.appcache">
+<head>
+	<meta charset="utf-8">
+	<title>HTML5 Podcatcher</title>
+	<meta name="description" content="A HTML5 podcast player!">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<!-- Chrome for Android: Configure as Web App --> 
+	<meta name="mobile-web-app-capable" content="yes">
+	<!-- iOS: Configure as Web App -->
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<!-- Application Logo in different resolutions -->
+	<link rel="shortcut icon"    type="image/x-icon"              href="favicon.ico"/>
+	<link rel="icon"             type="image/png" sizes="192x192" href="images/logo192.png">
+	<link rel="apple-touch-icon" type="image/png"                 href="images/logo60.png">
+	<link rel="apple-touch-icon" type="image/png" sizes="76x76"   href="images/logo76.png">
+	<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="images/logo120.png">
+	<link rel="apple-touch-icon" type="image/png" sizes="152x152" href="images/logo152.png">
+	<link href="styles/headers.css" rel="stylesheet" type="text/css" />
+	<link href="styles/buttons.css" rel="stylesheet" type="text/css" />
+	<link href="styles/main.css" rel="stylesheet" type="text/css" />
+	<script src="scripts/globalUi.js"></script>
+	<script src="scripts/install.js"></script>
+</head>
+<body>
+	<section role="region">
+		<header role="banner">
+			<button title="Close" id="appClose"><span class="icon icon-close">Close</span></button>
+			<menu type="toolbar">
+				<a href="playlist.html" title="Playlist"><span class="icon icon-playlist">Playlist</span></a>
+				<a href="settings.html" title="Settings"><span class="icon icon-settings">Settings</span></a>
+			</menu>
+			<h1 title="HTML5 Podcatcher Version {{ VERSION }} {{ VARIANT }}">HTML5 Podcatcher</h1>
+		</header>
+
+		<div class="content">
+			<section>
+				<header>
+					<h2>Description</h2>
+				</header>
+				<p>An podcast player based on HTML 5 and modern web technologies.</p>
+			</section>
+			<section>
+				<header>
+					<h2>Installation</h2>
+				</header>
+				<p>To install the app on Desktop, Android ore Firefox OS please use the Mozilla Marketplace. Other option needs a proxy configuration to work.</p>
+				<p>
+					<a class="bb-button recommend" href="#" style="display:none;">Mozilla Marketplace</a>
+					<button id="installFirefoxOS">Hosted App for Firefox OS</button>
+					<a class="bb-button" href="playlist.html">Web-App</a>
+				</p>
+			</section>
+			<section>
+				<header>
+					<h2>Development</h2>
+				</header>
+				<p>
+					<a class="bb-button" href="https://github.com/sebastiansIT/HTML5Podcatcher">Code (GitHub)</a>
+					<a class="bb-button" href="http://human-injection.de/kategorie/html5podcatcher/">Blog (in German)</a>
+				</p>
+			</section>
+			<section>
+				<header>
+					<h2>Contact</h2>
+				</header>
+				<p>
+					<a class="bb-button" href="mail:podcatcher@sebastiansIT.de">podcatcher@sebastiansIT.de</a>
+				</p>
+			</section>
+		</div>
+	</section>
+</body>

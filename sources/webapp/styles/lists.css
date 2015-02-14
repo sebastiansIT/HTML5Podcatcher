@@ -1,0 +1,108 @@
+/*  Copyright 2013, 2014 Sebastian Spautz
+
+    This file is part of "HTML5 Podcatcher".
+    
+    "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    "HTML5 Podcatcher" is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see http://www.gnu.org/licenses/.
+*/
+
+/* ----------------------------------
+ * Lists with clickable Entries
+ * ---------------------------------- */
+.content ul.entries{
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+/* List items */
+.content .entries li {
+	width: 100%;
+	min-height: 6rem;
+	box-sizing: border-box;
+	border-bottom: solid 0.1rem #e7e7e7;
+	color: #333;
+	margin: 0;
+	display: flex;
+	position: relative;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.content .entries li:last-child {
+	border: none;
+}
+.content .entries li.active {
+	border-bottom: solid 1px #006400;
+}
+/* Entry content */
+.content .entries li > :first-child {
+	flex-grow:1;
+	width: calc(100% - 10rem);
+}
+.content .entries li h3 {
+	font-size: 1.8rem;
+	line-height: 2.2rem;
+	color: #333;
+	margin: 0;
+	padding: 1rem 0 0 0;
+}
+.content .entries li p {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	border: none;
+	display: block;
+	margin: 0;
+	color: #858585;
+	font-size: 1.5rem;
+	line-height: 2rem;
+}
+.content .entries li a {
+	color: inherit;
+	text-decoration:none;
+}
+
+/* Buttons */
+.content .entries li a.button,
+.content .entries li button {
+	width:4rem;
+	height:4rem;
+	margin:1rem 0 1rem 1rem;
+	border-radius:50%;
+	display:block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.content .entries li a[data-icon],
+.content .entries li button[data-icon] {
+    font-size: 0;
+	background-color:transparent;
+}
+.content .entries li a[data-icon]:before,
+.content .entries li button[data-icon]:before {
+    /*background-size: 4rem 4rem;*/
+    content: "";
+    height: 4rem;
+    margin-left: -2rem;
+    position: absolute;
+    width: 4rem;
+}
+.content .entries li a[data-icon="reload"]:before {
+    background: url("icons/refresh.png") no-repeat scroll center center rgba(0, 0, 0, 0);
+}
+.content .entries li button[data-icon="delete"]:before {
+    background: url("icons/delete.png") no-repeat scroll center center rgba(0, 0, 0, 0);
+}
+
+
+

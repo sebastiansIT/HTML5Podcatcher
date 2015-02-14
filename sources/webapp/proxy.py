@@ -25,7 +25,7 @@ def DoGet():
 			if not header.startswith("Server") and not header.startswith("Set-Cookie"):
 				sys.stdout.write(header.replace("\n", "").replace("\r", "")+"\n")
 		#print "Content-Type:" + filehandle.info().gettype()		
-		sys.stdout.write("Access-Control-Allow-Origin: http://lab.human-injection.de\n")
+		sys.stdout.write("Access-Control-Allow-Origin: http://podcatcher.sebastiansit.de, \n")
 		sys.stdout.write("\n")
 		
 		CHUNK = 16 * 1024

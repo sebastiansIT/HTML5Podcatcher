@@ -1,0 +1,117 @@
+﻿/*  Copyright 2013, 2014 Sebastian Spautz
+
+    This file is part of "HTML5 Podcatcher".
+    
+    "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    "HTML5 Podcatcher" is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see http://www.gnu.org/licenses/.
+*/
+
+@import "headers.css";
+@import "footers.css";
+@import "buttons.css";
+@import "input_areas.css";
+@import "lists.css";
+
+/* App-Page Layout */
+html {
+	font-size: 62.5%; /*Set font size to 10px (if default is 16px) */
+	font-family: 'Fira Sans', sans-serif; 
+	line-height: 2.0rem;
+	height: 100%;
+}
+
+/* The Body defines the Stage */
+body { 
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	position: relative;
+	overflow: hidden;
+	font-size:1.6rem;
+}
+/* Each Region is a Scene */
+section[role="region"] {
+	height:100%;
+	display:flex; 
+	flex-direction: column;
+	flex-wrap: nowrap;
+	color: #333;
+}
+
+section[role="region"] > footer:last-child {
+	background-color: #006400;
+	color: #fff;
+}
+section[role="region"] .content {
+	height:100%;
+	overflow:auto;
+	flex-basis: 0;
+	flex-grow: 1;
+	flex-shrink: 1;
+}
+section[role="region"] .content > * {
+	margin: 1.5rem;
+}
+
+/* Special Layout for Dialogs */
+section.dialog[role="region"] {
+	display:none;
+	width:100%;
+	background-color: rgba(255,255,255,0.9);
+}
+section.dialog.fullscreen[role="region"] {
+	position: absolute;
+	display:flex;
+	top: 0;
+}
+/* end of App-Page Layout */
+	
+	section[data-type="list"] header h2 {
+		color: #006400;
+		font-size: 1.6rem;
+		font-weight: normal;
+		height: 3rem;
+		line-height: 4rem;
+		margin-bottom: 0;
+		margin-left: 0;
+		margin-right: 0;
+		margin-top: 0;
+		overflow-x: hidden;
+		overflow-y: hidden;
+		padding-bottom: 0;
+		padding-left: 1.5rem;
+		padding-right: 1.5rem;
+		padding-top: 0;
+		text-overflow: ellipsis;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+	
+	input[type="number"] {
+		-moz-appearance: textfield;
+	}
+	
+	template, .template {
+		display: none;
+	}
+	
+	@media screen and (min-width:64.6rem) {
+		body {
+			max-width:64rem;
+			height:calc(100% - 0.9rem);
+			margin: 0.3rem auto;
+			border-left: 0.3rem solid #006400;
+			border-right:0.3rem solid #006400;
+			border-bottom:0.3rem solid #006400;
+		}
+	}

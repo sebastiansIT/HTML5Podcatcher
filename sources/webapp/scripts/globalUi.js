@@ -1,4 +1,4 @@
-﻿/*  Copyright 2014 Sebastian Spautz
+﻿/*  Copyright 2014, 2015 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -15,7 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
-/*global window, navigator */
+/*global window, navigator, document */
 /*global console */
 /*global confirm */
 /*global applicationCache */
@@ -52,7 +52,7 @@ var GlobalUserInterfaceHelper = {
     },
     logHandler: function (message, loglevel) {
         "use strict";
-        if (loglevel.indexOf(":") >= 0) {
+        if (loglevel && loglevel.indexOf(":") >= 0) {
             loglevel = loglevel.substring(0, loglevel.indexOf(":"));
         }
         switch (loglevel) {
@@ -71,7 +71,12 @@ var GlobalUserInterfaceHelper = {
         default:
             console.log(loglevel + ': ' + message);
         }
-        $('#statusbar').prepend('<span class=' + loglevel + '>' + message + '</span></br>');
+        var logEntryNode = document.createElement("p");
+        logEntryNode.className = loglevel;
+        logEntryNode.appendChild(document.createTextNode(message));
+        if (document.getElementById('log')) {
+            document.getElementById('log').insertBefore(logEntryNode, document.getElementById('log').firstChild);
+        }
     },
     errorHandler: function (event) {
         "use strict";
@@ -155,11 +160,43 @@ var GlobalUserInterfaceHelper = {
     },
     initGeneralUIEvents: function () {
         "use strict";
-        $('#statusbar').on('click', function (event) {
+        $('#showLogView, #logView .closeDialog').on('click', function (event) {
             event.preventDefault();
             event.stopPropagation();
-            $(this).parent().toggleClass('fullscreen');
+            $('#logView').toggleClass('fullscreen');
         });
+        $('#appClose').on('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            window.open('', '_parent', '');
+            window.close();
+        });
+    },
+    renderSource: function (source) {
+        "use strict";
+        var entryUI;
+        entryUI = $($('#sourceTemplate li')[0].cloneNode(true));
+        entryUI.data('sourceUri', source.uri);
+        entryUI.find('.title').text(source.title);
+        entryUI.find('.link').attr('href', source.link);
+        entryUI.find('.description').text(source.description);
+        entryUI.find('.update').attr('href', source.uri);
+        return entryUI;
+    },
+    renderSourceList: function (sourcelist) {
+        "use strict";
+        var sourcelistUI, entryUI, i;
+        sourcelistUI = $('#sourceslist .entries');
+        sourcelistUI.empty();
+        if (sourcelist && sourcelist.length > 0) {
+            for (i = 0; i < sourcelist.length; i++) {
+                entryUI = this.renderSource(sourcelist[i]);
+                sourcelistUI.append(entryUI);
+            }
+        } else {
+            entryUI = $('<li class="emptyPlaceholder">no entries</li>');
+            sourcelistUI.append(entryUI);
+        }
     }
 };
 var UI = GlobalUserInterfaceHelper;

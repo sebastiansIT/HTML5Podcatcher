@@ -1,0 +1,129 @@
+/*
+    Copyright 2013 - 2015 Sebastian Spautz
+
+    This file is part of "HTML5 Podcatcher".
+    
+    "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    any later version.
+
+    "HTML5 Podcatcher" is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see http://www.gnu.org/licenses/.
+*/
+
+/* -------------------------------------------------------------------
+  HEADERS: layout
+  Form factor or Skin dependent styles should NOT be defined here.
+------------------------------------------------------------------- */
+section[role="region"] > header:first-child {
+  position: relative;
+  display: block;
+  z-index: 10;
+  padding: 0;
+  height: 5rem;
+  border: none;
+}
+section[role="region"] > header:first-child h1 {
+  font-size: 2.3rem;
+  line-height: 5rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: block;
+  overflow: hidden;
+  margin: 0;
+  padding: 0 1rem;
+  height: 100%;
+  font-weight: 300;
+  font-style: italic;
+  text-align: center;
+}
+section[role="region"] > header:first-child menu {
+  height: 100%;
+  float: right;
+  padding: 0;
+  margin: 0;
+}
+
+/* ----------------------------------
+  Buttons (In Header)
+---------------------------------- */
+section[role="region"] > header:first-child a,
+section[role="region"] > header:first-child button {
+  box-sizing: border-box;
+  position: relative;
+  display: block;
+  overflow: hidden;
+  float: left;
+  min-width: 5rem;
+  width: auto;
+  height: 5rem;
+  border: none;
+  background: none;
+  padding: 0 1rem;
+  margin: 0;
+  font-weight: 400;
+  font-size: 1.5rem;
+  line-height: 5rem;
+  border-radius: 0;
+  text-decoration: none;
+  text-align: center;
+  text-shadow: none;
+  font-style: italic;
+}
+/* Pressed  state */
+section[role="region"] > header:first-child a:focus,
+section[role="region"] > header:first-child button:focus  {
+  outline: solid 1px rgba(255,255,255,0.7);
+}
+section[role="region"] > header:first-child button::-moz-focus-inner {
+  outline: none;
+  border: none;
+  margin-top: -0.2rem; /* To fix line-height bug (697451) */
+  padding: 0;
+}
+/* Hover state */
+section[role="region"] > header:first-child a:active,
+section[role="region"] > header:first-child button:active,
+section[role="region"] > header:first-child a:hover,
+section[role="region"] > header:first-child button:hover
+{ 
+  background-color: rgba(0,0,0,0.17);
+}
+
+/* ----------------------------------
+  Icons as parts of the Header
+---------------------------------- */
+section[role="region"] > header:first-child .icon {
+  display: block;
+  width: 3rem;
+  height: 5rem;
+  background: transparent no-repeat center / 3rem auto;
+  font-size: 0;
+}
+/* Symbols*/
+section[role="region"] > header:first-child .icon-close {
+  background-image: url(icons/close.png);
+}
+section[role="region"] > header:first-child .icon-settings {
+  background-image: url(icons/settings.png);
+}
+section[role="region"] > header:first-child .icon-playlist {
+  background-image: url(icons/playlist.png);
+}
+section[role="region"] > header:first-child .icon-back {
+  background-image: url(icons/back.png);
+}
+
+/* ----------------------------------
+  Colors
+---------------------------------- */
+section[role="region"] > header:first-child {
+	background-color: #006400;
+	color: #fff;
+}

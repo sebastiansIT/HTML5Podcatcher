@@ -1,0 +1,77 @@
+/* ----------------------------------
+* Toolbars
+* ---------------------------------- */
+
+[role="toolbar"] {
+  display: flex;
+  box-sizing: border-box;
+  height: 45px;
+  width: 100%;
+  background: #fff;
+  border-top: 1px solid #eee;
+}
+
+[role="toolbar"] button,
+[role="toolbar"] a {
+  position: relative;
+  flex: 1;
+  border: none;
+  border-left: 1px solid #e5e5e5;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  color: #919191;
+  border-radius: 0;
+  height: 100%;
+  font-size: 0;
+}
+
+[role="toolbar"] button:first-child,
+[role="toolbar"] a:first-child {
+  border-left: none;
+}
+
+[role="toolbar"] button:active,
+[role="toolbar"] a:active {
+  color: #fff;
+  background-color: rgb(51, 160, 51);
+}
+
+[role="toolbar"] [data-icon] {
+  font-size: 0;
+}
+[role="toolbar"] button[data-icon]:before {
+  width: 3rem;
+  height: 3rem;
+  position: absolute;
+  content: "";
+  top:50%;
+  margin-top:-1.5rem;
+  left:50%;
+  margin-left:-1.5rem;
+  background-size: 3rem 3rem;
+}
+[role="toolbar"] button[data-icon="reload"]:before { 
+	background: url(icons/refresh.png) no-repeat center center;
+}
+[role="toolbar"] button[data-icon="play"]:before { 
+	background: url(icons/play.png) no-repeat center center;
+}
+[role="toolbar"] button[data-icon="pause"]:before { 
+	background: url(icons/pause.png) no-repeat center center;
+}
+[role="toolbar"] button[data-icon="previous"]:before { 
+	background: url(icons/skipback.png) no-repeat center center;
+}
+[role="toolbar"] button[data-icon="next"]:before { 
+	background: url(icons/skipforward.png) no-repeat center center;
+}
+[role="toolbar"] button[data-icon="show-log"]:before { 
+	background: url(icons/notifications.png) no-repeat center center;
+}
+[role="toolbar"] button[data-icon="add-source"]:before { 
+	background: url(icons/addSource.png) no-repeat center center;
+}
+

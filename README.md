@@ -44,7 +44,7 @@ More will come later.
 
 Installation and usaged
 At the moment you can use the web version 
-at http://lab.human-injection.de/podcatcher/playlist.html but you need a 
+at http://podcatcher.sebastiansit.de/podcatcher.html but you need a 
 proxy to avoid SOP-Errors.
 
 ## Screenshots

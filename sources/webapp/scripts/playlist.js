@@ -61,24 +61,17 @@ GlobalUserInterfaceHelper.renderEpisode = function (episode) {
     "use strict";
     var entryUI;
     entryUI = $($('#episodeTemplate li')[0].cloneNode(true));
-    //entryUI = $('<li>');
     entryUI.data('episodeUri', episode.uri);
-    entryUI.find('h3.title a').attr('href', episode.uri).text(episode.title);
-    //entryUI.append('<h3 class="title"><a href="' + episode.uri + '">' + episode.title + '</a></h3>');
-    entryUI.find('span.source').text(episode.source);
-    //entryUI.append('<span class="source">' + episode.source + '</span>');
-    entryUI.find('time.updated').attr('datetime', episode.updated.toISOString()).text(episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString());
-    //entryUI.append('<time datetime="' + episode.updated.toISOString() + '" class="updated">' + episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString() + '</time>');
-    //entryFunctionsUI = $('<span class="functions">');
+    entryUI.find('a.link').attr('href', episode.uri)
+    entryUI.find('h3.title').text(episode.title);
+    entryUI.find('.source').text(episode.source);
+    entryUI.find('.updated').attr('datetime', episode.updated.toISOString()).text(episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString());
     if (episode.playback.played) {
-        entryUI.find('.functions button.status').text("Status: played");
-        //entryFunctionsUI.append('<button type="button" class="status">Status: played</button>');
+        entryUI.find('button.status').text("Status: played");
     } else {
-        entryUI.find('.functions button.status').text("Status: new");
-        //entryFunctionsUI.append('<button type="button" class="status">Status: new</button>');
+        entryUI.find('button.status').text("Status: new");
     }
-    entryUI.find('.functions a.origin').attr('href', episode.uri);
-    //entryFunctionsUI.append('<a class="origin button" href="' + episode.uri + '">Internet</a>');
+    entryUI.find('a.origin').attr('href', episode.uri);
     if (POD.storage.isFileStorageAvailable() && episode.mediaUrl) {
         if (episode.isFileSavedOffline) {
             entryUI.find('.functions .downloadFile').replaceWith('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>');
@@ -88,9 +81,8 @@ GlobalUserInterfaceHelper.renderEpisode = function (episode) {
             //entryFunctionsUI.append('<a class="button downloadFile" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
         }
     } else {
-        entryUI.find('.functions .downloadFile').remove();
+        entryUI.find('.downloadFile').remove();
     }
-    //entryUI.append(entryFunctionsUI);
     return entryUI;
 };
 GlobalUserInterfaceHelper.renderPlaylist = function (playlist) {
@@ -108,56 +100,19 @@ GlobalUserInterfaceHelper.renderPlaylist = function (playlist) {
         playlistUI.append(entryUI);
     }
 };
-GlobalUserInterfaceHelper.renderSource = function (source) {
-    "use strict";
-    var entryUI;
-    entryUI = $($('#sourceTemplate li')[0].cloneNode(true));
-    //entryUI = $('<li>');
-    entryUI.data('sourceUri', source.uri);
-    entryUI.find('h3.title').text(source.title);
-    //entryUI.append('<h3 class="title">' + source.title + '<h3>');
-    entryUI.find('p.description').text(source.description);
-    //entryUI.append('<p class="description">' + source.description + '</p>');
-    entryUI.find('p.uri a').attr('href', source.uri).text(source.uri);
-    //entryUI.append('<p class="uri"><a href="' + source.uri + '">' + source.uri + '</a></p>');
-    //entryFunctionsUI = $('<span class="functions">');
-    entryUI.find('.functions a.link').attr('href', source.link);
-    //entryFunctionsUI.append('<a class="link button" href="' + source.link + '">Internet</a> ');
-    entryUI.find('.functions button.updateSource').attr('href', source.uri);
-    //entryFunctionsUI.append('<button type="button" class="updateSource" href="' + source.uri + '">Update</button> ');
-    entryUI.find('.functions button.deleteSource').attr('href', 'source.uri');
-    //entryFunctionsUI.append('<button type="button" class="deleteSource" href="' + source.uri + '">Delete</button>');
-    //entryUI.append(entryFunctionsUI);
-    return entryUI;
-};
-GlobalUserInterfaceHelper.renderSourceList = function (sourcelist) {
-    "use strict";
-    var sourcelistUI, entryUI, i;
-    sourcelistUI = $('#sources .entries');
-    sourcelistUI.empty();
-    if (sourcelist && sourcelist.length > 0) {
-        for (i = 0; i < sourcelist.length; i++) {
-            entryUI = this.renderSource(sourcelist[i]);
-            sourcelistUI.append(entryUI);
-        }
-    } else {
-        entryUI = $('<li class="emptyPlaceholder">no entries</li>');
-        sourcelistUI.append(entryUI);
-    }
-};
 GlobalUserInterfaceHelper.activeEpisode = function (onReadCallback) {
     "use strict";
-    var activeEpisode = $('#playlist').find('.activeEpisode');
+    var activeEpisode = $('#playlist').find('.active');
     POD.storage.readEpisode(activeEpisode.data('episodeUri'), onReadCallback);
 };
 GlobalUserInterfaceHelper.previousEpisode = function (onReadCallback) {
     "use strict";
-    var activeEpisode = $('#playlist').find('.activeEpisode');
+    var activeEpisode = $('#playlist').find('.active');
     POD.storage.readEpisode(activeEpisode.prev().data('episodeUri'), onReadCallback);
 };
 GlobalUserInterfaceHelper.nextEpisode = function (onReadCallback) {
     "use strict";
-    var activeEpisode = $('#playlist').find('.activeEpisode');
+    var activeEpisode = $('#playlist').find('.active');
     POD.storage.readEpisode(activeEpisode.next().data('episodeUri'), onReadCallback);
 };
 GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
@@ -304,8 +259,8 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
                 });
             });
             //Styling
-            $('#playlist').find('.activeEpisode').removeClass('activeEpisode');
-            $('#playlist li').filter(function () { return $(this).data('episodeUri') === episode.uri; }).addClass('activeEpisode');
+            $('#playlist').find('.active').removeClass('active');
+            $('#playlist li').filter(function () { return $(this).data('episodeUri') === episode.uri; }).addClass('active');
             if (onActivatedCallback && typeof onActivatedCallback === 'function') {
                 onActivatedCallback(episode);
             }
@@ -330,8 +285,12 @@ $(document).ready(function () {
     "use strict";
     var k, quota, multiMediaKeyDownTimestemp;
     POD.settings.uiLogger = UI.logHandler;
+    POD.settings.uiLogger("Open Playlist", "debug");
     POD.web.settings.proxyUrlPattern = UI.settings.get("proxyUrl");
-    //Update local storage to actual version of key-names (changed "track" to "episode"; changed "configuration" to "settings")
+    // --------------------- //
+    // -- Database Update -- //
+    // --------------------- //
+    // -- Update local storage to actual version of key-names (changed "track" to "episode"; changed "configuration" to "settings")
     for (k = 0; k < localStorage.length; k++) {
         if (localStorage.key(k).slice(0, 6) === 'track.') {
             localStorage.setItem(localStorage.key(k).replace('track.', 'episode.'), localStorage.getItem(localStorage.key(k)));
@@ -341,6 +300,28 @@ $(document).ready(function () {
             localStorage.removeItem(localStorage.key(k));
         }
     }
+    // ------------------- //
+    // -- Initialise UI -- //
+    // ------------------- //
+    //Quota and Filesystem initialisation
+    if (POD.storage.fileStorageEngine() === POD.storage.fileSystemStorage) {
+        quota = UI.settings.get("quota");
+        if (!quota) { quota = 1024 * 1024 * 200; }
+        POD.storage.fileSystemStorage.requestFileSystemQuota(quota, function (usage, quota) {
+            GlobalUserInterfaceHelper.logHandler("Usage: " + usage + " MiB of " + quota + 'MiB File Storage', 'info');
+            UI.settings.set("quota", quota);
+        });
+    }
+    //Render playlist
+    POD.storage.readPlaylist(false, UI.renderPlaylist);
+    if (!navigator.onLine) {
+        $('#updatePlaylist, .updateSource, .downloadFile').attr('disabled', 'disabled');
+    }
+    //Initialise player
+    UI.getLastPlayedEpisode(UI.playEpisode);
+    // --------------------------- //
+    // -- Register Eventhandler -- //
+    // --------------------------- //
     //Application Cache Events
     UI.initApplicationCacheEvents();
     //Player UI Events
@@ -441,10 +422,11 @@ $(document).ready(function () {
         event.preventDefault();
         window.open($(this).attr('href'), '_blank');
     });
-    $('#playlist #updatePlaylist').on('click', function (event) {
+    $('#refreshPlaylist').on('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
         var i;
+        POD.settings.uiLogger("Playlist will refreshed now", "debug");
         POD.storage.readSources(function (sources) {
             for (i = 0; i < sources.length; i++) {
                 POD.web.downloadSource(sources[i]);
@@ -530,23 +512,4 @@ $(document).ready(function () {
     }, false);
     UI.initGeneralUIEvents();
     UI.initConnectionStateEvents();
-    //Quota and Filesystem initialisation
-    if (POD.storage.fileStorageEngine() === POD.storage.fileSystemStorage) {
-        quota = UI.settings.get("quota");
-        if (!quota) { quota = 1024 * 1024 * 200; }
-        POD.storage.fileSystemStorage.requestFileSystemQuota(quota, function (usage, quota) {
-            GlobalUserInterfaceHelper.logHandler("Usage: " + usage + " MiB of " + quota + 'MiB File Storage', 'info');
-            UI.settings.set("quota", quota);
-        });
-    }
-    //Render lists
-    POD.storage.readSources(function (sources) {
-        UI.renderSourceList(sources);
-        POD.storage.readPlaylist(false, UI.renderPlaylist);
-        if (!navigator.onLine) {
-            $('#updatePlaylist, .updateSource, .downloadFile').attr('disabled', 'disabled');
-        }
-        //Initialise player
-        UI.getLastPlayedEpisode(UI.playEpisode);
-    });
 });

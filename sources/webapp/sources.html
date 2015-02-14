@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 
 <!--
-    Copyright 2014, 2015 Sebastian Spautz
+    Copyright 2013 - 2015 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
     
@@ -22,8 +22,8 @@
 <html xmanifest="manifest.appcache">
 <head>
 	<meta charset="utf-8">
-	<title>Settings &mdash; HTML5 Podcatcher</title>
-	<meta name="description" content="A HTML5 podcast player!">
+	<title>Sources/Feeds &mdash; HTML5 Podcatcher</title>
+	<meta name="description" content="The List of sources and Feeds for the HTML5 podcast player!">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<!-- Chrome for Android: Configure as Web App --> 
 	<meta name="mobile-web-app-capable" content="yes">
@@ -36,7 +36,7 @@
 	<link rel="apple-touch-icon" type="image/png" sizes="76x76"   href="images/logo76.png">
 	<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="images/logo120.png">
 	<link rel="apple-touch-icon" type="image/png" sizes="152x152" href="images/logo152.png">
-	
+
 	<link href="styles/main.css" rel="stylesheet" type="text/css" />
 	
 	<script src="scripts/jquery.min.js"></script>
@@ -46,52 +46,66 @@
 	<script src="scripts/storage/webStorageProvider.js"></script>
 	<script src="scripts/storage/fileSystemProvider.js"></script>
 	<script src="scripts/globalUi.js"></script>
-	<script src="scripts/settings.js"></script>
+	<script src="scripts/sources.js"></script>
 </head>
 <body>
 	<section role="region">
 		<header role="banner">
-			<a href="playlist.html" title="Back to Playlist"><span class="icon icon-back">Back</span></a>
+			<a href="playlist.html" title="Back to Playlist"><span class="icon icon-back">Playlist</span></a>
 			<menu type="toolbar">
-				<a href="playlist.html" title="Playlist"><span class="icon icon-playlist">Playlist</span></a>
-				<a href="sources.html" title="Sources/Feeds"><span class="icon icon-feed">Feeds</span></a>
+				<a href="settings.html" title="Settings"><span class="icon icon-settings">Settings</span></a>
 			</menu>
-			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} Settings">Settings</h1>
+			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} Playlist">Feed Management</h1>
 		</header>
 		<div class="content">
-			<section id="FileSystemAPI">
-				<header><h2>File System</h2></header>
-				<form action="#" id="memorySizeForm">
-					<label for="memorySizeInput">Memory size (MiB):</label>
-					<input title="Allowed size for downloaded files in megabyte" type="number" required="required" min="100" step="20" value="500" name="memorySizeInput" id="memorySizeInput" />
-					<button id="saveMemorySizeButton">Save</button>
-				</form>
-			</section>
-			<section id="Proxy">
-				<header><h2>Proxy</h2></header>
-				<form action="#" id="proxyForm">
-					<label for="httpProxyInput">Proxy-URL:</label>
-					<input type="url" name="httpProxyInput" id="httpProxyInput" />
-					<button id="saveProxyConfigurationButton">Save</button>
-				</form>
-			<section id="ImportExport">
-				<header><h2>Import/Export</h2></header>
-				<form action="#" id="ExportImportForm">
-					<label for="SerialisedConfigurationInput">Import/Export Configuration:</label>
-					<textarea name="SerialisedConfigurationInput" id="SerialisedConfigurationInput"></textarea>
-					<button name="importConfiguration" id="importConfiguration" style="width:49%;">Import</button>
-					<button name="exportConfiguration" id="exportConfiguration" style="width:49%;">Export</button>
-				</form>
-			</section>
+			<div id="sourceslist">
+                <ul class="entries">
+					<li class="emptyPlaceholder">
+                        <p>no entries</p>
+                    </li>
+                </ul>
+                <ul clasS="template" id="sourceTemplate">
+                    <li>
+						<a class="link" href="source.uri">
+						<div>
+							<h3 class="title">source.title</h3>
+							<p class="description">source.description</p>
+						</div>
+						</a>
+						<button class="delete" data-icon="delete">Delete</button>
+						<a class="button update" href="source.uri" data-icon="reload">Update</a>
+                    </li>
+                </ul>
+            </div>
 		</div>
 		<footer>
 			<div role="toolbar">
 			  <button id="showLogView" data-icon="show-log">Show Log</button>
+			  <button id="showAddSourceView" data-icon="add-source">Add Feed</button>
+			  <button id="refreshPlaylist" data-icon="reload">Refresh Playlist</button>
 			</div>
 		</footer>
 	</section>
+	<section id="addSourceView" class="dialog" role="region">
+		<header>
+			<button title="Close" class="closeDialog"><span class="icon icon-close">Close</span></button>
+			<menu type="toolbar">
+			</menu>
+			<h1 title="HTML5 Podcatcher  {{ VERSION }} {{ VARIANT }} Message Log">Add Feed</h1>
+		</header>
+		<div class="content">
+			<section>
+				<label for="addSourceUrlInput"><abbr title="Uniform Resource Locator">URL</abbr> of Podcast Feed</label>
+				<input type="url" id="addSourceUrlInput" required="required" />
+				<button id="loadSourceButton" class="recommend">Load</button>
+			</section>
+		</div>
+		<footer>
+			
+		</footer>
+	</section>
 	<section id="logView" class="dialog" role="region">
-		<header role="banner">
+		<header>
 			<button title="Close" class="closeDialog"><span class="icon icon-close">Close</span></button>
 			<menu type="toolbar">
 			</menu>

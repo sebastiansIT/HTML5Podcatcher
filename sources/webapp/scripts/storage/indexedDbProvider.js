@@ -448,16 +448,16 @@ HTML5Podcatcher.storage.indexedDbStorage = {
         "use strict";
         HTML5Podcatcher.logger('Saving file "' + episode.mediaUrl + '" to IndexedDB starts now', 'debug');
         var blob, requestOpenDB, i, chunkArray = [];
-        if (typeof content === "arraybuffer") {
+        if (content instanceof ArrayBuffer) {
             for (i = 0; i < content.byteLength; i += this.settings.chunkSize) {
                 if (i + this.settings.chunkSize < content.byteLength) {
-                    chunkArray.push(content.chunk(i, i + this.settings.chunkSize));
+                    chunkArray.push(content.slice(i, i + this.settings.chunkSize));
                 } else {
-                    chunkArray.push(content.chunk(i));
+                    chunkArray.push(content.slice(i));
                 }
             }
             blob = new Blob(chunkArray, {type: mimeType});
-        } else if (typeof content === "Blob") {
+        } else if (content instanceof Blob) {
             blob = content;
         }
         requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
@@ -527,5 +527,38 @@ HTML5Podcatcher.storage.indexedDbStorage = {
         } else {
             HTML5Podcatcher.logger('Nothing to delete from IndexedDB', 'info');
         }
+    },
+    listFiles: function (onReadCallback) {
+        "use strict";
+        var request;
+        request = window.indexedDB.open(this.settings.name, this.settings.version);
+        request.onupgradeneeded = this.updateIndexedDB;
+        request.onblocked = function () { HTML5Podcatcher.logger("Database blocked", 'debug'); };
+        request.onsuccess = function () {
+            HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug');
+            var db, transaction, store, cursorRequest, filelist;
+            db = this.result;
+            transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore], 'readonly');
+            store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore);
+            cursorRequest = store.openCursor();
+            filelist = [];
+            cursorRequest.onsuccess = function (event) {
+                var result = event.target.result;
+                if (result) {
+                    filelist.push(result.value);
+                    result.continue();
+                } else {
+                    if (onReadCallback && typeof onReadCallback === 'function') {
+                        onReadCallback(filelist);
+                    }
+                }
+            };
+            request.onerror = function (event) {
+                HTML5Podcatcher.logger(event.target.error.name + ' while reading list of sources from IndexedDB (' + event.target.error.message + ')', 'error');
+            };
+        };
+        request.onerror = function (event) {
+            HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
+        };
     }
 };

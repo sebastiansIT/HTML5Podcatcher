@@ -69,22 +69,24 @@ module.exports = function (grunt) {
             HostedWebApp: {
                 files: [
                     // includes files within path
-                    {expand: true,  cwd: 'sources/webapp/',    src: ['css/*.css'],                    dest: 'build/webapp/',             filter: 'isFile'},
-                    {expand: true,  cwd: 'sources/webapp/',    src: ['img/*.png'],                    dest: 'build/webapp/',             filter: 'isFile'},
-                    {expand: true,  cwd: 'sources/hostedapp/', src: ['img/*.png'],                    dest: 'build/webapp/',             filter: 'isFile'},
-                    {expand: true,  cwd: 'sources/hostedapp/', src: ['scripts/*.js'],                 dest: 'build/webapp/',             filter: 'isFile'},
-                    {expand: true,  cwd: 'sources/webapp/',    src: ['*.py'],                         dest: 'build/webapp/',             filter: 'isFile'},
-                    {expand: false,                            src: 'sources/webapp/img/favicon.ico', dest: 'build/webapp/favicon.ico'},
-                    {expand: false,                            src: 'sources/webapp/.htaccess',       dest: 'build/webapp/.htaccess'}
+                    {expand: true,  cwd: 'sources/webapp/',    src: ['styles/*.css'],                    dest: 'build/webapp/',             filter: 'isFile'},
+                    {expand: true,  cwd: 'sources/webapp/',    src: ['styles/icons/*.png'],              dest: 'build/webapp/',             filter: 'isFile'},
+                    {expand: true,  cwd: 'sources/webapp/',    src: ['images/*.png'],                    dest: 'build/webapp/',             filter: 'isFile'},
+                    {expand: true,  cwd: 'sources/hostedapp/', src: ['images/*.png'],                    dest: 'build/webapp/',             filter: 'isFile'},
+                    {expand: true,  cwd: 'sources/hostedapp/', src: ['scripts/*.js'],                    dest: 'build/webapp/',             filter: 'isFile'},
+                    {expand: true,  cwd: 'sources/webapp/',    src: ['*.py'],                            dest: 'build/webapp/',             filter: 'isFile'},
+                    {expand: false,                            src: 'sources/webapp/images/favicon.ico', dest: 'build/webapp/favicon.ico'},
+                    {expand: false,                            src: 'sources/webapp/.htaccess',          dest: 'build/webapp/.htaccess'}
                 ]
             },
             FirefoxPackagedApp: {
                 files: [
-                    {expand: true,  cwd: 'sources/webapp/',      src: ['css/*.css'],                    dest: 'build/packagedapp/temp/',            filter: 'isFile'},
-                    {expand: true,  cwd: 'sources/webapp/',      src: ['img/*.png'],                    dest: 'build/packagedapp/temp/',            filter: 'isFile'},
-                    {expand: true,  cwd: 'sources/packagedapp/', src: ['img/*.png'],                    dest: 'build/packagedapp/temp/',            filter: 'isFile'},
-                    {expand: false, cwd: 'sources/webapp/',      src: 'sources/webapp/img/favicon.ico', dest: 'build/packagedapp/temp/favicon.ico', filter: 'isFile'},
-                    {expand: true,  cwd: 'sources/packagedapp/', src: ['scripts/*.js'],                 dest: 'build/packagedapp/',                 filter: 'isFile'}
+                    {expand: true,  cwd: 'sources/webapp/',      src: ['styles/*.css'],                    dest: 'build/packagedapp/temp/',            filter: 'isFile'},
+                    {expand: true,  cwd: 'sources/webapp/',      src: ['styles/icons/*.png'],              dest: 'build/webapp/',                      filter: 'isFile'},
+                    {expand: true,  cwd: 'sources/webapp/',      src: ['images/*.png'],                    dest: 'build/packagedapp/temp/',            filter: 'isFile'},
+                    {expand: true,  cwd: 'sources/packagedapp/', src: ['images/*.png'],                    dest: 'build/packagedapp/temp/',            filter: 'isFile'},
+                    {expand: false, cwd: 'sources/webapp/',      src: 'sources/webapp/images/favicon.ico', dest: 'build/packagedapp/temp/favicon.ico', filter: 'isFile'},
+                    {expand: true,  cwd: 'sources/packagedapp/', src: ['scripts/*.js'],                    dest: 'build/packagedapp/',                 filter: 'isFile'}
                 ]
             }
         },
@@ -130,10 +132,8 @@ module.exports = function (grunt) {
         jasmine: {
             client: {
                 src: [
-                    'sources/webapp/scripts/lowLevelApi.js',
+                    'sources/webapp/scripts/*.js',
                     'sources/webapp/scripts/storage/*.js',
-                    'sources/webapp/scripts/globalUi.js',
-                    'sources/webapp/scripts/settings.js',
                     'http://code.jquery.com/jquery-2.1.1.min.js'
                 ],
                 options: {

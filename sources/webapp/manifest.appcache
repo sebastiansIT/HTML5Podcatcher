@@ -36,6 +36,8 @@
 ### Add functions to clear storage and save multiple episodes or sources to storage
 ## 0.20.1
 ### Use Media Fragment URI Recomendation to address the starting playback time
+##0.21.4
+### Fix a Bug in experimental code while working on storage of array buffers
 
 # VALIDATE this manifest on http://manifest-validator.com/
 
@@ -53,14 +55,22 @@ scripts/storage/webStorageProvider.js
 scripts/globalUi.js
 scripts/playlist.js
 scripts/settings.js
+scripts/sources.js
 # STYLES
-css/main.css
+styles/main.css
+styles/headers.css
+styles/buttons.css
+styles/footers.css
+styles/input_areas.css
+styles/lists.css
+styles/icons/addSource.png
 # IMAGES
 favicon.ico
-img/logo60.png
-img/logo128.png
-img/logo192.png
-img/logo512.png
+images/logo60.png
+images/logo76.png
+images/logo120.png
+images/logo152.png
+images/logo192.png
 
 NETWORK:
 *

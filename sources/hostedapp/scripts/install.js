@@ -26,15 +26,20 @@
 var manifestUrl = 'http://lab.human-injection.de/podcatcher/manifest.webapp';
 document.addEventListener('DOMContentLoaded', function () {
     "use strict";
-    document.getElementById('install').onclick = function (event) {
-        event.stopPropagation();
-        event.preventDefault();
-        var req = navigator.mozApps.install(manifestUrl);
-        req.onsuccess = function () {
-            alert(this.result.origin);
+    if (navigator.mozApps) {
+        document.getElementById('installFirefoxOS').onclick = function (event) {
+            event.stopPropagation();
+            event.preventDefault();
+            var req = navigator.mozApps.install(manifestUrl);
+            req.onsuccess = function () {
+                alert(this.result.origin);
+            };
+            req.onerror = function () {
+                alert(this.error.name);
+            };
         };
-        req.onerror = function () {
-            alert(this.error.name);
-        };
-    };
+    } else {
+        var element = document.getElementById('installFirefoxOS');
+        element.parentNode.removeChild(element);
+    }
 }, false);
