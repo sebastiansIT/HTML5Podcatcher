@@ -15,6 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
+/*global navigator, window */
 /*global jasmine, describe, it, expect, beforeEach, afterEach */
 /*global HTML5Podcatcher */
 /*global DOMParser */
@@ -29,13 +30,31 @@
             });
             it("can clean all data in the storage subsystem", function (done) {
                 HTML5Podcatcher.storage.cleanStorage(function () {
-					HTML5Podcatcher.storage.readPlaylist(true, function (readedEpisodes) {
+                    HTML5Podcatcher.storage.readPlaylist(true, function (readedEpisodes) {
                         HTML5Podcatcher.storage.readSources(function (readedSources) {
                             expect(readedEpisodes.length).toEqual(0);
                             expect(readedSources.length).toEqual(0);
                             done();
                         });
                     });
+                });
+            });
+            describe("Selection of applicable storage provider in different browsers", function () {
+                it("should available at least one storage provider for files (in Firefox, Chrome, Interet Explorer or Opera on Windows, Android or Firefox OS; Safarie on iOS don't support one of the implemented providers)", function () {
+                    expect(HTML5Podcatcher.storage.isFileStorageAvailable()).toEqual(true);
+                });
+                it("should select Indexed DB storage provider for data when called in Firefox, Chrome, Opera or Internet Explorer on Windows, Android or Firefox OS", function () {
+                    expect(HTML5Podcatcher.storage.dataStorageEngine()).toEqual(HTML5Podcatcher.storage.indexedDbStorage);
+                });
+                it("should select Indexed DB storage provider for files when called in Firefox", function () {
+                    if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+                        expect(HTML5Podcatcher.storage.fileStorageEngine()).toEqual(HTML5Podcatcher.storage.indexedDbStorage);
+                    }
+                });
+                it("should select File System API storage provider for files when called in Chrome or Opera on Windows or Android", function () {
+                    if (window.chrome) {
+                        expect(HTML5Podcatcher.storage.fileStorageEngine()).toEqual(HTML5Podcatcher.storage.fileSystemStorage);
+                    }
                 });
             });
             describe("Episode Storage", function () {
