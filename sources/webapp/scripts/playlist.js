@@ -478,59 +478,6 @@ $(document).ready(function () {
             episodeUI.fadeIn();
         }
     }, false);
-    //Sources UI Events
-    $('#sources').on('click', '.updateSource', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        POD.storage.readSource($(this).attr("href"), function (source) {
-            POD.web.downloadSource(source);
-        });
-    });
-    $('#sources').on('click', '.deleteSource', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        var i, removeFunction;
-        removeFunction = function (element) { $(element).remove(); };
-        POD.storage.readSource($(this).closest('li').data('sourceUri'), function (source) {
-            POD.storage.deleteSource(source, function (source) {
-                for (i = 0; i < $('#sources .entries li').length; i++) {
-                    if ($($('#sources .entries li')[i]).data('sourceUri') === source.uri) {
-                        $($('#sources .entries li')[i]).slideUp(400, removeFunction(this));
-                        break;
-                    }
-                }
-            });
-        });
-    });
-    $('#sources').on('click', '.link', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        window.open($(this).attr('href'), '_blank');
-    });
-    $('#sources #addSourceForm').on('submit', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        if ($('#addSourceUrlInput')[0].checkValidity()) {
-            POD.storage.readSource($('#addSourceUrlInput').val(), function (source) {
-                POD.web.downloadSource(source);
-            });
-        }
-    });
-    document.addEventListener('writeSource', function (event) {
-        var i, source, sourceUI;
-        source = event.detail.source;
-        sourceUI = UI.renderSource(source);
-        for (i = 0; i < $('#sources').find('.entries li').length; i++) {
-            if ($($('#sources').find('.entries li')[i]).data('sourceUri') === source.uri) {
-                $($('#sources').find('.entries li')[i]).slideUp().html(sourceUI.html()).slideDown();
-                return;
-            }
-        }
-        //show source if not listed before
-        sourceUI.hide();
-        $('#sources').find('.entries').append(sourceUI);
-        sourceUI.fadeIn();
-    }, false);
     UI.initGeneralUIEvents();
     UI.initConnectionStateEvents();
 });
