@@ -17,33 +17,19 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see http://www.gnu.org/licenses/.
 
-# Version {{ VERSION }} Alpha
+# Version {{ VERSION }}
 # Change Log: 
 ## Older entries see
 ### ChangeLog.md
-## 0.18.11
-### Fix a Bug in RSS-Parser: Link elements with Atom namespace are accepted now 
-## 0.18.12
-### Fix Bugs in Parser and UI: empty description elements; missing encoded tags and changing feed uri and website url in some cases; Remove Download Button if no audio-file available
-## 0.18.12
-### New implementation of import and export of the complete configuration
-## 0.19.13
-### Variate the implementation of the multimedia-event "duration changed"
-### Refactor DownloadSource() and remove usage of local storage API from this function
-## 0.19.14
-### Fix a bug in export function
-## 0.20.0
-### Add functions to clear storage and save multiple episodes or sources to storage
-## 0.20.1
-### Use Media Fragment URI Recomendation to address the starting playback time
-##0.21.4
-### Fix a Bug in experimental code while working on storage of array buffers
+##0.30.1
+### A new User Interface
 
 # VALIDATE this manifest on http://manifest-validator.com/
 
 CACHE:
 # HTML
-podcatcher.html
+playlist.html
+sources.html
 settings.html
 # SCRIPTS
 scripts/jquery.min.js
@@ -54,16 +40,32 @@ scripts/storage/fileSystemProvider.js
 scripts/storage/webStorageProvider.js
 scripts/globalUi.js
 scripts/playlist.js
-scripts/settings.js
 scripts/sources.js
+scripts/settings.js
 # STYLES
 styles/main.css
 styles/headers.css
-styles/buttons.css
 styles/footers.css
+styles/buttons.css
 styles/input_areas.css
 styles/lists.css
 styles/icons/addSource.png
+styles/icons/back.png
+styles/icons/browsing.png
+styles/icons/close.png
+styles/icons/delete.png
+styles/icons/download.png
+styles/icons/notifications.png
+styles/icons/pause.png
+styles/icons/play.png
+styles/icons/playlist.png
+styles/icons/refresh.png
+styles/icons/seekback.png
+styles/icons/seekforward.png
+styles/icons/settings.png
+styles/icons/skipback.png
+styles/icons/skipforward.png
+styles/icons/sources.png
 # IMAGES
 favicon.ico
 images/logo60.png

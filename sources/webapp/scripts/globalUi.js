@@ -68,6 +68,10 @@ var GlobalUserInterfaceHelper = {
         case "error":
             console.error(message);
             break;
+        case "fatal":
+            console.error(message);
+            $('#logView').addClass("fullscreen");
+            break;
         default:
             console.log(loglevel + ': ' + message);
         }
@@ -98,7 +102,15 @@ var GlobalUserInterfaceHelper = {
         },
         get: function (key) {
             "use strict";
-            return localStorage.getItem('settings.' + key);
+            try {
+                return localStorage.getItem('settings.' + key);
+            } catch (exception) {
+                if (exception.code === 18) {
+                    GlobalUserInterfaceHelper.logHandler("Please activate Cookies in your Browser settings! [" + exception.name + ': ' + exception.message + ']', 'fatal')
+                } else {
+                    GlobalUserInterfaceHelper.logHandler(exception, 'error')
+                }
+            }
         }
     },
     initApplicationCacheEvents: function () {

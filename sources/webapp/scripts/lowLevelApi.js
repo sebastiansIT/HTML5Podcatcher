@@ -239,7 +239,7 @@ var HTML5Podcatcher = {
             errorfunction = function (xhrError) {
                 if (HTML5Podcatcher.web.settings.proxyUrlPattern) {
                     HTML5Podcatcher.logger('Direct download failed. Try proxy: ' + HTML5Podcatcher.web.settings.proxyUrlPattern.replace("$url$", source.uri), 'warning');
-                    var proxyXhr = new XMLHttpRequest({ mozSystem: true });
+                    var proxyXhr = new XMLHttpRequest(/*{ mozSystem: true }*/);
                     proxyXhr.open('GET', HTML5Podcatcher.web.settings.proxyUrlPattern.replace("$url$", source.uri), true);
                     proxyXhr.addEventListener("error", function (xhrError) {
                         HTML5Podcatcher.logger("Can't download Source: " + xhrError.error);
@@ -256,7 +256,7 @@ var HTML5Podcatcher = {
             };
             //Load Feed and Parse Entries
             try {
-                xhr = new XMLHttpRequest({ mozSystem: true });
+                xhr = new XMLHttpRequest(/*{ mozSystem: true }*/);
                 xhr.open('GET', source.uri, true);
                 xhr.addEventListener("error", errorfunction);
                 xhr.addEventListener("abort", HTML5Podcatcher.logger, false);
@@ -311,7 +311,7 @@ var HTML5Podcatcher = {
                 }
             };
             try {
-                xhr = new XMLHttpRequest({ mozSystem: true });
+                xhr = new XMLHttpRequest(/*{ mozSystem: true }*/);
                 xhr.open('GET', episode.mediaUrl, true);
                 xhr.responseType = 'arraybuffer';
                 //xhr.responseType = 'blob';

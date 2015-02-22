@@ -19,7 +19,7 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 -->
 
-<html xmanifest="manifest.appcache">
+<html manifest="manifest.appcache">
 <head>
 	<meta charset="utf-8">
 	<title>Sources/Feeds &mdash; HTML5 Podcatcher</title>
@@ -53,6 +53,7 @@
 		<header role="banner">
 			<a href="playlist.html" title="Back to Playlist"><span class="icon icon-back">Playlist</span></a>
 			<menu type="toolbar">
+				<a href="playlist.html" title="Playlist"><span class="icon icon-playlist">Playlist</span></a>
 				<a href="settings.html" title="Settings"><span class="icon icon-settings">Settings</span></a>
 			</menu>
 			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} Playlist">Feed Management</h1>
@@ -67,10 +68,10 @@
                 <ul clasS="template" id="sourceTemplate">
                     <li>
 						<a class="link" href="source.uri">
-						<div>
-							<h3 class="title">source.title</h3>
-							<p class="description">source.description</p>
-						</div>
+							<div>
+								<h3 class="title">source.title</h3>
+								<p class="description">source.description</p>
+							</div>
 						</a>
 						<button class="delete" data-icon="delete">Delete</button>
 						<a class="button update" href="source.uri" data-icon="reload">Update</a>

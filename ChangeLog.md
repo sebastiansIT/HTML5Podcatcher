@@ -95,3 +95,20 @@
 	* Removed dependencies from jQuery in lowLevelApi.js
 - 0.18.10
 	* Rebind Events to audio element when switching to another Episode
+- 0.18.11
+	* Fix a Bug in RSS-Parser: Link elements with Atom namespace are accepted now 
+- 0.18.12
+	* Fix Bugs in Parser and UI: empty description elements; missing encoded tags and changing feed uri and website url in some cases; Remove Download Button if no audio-file available
+- 0.18.12
+	* New implementation of import and export of the complete configuration
+- 0.19.13
+	* Variate the implementation of the multimedia-event "duration changed"
+	* Refactor DownloadSource() and remove usage of local storage API from this function
+- 0.19.14
+	* Fix a bug in export function
+- 0.20.0
+	* Add functions to clear storage and save multiple episodes or sources to storage
+- 0.20.1
+	* Use Media Fragment URI Recomendation to address the starting playback time
+- 0.21.4
+	* Fix a Bug in experimental code while working on storage of array buffers

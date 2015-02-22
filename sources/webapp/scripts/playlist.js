@@ -1,4 +1,4 @@
-﻿/*  Copyright 2013, 2014 Sebastian Spautz
+﻿/*  Copyright 2013 - 2015 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -62,23 +62,20 @@ GlobalUserInterfaceHelper.renderEpisode = function (episode) {
     var entryUI;
     entryUI = $($('#episodeTemplate li')[0].cloneNode(true));
     entryUI.data('episodeUri', episode.uri);
-    entryUI.find('a.link').attr('href', episode.uri)
+    entryUI.find('a.link').attr('href', episode.uri);
     entryUI.find('h3.title').text(episode.title);
     entryUI.find('.source').text(episode.source);
-    entryUI.find('.updated').attr('datetime', episode.updated.toISOString()).text(episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString());
     if (episode.playback.played) {
-        entryUI.find('button.status').text("Status: played");
+        entryUI.find('.updated').attr('datetime', episode.updated.toISOString()).text(episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString());
     } else {
-        entryUI.find('button.status').text("Status: new");
+        entryUI.find('.updated').attr('datetime', episode.updated.toISOString()).text("New");
     }
     entryUI.find('a.origin').attr('href', episode.uri);
     if (POD.storage.isFileStorageAvailable() && episode.mediaUrl) {
         if (episode.isFileSavedOffline) {
-            entryUI.find('.functions .downloadFile').replaceWith('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>');
-            //entryFunctionsUI.append('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>');
+            entryUI.find('.downloadFile').replaceWith('<button class="delete" href="' + episode.mediaUrl + '" data-icon="delete">Delete</button>');
         } else if (episode.mediaUrl) {
-            entryUI.find('.functions .downloadFile').attr('href', episode.mediaUrl).attr('download', episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/') + 1));
-            //entryFunctionsUI.append('<a class="button downloadFile" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf()) + '">Download</a>');
+            entryUI.find('.downloadFile').attr('href', episode.mediaUrl).attr('download', episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/') + 1));
         }
     } else {
         entryUI.find('.downloadFile').remove();
@@ -132,22 +129,27 @@ GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
     });
 };
 GlobalUserInterfaceHelper.progressHandler = function (progressEvent, prefix, episode) {
-    "use strict"; //xmlHttpRequestProgressEvent
-    var progressbar, percentComplete, episodeUI;
+    "use strict";
+    //TODO Clean code from old solution with a HTML-Progress-Bar
+    var percentComplete, episodeUI; //progressbar, 
     episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode);
-    if ($(episodeUI).find('progress').length) {
+    /*if ($(episodeUI).find('progress').length) {
         progressbar = $(episodeUI).find('progress');
     } else {
         progressbar = $('<progress min="0" max="1">&helip;</progress>');
         $(episodeUI).find('.downloadFile').hide().after(progressbar);
-    }
+    }*/
+    $(episodeUI).find('.downloadFile').attr('disabled', 'disabled');
     if (progressEvent.lengthComputable) {
-        percentComplete = progressEvent.loaded / progressEvent.total;
+        //Downloaded Bytes / (total Bytes + 10% for saving on local system)
+        percentComplete = progressEvent.loaded / (progressEvent.total + (progressEvent.total / 10));
         console.log(prefix + ': ' + (percentComplete * 100).toFixed(2) + '%');
-        $(episodeUI).find('progress').attr('value', percentComplete).text((percentComplete * 100).toFixed(2) + '%');
+        $(episodeUI).data('progress', percentComplete);
+        $(episodeUI).attr('style', 'background: linear-gradient(to right, rgba(0, 100, 0, 0.2) 0%,rgba(0, 100, 0, 0.2) ' + (percentComplete * 100).toFixed(2) + '%, #ffffff ' + (percentComplete * 100).toFixed(2) + '%);');
+        //$(episodeUI).find('progress').attr('value', percentComplete).text((percentComplete * 100).toFixed(2) + '%');
     } else {
         console.log(prefix + '...');
-        $(episodeUI).find('progress').removeAttr('value').text('&helip;');
+        //$(episodeUI).find('progress').removeAttr('value').text('&helip;');
     }
 };
 
@@ -196,6 +198,8 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
             });
             $('#player audio').on('playing', function (event) {
                 var audioElement = event.target;
+                $('#playPause').data('icon', 'pause');
+                $('#playPause').attr('data-icon', 'pause');
                 GlobalUserInterfaceHelper.activeEpisode(function (episode) {
                     GlobalUserInterfaceHelper.logHandler(episode.title + " is playing", 'info:playback');
                     audioElement.autoplay = true;
@@ -238,7 +242,7 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
                 GlobalUserInterfaceHelper.nextEpisode(GlobalUserInterfaceHelper.playEpisode);
             });
             $('#player audio').on('durationchange', function (event) {
-                var audioElement = event.target;
+                var percentPlayed, episodeUI, audioElement = event.target;
                 GlobalUserInterfaceHelper.activeEpisode(function (episode) {
                     GlobalUserInterfaceHelper.logHandler("Duration of " + episode.title + " is changed to " + UI.formatTimeCode(event.currentTarget.duration) + ".", 'debug:playback');
                     if (episode && audioElement.duration > episode.playback.currentTime) {
@@ -252,6 +256,12 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
                                 episode.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10;
                                 POD.storage.writeEpisode(episode);
                                 GlobalUserInterfaceHelper.logHandler('Current timecode is ' + UI.formatTimeCode(episode.playback.currentTime) + '.', 'debug');
+                            }
+                            if (episode && (event.target.currentTime > (episode.playback.currentTime + 2) || event.target.currentTime < (episode.playback.currentTime - 2))) {
+                                //Show Progress as background Gradient of Episode-UI
+                                episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode);
+                                percentPlayed = event.target.currentTime / audioElement.duration;
+                                $(episodeUI).attr('style', 'background: linear-gradient(to right, rgba(0, 100, 0, 0.2) 0%,rgba(0, 100, 0, 0.2) ' + (percentPlayed * 100).toFixed(2) + '%, #ffffff ' + (percentPlayed * 100).toFixed(2) + '%);');
                             }
                         });
                         GlobalUserInterfaceHelper.logHandler("Timeupdate on", 'debug');
@@ -315,7 +325,7 @@ $(document).ready(function () {
     //Render playlist
     POD.storage.readPlaylist(false, UI.renderPlaylist);
     if (!navigator.onLine) {
-        $('#updatePlaylist, .updateSource, .downloadFile').attr('disabled', 'disabled');
+        $('#refreshPlaylist, .update, #showAddSourceView, .downloadFile').attr('disabled', 'disabled');
     }
     //Initialise player
     UI.getLastPlayedEpisode(UI.playEpisode);
@@ -325,17 +335,33 @@ $(document).ready(function () {
     //Application Cache Events
     UI.initApplicationCacheEvents();
     //Player UI Events
-    $('#player #playPreviousEpisode').on('click', function () {
+    $('#playPause').on('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var audioTag = $('#player audio')[0];
+        if (audioTag) {
+            if (audioTag.paused) {
+                audioTag.play();
+                $('#playPause').data('icon', 'pause');
+                $('#playPause').attr('data-icon', 'pause');
+            } else {
+                audioTag.pause();
+                $('#playPause').data('icon', 'play');
+                $('#playPause').attr('data-icon', 'play');
+            }
+        }
+    });
+    $('#playPreviousEpisode').on('click', function () {
         UI.previousEpisode(UI.playEpisode);
     });
-    $('#player #playNextEpisode').on('click', function () {
+    $('#playNextEpisode').on('click', function () {
         UI.nextEpisode(UI.playEpisode);
     });
-    $('#player #jumpBackwards').on('click', function () {
+    $('#jumpBackwards').on('click', function () {
         var audioTag = $('#player audio')[0];
         audioTag.currentTime = Math.max(0, audioTag.currentTime - 10);
     });
-    $('#player #jumpForwards').on('click', function () {
+    $('#jumpForwards').on('click', function () {
         var audioTag = $('#player audio')[0];
         audioTag.currentTime = Math.min(audioTag.duration, audioTag.currentTime + 10);
     });
@@ -432,11 +458,6 @@ $(document).ready(function () {
                 POD.web.downloadSource(sources[i]);
             }
         });
-    });
-    $('#playlist #showFullPlaylist').on('click', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        POD.storage.readPlaylist(true, UI.renderPlaylist);
     });
     document.addEventListener('writeEpisode', function (event) {
         var i, episode, episodeUI;

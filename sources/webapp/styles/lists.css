@@ -1,4 +1,4 @@
-/*  Copyright 2013, 2014 Sebastian Spautz
+/*  Copyright 2013 - 2015 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
     
@@ -37,17 +37,24 @@
 	position: relative;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	/*background: linear-gradient(to right, #006400 0%,#006400 attr(data-progress %),#ffffff attr(data-progress %));*/
 }
 .content .entries li:last-child {
 	border: none;
 }
 .content .entries li.active {
-	border-bottom: solid 1px #006400;
+	border-bottom: solid 0.3rem #006400;
 }
 /* Entry content */
 .content .entries li > :first-child {
 	flex-grow:1;
 	width: calc(100% - 10rem);
+}
+.content .entries li > a:hover,
+.content .entries li > a:active,
+.content .entries li > a:focus {
+	outline:none;
+	background-color:rgba(0, 100, 0, 0.2);
 }
 .content .entries li h3 {
 	font-size: 1.8rem;
@@ -88,6 +95,14 @@
     font-size: 0;
 	background-color:transparent;
 }
+.content .entries li a[data-icon]:active,
+.content .entries li a[data-icon]:focus,
+.content .entries li a[data-icon]:hover,
+.content .entries li button[data-icon]:active,
+.content .entries li button[data-icon]:focus,
+.content .entries li button[data-icon]:hover {
+	background-color:rgba(0, 100, 0, 0.2);
+}
 .content .entries li a[data-icon]:before,
 .content .entries li button[data-icon]:before {
     /*background-size: 4rem 4rem;*/
@@ -102,6 +117,14 @@
 }
 .content .entries li button[data-icon="delete"]:before {
     background: url("icons/delete.png") no-repeat scroll center center rgba(0, 0, 0, 0);
+}
+.content .entries li a[data-icon="download"]:before,
+.content .entries li button[data-icon="download"]:before {
+    background: url("icons/download.png") no-repeat scroll center center rgba(0, 0, 0, 0);
+}
+.content .entries li a[data-icon="browsing"]:before,
+.content .entries li button[data-icon="browsing"]:before {
+    background: url("icons/browsing.png") no-repeat scroll center center rgba(0, 0, 0, 0);
 }
 
 

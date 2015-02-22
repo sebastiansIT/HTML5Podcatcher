@@ -110,11 +110,14 @@ section[role="region"] > header:first-child .icon {
 section[role="region"] > header:first-child .icon-close {
   background-image: url(icons/close.png);
 }
-section[role="region"] > header:first-child .icon-settings {
-  background-image: url(icons/settings.png);
-}
 section[role="region"] > header:first-child .icon-playlist {
   background-image: url(icons/playlist.png);
+}
+section[role="region"] > header:first-child .icon-feed {
+  background-image: url(icons/sources.png);
+}
+section[role="region"] > header:first-child .icon-settings {
+  background-image: url(icons/settings.png);
 }
 section[role="region"] > header:first-child .icon-back {
   background-image: url(icons/back.png);

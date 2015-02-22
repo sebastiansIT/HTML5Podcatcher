@@ -1,4 +1,4 @@
-﻿/*  Copyright 2013, 2014 Sebastian Spautz
+﻿/*  Copyright 2013 - 2015 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -57,29 +57,31 @@ HTML5Podcatcher.storage.fileSystemStorage = {
     },
     deleteFile: function (episode, onDeleteCallback) {
         "use strict";
-        window.resolveLocalFileSystemURL(episode.offlineMediaUrl, function (fileEntry) { //success
-            fileEntry.remove(function () { //success
-                var url;
-                url = episode.offlineMediaUrl;
-                episode.isFileSavedOffline = false;
-                episode.offlineMediaUrl = undefined;
-                HTML5Podcatcher.storage.writeEpisode(episode);
-                HTML5Podcatcher.logger('Deleting file "' + url + '" finished', 'info');
-                if (onDeleteCallback && typeof onDeleteCallback === 'function') {
-                    onDeleteCallback(episode);
+        if (episode.offlineMediaUrl) {
+            window.resolveLocalFileSystemURL(episode.offlineMediaUrl, function (fileEntry) { //success
+                fileEntry.remove(function () { //success
+                    var url;
+                    url = episode.offlineMediaUrl;
+                    episode.isFileSavedOffline = false;
+                    episode.offlineMediaUrl = undefined;
+                    HTML5Podcatcher.storage.writeEpisode(episode);
+                    HTML5Podcatcher.logger('Deleting file "' + url + '" finished', 'info');
+                    if (onDeleteCallback && typeof onDeleteCallback === 'function') {
+                        onDeleteCallback(episode);
+                    }
+                }, HTML5Podcatcher.errorLogger);
+            }, function (event) { //error
+                if (event.code === event.NOT_FOUND_ERR) {
+                    var url;
+                    url = episode.offlineMediaUrl;
+                    episode.offlineMediaUrl = undefined;
+                    HTML5Podcatcher.storage.writeEpisode(episode);
+                    HTML5Podcatcher.logger('File "' + url + '"not found. But that\'s OK', 'info');
+                } else {
+                    HTML5Podcatcher.logger(event, 'error');
                 }
-            }, HTML5Podcatcher.errorLogger);
-        }, function (event) { //error
-            if (event.code === event.NOT_FOUND_ERR) {
-                var url;
-                url = episode.offlineMediaUrl;
-                episode.offlineMediaUrl = undefined;
-                HTML5Podcatcher.storage.writeEpisode(episode);
-                HTML5Podcatcher.logger('File "' + url + '"not found. But that\'s OK', 'info');
-            } else {
-                HTML5Podcatcher.logger(event, 'error');
-            }
-        });
+            });
+        }
     },
     openFile: function (episode, onReadCallback) {
         "use strict";

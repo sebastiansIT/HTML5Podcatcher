@@ -19,7 +19,7 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 -->
 
-<html xmanifest="manifest.appcache">
+<html manifest="manifest.appcache">
 <head>
 	<meta charset="utf-8">
 	<title>Playlist &mdash; HTML5 Podcatcher</title>
@@ -47,23 +47,11 @@
 	<script src="scripts/storage/fileSystemProvider.js"></script>
 	<script src="scripts/globalUi.js"></script>
 	<script src="scripts/playlist.js"></script>
-	<style>
-		#logView {
-			display:none;
-		}
-		#logView.fullscreen {
-			position: absolute;
-			display:flex;
-			width:100%;
-			top: 0;
-			background-color: rgba(255,255,255,0.7);
-		}
-	</style>
 </head>
 <body>
 	<section role="region">
 		<header role="banner">
-			<button title="Close" id="appClose"><span class="icon icon-close">Close</span></button>
+			<!--<button title="Close" id="appClose"><span class="icon icon-close">Close</span></button>-->
 			<menu type="toolbar">
 				<a href="sources.html" title="Sources/Feeds"><span class="icon icon-feed">Feeds</span></a>
 				<a href="settings.html" title="Settings"><span class="icon icon-settings">Settings</span></a>
@@ -73,7 +61,7 @@
 		<div class="content">
 			<div id="playlist">
                 <ul class="entries">
-                    <li class="emptyPlaceholder">
+                    <li class="emptyPlaceholder" >
                         <p>no entries</p>
                     </li>
                 </ul>
@@ -82,28 +70,25 @@
                         <a class="link" href="episode.uri">
 							<div>
 								<h3 class="title">episode.title</h3>
-								<p><span class="source">episode.source</span> at <time datetime="episode.updated" class="updated">episode.updated</time></p>
+								<p><span href="#" class="status"><time datetime="episode.updated" class="updated">episode.updated</time></span> at <span class="source">episode.source</span></p>
 								
 							</div>
-							<!--<button class="status">Status: played</button>-->
-							<a class="origin button" href="episode.uri">Internet</a>
-							<a class="button downloadFile" href="episode.mediaUrl" download="episode.mediaUrl.fileName">Download</a>
 						</a>
+						<!--<button class="status">Status: played</button>-->
+						<a class="origin button" href="episode.uri" data-icon="browsing">Internet</a>
+						<a class="button downloadFile" href="episode.mediaUrl" download="episode.mediaUrl.fileName" data-icon="download">Download</a>
                     </li>
                 </ul>
             </div>
 		</div>
 		<footer>
-			<div role="toolbar" id="player">
-			  <button id="jumpBackwards" name="jumpBackwards" data-icon="jumpBackwards">Play Previous</button>
-			  <button id="mediacontrol"></button>
-			  <button id="jumpForwards" name="jumpForwards" data-icon="jumpForwards">Skip 10 seconds</button>
-			</div>
 			<div role="toolbar">
 			  <button id="showLogView" data-icon="show-log">Show Log</button>
-			  <button id="playPreviousEpisode" name="playPreviousEpisode" data-icon="previous">Play Previous</button>
-			  <button data-icon="play">Play</button>
-			  <button id="playNextEpisode" name="playNextEpisode" data-icon="next">Play Next</button>
+			  <button id="playPreviousEpisode" data-icon="previous">Play Previous</button>
+			  <button id="jumpBackwards" data-icon="jumpBackwards">Play Previous</button>
+			  <button id="playPause" data-icon="play">Play</button>
+			  <button id="jumpForwards" data-icon="jumpForwards">Skip 10 seconds</button>
+			  <button id="playNextEpisode" data-icon="next">Play Next</button>
 			  <button id="refreshPlaylist" data-icon="reload">Refresh Playlist</button>
 			</div>
 		</footer>
@@ -113,9 +98,23 @@
 			<button title="Close" class="closeDialog"><span class="icon icon-close">Close</span></button>
 			<menu type="toolbar">
 			</menu>
-			<h1 title="HTML5 Podcatcher  {{ VERSION }} {{ VARIANT }} Message Log">Message Log</h1>
+			<h1 title="Message Log">Message Log</h1>
 		</header>
 		<div id="log" class="content">
+		<p>HTML5 Podcatcher {{ VERSION }} {{ VARIANT }}</p>
+		</div>
+	</section>
+	<section id="playerView" class="dialog" role="region">
+		<header role="banner">
+			<button title="Close" class="closeDialog"><span class="icon icon-close">Close</span></button>
+			<menu type="toolbar">
+			</menu>
+			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} :: Player">Player</h1>
+		</header>
+		<div role="toolbar" id="player">
+			<div id="mediacontrol" class="content"></div>
+				<p>nothing to play!</p>
+			</div>
 		</div>
 	</section>
     </body>

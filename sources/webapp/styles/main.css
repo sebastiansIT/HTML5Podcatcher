@@ -1,4 +1,4 @@
-﻿/*  Copyright 2013, 2014 Sebastian Spautz
+﻿/*  Copyright 2013 - 2015 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
     
@@ -75,43 +75,20 @@ section.dialog.fullscreen[role="region"] {
 	top: 0;
 }
 /* end of App-Page Layout */
-	
-	section[data-type="list"] header h2 {
-		color: #006400;
-		font-size: 1.6rem;
-		font-weight: normal;
-		height: 3rem;
-		line-height: 4rem;
-		margin-bottom: 0;
-		margin-left: 0;
-		margin-right: 0;
-		margin-top: 0;
-		overflow-x: hidden;
-		overflow-y: hidden;
-		padding-bottom: 0;
-		padding-left: 1.5rem;
-		padding-right: 1.5rem;
-		padding-top: 0;
-		text-overflow: ellipsis;
-		text-transform: uppercase;
-		white-space: nowrap;
+		
+/* Non-Layout for Template areas */
+template, .template {
+	display: none;
+}
+
+/* Layout for deskop displays and greater */
+@media screen and (min-width:64.6rem) {
+	body {
+		max-width:64rem;
+		height:calc(100% - 0.9rem);
+		margin: 0.3rem auto;
+		border-left: 0.3rem solid #006400;
+		border-right:0.3rem solid #006400;
+		border-bottom:0.3rem solid #006400;
 	}
-	
-	input[type="number"] {
-		-moz-appearance: textfield;
-	}
-	
-	template, .template {
-		display: none;
-	}
-	
-	@media screen and (min-width:64.6rem) {
-		body {
-			max-width:64rem;
-			height:calc(100% - 0.9rem);
-			margin: 0.3rem auto;
-			border-left: 0.3rem solid #006400;
-			border-right:0.3rem solid #006400;
-			border-bottom:0.3rem solid #006400;
-		}
-	}
+}
