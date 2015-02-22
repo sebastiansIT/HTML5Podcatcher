@@ -23,6 +23,8 @@
 ### ChangeLog.md
 ##0.30.1
 ### A new User Interface
+##0.30.2
+### Make a difference betwean (hosted-) webapp and installed Open-Web-App when creating a Ajax-Request (Using System-Request without limitations of SOP in privileged apps)
 
 # VALIDATE this manifest on http://manifest-validator.com/
 
