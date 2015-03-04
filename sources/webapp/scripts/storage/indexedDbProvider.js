@@ -1,4 +1,4 @@
-﻿/*  Copyright 2013, 2014 Sebastian Spautz
+﻿/*  Copyright 2013-2015 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -15,12 +15,13 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
-/*global window, Blob */
+/*global window, Blob, ArrayBuffer */
+/*global IDBKeyRange */
 /*global HTML5Podcatcher */
 HTML5Podcatcher.storage.indexedDbStorage = {
     settings: {
         name: 'HTML5Podcatcher',
-        version: 5.0,
+        version: 6,
         sourcesStore: 'sources',
         episodesStore: 'episodes',
         filesStore: 'files',
@@ -35,13 +36,21 @@ HTML5Podcatcher.storage.indexedDbStorage = {
         }
         var db, episodeStore;
         db = this.result;
+        //Add object store for sorces/feeds
         if (!db.objectStoreNames.contains(HTML5Podcatcher.storage.indexedDbStorage.settings.sourcesStore)) {
             db.createObjectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.sourcesStore, { keyPath: 'uri' });
         }
+        //Add object store for episodes
         if (!db.objectStoreNames.contains(HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore)) {
             episodeStore = db.createObjectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore, { keyPath: 'uri' });
             episodeStore.createIndex('source', 'source', {unique: false});
         }
+        //Add index "status" to episode store
+        episodeStore = event.currentTarget.transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore);
+        if (!episodeStore.indexNames.contains("status")) {
+            episodeStore.createIndex("status", "playback.played", { unique: false });
+        }
+        //Add object store for Files
         if (!db.objectStoreNames.contains(HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore)) {
             db.createObjectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore, {});
         }
@@ -291,13 +300,13 @@ HTML5Podcatcher.storage.indexedDbStorage = {
         request.onblocked = function () { HTML5Podcatcher.logger("Database blocked", 'debug'); };
         request.onsuccess = function () {
             HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug');
-            var db, transaction, store, cursorRequest, playlist = [];
+            var db, transaction, store, cursor, playlist = [];
             db = this.result;
             transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore], 'readonly');
             store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore);
-            cursorRequest = store.openCursor();
+            cursor = store.openCursor();
             playlist = [];
-            cursorRequest.onsuccess = function (event) {
+            cursor.onsuccess = function (event) {
                 var result = event.target.result;
                 //checks episode.updated to be a Date object
                 if (result) {

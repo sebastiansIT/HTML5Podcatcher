@@ -414,12 +414,14 @@ var HTML5Podcatcher = {
                     // use files linked with enclosure elements or ...
                     if (item.querySelector('enclosure') && (item.querySelector('enclosure').attributes.type.value.indexOf("audio") >= 0)) {
                         episode.mediaUrl = item.querySelector('enclosure').attributes.url.value;
+                        episode.mediaType = item.querySelector('enclosure').attributes.type.value;
                     // ... or use anker tags in the full content markup of the item
                     } else if (item.querySelector('encoded') && item.querySelector('encoded').childNodes[0].nodeValue) {
                         contentElement = document.createElement("encoded");
                         contentElement.innerHTML = item.querySelector('encoded').childNodes[0].nodeValue;
                         if (contentElement.querySelector('a[href$=".mp3"]')) {
                             episode.mediaUrl = contentElement.querySelector('a[href$=".mp3"]').attributes.href.value;
+                            episode.mediaType = 'audio/mpeg';
                         }
                     }
                     episodes.push(episode);

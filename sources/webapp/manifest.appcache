@@ -25,6 +25,12 @@
 ### A new User Interface
 ##0.30.2
 ### Make a difference betwean (hosted-) webapp and installed Open-Web-App when creating a Ajax-Request (Using System-Request without limitations of SOP in privileged apps)
+##0.30.4
+### Test: Adding proxy.py to NETWORK-Section solved the connectivity-Problem in Firefox (Android)?
+##0.30.5
+### Test: Try a boolean index on episode store in Indexed DB (not working)
+##0.30.6
+### Add support for different audio formats (set the mime-type of the html source element dynamicaly)
 
 # VALIDATE this manifest on http://manifest-validator.com/
 
@@ -77,4 +83,5 @@ images/logo152.png
 images/logo192.png
 
 NETWORK:
+proxy.py?*
 *

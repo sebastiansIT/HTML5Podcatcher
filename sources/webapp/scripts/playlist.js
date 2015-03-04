@@ -156,7 +156,7 @@ GlobalUserInterfaceHelper.progressHandler = function (progressEvent, prefix, epi
 /** Functions for playback */
 GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallback) {
     "use strict";
-    var mediaUrl, audioTag, mp3SourceTag;
+    var mediaUrl, mediaType, audioTag, mp3SourceTag;
     $('#player audio').off('timeupdate');
     GlobalUserInterfaceHelper.logHandler("Timeupdate off", 'debug:playback');
     if (episode) {
@@ -166,17 +166,18 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
             } else {
                 mediaUrl = episode.mediaUrl;
             }
+            mediaType = episode.mediaType;
             //Add media fragment to playback URI
             mediaUrl = mediaUrl + "#t=" + episode.playback.currentTime;
             if ($('#player audio').length > 0) {
                 audioTag = $('#player audio')[0];
                 $(audioTag).off();
-                $(audioTag).find('source[type="audio/mpeg"]').attr('src', mediaUrl);
+                $(audioTag).find('source').attr('type', mediaType).attr('src', mediaUrl);
                 $(audioTag).attr('title', episode.title);
             } else {
                 $('#mediacontrol > p').remove();
                 audioTag = $('<audio controls="controls" preload="metadata">');
-                mp3SourceTag = $('<source type="audio/mpeg" />');
+                mp3SourceTag = $('<source type="' + mediaType + '" />');
                 mp3SourceTag.attr('src', mediaUrl);
                 audioTag.append(mp3SourceTag);
                 audioTag.attr('title', episode.title);
