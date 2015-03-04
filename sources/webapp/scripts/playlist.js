@@ -166,7 +166,11 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
             } else {
                 mediaUrl = episode.mediaUrl;
             }
-            mediaType = episode.mediaType;
+            if (episode.mediaType) {
+                mediaType = episode.mediaType;
+            } else {
+                mediaType = "audio";
+            }
             //Add media fragment to playback URI
             mediaUrl = mediaUrl + "#t=" + episode.playback.currentTime;
             if ($('#player audio').length > 0) {

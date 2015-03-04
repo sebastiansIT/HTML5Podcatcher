@@ -240,6 +240,7 @@ var HTML5Podcatcher = {
                         existingEpisode.title = mergeEpisode.title;
                         existingEpisode.updated = mergeEpisode.updated;
                         existingEpisode.mediaUrl = mergeEpisode.mediaUrl;
+                        existingEpisode.mediaType = mergeEpisode.mediaType;
                         existingEpisode.source = mergeEpisode.source;
                         //ATTENTION! never change playback information if episode updated from internet
                         HTML5Podcatcher.storage.writeEpisode(existingEpisode);

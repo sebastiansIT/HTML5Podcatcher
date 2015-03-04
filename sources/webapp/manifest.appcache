@@ -29,8 +29,10 @@
 ### Test: Adding proxy.py to NETWORK-Section solved the connectivity-Problem in Firefox (Android)?
 ##0.30.5
 ### Test: Try a boolean index on episode store in Indexed DB (not working)
-##0.30.6
+##0.31.0
 ### Add support for different audio formats (set the mime-type of the html source element dynamicaly)
+##0.31.1
+### Add mime-type to merge function to fix a bug in 0.30.0
 
 # VALIDATE this manifest on http://manifest-validator.com/
 
