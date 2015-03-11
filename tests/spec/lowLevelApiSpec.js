@@ -94,8 +94,69 @@
             });
         });
         describe("Parser", function () {
-            var xml, source;
+            var xml, psc, source;
             source = { uri: "http://podcast.web.site/feed/", link: "http://podcast.web.site/", title: "Podcast", description: "The not existing example podcast." };
+            describe("Parser for \"Normal Play Time\" (RFC 2326)", function () {
+                it("should be able to parse a value in seconds", function () {
+                    var result = HTML5Podcatcher.parser.parseNormalPlayTime("345");
+                    expect(result).toEqual(345000);
+                });
+                it("should be able to parse a value in seconds and milliseconds", function () {
+                    var result = HTML5Podcatcher.parser.parseNormalPlayTime("345.789");
+                    expect(result).toEqual(345789);
+                });
+                it("should be able to parse a value in minutes, seconds and milliseconds", function () {
+                    var result = HTML5Podcatcher.parser.parseNormalPlayTime("23:45.789");
+                    expect(result).toEqual(23 * 60 * 1000 + 45789);
+                });
+                it("should be able to parse a value in hours, minutes, seconds and milliseconds", function () {
+                    var result = HTML5Podcatcher.parser.parseNormalPlayTime("01:23:45.789");
+                    expect(result).toEqual(60 * 60 * 1000 + 23 * 60 * 1000 + 45789);
+                });
+            });
+            describe("Parser for \"Podlove Simple Chapters\" (http://podlove.org/simple-chapters/)", function () {
+                psc = (new DOMParser()).parseFromString('<psc:chapters version="1.1" xmlns:psc="http://podlove.org/simple-chapters">\n\t'
+                    + '<psc:chapter start="00:00:00.000" title="Chapter1" />\n\t'
+                    + '<psc:chapter start="00:01:30.009" title="Chapter2" href="https://podcast.web.site/episode1/chapter2/" />\n\t'
+                    + '<psc:chapter start="00:12:57.062" image="https://podcast.web.site/episode1/chapter3/img.png" title="Chapter3" />\n\t'
+                    + '<psc:chapter href="https://podcast.web.site/episode1/chapter4/" start="1:00:27.254" title="Chapter4" image="https://podcast.web.site/episode1/chapter4/img.png" />\n'
+                    + '</psc:chapters>', "text/xml");
+                it("should return an empty array if no correct <psc:chapters> element found", function () {
+                    var result, xmlWithFailure;
+                    xmlWithFailure = (new DOMParser()).parseFromString('<other type="format"><channel>\n'
+                        + '\t<title>Podcast (changed title)</title>\n'
+                        + '\t<link>http://podcast.web.site.new/</link>\n'
+                        + '\t<description>The never existing example podcast.</description>\n'
+                        + '</channel></other>', "text/xml");
+                    result = HTML5Podcatcher.parser.parsePodloveSimpleChapters(xmlWithFailure);
+                    expect(result).toEqual([]);
+                });
+                it("should return an array with 4 elements from parsing the sample xml fragment", function () {
+                    var result;
+                    result = HTML5Podcatcher.parser.parsePodloveSimpleChapters(psc.getElementsByTagNameNS('http://podlove.org/simple-chapters', 'chapters'));
+                    expect(result.length).toEqual(4);
+                });
+                it("should return an array with correct data from parsing the sample xml fragment", function () {
+                    var result;
+                    result = HTML5Podcatcher.parser.parsePodloveSimpleChapters(psc.getElementsByTagNameNS('http://podlove.org/simple-chapters', 'chapters'));
+                    expect(result[0].time).toEqual(0);
+                    expect(result[1].time).toEqual(90009);
+                    expect(result[2].time).toEqual((12*60+57.062)*1000);
+                    expect(result[3].time).toEqual((60*60+27.254)*1000);
+                    expect(result[0].title).toEqual('Chapter1');
+                    expect(result[1].title).toEqual('Chapter2');
+                    expect(result[2].title).toEqual('Chapter3');
+                    expect(result[3].title).toEqual('Chapter4');
+                    expect(result[0].uri).toBeUndefined();
+                    expect(result[1].uri).toEqual('https://podcast.web.site/episode1/chapter2/');
+                    expect(result[2].uri).toBeUndefined();
+                    expect(result[3].uri).toEqual('https://podcast.web.site/episode1/chapter4/');
+                    expect(result[0].image).toBeUndefined();
+                    expect(result[1].image).toBeUndefined();
+                    expect(result[2].image).toEqual('https://podcast.web.site/episode1/chapter3/img.png');
+                    expect(result[3].image).toEqual('https://podcast.web.site/episode1/chapter4/img.png');
+                });
+            });
             describe("RSS Version 2 Parser", function () {
                 xml = (new DOMParser()).parseFromString('<?xml version="1.0" encoding="UTF-8"?>\n'
                     + '<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom"><channel>\n'
@@ -110,6 +171,12 @@
                     + '\t\t<description><![CDATA[Episode description. <a href="https://podcast.web.site.new/episode1">More &#8594;</a>]]></description>\n'
                     + '\t\t<itunes:duration>0:59:30</itunes:duration>\n'
                     + '\t\t<enclosure url="https://podcast.web.site.new/files/episode1.mp3" length="10000000" type="audio/mpeg" />\n'
+                    + '\t\t<psc:chapters version="1.1" xmlns:psc="http://podlove.org/simple-chapters">\n'
+                    + '\t\t\t<psc:chapter start="00:00:00.000" title="Chapter1" />\n'
+                    + '\t\t\t<psc:chapter start="00:01:30.009" title="Chapter2" href="https://podcast.web.site/episode1/chapter2/" />\n'
+                    + '\t\t\t<psc:chapter start="00:12:57.062" image="https://podcast.web.site/episode1/chapter3/img.png" title="Chapter3" />\n'
+                    + '\t\t\t<psc:chapter href="https://podcast.web.site/episode1/chapter4/" start="1:00:27.254" title="Chapter4" image="https://podcast.web.site/episode1/chapter4/img.png" />\n'
+                    + '\t\t</psc:chapters>\n'
                     + '\t</item>\n'
                     + '\t<item>\n'
                     + '\t\t<title>Episode Two Title</title>\n'
@@ -276,6 +343,11 @@
                     result = HTML5Podcatcher.parser.parseSource(xml, source);
                     expect(result.episodes[1].mediaUrl).toEqual('https://podcast.web.site.new/files/episode2.mp3');
                     expect(result.episodes[1].mediaType).toEqual('audio/mpeg');
+                });
+                it("should be able to detect a chapters list from the rss item in \"Podlove Simple Chapters\" format", function() {
+                    var result;
+                    result = HTML5Podcatcher.parser.parseSource(xml, source);
+                    expect(result.episodes[0].jumppoints.length).toEqual(4);
                 });
             });
         });

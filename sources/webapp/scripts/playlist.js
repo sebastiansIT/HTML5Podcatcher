@@ -169,7 +169,8 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
             if (episode.mediaType) {
                 mediaType = episode.mediaType;
             } else {
-                mediaType = "audio";
+                //the most audio files in the internet i have ever sean are MP3-Files, so i expect the media type of 'audio/mpeg' when nothing else is set.
+                mediaType = "audio/mpeg";
             }
             //Add media fragment to playback URI
             mediaUrl = mediaUrl + "#t=" + episode.playback.currentTime;
@@ -294,6 +295,51 @@ GlobalUserInterfaceHelper.playEpisode = function (episode, onPlaybackStartedCall
         });
     }
 };
+GlobalUserInterfaceHelper.playPrevious = function () {
+    "use strict";
+    var audioTag = $('#player audio')[0];
+    audioTag.pause();
+    UI.activeEpisode(function (episode) {
+        var i, currentTime, jumppoint = {};
+        currentTime = audioTag.currentTime;
+        jumppoint.time = 0;
+        for (i = 0; i < episode.jumppoints.length; i++) {
+            if (episode.jumppoints[i].time < currentTime && episode.jumppoints[i].time > jumppoint.time) {
+                jumppoint = episode.jumppoints[i];
+            }
+        }
+        if (jumppoint.time > 1) {
+            audioTag.currentTime = jumppoint.time - 1;
+            audioTag.play();
+        } else if (currentTime > 10) {
+            audioTag.currentTime = 0;
+            audioTag.play();
+        } else {
+            UI.previousEpisode(UI.playEpisode);
+        }
+    });
+};
+GlobalUserInterfaceHelper.playNext = function () {
+    "use strict";
+    var audioTag = $('#player audio')[0];
+    audioTag.pause();
+    UI.activeEpisode(function (episode) {
+        var i, currentTime, jumppoint = {};
+        currentTime = audioTag.currentTime;
+        jumppoint.time = audioTag.duration;
+        for (i = 0; i < episode.jumppoints.length; i++) {
+            if (episode.jumppoints[i].time > currentTime && episode.jumppoints[i].time < jumppoint.time) {
+                jumppoint = episode.jumppoints[i];
+            }
+        }
+        if (jumppoint.time < audioTag.duration) {
+            audioTag.currentTime = jumppoint.time;
+            audioTag.play();
+        } else {
+            UI.nextEpisode(UI.playEpisode);
+        }
+    });
+};
 
 /** Central 'ready' event handler */
 $(document).ready(function () {
@@ -356,11 +402,11 @@ $(document).ready(function () {
             }
         }
     });
-    $('#playPreviousEpisode').on('click', function () {
-        UI.previousEpisode(UI.playEpisode);
+    $('#playPrevious').on('click', function () {
+        UI.playPrevious();
     });
-    $('#playNextEpisode').on('click', function () {
-        UI.nextEpisode(UI.playEpisode);
+    $('#playNext').on('click', function () {
+        UI.playNext();
     });
     $('#jumpBackwards').on('click', function () {
         var audioTag = $('#player audio')[0];
@@ -371,7 +417,7 @@ $(document).ready(function () {
         audioTag.currentTime = Math.min(audioTag.duration, audioTag.currentTime + 10);
     });
     $(document).on('keydown', function (event) {
-        if (event.key === 'MediaNextTrack' || event.keyCode === 176) {
+        if (event.key === 'MediaNextTrack' || event.key === 'MediaTrackNext' || event.keyCode === 176) {
             var now = new Date();
             if (!multiMediaKeyDownTimestemp) {
                 multiMediaKeyDownTimestemp = new Date();
@@ -383,21 +429,17 @@ $(document).ready(function () {
         }
     });
     $(document).on('keyup', function (event) {
-        if (event.key === 'MediaNextTrack' || event.keyCode === 176) {
+        if (event.key === 'MediaNextTrack' || event.key === 'MediaTrackNext' || event.keyCode === 176) {
             var now = new Date();
-            if (now - multiMediaKeyDownTimestemp < 1000) {
-                UI.nextEpisode(UI.playEpisode);
-            } else {
+            if (now - multiMediaKeyDownTimestemp < 1000) { //Play next Track when key is pressed short (< 1000 miliseconds)
+                UI.playNext();
+            } else { //Stop fast forward when release the key
                 if ($('#player audio').length && $('#player audio')[0].playbackRate !== 1) {
                     $('#player audio')[0].playbackRate = 1;
                 }
             }
-        } else if (event.key === 'MediaPreviousTrack' || event.keyCode === 177) {
-            if ($('#player audio').length && $('#player audio')[0].currentTime >= 10) {
-                $('#player audio')[0].currentTime = 0;
-            } else {
-                UI.previousEpisode(UI.playEpisode);
-            }
+        } else if (event.key === 'MediaPreviousTrack' || event.key === 'MediaTrackPrevious' || event.keyCode === 177) {
+            UI.playPrevious();
         } else if (event.key === 'MediaPlayPause' || event.key === 'MediaPlay' || event.keyCode === 179) {
             if ($('#player audio').length) {
                 if ($('#player audio')[0].paused) {

@@ -33,6 +33,13 @@
 ### Add support for different audio formats (set the mime-type of the html source element dynamicaly)
 ##0.31.1
 ### Add mime-type to merge function to fix a bug in 0.30.0
+##0.32.0
+### Add partial support for "Podlove Simple Chapters" [see http://podlove.org/simple-chapters/]
+##0.32.1
+### Jump betwean chapters (based on Podlove Simple Chapters) when click on "Next/Previous Track"-Button instead of skip to next/previous Track
+##0.32.2
+### Jumps now one second bevor the target when skip to previous section. This avoids endless Jump to same chapter when clicking multiple times on "previous Chapter"-Button;
+### Better handling of multimedia keys (can now also use Chapters) 
 
 # VALIDATE this manifest on http://manifest-validator.com/
 
