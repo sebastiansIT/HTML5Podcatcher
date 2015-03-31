@@ -303,9 +303,11 @@ GlobalUserInterfaceHelper.playPrevious = function () {
         var i, currentTime, jumppoint = {};
         currentTime = audioTag.currentTime;
         jumppoint.time = 0;
-        for (i = 0; i < episode.jumppoints.length; i++) {
-            if (episode.jumppoints[i].time < currentTime && episode.jumppoints[i].time > jumppoint.time) {
-                jumppoint = episode.jumppoints[i];
+        if (episode.jumppoints) {
+            for (i = 0; i < episode.jumppoints.length; i++) {
+                if (episode.jumppoints[i].time < currentTime && episode.jumppoints[i].time > jumppoint.time) {
+                    jumppoint = episode.jumppoints[i];
+                }
             }
         }
         if (jumppoint.time > 1) {
@@ -327,9 +329,11 @@ GlobalUserInterfaceHelper.playNext = function () {
         var i, currentTime, jumppoint = {};
         currentTime = audioTag.currentTime;
         jumppoint.time = audioTag.duration;
-        for (i = 0; i < episode.jumppoints.length; i++) {
-            if (episode.jumppoints[i].time > currentTime && episode.jumppoints[i].time < jumppoint.time) {
-                jumppoint = episode.jumppoints[i];
+        if (episode.jumppoints) {
+            for (i = 0; i < episode.jumppoints.length; i++) {
+                if (episode.jumppoints[i].time > currentTime && episode.jumppoints[i].time < jumppoint.time) {
+                    jumppoint = episode.jumppoints[i];
+                }
             }
         }
         if (jumppoint.time < audioTag.duration) {
