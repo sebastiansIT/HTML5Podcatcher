@@ -46,109 +46,17 @@ textarea {
 input[type="number"] {
 	-moz-appearance: textfield;
 }
-label:active {
-  background-color: transparent;
-}
 
 textarea {
   height: 10rem;
-  max-height: 10rem;
   line-height: 2rem;
-}
-
-input::-moz-placeholder,
-textarea::-moz-placeholder {
-  color: #a9a9a9;
-  opacity: 1;
-  font-style: italic;
-  font-weight: 400;
+  padding: 0.9rem;
 }
 
 input[disabled],
 textarea[disabled] {
   opacity: 0.5;
 }
-
-/* To avoid colission with BB butons */
-li input + button[type="reset"]:after,
-li textarea + button[type="reset"]:after {
-  background: none;
-}
-
-textarea {
-  padding: 1.2rem;
-}
-
-/* Fieldset */
-fieldset {
-  position: relative;
-  overflow: hidden;
-  margin: 1.5rem 0 0 0;
-  padding: 0;
-  font-size: 2rem;
-  line-height: 1em;
-  background: none;
-  border: 0;
-}
-
-fieldset legend,
-input[type="date"],
-input[type="time"],
-input[type="datetime"],
-input[type="datetime-local"] {
-  border: 0.1rem solid #c7c7c7;
-  width: 100%;
-  box-sizing: border-box;
-  font-family: sans-serif;
-  font-style: italic;
-  font-size: 1.6rem;
-  margin: 0 0 1.5rem;
-  padding: 0 1.5rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-  height: 4rem;
-  color: #333;
-  border-radius: 0;
-  background: #fff url(input_areas/images/dialog.svg) no-repeat calc(100% - 1rem) calc(100% - 1rem);
-}
-
-fieldset legend {
-  margin: 0 0 1rem;
-  padding: 1rem 1.5rem 0;
-  background-color: rgba(0,0,0,0.05);
-}
-
-fieldset[disabled] {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-fieldset[disabled] legend,
-input[type="date"][disabled],
-input[type="time"][disabled],
-input[type="datetime"][disabled],
-input[type="datetime-local"][disabled] {
-  background-image: url(input_areas/images/dialog_disabled.svg);
-  background-color: transparent
-}
-
-input[type="date"]:focus,
-input[type="time"]:focus,
-input[type="datetime"]:focus,
-input[type="datetime-local"]:focus {
-  box-shadow: none;
-  border-bottom-color: #c7c7c7;
-}
-
-input[type="date"]:active,
-input[type="time"]:active,
-input[type="datetime"]:active,
-input[type="datetime-local"]:active {
-  background-color: #b2f2ff;
-  color: #fff;
-}
-
 
 /* fix for required inputs with wrong or empty value e.g. [type=email] */
 input:invalid,
@@ -158,22 +66,12 @@ textarea:invalid {
 
 input:focus,
 textarea:focus {
-  box-shadow: inset 0 -0.1rem 0 #00caf2;
-  border-bottom-color: #00caf2;
+  box-shadow: inset 0 -0.1rem 0 #006400;
+  border-bottom-color: #006400;
 }
 
 input:invalid:focus,
 textarea:invalid:focus {
   box-shadow: inset 0 -0.1rem 0 #820000;
   border-bottom-color: #820000;
-}
-
-input[type="range"]:focus {
-  box-shadow: none;
-  border-bottom: 0;
-}
-
-form button::-moz-focus-inner {
-  border: none;
-  outline: none;
 }
