@@ -340,6 +340,21 @@ GlobalUserInterfaceHelper.playNext = function () {
         }
     });
 };
+GlobalUserInterfaceHelper.togglePauseStatus = function () {
+    "use strict";
+    var audioTag = $('#player audio')[0];
+    if (audioTag) {
+        if (audioTag.paused) {
+            audioTag.play();
+            $('#playPause').data('icon', 'pause');
+            $('#playPause').attr('data-icon', 'pause');
+        } else {
+            audioTag.pause();
+            $('#playPause').data('icon', 'play');
+            $('#playPause').attr('data-icon', 'play');
+        }
+    }
+};
 
 /** Central 'ready' event handler */
 $(document).ready(function () {
@@ -389,18 +404,7 @@ $(document).ready(function () {
     $('#playPause').on('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
-        var audioTag = $('#player audio')[0];
-        if (audioTag) {
-            if (audioTag.paused) {
-                audioTag.play();
-                $('#playPause').data('icon', 'pause');
-                $('#playPause').attr('data-icon', 'pause');
-            } else {
-                audioTag.pause();
-                $('#playPause').data('icon', 'play');
-                $('#playPause').attr('data-icon', 'play');
-            }
-        }
+        GlobalUserInterfaceHelper.togglePauseStatus();
     });
     $('#playPrevious').on('click', function () {
         UI.playPrevious();
@@ -441,16 +445,12 @@ $(document).ready(function () {
         } else if (event.key === 'MediaPreviousTrack' || event.key === 'MediaTrackPrevious' || event.keyCode === 177) {
             UI.playPrevious();
         } else if (event.key === 'MediaPlayPause' || event.key === 'MediaPlay' || event.keyCode === 179) {
-            if ($('#player audio').length) {
-                if ($('#player audio')[0].paused) {
-                    $('#player audio')[0].play();
-                } else {
-                    $('#player audio')[0].pause();
-                }
-            }
+            GlobalUserInterfaceHelper.togglePauseStatus();
         } else if (event.key === 'MediaStop' || event.keyCode === 178) {
             if ($('#player audio').length) {
                 $('#player audio')[0].pause();
+                $('#playPause').data('icon', 'play');
+                $('#playPause').attr('data-icon', 'play');
             }
         }
         multiMediaKeyDownTimestemp = undefined;
