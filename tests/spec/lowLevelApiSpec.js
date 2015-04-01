@@ -140,9 +140,9 @@
                     var result;
                     result = HTML5Podcatcher.parser.parsePodloveSimpleChapters(psc.getElementsByTagNameNS('http://podlove.org/simple-chapters', 'chapters'));
                     expect(result[0].time).toEqual(0);
-                    expect(result[1].time).toEqual(90009);
-                    expect(result[2].time).toEqual((12*60+57.062)*1000);
-                    expect(result[3].time).toEqual((60*60+27.254)*1000);
+                    expect(result[1].time).toEqual(90.009);
+                    expect(result[2].time).toEqual((12*60+57.062));
+                    expect(result[3].time).toEqual((60*60+27.254));
                     expect(result[0].title).toEqual('Chapter1');
                     expect(result[1].title).toEqual('Chapter2');
                     expect(result[2].title).toEqual('Chapter3');
@@ -161,8 +161,9 @@
                 xml = (new DOMParser()).parseFromString('<?xml version="1.0" encoding="UTF-8"?>\n'
                     + '<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom"><channel>\n'
                     + '\t<title>Podcast (changed title)</title>\n'
-                    + '\t<atom:link href="https://podcast.web.site.new/" rel="self" type="application/rss+xml" />\n'
                     + '\t<link>https://podcast.web.site.new/</link>\n'
+                    + '\t<atom:link href="https://podcast.web.site.mp3.rss/" rel="self" type="application/rss+xml" title="Feed MP3" />\n'
+                    + '\t<atom:link href="https://podcast.web.site.off.rss/" rel="alternate" type="application/rss+xml" title="Feed OGG" />\n'
                     + '\t<description>The never existing example podcast.</description>\n'
                     + '\t<item>\n'
                     + '\t\t<title>Episode One Title</title>\n'

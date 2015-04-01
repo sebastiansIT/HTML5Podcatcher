@@ -376,15 +376,27 @@ var HTML5Podcatcher = {
             rootElement = xml.querySelector('rss[version="2.0"]');
             if (rootElement) {
                 //RSS-Channel
-                // * URI (<link> or <atom:link rel="self">)
-                currentElementList = rootElement.querySelectorAll('channel > link');
+                // * Actualise URI from atom link element with relation of "self"
+                currentElementList = rootElement.querySelectorAll('channel > link'); //find all Link-Elements in the feed
                 for (i = 0; i < currentElementList.length; i++) {
                     currentElement = currentElementList[i];
-                    if (currentElement.namespaceURI !== 'http://www.w3.org/2005/Atom') {
-                        source.link = currentElement.childNodes[0].nodeValue;
-                    } else {
-                        source.link = source.uri;
+                    if (currentElement.namespaceURI === 'http://www.w3.org/2005/Atom' && currentElement.attributes.rel === 'self') {
+                        source.uri = currentElement.href;
+                        break;
                     }
+                }
+                // * Link to Website (<link> or <atom:link rel="self">)
+                //   uses same list of elements (currentElementList) as the previous section
+                for (i = 0; i < currentElementList.length; i++) {
+                    currentElement = currentElementList[i];
+                    if (!currentElement.namespaceURI) { //undefined Namespace is mostly the rss 'namespace' ;) 
+                        source.link = currentElement.childNodes[0].nodeValue;
+                        break;
+                    }
+                }
+                //   set default: Website is equals to Feed-URI
+                if (!source.link) {
+                    source.link = source.uri;
                 }
                 // * Title (<title>)
                 currentElement = rootElement.querySelector('channel > title');
@@ -448,7 +460,7 @@ var HTML5Podcatcher = {
                 for (i = 0; i < chapters.length; i++) {
                     jumppoints.push({
                         type: 'chapter',
-                        time: HTML5Podcatcher.parser.parseNormalPlayTime(chapters[i].attributes.start.value)/1000,
+                        time: HTML5Podcatcher.parser.parseNormalPlayTime(chapters[i].attributes.start.value) / 1000,
                         title: chapters[i].attributes.title.value,
                         uri: chapters[i].attributes.href ? chapters[i].attributes.href.value : undefined,
                         image: chapters[i].attributes.image ? chapters[i].attributes.image.value : undefined
