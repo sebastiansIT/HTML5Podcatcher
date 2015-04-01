@@ -46,6 +46,12 @@ $(document).ready(function () {
     UI.initApplicationCacheEvents();
     //Connection State Events
     UI.initConnectionStateEvents();
+    $('#sourceslist').on('click', '.details', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        UI.settings.set('ShowDetailsForSource', $(this).closest('li').data('sourceUri'));
+        window.location.href = 'source.html';
+    });
     //Update one Source
     $('#sourceslist').on('click', '.update', function (event) {
         event.preventDefault();
@@ -119,7 +125,7 @@ $(document).ready(function () {
             POD.storage.readSource($('#addSourceUrlInput').val(), function (source) {
                 POD.web.downloadSource(source);
                 $('#addSourceView').toggleClass('fullscreen');
-                $('#addSourceUrlInput').val("")
+                $('#addSourceUrlInput').val("");
             });
         }
     });

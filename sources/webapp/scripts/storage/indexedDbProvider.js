@@ -21,7 +21,7 @@
 HTML5Podcatcher.storage.indexedDbStorage = {
     settings: {
         name: 'HTML5Podcatcher',
-        version: 6,
+        version: 7,
         sourcesStore: 'sources',
         episodesStore: 'episodes',
         filesStore: 'files',
@@ -49,6 +49,11 @@ HTML5Podcatcher.storage.indexedDbStorage = {
         episodeStore = event.currentTarget.transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore);
         if (!episodeStore.indexNames.contains("status")) {
             episodeStore.createIndex("status", "playback.played", { unique: false });
+        }
+        //Add index "source" to episode store
+        episodeStore = event.currentTarget.transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore);
+        if (!episodeStore.indexNames.contains("sources")) {
+            episodeStore.createIndex("sources", "source", { unique: false });
         }
         //Add object store for Files
         if (!db.objectStoreNames.contains(HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore)) {
@@ -270,7 +275,7 @@ HTML5Podcatcher.storage.indexedDbStorage = {
                     }
                     //generate playback object if not exists
                     if (!episode.playback) {
-                        episode.playback = {'played': false, 'currentTime': 0};
+                        episode.playback = {'played': undefined, 'currentTime': 0};
                     }
                     if (onReadCallback && typeof onReadCallback === 'function') {
                         //Generate "playback" object if not exists
@@ -313,7 +318,7 @@ HTML5Podcatcher.storage.indexedDbStorage = {
                     if (!(result.value.updated instanceof Date)) {
                         result.value.updated = new Date(result.value.updated);
                     }
-                    if (result.value.playback.played === false || showAll === true) {
+                    if (!result.value.playback.played || showAll === true) {
                         playlist.push(result.value);
                     }
                     result.continue();
@@ -321,6 +326,45 @@ HTML5Podcatcher.storage.indexedDbStorage = {
                     if (onReadCallback && typeof onReadCallback === 'function') {
                         playlist.sort(HTML5Podcatcher.sortEpisodes);
                         onReadCallback(playlist);
+                    }
+                }
+            };
+            request.onerror = function (event) {
+                HTML5Podcatcher.logger(event.target.error.name + ' while reading playlist from IndexedDB (' + event.target.error.message + ')', 'error');
+            };
+        };
+        request.onerror = function (event) {
+            HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
+        };
+    },
+    readEpisodesBySource: function (source, onReadCallback) {
+        "use strict";
+        var request;
+        request = window.indexedDB.open(this.settings.name, this.settings.version);
+        request.onupgradeneeded = this.updateIndexedDB;
+        request.onblocked = function () { HTML5Podcatcher.logger("Database blocked", 'debug'); };
+        request.onsuccess = function () {
+            HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug');
+            var db, transaction, store, index, cursor, episodes = [];
+            db = this.result;
+            transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore], 'readonly');
+            store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore);
+            index = store.index("sources");
+            cursor = index.openCursor(IDBKeyRange.only(source.title));
+            episodes = [];
+            cursor.onsuccess = function (event) {
+                var result = event.target.result;
+                if (result) {
+                    //checks episode.updated to be a Date object
+                    if (!(result.value.updated instanceof Date)) {
+                        result.value.updated = new Date(result.value.updated);
+                    }
+                    episodes.push(result.value);
+                    result.continue();
+                } else {
+                    if (onReadCallback && typeof onReadCallback === 'function') {
+                        episodes.sort(HTML5Podcatcher.sortEpisodes);
+                        onReadCallback(episodes);
                     }
                 }
             };

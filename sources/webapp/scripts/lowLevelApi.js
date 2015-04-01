@@ -90,6 +90,12 @@ var HTML5Podcatcher = {
                 this.dataStorageEngine().readPlaylist(showAll, onReadCallback);
             }
         },
+        readEpisodesBySource: function (source, onReadCallback) {
+            "use strict";
+            if (this.dataStorageEngine()) {
+                this.dataStorageEngine().readEpisodesBySource(source, onReadCallback);
+            }
+        },
         writeEpisode: function (episode, onWriteCallback) {
             "use strict";
             if (this.dataStorageEngine()) {
@@ -227,16 +233,20 @@ var HTML5Podcatcher = {
                 completed(ajaxRequest);
             }
         },
-        downloadSource: function (source) {
+        downloadSource: function (source, limitOfNewEpisodes) {
             "use strict";
             var successfunction, errorfunction, parserresult;
+            if (!limitOfNewEpisodes) {
+                limitOfNewEpisodes = 5;
+            }
             parserresult = {'source': source, 'episodes': []};
             successfunction = function () {
-                var data, newestEpisodes, mergeFunction, i;
+                var data, /*newestEpisodes,*/ mergeFunction, i;
                 HTML5Podcatcher.logger('Download of source "' + source.uri + '" is finished', 'debug');
                 data = this.responseXML;
-                mergeFunction = function (mergeEpisode) {
+                mergeFunction = function (mergeEpisode, forcePlayed) {
                     HTML5Podcatcher.storage.readEpisode(mergeEpisode.uri, function (existingEpisode) {
+                        existingEpisode.link = mergeEpisode.link;
                         existingEpisode.title = mergeEpisode.title;
                         existingEpisode.updated = mergeEpisode.updated;
                         existingEpisode.mediaUrl = mergeEpisode.mediaUrl;
@@ -244,6 +254,10 @@ var HTML5Podcatcher = {
                         existingEpisode.source = mergeEpisode.source;
                         existingEpisode.jumppoints = mergeEpisode.jumppoints;
                         //ATTENTION! never change playback information if episode updated from internet
+                        //Only Exception: If the forcedPlayed parameter is set - then the actual playback state is overriden
+                        if (forcePlayed && existingEpisode.playback.played === undefined) {
+                            existingEpisode.playback.played = true;
+                        }
                         HTML5Podcatcher.storage.writeEpisode(existingEpisode);
                     });
                 };
@@ -256,10 +270,14 @@ var HTML5Podcatcher = {
                     // 1. merge existing data with actual one
                     // TODO writing a multi episode write method
                     // 2. filter top 5 episodes and check if unread
-                    newestEpisodes = parserresult.episodes.slice(parserresult.episodes.length - 5, parserresult.episodes.length);
+                    //newestEpisodes = parserresult.episodes.slice(parserresult.episodes.length - 5, parserresult.episodes.length);
                     // 3. save top 5 episodes with actualised data
-                    for (i = 0; i < newestEpisodes.length; i++) {
-                        mergeFunction(newestEpisodes[i]);
+                    for (i = 0; i < parserresult.episodes.length; i++) {
+                        if (i < parserresult.episodes.length - limitOfNewEpisodes) {
+                            mergeFunction(parserresult.episodes[i], true);
+                        } else {
+                            mergeFunction(parserresult.episodes[i], false);
+                        }
                     }
                     // 4. Save Source
                     HTML5Podcatcher.storage.writeSource(source);
@@ -411,6 +429,13 @@ var HTML5Podcatcher = {
                     source.description = currentElement.childNodes[0].nodeValue;
                 } else {
                     source.description = '';
+                }
+                // * License (<copyright>)
+                currentElement = rootElement.querySelector('channel > copyright');
+                if (currentElement && currentElement.childNodes.length > 0) {
+                    source.license = currentElement.childNodes[0].nodeValue;
+                } else {
+                    source.license = undefined;
                 }
                 //RSS-Entries
                 itemArray = rootElement.querySelectorAll('channel > item');

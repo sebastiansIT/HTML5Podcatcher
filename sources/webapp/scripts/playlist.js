@@ -57,7 +57,7 @@ GlobalUserInterfaceHelper.actualiseEpisodeUI = function (episode) {
     $(episodeUI).find('progress').remove();
     return false;
 };
-GlobalUserInterfaceHelper.renderEpisode = function (episode) {
+/*GlobalUserInterfaceHelper.renderEpisode = function (episode) {
     "use strict";
     var entryUI;
     entryUI = $($('#episodeTemplate li')[0].cloneNode(true));
@@ -96,7 +96,7 @@ GlobalUserInterfaceHelper.renderPlaylist = function (playlist) {
         entryUI = $('<li class="emptyPlaceholder">no entries</li>');
         playlistUI.append(entryUI);
     }
-};
+};*/
 GlobalUserInterfaceHelper.activeEpisode = function (onReadCallback) {
     "use strict";
     var activeEpisode = $('#playlist').find('.active');
@@ -393,7 +393,7 @@ $(document).ready(function () {
         });
     }
     //Render playlist
-    POD.storage.readPlaylist(false, UI.renderPlaylist);
+    POD.storage.readPlaylist(false, UI.renderEpisodeList);
     if (!navigator.onLine) {
         $('#refreshPlaylist, .update, #showAddSourceView, .downloadFile').attr('disabled', 'disabled');
     }

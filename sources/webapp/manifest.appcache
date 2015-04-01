@@ -21,25 +21,14 @@
 # Change Log: 
 ## Older entries see
 ### ChangeLog.md
-##0.30.1
-### A new User Interface
-##0.30.2
-### Make a difference betwean (hosted-) webapp and installed Open-Web-App when creating a Ajax-Request (Using System-Request without limitations of SOP in privileged apps)
-##0.30.4
-### Test: Adding proxy.py to NETWORK-Section solved the connectivity-Problem in Firefox (Android)?
-##0.30.5
-### Test: Try a boolean index on episode store in Indexed DB (not working)
-##0.31.0
-### Add support for different audio formats (set the mime-type of the html source element dynamicaly)
-##0.31.1
-### Add mime-type to merge function to fix a bug in 0.30.0
-##0.32.0
-### Add partial support for "Podlove Simple Chapters" [see http://podlove.org/simple-chapters/]
-##0.32.1
-### Jump betwean chapters (based on Podlove Simple Chapters) when click on "Next/Previous Track"-Button instead of skip to next/previous Track
-##0.32.2
-### Jumps now one second bevor the target when skip to previous section. This avoids endless Jump to same chapter when clicking multiple times on "previous Chapter"-Button;
-### Better handling of multimedia keys (can now also use Chapters) 
+##0.33.0
+### Add a detail page for feeds
+##0.33.1
+### Use Local Storage to transfer parameters to new detail page (instead of URL parameters; URL parameters are problematic in combination with App Cache)
+##0.33.2
+### Adding a index over the source of episodes (Indexed Database API)
+##0.33.3
+### Save all episodes in a feed instead of the top 5; alle episodes without the newest 5 are set automaticaly to played
 
 # VALIDATE this manifest on http://manifest-validator.com/
 
@@ -47,6 +36,7 @@ CACHE:
 # HTML
 playlist.html
 sources.html
+source.html
 settings.html
 # SCRIPTS
 scripts/jquery.min.js
@@ -58,6 +48,7 @@ scripts/storage/webStorageProvider.js
 scripts/globalUi.js
 scripts/playlist.js
 scripts/sources.js
+scripts/source.js
 scripts/settings.js
 # STYLES
 styles/main.css

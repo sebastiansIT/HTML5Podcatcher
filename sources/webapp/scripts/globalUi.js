@@ -21,6 +21,7 @@
 /*global applicationCache */
 /*global localStorage */
 /*global $ */
+/*global HTML5Podcatcher, POD */
 var GlobalUserInterfaceHelper = {
     formatTimeCode: function (timecode) {
         "use strict";
@@ -106,9 +107,9 @@ var GlobalUserInterfaceHelper = {
                 return localStorage.getItem('settings.' + key);
             } catch (exception) {
                 if (exception.code === 18) {
-                    GlobalUserInterfaceHelper.logHandler("Please activate Cookies in your Browser settings! [" + exception.name + ': ' + exception.message + ']', 'fatal')
+                    GlobalUserInterfaceHelper.logHandler("Please activate Cookies in your Browser settings! [" + exception.name + ': ' + exception.message + ']', 'fatal');
                 } else {
-                    GlobalUserInterfaceHelper.logHandler(exception, 'error')
+                    GlobalUserInterfaceHelper.logHandler(exception, 'error');
                 }
             }
         }
@@ -184,15 +185,69 @@ var GlobalUserInterfaceHelper = {
             window.close();
         });
     },
+    renderEpisode: function (episode) {
+        "use strict";
+        var entryUI;
+        entryUI = $($('#episodeTemplate li')[0].cloneNode(true));
+        entryUI.data('episodeUri', episode.uri);
+        entryUI.find('a.link').attr('href', episode.uri);
+        entryUI.find('.title').text(episode.title);
+        entryUI.find('.source').text(episode.source);
+        if (episode.playback.played) {
+            entryUI.find('.updated').attr('datetime', episode.updated.toISOString()).text(episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString());
+        } else {
+            entryUI.find('.updated').attr('datetime', episode.updated.toISOString()).text("New");
+        }
+        entryUI.find('a.origin').attr('href', episode.uri);
+        if (POD.storage.isFileStorageAvailable() && episode.mediaUrl) {
+            if (episode.isFileSavedOffline) {
+                entryUI.find('.downloadFile').replaceWith('<button class="delete" href="' + episode.mediaUrl + '" data-icon="delete">Delete</button>');
+            } else if (episode.mediaUrl) {
+                entryUI.find('.downloadFile').attr('href', episode.mediaUrl).attr('download', episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/') + 1));
+            }
+        } else {
+            entryUI.find('.downloadFile').remove();
+        }
+        return entryUI;
+    },
+    renderEpisodeList: function (episodes) {
+        "use strict";
+        var listUI, entryUI, i;
+        listUI = $('#playlist .entries, #episodes .entries');
+        listUI.empty();
+        if (episodes && episodes.length > 0) {
+            for (i = 0; i < episodes.length; i++) {
+                entryUI = GlobalUserInterfaceHelper.renderEpisode(episodes[i]);
+                listUI.append(entryUI);
+            }
+        } else {
+            entryUI = $('<li class="emptyPlaceholder">no entries</li>');
+            listUI.append(entryUI);
+        }
+    },
     renderSource: function (source) {
         "use strict";
         var entryUI;
-        entryUI = $($('#sourceTemplate li')[0].cloneNode(true));
+        entryUI = $($('#sourceTemplate > *')[0].cloneNode(true));
+        entryUI.find('a.details').attr('href', 'source.html?uri=' + source.uri);
+        entryUI.find('a.details').attr('title', 'Details for ' + source.title);
         entryUI.data('sourceUri', source.uri);
         entryUI.find('.title').text(source.title);
+        entryUI.find('a.uri').attr('href', source.uri);
+        entryUI.find('span.uri').text(source.uri);
         entryUI.find('.link').attr('href', source.link);
         entryUI.find('.description').text(source.description);
         entryUI.find('.update').attr('href', source.uri);
+        if (source.img && source.img.uri) {
+            entryUI.find('.image').attr('src', source.img.uri);
+        } else {
+            entryUI.find('.image').remove();
+        }
+        if (source.license) {
+            entryUI.find('.license').text(source.license);
+        } else {
+            entryUI.find('.license').text("All rights reserved or no information");
+        }
         return entryUI;
     },
     renderSourceList: function (sourcelist) {

@@ -118,6 +118,25 @@ HTML5Podcatcher.storage.webStorage = {
             onReadCallback(playlist);
         }
     },
+    readEpisodesBySource: function (source, onReadCallback) {
+        "use strict";
+        var i, filter, episodes = [];
+        filter = function (episode) {
+            if (episode.source === source.title) {
+                episodes.push(episode);
+            }
+        };
+        for (i = 0; i < localStorage.length; i++) {
+            if (localStorage.key(i).slice(0, 8) === 'episode.') {
+                this.readEpisode(localStorage.key(i).substring(8), filter);
+            }
+        }
+        episodes.sort(HTML5Podcatcher.sortEpisodes);
+
+        if (onReadCallback && typeof onReadCallback === 'function') {
+            onReadCallback(episodes);
+        }
+    },
     writeEpisode: function (episode, onWriteCallback) {
         "use strict";
         localStorage.setItem('episode.' + episode.uri, JSON.stringify(episode));

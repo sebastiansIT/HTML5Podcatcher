@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 
 <!--
-    Copyright 2013 - 2015 Sebastian Spautz
+    Copyright 2015 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
     
@@ -22,8 +22,8 @@
 <html manifest="manifest.appcache">
 <head>
 	<meta charset="utf-8">
-	<title>Playlist &mdash; HTML5 Podcatcher</title>
-	<meta name="description" content="A HTML5 podcast player!">
+	<title>Source/Feed &mdash; HTML5 Podcatcher</title>
+	<meta name="description" content="Detail Information of a source or feed saved in HTML5 podcast player!">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<!-- Chrome for Android: Configure as Web App --> 
 	<meta name="mobile-web-app-capable" content="yes">
@@ -46,75 +46,69 @@
 	<script src="scripts/storage/webStorageProvider.js"></script>
 	<script src="scripts/storage/fileSystemProvider.js"></script>
 	<script src="scripts/globalUi.js"></script>
-	<script src="scripts/playlist.js"></script>
+	<script src="scripts/source.js"></script>
 </head>
 <body>
 	<section role="region">
 		<header role="banner">
-			<!--<button title="Close" id="appClose"><span class="icon icon-close">Close</span></button>-->
+			<a href="sources.html" title="Back to list of sources/feeds"><span class="icon icon-back">Feeds</span></a>
 			<menu type="toolbar">
-				<a href="sources.html" title="Sources/Feeds"><span class="icon icon-feed">Feeds</span></a>
+				<a href="playlist.html" title="Playlist"><span class="icon icon-playlist">Playlist</span></a>
 				<a href="settings.html" title="Settings"><span class="icon icon-settings">Settings</span></a>
 			</menu>
-			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} Playlist">Playlist</h1>
+			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} Source/Feed Details">Feed Details</h1>
 		</header>
 		<div class="content">
-			<div id="playlist">
-                <ul class="entries">
-                    <li class="emptyPlaceholder" >
-                        <p>no entries</p>
-                    </li>
-                </ul>
-                <ul class="template" id="episodeTemplate">
-                    <li>
-                        <a class="link" href="episode.uri">
-							<div>
-								<h3 class="title">episode.title</h3>
-								<p><span href="#" class="status"><time datetime="episode.updated" class="updated">episode.updated</time></span> at <span class="source">episode.source</span></p>
-								
-							</div>
-						</a>
-						<!--<button class="status">Status: played</button>-->
-						<a class="origin button" href="episode.uri" data-icon="browsing">Internet</a>
-						<a class="button downloadFile" href="episode.mediaUrl" download="episode.mediaUrl.fileName" data-icon="download">Download</a>
-                    </li>
-                </ul>
-            </div>
+			<section id="information">
+				<h2>unknown feed</h2>
+			</section>
+			<div class="template" id="sourceTemplate">
+				<div>
+					<!--<img class="image" alt="" />-->
+					<h2><a class="link title" href="source.link">source.title</a></h2>
+					<p class="description">source.description</p>
+					<dl>
+						<dt>Feed:</dt><dd><a class="uri"><span class="uri">source.uri</span></a></dd>
+						<dt>License:</td><dd class="license">source.license</dd>
+					</dl>
+					<section id="episodes">
+						<h3>Episodes</h3>
+						<ul class="entries">
+							<li class="emptyPlaceholder">
+								<p>no entries</p>
+							</li>
+						</ul>
+					</section>
+				</div>
+			</div>
+			<ul class="template" id="episodeTemplate">
+				<li>
+					<div>
+						<h4 class="title">episode.title</h4>
+						<p><span href="#" class="status"><time datetime="episode.updated" class="updated">episode.updated</time></span> at <span class="source">episode.source</span></p>
+					</div>
+					<a class="origin button" href="episode.uri" data-icon="browsing">Internet</a>
+					<a class="button downloadFile" href="episode.mediaUrl" download="episode.mediaUrl.fileName" data-icon="download">Download</a>
+				</li>
+			</ul>
 		</div>
 		<footer>
 			<div role="toolbar">
 			  <button id="showLogView" data-icon="show-log">Show Log</button>
-			  <button id="playPrevious" data-icon="previous">Previous Chapter</button>
-			  <button id="jumpBackwards" data-icon="jumpBackwards">Play Previous</button>
-			  <button id="playPause" data-icon="play">Play</button>
-			  <button id="jumpForwards" data-icon="jumpForwards">Skip 10 seconds</button>
-			  <button id="playNext" data-icon="next">Next Chapter</button>
-			  <button id="refreshPlaylist" data-icon="reload">Refresh Playlist</button>
+			  <button id="deleteSource" data-icon="delete">Delete Feed</button>
+			  <a      id="openSourceWebsite" data-icon="browsing">Website</a>
+			  <button id="updateSource" data-icon="reload">Update Feed</button>
 			</div>
 		</footer>
 	</section>
 	<section id="logView" class="dialog" role="region">
-		<header role="banner">
+		<header>
 			<button title="Close" class="closeDialog"><span class="icon icon-close">Close</span></button>
 			<menu type="toolbar">
 			</menu>
-			<h1 title="Message Log">Message Log</h1>
+			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} Message Log">Message Log</h1>
 		</header>
 		<div id="log" class="content">
-		<p>HTML5 Podcatcher {{ VERSION }} {{ VARIANT }}</p>
-		</div>
-	</section>
-	<section id="playerView" class="dialog" role="region">
-		<header role="banner">
-			<button title="Close" class="closeDialog"><span class="icon icon-close">Close</span></button>
-			<menu type="toolbar">
-			</menu>
-			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} :: Player">Player</h1>
-		</header>
-		<div role="toolbar" id="player">
-			<div id="mediacontrol" class="content">
-				<p>nothing to play!</p>
-			</div>
 		</div>
 	</section>
 </body>

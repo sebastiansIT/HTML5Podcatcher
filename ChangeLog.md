@@ -1,6 +1,6 @@
 ﻿# HTML5 Podcatcher #
 
-## Change Log ##
+-  Change Log - 
 
 - 0.12.11
 	* Fix a Bug on setting the last played episode after page load
@@ -112,3 +112,22 @@
 	* Use Media Fragment URI Recomendation to address the starting playback time
 - 0.21.4
 	* Fix a Bug in experimental code while working on storage of array buffers
+- 0.30.1
+	* A new User Interface
+- 0.30.2
+	*  Make a difference betwean (hosted-) webapp and installed Open-Web-App when creating a Ajax-Request (Using System-Request without limitations of SOP in privileged apps)
+- 0.30.4
+	*  Test: Adding proxy.py to NETWORK-Section solved the connectivity-Problem in Firefox (Android)?
+- 0.30.5
+	*  Test: Try a boolean index on episode store in Indexed DB (not working)
+- 0.31.0
+	*  Add support for different audio formats (set the mime-type of the html source element dynamicaly)
+- 0.31.1
+	*  Add mime-type to merge function to fix a bug in 0.30.0
+- 0.32.0
+	*  Add partial support for "Podlove Simple Chapters" [see http://podlove.org/simple-chapters/]
+- 0.32.1
+	*  Jump betwean chapters (based on Podlove Simple Chapters) when click on "Next/Previous Track"-Button instead of skip to next/previous Track
+- 0.32.2
+	*  Jumps now one second bevor the target when skip to previous section. This avoids endless Jump to same chapter when clicking multiple times on "previous Chapter"-Button;
+	*  Better handling of multimedia keys (can now also use Chapters) 

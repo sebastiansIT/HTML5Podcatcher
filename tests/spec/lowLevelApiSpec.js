@@ -60,7 +60,9 @@
             describe("Episode Storage", function () {
                 var episodes = [
                     {"uri": "https://podcast.web.site.new/episode1", "playback": {"played": false, "currentTime": 10}, "title": "Episode One Title", "updated": new Date("Fri, 05 Sep 2014 06:00:20 +0000"), "mediaUrl": "https://podcast.web.site.new/files/episode1.mp3", "source": "Podcast", "isFileSavedOffline": true},
-                    {"uri": "https://podcast.web.site.new/episode2", "playback": {"played": true, "currentTime": 70}, "title": "Episode Two Title", "updated": new Date("12 Sep 2014 17:20:50 +0000"), "mediaUrl": "https://podcast.web.site.new/files/episode2.mp3", "source": "Podcast", "isFileSavedOffline": false}
+                    {"uri": "https://podcast.web.site.new/episode2", "playback": {"played": true, "currentTime": 70}, "title": "Episode Two Title", "updated": new Date("12 Sep 2014 17:20:50 +0000"), "mediaUrl": "https://podcast.web.site.new/files/episode2.mp3", "source": "Podcast", "isFileSavedOffline": false},
+                    {"uri": "https://podcast.web.site.new/episode3", "playback": {"played": true, "currentTime": 140}, "title": "Episode 3 Title", "updated": new Date("13 Sep 2014 17:20:50 +0000"), "mediaUrl": "https://podcast.web.site.new/files/episode3.mp3", "source": "Podcast", "isFileSavedOffline": false},
+                    {"uri": "https://another.web.site.new/episode1", "playback": {"played": false, "currentTime": 0}, "title": "Another Episode One Title", "updated": new Date("14 Sep 2014 7:20:50 +0000"), "mediaUrl": "https://another.web.site.new/files/episode1.mp3", "source": "Another.Podcast", "isFileSavedOffline": false}
                 ];
                 it("should save and read an array of episodes without any errors", function (done) {
                     HTML5Podcatcher.storage.writeEpisodes(episodes, function (writenEpisodes) {
@@ -69,6 +71,18 @@
                             expect(playlist).toEqual(episodes);
                             done();
                         });
+                    });
+                });
+                it("should get all new episodes", function (done) {
+                    HTML5Podcatcher.storage.readPlaylist(false, function (episodes) {
+                        expect(episodes.length).toEqual(2);
+                        done();
+                    });
+                });
+                it("should return all episodes from given source", function (done) {
+                    HTML5Podcatcher.storage.readEpisodesBySource({"title": "Podcast"}, function (episodes) {
+                        expect(episodes.length).toEqual(3);
+                        done();
                     });
                 });
             });
@@ -141,8 +155,8 @@
                     result = HTML5Podcatcher.parser.parsePodloveSimpleChapters(psc.getElementsByTagNameNS('http://podlove.org/simple-chapters', 'chapters'));
                     expect(result[0].time).toEqual(0);
                     expect(result[1].time).toEqual(90.009);
-                    expect(result[2].time).toEqual((12*60+57.062));
-                    expect(result[3].time).toEqual((60*60+27.254));
+                    expect(result[2].time).toEqual((12 * 60 + 57.062));
+                    expect(result[3].time).toEqual((60 * 60 + 27.254));
                     expect(result[0].title).toEqual('Chapter1');
                     expect(result[1].title).toEqual('Chapter2');
                     expect(result[2].title).toEqual('Chapter3');
@@ -165,6 +179,7 @@
                     + '\t<atom:link href="https://podcast.web.site.mp3.rss/" rel="self" type="application/rss+xml" title="Feed MP3" />\n'
                     + '\t<atom:link href="https://podcast.web.site.off.rss/" rel="alternate" type="application/rss+xml" title="Feed OGG" />\n'
                     + '\t<description>The never existing example podcast.</description>\n'
+                    + '\t<copyright>CC BY-NC-SA 3.0</copyright>\n'
                     + '\t<item>\n'
                     + '\t\t<title>Episode One Title</title>\n'
                     + '\t\t<link>https://podcast.web.site.new/episode1</link>\n'
@@ -279,6 +294,21 @@
                     result = HTML5Podcatcher.parser.parseSource(xml, source);
                     expect(result.source.link).toEqual('https://podcast.web.site.new/');
                 });
+                it("should be able to parse a source license from a RSS (Level 2) feed", function () {
+                    var result;
+                    result = HTML5Podcatcher.parser.parseSource(xml, source);
+                    expect(result.source.license).toEqual('CC BY-NC-SA 3.0');
+                });
+                it("should return a \"undefined\" license if no such information is contains in a RSS (Level 2) feed", function () {
+                    var result, xmlWithFailure;
+                    xmlWithFailure = (new DOMParser()).parseFromString('<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom"><channel>\n'
+                        + '\t<link>https://podcast.web.site.new/</link>\n'
+                        + '\t<title>Podcast (changed title)</title>\n'
+                        + '\t<description>This is a sample.</description>\n'
+                        + '</channel></rss>', "text/xml");
+                    result = HTML5Podcatcher.parser.parseSource(xmlWithFailure, source);
+                    expect(result.source.license).toBeUndefined();
+                });
                 it("should be able to parse the list of items from a RSS (Level 2) feed", function () {
                     var result;
                     result = HTML5Podcatcher.parser.parseSource(xml, source);
@@ -345,7 +375,7 @@
                     expect(result.episodes[1].mediaUrl).toEqual('https://podcast.web.site.new/files/episode2.mp3');
                     expect(result.episodes[1].mediaType).toEqual('audio/mpeg');
                 });
-                it("should be able to detect a chapters list from the rss item in \"Podlove Simple Chapters\" format", function() {
+                it("should be able to detect a chapters list from the rss item in \"Podlove Simple Chapters\" format", function () {
                     var result;
                     result = HTML5Podcatcher.parser.parseSource(xml, source);
                     expect(result.episodes[0].jumppoints.length).toEqual(4);
