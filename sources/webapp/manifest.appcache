@@ -52,11 +52,11 @@ scripts/source.js
 scripts/settings.js
 # STYLES
 styles/main.css
-styles/headers.css
-styles/footers.css
-styles/buttons.css
-styles/input_areas.css
-styles/lists.css
+# styles/headers.css
+# styles/footers.css
+# styles/buttons.css
+# styles/input_areas.css
+# styles/lists.css
 styles/icons/addSource.png
 styles/icons/back.png
 styles/icons/browsing.png

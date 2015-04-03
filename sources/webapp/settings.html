@@ -36,9 +36,14 @@
 	<link rel="apple-touch-icon" type="image/png" sizes="76x76"   href="images/logo76.png">
 	<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="images/logo120.png">
 	<link rel="apple-touch-icon" type="image/png" sizes="152x152" href="images/logo152.png">
-	
+	<!-- build:css styles/main.css -->
+	<link href="styles/headers.css" rel="stylesheet" type="text/css" />
+	<link href="styles/footers.css" rel="stylesheet" type="text/css" />
+	<link href="styles/buttons.css" rel="stylesheet" type="text/css" />
+	<link href="styles/input_areas.css" rel="stylesheet" type="text/css" />
+	<link href="styles/lists.css" rel="stylesheet" type="text/css" />
 	<link href="styles/main.css" rel="stylesheet" type="text/css" />
-	
+	<!-- endbuild -->
 	<script src="scripts/jquery.min.js"></script>
 	<script src="scripts/normalise.js"></script>
 	<script src="scripts/lowLevelApi.js"></script>
@@ -74,6 +79,7 @@
 					<input type="url" name="httpProxyInput" id="httpProxyInput" />
 					<button id="saveProxyConfigurationButton">Save</button>
 				</form>
+			</section>
 			<section id="ImportExport">
 				<header><h2>Import/Export</h2></header>
 				<form action="#" id="ExportImportForm">
@@ -97,7 +103,9 @@
 			</menu>
 			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} Message Log">Message Log</h1>
 		</header>
-		<div id="log" class="content">
+		<div class="content">
+			<div id="log">
+			</div>
 		</div>
 	</section>
 </body>

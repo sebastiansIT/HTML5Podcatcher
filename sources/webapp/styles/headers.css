@@ -29,7 +29,7 @@ section[role="region"] > header:first-child {
   height: 5rem;
   border: none;
 }
-section[role="region"] > header:first-child h1 {
+h1 {
   font-size: 2.3rem;
   line-height: 5rem;
   white-space: nowrap;
@@ -80,12 +80,6 @@ section[role="region"] > header:first-child button {
 section[role="region"] > header:first-child a:focus,
 section[role="region"] > header:first-child button:focus  {
   outline: solid 1px rgba(255,255,255,0.7);
-}
-section[role="region"] > header:first-child button::-moz-focus-inner {
-  outline: none;
-  border: none;
-  margin-top: -0.2rem; /* To fix line-height bug (697451) */
-  padding: 0;
 }
 /* Hover state */
 section[role="region"] > header:first-child a:active,

@@ -36,9 +36,14 @@
 	<link rel="apple-touch-icon" type="image/png" sizes="76x76"   href="images/logo76.png">
 	<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="images/logo120.png">
 	<link rel="apple-touch-icon" type="image/png" sizes="152x152" href="images/logo152.png">
-
+	<!-- build:css styles/main.css -->
+	<link href="styles/headers.css" rel="stylesheet" type="text/css" />
+	<link href="styles/footers.css" rel="stylesheet" type="text/css" />
+	<link href="styles/buttons.css" rel="stylesheet" type="text/css" />
+	<link href="styles/input_areas.css" rel="stylesheet" type="text/css" />
+	<link href="styles/lists.css" rel="stylesheet" type="text/css" />
 	<link href="styles/main.css" rel="stylesheet" type="text/css" />
-	
+	<!-- endbuild -->
 	<script src="scripts/jquery.min.js"></script>
 	<script src="scripts/normalise.js"></script>
 	<script src="scripts/lowLevelApi.js"></script>
@@ -69,8 +74,8 @@
                     <li>
                         <a class="link" href="episode.uri">
 							<div>
-								<h3 class="title">episode.title</h3>
-								<p><span href="#" class="status"><time datetime="episode.updated" class="updated">episode.updated</time></span> at <span class="source">episode.source</span></p>
+								<h4 class="title">episode.title</h4>
+								<p><span class="status"><time datetime="2014-01-01" class="updated">episode.updated</time></span> at <span class="source">episode.source</span></p>
 								
 							</div>
 						</a>
@@ -100,8 +105,10 @@
 			</menu>
 			<h1 title="Message Log">Message Log</h1>
 		</header>
-		<div id="log" class="content">
-		<p>HTML5 Podcatcher {{ VERSION }} {{ VARIANT }}</p>
+		<div class="content">
+		<div id="log">
+			<p>HTML5 Podcatcher {{ VERSION }} {{ VARIANT }}</p>
+		</div>
 		</div>
 	</section>
 	<section id="playerView" class="dialog" role="region">

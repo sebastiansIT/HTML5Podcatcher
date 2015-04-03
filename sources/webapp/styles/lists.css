@@ -42,7 +42,7 @@
 .content .entries li:last-child {
 	border: none;
 }
-.content .entries li.active {
+.content .entries .active {
 	border-bottom: solid 0.3rem #006400;
 }
 /* Entry content */
@@ -56,7 +56,7 @@
 	outline:none;
 	background-color:rgba(0, 100, 0, 0.2);
 }
-.content .entries li h3 {
+h4 { /* = Title of list item */
 	font-size: 1.8rem;
 	line-height: 2.2rem;
 	color: #333;
@@ -80,7 +80,7 @@
 }
 
 /* Buttons */
-.content .entries li a.button,
+.content .entries li .button,
 .content .entries li button {
 	width:4rem;
 	height:4rem;
@@ -113,18 +113,18 @@
     width: 4rem;
 }
 .content .entries li a[data-icon="reload"]:before {
-    background: url("icons/refresh.png") no-repeat scroll center center rgba(0, 0, 0, 0);
+    background: url("icons/refresh.png") no-repeat scroll center center transparent ;
 }
 .content .entries li button[data-icon="delete"]:before {
-    background: url("icons/delete.png") no-repeat scroll center center rgba(0, 0, 0, 0);
+    background: url("icons/delete.png") no-repeat scroll center center transparent ;
 }
 .content .entries li a[data-icon="download"]:before,
 .content .entries li button[data-icon="download"]:before {
-    background: url("icons/download.png") no-repeat scroll center center rgba(0, 0, 0, 0);
+    background: url("icons/download.png") no-repeat scroll center center transparent ;
 }
 .content .entries li a[data-icon="browsing"]:before,
 .content .entries li button[data-icon="browsing"]:before {
-    background: url("icons/browsing.png") no-repeat scroll center center rgba(0, 0, 0, 0);
+    background: url("icons/browsing.png") no-repeat scroll center center transparent ;
 }
 
 

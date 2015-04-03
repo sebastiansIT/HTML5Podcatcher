@@ -19,7 +19,7 @@
 /* ----------------------------------
 * Toolbars
 * ---------------------------------- */
-[role="toolbar"] {
+div[role="toolbar"] {
   display: flex;
   box-sizing: border-box;
   height: 45px;
@@ -27,8 +27,8 @@
   background: #fff;
   border-top: 1px solid #eee;
 }
-[role="toolbar"] button,
-[role="toolbar"] a {
+div[role="toolbar"] button,
+div[role="toolbar"] a {
   position: relative;
   flex: 1;
   border: none;
@@ -43,22 +43,23 @@
   height: 100%;
   font-size: 0;
 }
-[role="toolbar"] button:first-child,
-[role="toolbar"] a:first-child {
+div[role="toolbar"] button:first-child,
+div[role="toolbar"] a:first-child {
   border-left: none;
 }
-[role="toolbar"] button:active,
-[role="toolbar"] button:focus,
-[role="toolbar"] a:active,
-[role="toolbar"] a:focus {
+div[role="toolbar"] button:active,
+div[role="toolbar"] button:focus,
+div[role="toolbar"] a:active,
+div[role="toolbar"] a:focus {
   color: #fff;
   background-color: rgba(0, 100, 0, 0.2);
 }
-[role="toolbar"] [data-icon] {
+div[role="toolbar"] button[data-icon],
+div[role="toolbar"] a[data-icon] {
   font-size: 0;
 }
-[role="toolbar"] button[data-icon]:before,
-[role="toolbar"] a[data-icon]:before {
+div[role="toolbar"] button[data-icon]:before,
+div[role="toolbar"] a[data-icon]:before {
   width: 3rem;
   height: 3rem;
   position: absolute;
@@ -101,5 +102,5 @@
     background: url("icons/browsing.png") no-repeat center center;
 }
 [role="toolbar"] button[data-icon="delete"]:before {
-    background: url("icons/delete.png") no-repeat scroll center center rgba(0, 0, 0, 0);
+    background: url("icons/delete.png") no-repeat center center;
 }

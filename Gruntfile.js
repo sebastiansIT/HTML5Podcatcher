@@ -2,17 +2,22 @@
 module.exports = function (grunt) {
     "use strict";
     //Load Tasks
-    grunt.loadNpmTasks('grunt-string-replace');
-    grunt.loadNpmTasks('grunt-jslint');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-contrib-jasmine');
+    grunt.loadNpmTasks('grunt-contrib-csslint');
+    grunt.loadNpmTasks('grunt-concat-css');
+    grunt.loadNpmTasks('grunt-string-replace');
     grunt.loadNpmTasks('grunt-curl');
     grunt.loadNpmTasks('grunt-zip');
-    grunt.loadNpmTasks('grunt-contrib-jasmine');
+    grunt.loadNpmTasks('grunt-html');
+    grunt.loadNpmTasks('grunt-jslint');
+    grunt.loadNpmTasks('grunt-usemin');
     //Config Tasks
     grunt.initConfig({
-        pkg: grunt.file.readJSON('package.json'),
-        clean: {
+        'pkg': grunt.file.readJSON('package.json'),
+        'clean': {
             HostedWebApp: {
                 src: ['build/webapp']
             },
@@ -65,11 +70,10 @@ module.exports = function (grunt) {
                 }
             }
         },
-        copy: {
+        'copy': {
             HostedWebApp: {
                 files: [
-                    // includes files within path
-                    {expand: true,  cwd: 'sources/webapp/',    src: ['styles/*.css'],                    dest: 'build/webapp/',             filter: 'isFile'},
+                    // includes files within path {expand: true,  cwd: 'sources/webapp/',    src: ['styles/*.css'],                    dest: 'build/webapp/',             filter: 'isFile'},
                     {expand: true,  cwd: 'sources/webapp/',    src: ['styles/icons/*.png'],              dest: 'build/webapp/',             filter: 'isFile'},
                     {expand: true,  cwd: 'sources/webapp/',    src: ['images/*.png'],                    dest: 'build/webapp/',             filter: 'isFile'},
                     {expand: true,  cwd: 'sources/hostedapp/', src: ['images/*.png'],                    dest: 'build/webapp/',             filter: 'isFile'},
@@ -82,7 +86,7 @@ module.exports = function (grunt) {
             FirefoxPackagedApp: {
                 files: [
                     {expand: true,  cwd: 'sources/webapp/',      src: ['styles/*.css'],                    dest: 'build/packagedapp/temp/',            filter: 'isFile'},
-                    {expand: true,  cwd: 'sources/webapp/',      src: ['styles/icons/*.png'],              dest: 'build/webapp/',                      filter: 'isFile'},
+                    {expand: true,  cwd: 'sources/webapp/',      src: ['styles/icons/*.png'],              dest: 'build/packagedapp/temp/',            filter: 'isFile'},
                     {expand: true,  cwd: 'sources/webapp/',      src: ['images/*.png'],                    dest: 'build/packagedapp/temp/',            filter: 'isFile'},
                     {expand: true,  cwd: 'sources/packagedapp/', src: ['images/*.png'],                    dest: 'build/packagedapp/temp/',            filter: 'isFile'},
                     {expand: false, cwd: 'sources/webapp/',      src: 'sources/webapp/images/favicon.ico', dest: 'build/packagedapp/temp/favicon.ico', filter: 'isFile'},
@@ -90,7 +94,7 @@ module.exports = function (grunt) {
                 ]
             }
         },
-        curl: {
+        'curl': {
             HostedWebApp: {
                 src: 'http://code.jquery.com/jquery-2.1.1.min.js',
                 dest: 'build/webapp/scripts/jquery.min.js'
@@ -100,7 +104,7 @@ module.exports = function (grunt) {
                 dest: 'build/packagedapp/temp/scripts/jquery.min.js'
             }
         },
-        zip: {
+        'zip': {
             FirefoxPackagedApp: {
                 cwd: 'build/packagedapp/temp/',
                 src: ['build/packagedapp/temp/**'],
@@ -119,17 +123,51 @@ module.exports = function (grunt) {
                     'sources/webapp/scripts/*min.js'
                 ],
                 directives: {
-                    browser: true,
-                    plusplus: true,
+                    browser: true, //Assume a browser and his global namespaces and objects
+                    plusplus: true, //allow usage of i++ and ++i operators
+                    todo: true, //allow usage of TODO comments
                     predef: []
                 },
                 options: {
+                    edition: 'latest',
                     failOnError : false,
                     junit: 'tests/jslint.result.xml'
                 }
             }
         },
-        jasmine: {
+        csslint: {
+            options: {
+                'fallback-colors': false,
+                'box-sizing': false,
+                'unqualified-attributes': true,
+                'universal-selector': true,
+                'overqualified-elements': true,
+                formatters: [
+                    {id: 'junit-xml', dest: 'tests/csslint.result.junit.xml'},
+                    {id: 'text', dest: 'tests/csslint.result.txt'}
+                ]
+            },
+            client: {
+                src: [
+                    'sources/webapp/styles/*.css', // Include all CSS files in this directory.
+                    'sources/webapp/styles/' + '!*.min.css' // Exclude any files ending with `.min.css`
+                ]
+            }
+        },
+        htmllint: {
+            client: {
+                options: {
+                    ignore: [ 'The “menu” element is not supported by browsers yet. It would probably be better to wait for implementations.'
+                    ],
+                    reporter: 'checkstyle',
+                    reporterOutput: 'tests/htmllint.result.txt'
+                },
+                src: [
+                    'sources/webapp/*.html'
+                ]
+            }
+        },
+        'jasmine': {
             client: {
                 src: [
                     'sources/webapp/scripts/*.js',
@@ -146,11 +184,22 @@ module.exports = function (grunt) {
                     }
                 }
             }
+        },
+        concat: {
+            'HostedWebApp-css': {
+                'src': ['sources/webapp/styles/*.css'],
+                'dest': 'build/webapp/styles/main.css'
+            }
+        },
+        usemin: {
+            HostedWebApp: ['build/webapp/*.html'],
+            options: {
+            }
         }
     });
     //Register Tasks
-    grunt.registerTask('HostedWebApp',       ['clean:HostedWebApp', 'string-replace:HostedWebApp', 'copy:HostedWebApp', 'curl:HostedWebApp']);
+    grunt.registerTask('HostedWebApp',       ['clean:HostedWebApp', 'string-replace:HostedWebApp', 'concat:HostedWebApp-css', 'copy:HostedWebApp', 'curl:HostedWebApp', 'usemin:HostedWebApp']);
     grunt.registerTask('FirefoxPackagedApp', ['string-replace:FirefoxPackagedApp', 'copy:FirefoxPackagedApp', 'curl:FirefoxPackagedApp', 'zip:FirefoxPackagedApp']); //, 'clean:FirefoxPackagedApp'
-    grunt.registerTask('test',               ['jslint', 'jasmine']);
+    grunt.registerTask('test',               ['htmllint', 'csslint', 'jslint', 'jasmine']);
     grunt.registerTask('default',            ['test', 'HostedWebApp', 'FirefoxPackagedApp']);
 };

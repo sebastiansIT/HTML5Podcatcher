@@ -5,6 +5,11 @@ build
 tests/bin
 tests/jasmine.result
 tests/jslint.result.xml
+tests/csslint.result.junit.xml
+tests/csslint.result.txt
+tests/htmllint.result.txt
+.grunt
+_SpecRunner.html
 
 # OS generated files #
 ######################

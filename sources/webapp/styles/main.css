@@ -16,12 +16,6 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 
-@import "headers.css";
-@import "footers.css";
-@import "buttons.css";
-@import "input_areas.css";
-@import "lists.css";
-
 /* App-Page Layout */
 html {
 	font-size: 62.5%; /*Set font size to 10px (if default is 16px) */
@@ -59,17 +53,18 @@ section[role="region"] .content {
 	flex-grow: 1;
 	flex-shrink: 1;
 }
-section[role="region"] .content > * {
+section[role="region"] .content > div,
+section[role="region"] .content > section {
 	margin: 1.5rem;
 }
 
 /* Special Layout for Dialogs */
-section.dialog[role="region"] {
+.dialog[role="region"] {
 	display:none;
 	width:100%;
 	background-color: rgba(255,255,255,0.9);
 }
-section.dialog.fullscreen[role="region"] {
+.fullscreen[role="region"] {
 	position: absolute;
 	display:flex;
 	top: 0;
@@ -79,6 +74,41 @@ section.dialog.fullscreen[role="region"] {
 /* Non-Layout for Template areas */
 template, .template {
 	display: none;
+}
+
+h2 { /* = Headline of Content */
+	font-size: 2.2rem;
+	line-height:1.2em;
+	margin-top: 1em;
+	margin-bottom: 0.6em;
+}
+h3 { /* = Headline of a content section */
+	font-size: 2.0rem;
+	line-height:1.2em;
+	margin-top: 1em;
+	margin-bottom: 0.6em;
+}
+
+a { 
+	color: #006400;
+}
+a:visited {
+	color:#006400;
+	text-decoration:none;
+}
+a:hover,
+a:active,
+a:focus {
+	color: #333;
+	background-color: rgba(0, 100, 0, 0.2);
+	padding: 1px 2px;
+	outline: 1px solid rgba(0, 100, 0, 0.2);
+}
+h2 a,
+h3 a,
+h4 a { /*Links insite a Headline*/
+	color: inherit;
+	text-decoration: inherit;
 }
 
 /* Layout for deskop displays and greater */

@@ -36,9 +36,14 @@
 	<link rel="apple-touch-icon" type="image/png" sizes="76x76"   href="images/logo76.png">
 	<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="images/logo120.png">
 	<link rel="apple-touch-icon" type="image/png" sizes="152x152" href="images/logo152.png">
-
+<!-- build:css styles/main.css -->
+	<link href="styles/headers.css" rel="stylesheet" type="text/css" />
+	<link href="styles/footers.css" rel="stylesheet" type="text/css" />
+	<link href="styles/buttons.css" rel="stylesheet" type="text/css" />
+	<link href="styles/input_areas.css" rel="stylesheet" type="text/css" />
+	<link href="styles/lists.css" rel="stylesheet" type="text/css" />
 	<link href="styles/main.css" rel="stylesheet" type="text/css" />
-	
+	<!-- endbuild -->
 	<script src="scripts/jquery.min.js"></script>
 	<script src="scripts/normalise.js"></script>
 	<script src="scripts/lowLevelApi.js"></script>
@@ -69,7 +74,7 @@
 					<p class="description">source.description</p>
 					<dl>
 						<dt>Feed:</dt><dd><a class="uri"><span class="uri">source.uri</span></a></dd>
-						<dt>License:</td><dd class="license">source.license</dd>
+						<dt>License:</dt><dd class="license">source.license</dd>
 					</dl>
 					<section id="episodes">
 						<h3>Episodes</h3>
@@ -85,7 +90,7 @@
 				<li>
 					<div>
 						<h4 class="title">episode.title</h4>
-						<p><span href="#" class="status"><time datetime="episode.updated" class="updated">episode.updated</time></span> at <span class="source">episode.source</span></p>
+						<p><a href="#" class="status"><time datetime="2014-01-01" class="updated">episode.updated</time></a> at <span class="source">episode.source</span></p>
 					</div>
 					<a class="origin button" href="episode.uri" data-icon="browsing">Internet</a>
 					<a class="button downloadFile" href="episode.mediaUrl" download="episode.mediaUrl.fileName" data-icon="download">Download</a>
@@ -108,7 +113,9 @@
 			</menu>
 			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} Message Log">Message Log</h1>
 		</header>
-		<div id="log" class="content">
+		<div class="content">
+			<div id="log">
+			</div>
 		</div>
 	</section>
 </body>

@@ -20,12 +20,6 @@
 /* ----------------------------------
  * Buttons
  * ---------------------------------- */
-.button::-moz-focus-inner,
-button::-moz-focus-inner {
-  border: none;
-  outline: none;
-}
-
 button,
 .button {
   font-family: sans-serif;
@@ -47,7 +41,6 @@ button,
   line-height: 4rem;
   text-align: center;
   text-decoration: none;
-  outline: none;
   background-color: #006400;
   color: #fff;
   cursor:pointer;
@@ -63,18 +56,14 @@ button:active,
 button:focus,
 .button:focus {
   text-decoration: underline;
+  outline: none;
 }
 
 /* Disabled */
 button[disabled],
-.button[aria-disabled="true"] {
+a.button[aria-disabled="true"] {
   background-color: rgba(0,0,0,0.05);
   color: #c7c7c7;
   cursor: default;
   pointer-events: none;
-}
-
-button[disabled]::-moz-selection,
-.bb-button[aria-disabled="true"]::-moz-selection {
-  -moz-user-select: none;
 }
