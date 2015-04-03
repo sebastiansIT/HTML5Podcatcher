@@ -180,6 +180,7 @@
                     + '\t<atom:link href="https://podcast.web.site.off.rss/" rel="alternate" type="application/rss+xml" title="Feed OGG" />\n'
                     + '\t<description>The never existing example podcast.</description>\n'
                     + '\t<copyright>CC BY-NC-SA 3.0</copyright>\n'
+                    
                     + '\t<item>\n'
                     + '\t\t<title>Episode One Title</title>\n'
                     + '\t\t<link>https://podcast.web.site.new/episode1</link>\n'
@@ -194,23 +195,29 @@
                     + '\t\t\t<psc:chapter href="https://podcast.web.site/episode1/chapter4/" start="1:00:27.254" title="Chapter4" image="https://podcast.web.site/episode1/chapter4/img.png" />\n'
                     + '\t\t</psc:chapters>\n'
                     + '\t</item>\n'
+                    
                     + '\t<item>\n'
                     + '\t\t<title>Episode Two Title</title>\n'
                     + '\t\t<guid>https://podcast.web.site.new/episode2</guid>\n'
                     + '\t\t<pubDate>12 Sep 2014 17:20:50 +0000</pubDate>\n'
                     + '\t\t<content:encoded><![CDATA[<p>Text and <span>some markup</span><a href="https://podcast.web.site.new/files/episode2.mp3" target="_blank">Download</a></p>]]></content:encoded>\n'
                     + '\t</item>\n'
+                    
                     + '\t<item>\n'
                     + '\t\t<title>Item without Audio-File</title>\n'
                     + '\t\t<link>https://podcast.web.site.new/news1</link>\n'
+                    + '\t\t<guid>https://podcast.web.site.new/news1_guid</guid>\n'
                     + '\t\t<pubDate>Fri, 13 Sep 2014 18:21:26 +0000</pubDate>\n'
                     + '\t</item>\n'
+                    
                     + '\t<item>\n'
                     + '\t\t<title>Item with MP3 enclosure</title>\n'
+                    + '\t\t<guid>https://podcast.web.site/episode3_guid</guid>\n'
                     + '\t\t<link>https://podcast.web.site/episode3</link>\n'
                     + '\t\t<pubDate>Fri, 13 Sep 2014 18:21:26 +0000</pubDate>\n'
                     + '\t\t<enclosure url="https://podcast.web.site/episode.mp3" length="76206624" type="audio/mpeg" />\n'
                     + '\t</item>\n'
+                    
                     + '\t<item>\n'
                     + '\t\t<title>Item with AAC enclosure</title>\n'
                     + '\t\t<link>https://podcast.web.site/episode4</link>\n'
@@ -328,6 +335,10 @@
                     expect(result.episodes[0].uri).toEqual('https://podcast.web.site.new/episode1');
                     //Test <guid>-Element
                     expect(result.episodes[1].uri).toEqual('https://podcast.web.site.new/episode2');
+                    //Test <link> before <guid> in markup (<link> has priority)
+                    expect(result.episodes[2].uri).toEqual('https://podcast.web.site.new/news1');
+                    //Test <guid> before <link> in markup (<link> has priority)
+                    expect(result.episodes[3].uri).toEqual('https://podcast.web.site/episode3');
                 });
                 it("should be able to add a reference to the source when parsing a episode", function () {
                     var result;

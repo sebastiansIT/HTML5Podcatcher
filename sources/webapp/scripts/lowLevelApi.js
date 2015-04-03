@@ -442,7 +442,18 @@ var HTML5Podcatcher = {
                 for (i = 0; i < itemArray.length; i++) {
                     item = itemArray[i];
                     episode = {};
-                    episode.uri = item.querySelector('link, guid').childNodes[0].nodeValue;
+                    // * URI of Episode
+                    if (item.querySelector('link')) {
+                        // Try to get from RSS link element
+                        episode.uri = item.querySelector('link').childNodes[0].nodeValue;
+                    } else if (item.querySelector('guid')) {
+                        // If there is no link element try to get it from GUID element
+                        episode.uri = item.querySelector('guid').childNodes[0].nodeValue;
+                    } else {
+                        HTML5Podcatcher.logger('No URI found - invalid RSS item', 'error');
+                        break;
+                    }
+                    // * Title of Episode
                     episode.title = item.querySelector('title').childNodes[0].nodeValue;
                     if (/^\d/.test(item.querySelector('pubDate').childNodes[0].nodeValue)) {
                         episode.updated = new Date("Sun " + item.querySelector('pubDate').childNodes[0].nodeValue);
