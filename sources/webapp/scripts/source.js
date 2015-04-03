@@ -107,6 +107,31 @@ $(document).ready(function () {
             POD.toggleEpisodeStatus(episode);
         });
     });
+    $('.content').on('click', '.downloadFile', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var episodeUI;
+        episodeUI = $(this).closest('li');
+        POD.storage.readEpisode(episodeUI.data('episodeUri'), function (episode) {
+            UI.logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info');
+            POD.web.downloadFile(episode, 'audio/mpeg', function (episode) {
+                episodeUI.replaceWith(UI.renderEpisode(episode));
+            }, UI.progressHandler);
+        });
+    });
+    $('.content').on('click', '.delete', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        POD.storage.readEpisode($(this).closest('li').data('episodeUri'), function (episode) {
+            UI.logHandler('Deleting file "' + episode.offlineMediaUrl + '" starts now', 'info');
+            POD.storage.deleteFile(episode);
+        });
+    });
+    $('.content').on('click', '.origin', function (event) {
+        event.stopPropagation();
+        event.preventDefault();
+        window.open($(this).attr('href'), '_blank');
+    });
     //Toolbar events
     $('#deleteSource').on('click', function (event) {
         event.preventDefault();
