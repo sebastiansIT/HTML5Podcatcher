@@ -23,17 +23,6 @@
 /*global $ */
 /*global POD */
 /*global GlobalUserInterfaceHelper, UI */
-GlobalUserInterfaceHelper.findEpisodeUI = function (episode) {
-    "use strict";
-    var episodeUI;
-    $('#playlist .entries li').each(function () {
-        if ($(this).data('episodeUri') === episode.uri) {
-            episodeUI = this;
-            return false;
-        }
-    });
-    return episodeUI;
-};
 GlobalUserInterfaceHelper.actualiseEpisodeUI = function (episode) {
     "use strict";
     var episodeUI;
@@ -57,46 +46,6 @@ GlobalUserInterfaceHelper.actualiseEpisodeUI = function (episode) {
     $(episodeUI).find('progress').remove();
     return false;
 };
-/*GlobalUserInterfaceHelper.renderEpisode = function (episode) {
-    "use strict";
-    var entryUI;
-    entryUI = $($('#episodeTemplate li')[0].cloneNode(true));
-    entryUI.data('episodeUri', episode.uri);
-    entryUI.find('a.link').attr('href', episode.uri);
-    entryUI.find('h3.title').text(episode.title);
-    entryUI.find('.source').text(episode.source);
-    if (episode.playback.played) {
-        entryUI.find('.updated').attr('datetime', episode.updated.toISOString()).text(episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString());
-    } else {
-        entryUI.find('.updated').attr('datetime', episode.updated.toISOString()).text("New");
-    }
-    entryUI.find('a.origin').attr('href', episode.uri);
-    if (POD.storage.isFileStorageAvailable() && episode.mediaUrl) {
-        if (episode.isFileSavedOffline) {
-            entryUI.find('.downloadFile').replaceWith('<button class="delete" href="' + episode.mediaUrl + '" data-icon="delete">Delete</button>');
-        } else if (episode.mediaUrl) {
-            entryUI.find('.downloadFile').attr('href', episode.mediaUrl).attr('download', episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/') + 1));
-        }
-    } else {
-        entryUI.find('.downloadFile').remove();
-    }
-    return entryUI;
-};
-GlobalUserInterfaceHelper.renderPlaylist = function (playlist) {
-    "use strict";
-    var playlistUI, entryUI, i;
-    playlistUI = $('#playlist .entries');
-    playlistUI.empty();
-    if (playlist && playlist.length > 0) {
-        for (i = 0; i < playlist.length; i++) {
-            entryUI = GlobalUserInterfaceHelper.renderEpisode(playlist[i]);
-            playlistUI.append(entryUI);
-        }
-    } else {
-        entryUI = $('<li class="emptyPlaceholder">no entries</li>');
-        playlistUI.append(entryUI);
-    }
-};*/
 GlobalUserInterfaceHelper.activeEpisode = function (onReadCallback) {
     "use strict";
     var activeEpisode = $('#playlist').find('.active');
@@ -127,30 +76,6 @@ GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
         }
         POD.storage.readEpisode(lastPlayedEpisode, onReadCallback);
     });
-};
-GlobalUserInterfaceHelper.progressHandler = function (progressEvent, prefix, episode) {
-    "use strict";
-    //TODO Clean code from old solution with a HTML-Progress-Bar
-    var percentComplete, episodeUI; //progressbar, 
-    episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode);
-    /*if ($(episodeUI).find('progress').length) {
-        progressbar = $(episodeUI).find('progress');
-    } else {
-        progressbar = $('<progress min="0" max="1">&helip;</progress>');
-        $(episodeUI).find('.downloadFile').hide().after(progressbar);
-    }*/
-    $(episodeUI).find('.downloadFile').attr('disabled', 'disabled');
-    if (progressEvent.lengthComputable) {
-        //Downloaded Bytes / (total Bytes + 10% for saving on local system)
-        percentComplete = progressEvent.loaded / (progressEvent.total + (progressEvent.total / 10));
-        console.log(prefix + ': ' + (percentComplete * 100).toFixed(2) + '%');
-        $(episodeUI).data('progress', percentComplete);
-        $(episodeUI).attr('style', 'background: linear-gradient(to right, rgba(0, 100, 0, 0.2) 0%,rgba(0, 100, 0, 0.2) ' + (percentComplete * 100).toFixed(2) + '%, #ffffff ' + (percentComplete * 100).toFixed(2) + '%);');
-        //$(episodeUI).find('progress').attr('value', percentComplete).text((percentComplete * 100).toFixed(2) + '%');
-    } else {
-        console.log(prefix + '...');
-        //$(episodeUI).find('progress').removeAttr('value').text('&helip;');
-    }
 };
 
 /** Functions for playback */

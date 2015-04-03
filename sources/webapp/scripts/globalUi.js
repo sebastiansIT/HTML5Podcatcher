@@ -96,6 +96,21 @@ var GlobalUserInterfaceHelper = {
         "use strict";
         this.logHandler(event, 'info');
     },
+    progressHandler: function (progressEvent, prefix, episode) {
+        "use strict";
+        var percentComplete, episodeUI; //progressbar, 
+        episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode);
+        $(episodeUI).find('.downloadFile').attr('disabled', 'disabled');
+        if (progressEvent.lengthComputable) {
+            //Downloaded Bytes / (total Bytes + 10% for saving on local system)
+            percentComplete = progressEvent.loaded / (progressEvent.total + (progressEvent.total / 10));
+            console.log(prefix + ': ' + (percentComplete * 100).toFixed(2) + '%');
+            $(episodeUI).data('progress', percentComplete);
+            $(episodeUI).attr('style', 'background: linear-gradient(to right, rgba(0, 100, 0, 0.2) 0%,rgba(0, 100, 0, 0.2) ' + (percentComplete * 100).toFixed(2) + '%, #ffffff ' + (percentComplete * 100).toFixed(2) + '%);');
+        } else {
+            console.log(prefix + '...');
+        }
+    },
     settings: {
         set: function (key, value) {
             "use strict";
@@ -264,6 +279,17 @@ var GlobalUserInterfaceHelper = {
             entryUI = $('<li class="emptyPlaceholder">no entries</li>');
             sourcelistUI.append(entryUI);
         }
+    },
+    findEpisodeUI: function (episode) {
+        "use strict";
+        var episodeUI;
+        $('#playlist .entries li, #episodes .entries li').each(function () {
+            if ($(this).data('episodeUri') === episode.uri) {
+                episodeUI = this;
+                return false;
+            }
+        });
+        return episodeUI;
     }
 };
 var UI = GlobalUserInterfaceHelper;

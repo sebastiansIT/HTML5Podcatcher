@@ -111,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
         $('#FileSystemAPI').hide();
     }
-    
     // -- Register Eventhandler -- //
     //General UI Events
     UI.initGeneralUIEvents();
