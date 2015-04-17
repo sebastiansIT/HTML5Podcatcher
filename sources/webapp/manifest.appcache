@@ -29,6 +29,10 @@
 ### Adding a index over the source of episodes (Indexed Database API)
 ##0.33.3
 ### Save all episodes in a feed instead of the top 5; alle episodes without the newest 5 are set automaticaly to played
+##0.33.4
+### Fix a bug: RSS link elements have now higher priority than gudi element when selecting the uri of an episode
+##0.33.5
+### Transfer mime-type audio/opus to "audio/ogg; codec=opus" (Firefox only understand the last one)
 
 # VALIDATE this manifest on http://manifest-validator.com/
 

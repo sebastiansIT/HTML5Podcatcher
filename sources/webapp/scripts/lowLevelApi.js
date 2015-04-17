@@ -388,7 +388,7 @@ var HTML5Podcatcher = {
     parser: {
         parseSource: function (xml, source) {
             "use strict";
-            var rootElement, currentElementList, currentElement, contentElement, itemArray, i, item, episode, episodes = [];
+            var rootElement, currentElementList, currentElement, contentElement, itemArray, enclosureArray, i, j, item, episode, episodes = [];
             HTML5Podcatcher.logger('Parsing source file "' + source.uri + '" starts now', 'debug');
             //RSS-Feed
             rootElement = xml.querySelector('rss[version="2.0"]');
@@ -461,17 +461,43 @@ var HTML5Podcatcher = {
                         episode.updated = new Date(item.querySelector('pubDate').childNodes[0].nodeValue);
                     }
                     episode.source = source.title;
+                    // * Audio-File (Atachement | Enclosure)
                     // use files linked with enclosure elements or ...
-                    if (item.querySelector('enclosure') && (item.querySelector('enclosure').attributes.type.value.indexOf("audio") >= 0)) {
-                        episode.mediaUrl = item.querySelector('enclosure').attributes.url.value;
-                        episode.mediaType = item.querySelector('enclosure').attributes.type.value;
+                    enclosureArray = item.querySelectorAll('enclosure');
+                    for (j = 0; j < enclosureArray.length; j++) {
+                        // accept only audio files
+                        if (enclosureArray[j].attributes.type.value.indexOf("audio") >= 0) {
+                            // map audio/opus to audio/ogg with codec of opus (Firefox don't understand audio/opus)
+                            if (enclosureArray[j].attributes.type.value === 'audio/opus') {
+                                episode.mediaType = 'audio/ogg; codecs=opus';
+                            } else {
+                                episode.mediaType = enclosureArray[j].attributes.type.value;
+                            }
+                            // check browser compatibility
+                            if (document.createElement('audio').canPlayType(episode.mediaType) === '') {
+                                HTML5Podcatcher.logger('The media file found in item ' + episode.title + ' isn\'t supported in your browser. The Type of the unsuported file is ' + episode.mediaType + '.', 'warning');
+                            } else {
+                                episode.mediaUrl = enclosureArray[j].attributes.url.value;
+                                break;
+                            }
+                        }
+                    }
                     // ... or use anker tags in the full content markup of the item
-                    } else if (item.querySelector('encoded') && item.querySelector('encoded').childNodes[0].nodeValue) {
+                    if (!episode.mediaUrl && item.querySelector('encoded') && item.querySelector('encoded').childNodes[0].nodeValue) {
                         contentElement = document.createElement("encoded");
                         contentElement.innerHTML = item.querySelector('encoded').childNodes[0].nodeValue;
-                        if (contentElement.querySelector('a[href$=".mp3"]')) {
+                        if (contentElement.querySelector('a[href$=".m4a"]')) {
+                            episode.mediaUrl = contentElement.querySelector('a[href$=".m4a"]').attributes.href.value;
+                            episode.mediaType = 'audio/mp4';
+                        } else if (contentElement.querySelector('a[href$=".mp3"]')) {
                             episode.mediaUrl = contentElement.querySelector('a[href$=".mp3"]').attributes.href.value;
                             episode.mediaType = 'audio/mpeg';
+                        } else if (contentElement.querySelector('a[href$=".oga"]')) {
+                            episode.mediaUrl = contentElement.querySelector('a[href$=".oga"]').attributes.href.value;
+                            episode.mediaType = 'audio/ogg';
+                        } else if (contentElement.querySelector('a[href$=".opus"]')) {
+                            episode.mediaUrl = contentElement.querySelector('a[href$=".opus"]').attributes.href.value;
+                            episode.mediaType = 'audio/ogg; codecs=opus';
                         }
                     }
                     //Parse Podlove Simple Chapters Format

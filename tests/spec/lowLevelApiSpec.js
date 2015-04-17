@@ -215,21 +215,50 @@
                     + '\t\t<guid>https://podcast.web.site/episode3_guid</guid>\n'
                     + '\t\t<link>https://podcast.web.site/episode3</link>\n'
                     + '\t\t<pubDate>Fri, 13 Sep 2014 18:21:26 +0000</pubDate>\n'
+                    + '\t\t<content:encoded><![CDATA[<p>Text and <span>some markup</span><a href="https://podcast.web.site.new/files/ankerTo.opus" target="_blank">Download</a></p>]]></content:encoded>\n'
                     + '\t\t<enclosure url="https://podcast.web.site/episode.mp3" length="76206624" type="audio/mpeg" />\n'
                     + '\t</item>\n'
                     
                     + '\t<item>\n'
                     + '\t\t<title>Item with AAC enclosure</title>\n'
                     + '\t\t<link>https://podcast.web.site/episode4</link>\n'
-                    + '\t\t<pubDate>Fri, 13 Sep 2014 18:21:26 +0000</pubDate>\n'
-                    + '\t\t<enclosure url="https://podcast.web.site/episode.m4a" length="49966646" type="audio/mp4a-latm" />\n'
+                    + '\t\t<pubDate>Fri, 14 Sep 2014 18:21:26 +0000</pubDate>\n'
+                    + '\t\t<enclosure url="https://podcast.web.site/episode.m4a" length="49966646" type="audio/mp4" />\n'
                     + '\t</item>\n'
+                    
                     + '\t<item>\n'
-                    + '\t\t<title>Item with Ogg/Opus enclosure</title>\n'
+                    + '\t\t<title>Item with Ogg/Opus enclosure and Ogg Mime-Type</title>\n'
                     + '\t\t<link>https://podcast.web.site/episode5</link>\n'
-                    + '\t\t<pubDate>Fri, 13 Sep 2014 18:21:26 +0000</pubDate>\n'
+                    + '\t\t<pubDate>Fri, 15 Sep 2014 18:21:26 +0000</pubDate>\n'
                     + '\t\t<enclosure url="https://podcast.web.site/episode.opus" length="34069747" type="audio/ogg; codecs=opus" />\n'
                     + '\t</item>\n'
+                    
+                    + '\t<item>\n'
+                    + '\t\t<title>Item with AAC content link</title>\n'
+                    + '\t\t<guid>https://podcast.web.site.new/episode6</guid>\n'
+                    + '\t\t<pubDate>16 Sep 2014 17:20:50 +0000</pubDate>\n'
+                    + '\t\t<content:encoded><![CDATA[<p>Text and <span>some markup</span><a href="https://podcast.web.site.new/files/episode.m4a" target="_blank">Download</a></p>]]></content:encoded>\n'
+                    + '\t</item>\n'
+                    + '\t<item>\n'
+                    + '\t\t<title>Item with Ogg/Vorbis content link</title>\n'
+                    + '\t\t<guid>https://podcast.web.site.new/episode7</guid>\n'
+                    + '\t\t<pubDate>17 Sep 2014 17:20:50 +0000</pubDate>\n'
+                    + '\t\t<content:encoded><![CDATA[<p>Text and <span>some markup</span><a href="https://podcast.web.site.new/files/episode.oga" target="_blank">Download</a></p>]]></content:encoded>\n'
+                    + '\t</item>\n'
+                    + '\t<item>\n'
+                    + '\t\t<title>Item with Opus content link</title>\n'
+                    + '\t\t<guid>https://podcast.web.site.new/episode8</guid>\n'
+                    + '\t\t<pubDate>18 Sep 2014 17:20:50 +0000</pubDate>\n'
+                    + '\t\t<content:encoded><![CDATA[<p>Text and <span>some markup</span><a href="https://podcast.web.site.new/files/episode.opus" target="_blank">Download</a></p>]]></content:encoded>\n'
+                    + '\t</item>\n'
+                    
+                    + '\t<item>\n'
+                    + '\t\t<title>Item with Ogg/Opus enclosure and  Opus Mime-Type</title>\n'
+                    + '\t\t<link>https://podcast.web.site/episode9</link>\n'
+                    + '\t\t<pubDate>Fri, 19 Sep 2014 18:21:26 +0000</pubDate>\n'
+                    + '\t\t<enclosure url="https://podcast.web.site/episode.opus" length="34069747" type="audio/opus" />\n'
+                    + '\t</item>\n'
+                    
                     + '</channel></rss>', "text/xml");
                 it("should return 'undefined' if no correct root element for RSS (Level 2) feed found", function () {
                     var result, xmlWithFailure;
@@ -319,7 +348,7 @@
                 it("should be able to parse the list of items from a RSS (Level 2) feed", function () {
                     var result;
                     result = HTML5Podcatcher.parser.parseSource(xml, source);
-                    expect(result.episodes.length).toEqual(6);
+                    expect(result.episodes.length).toEqual(10);
                 });
                 it("should be able to parse a episodes title from a RSS (Level 2) feed", function () {
                     var result;
@@ -368,23 +397,56 @@
                     expect(result.episodes[3].mediaUrl).toEqual('https://podcast.web.site/episode.mp3');
                     expect(result.episodes[3].mediaType).toEqual('audio/mpeg');
                 });
-                it("should be able to detect a ACC file from a closure tag in RSS (Level 2) feed by mimetype \"audio/mp4a-latm\"", function () {
+                it("should be able to detect a ACC file from a closure tag in RSS (Level 2) feed by mimetype \"audio/mp4\"", function () {
                     var result;
                     result = HTML5Podcatcher.parser.parseSource(xml, source);
                     expect(result.episodes[4].mediaUrl).toEqual('https://podcast.web.site/episode.m4a');
-                    expect(result.episodes[4].mediaType).toEqual('audio/mp4a-latm');
+                    expect(result.episodes[4].mediaType).toEqual('audio/mp4');
                 });
-                it("should be able to detect a Opus file from a closure tag in RSS (Level 2) feed by mimetype \"audio/ogg; codecs=opus\"", function () {
+                it("should be able to detect a Ogg/Opus file from a closure tag in RSS (Level 2) feed by mimetype \"audio/ogg; codecs=opus\" when this format is supported. Instead the episodes media URL shoud be undefined.", function () {
                     var result;
                     result = HTML5Podcatcher.parser.parseSource(xml, source);
-                    expect(result.episodes[5].mediaUrl).toEqual('https://podcast.web.site/episode.opus');
+                    if (document.createElement('audio').canPlayType('audio/ogg; codecs=opus') !== '') {
+                        expect(result.episodes[5].mediaUrl).toEqual('https://podcast.web.site/episode.opus');
+                    } else {
+                        expect(result.episodes[5].mediaUrl).toBeUndefined();
+                    }
+                    //expect(result.episodes[5].mediaType).toEqual('audio/opus');
                     expect(result.episodes[5].mediaType).toEqual('audio/ogg; codecs=opus');
+                });
+                it("should be able to detect a Ogg/Opus file from a closure tag in RSS (Level 2) feed by mimetype \"audio/opus\" when this format is supported. Instead the episodes media URL shoud be undefined.", function () {
+                    var result;
+                    result = HTML5Podcatcher.parser.parseSource(xml, source);
+                    if (document.createElement('audio').canPlayType('audio/ogg; codecs=opus') !== '') {
+                        expect(result.episodes[9].mediaUrl).toEqual('https://podcast.web.site/episode.opus');
+                    } else {
+                        expect(result.episodes[9].mediaUrl).toBeUndefined();
+                    }
+                    expect(result.episodes[9].mediaType).toEqual('audio/ogg; codecs=opus');
                 });
                 it("should be able to detect a MP3 file from the content tag in RSS (Level 2) feed by file extension \".mp3\"", function () {
                     var result;
                     result = HTML5Podcatcher.parser.parseSource(xml, source);
                     expect(result.episodes[1].mediaUrl).toEqual('https://podcast.web.site.new/files/episode2.mp3');
                     expect(result.episodes[1].mediaType).toEqual('audio/mpeg');
+                });
+                it("should be able to detect a AAC file from the content tag in RSS (Level 2) feed by file extension \".m4a\"", function () {
+                    var result;
+                    result = HTML5Podcatcher.parser.parseSource(xml, source);
+                    expect(result.episodes[6].mediaUrl).toEqual('https://podcast.web.site.new/files/episode.m4a');
+                    expect(result.episodes[6].mediaType).toEqual('audio/mp4');
+                });
+                it("should be able to detect a Ogg/Vorbis file from the content tag in RSS (Level 2) feed by file extension \".oga\"", function () {
+                    var result;
+                    result = HTML5Podcatcher.parser.parseSource(xml, source);
+                    expect(result.episodes[7].mediaUrl).toEqual('https://podcast.web.site.new/files/episode.oga');
+                    expect(result.episodes[7].mediaType).toEqual('audio/ogg');
+                });
+                it("should be able to detect a Ogg/Opus file from the content tag in RSS (Level 2) feed by file extension \".opus\"", function () {
+                    var result;
+                    result = HTML5Podcatcher.parser.parseSource(xml, source);
+                    expect(result.episodes[8].mediaUrl).toEqual('https://podcast.web.site.new/files/episode.opus');
+                    expect(result.episodes[8].mediaType).toEqual('audio/ogg; codecs=opus');
                 });
                 it("should be able to detect a chapters list from the rss item in \"Podlove Simple Chapters\" format", function () {
                     var result;
