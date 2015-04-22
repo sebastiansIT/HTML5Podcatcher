@@ -14,10 +14,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-html');
     grunt.loadNpmTasks('grunt-jslint');
     grunt.loadNpmTasks('grunt-usemin');
+    grunt.loadNpmTasks('grunt-autoprefixer');
     //Config Tasks
     grunt.initConfig({
-        'pkg': grunt.file.readJSON('package.json'),
-        'clean': {
+        pkg: grunt.file.readJSON('package.json'),
+        clean: {
             HostedWebApp: {
                 src: ['build/webapp']
             },
@@ -46,9 +47,8 @@ module.exports = function (grunt) {
             },
             FirefoxPackagedApp: { // configure the string replacement task for the packaged app
                 files: [
-                    {src: 'sources/webApp/playlist.html',        dest: 'build/packagedapp/temp/playlist.html'},
-                    {src: 'sources/webApp/settings.html',          dest: 'build/packagedapp/temp/settings.html'},
-                    {cwd: 'sources/webApp/', src: 'scripts/**/*.js', dest: 'build/packagedapp/temp/', expand: 'true'},
+                    {cwd: 'sources/webApp/', src: ['*.html', '!diagnostic.html'],                dest: 'build/packagedapp/temp/', expand: 'true' },
+                    {cwd: 'sources/webApp/', src: ['scripts/**/*.js', '!scripts/diagnostic.js'], dest: 'build/packagedapp/temp/', expand: 'true'},
                     {src: 'sources/packagedapp/manifest.webapp',   dest: 'build/packagedapp/temp/manifest.webapp'},
                     {src: 'sources/packagedapp/package.manifest',  dest: 'build/packagedapp/package.manifest'},
                     {src: 'sources/packagedapp/install.html',      dest: 'build/packagedapp/install.html'}
@@ -70,7 +70,7 @@ module.exports = function (grunt) {
                 }
             }
         },
-        'copy': {
+        copy: {
             HostedWebApp: {
                 files: [
                     // includes files within path {expand: true,  cwd: 'sources/webapp/',    src: ['styles/*.css'],                    dest: 'build/webapp/',             filter: 'isFile'},
@@ -85,7 +85,7 @@ module.exports = function (grunt) {
             },
             FirefoxPackagedApp: {
                 files: [
-                    {expand: true,  cwd: 'sources/webapp/',      src: ['styles/*.css'],                    dest: 'build/packagedapp/temp/',            filter: 'isFile'},
+                    
                     {expand: true,  cwd: 'sources/webapp/',      src: ['styles/icons/*.png'],              dest: 'build/packagedapp/temp/',            filter: 'isFile'},
                     {expand: true,  cwd: 'sources/webapp/',      src: ['images/*.png'],                    dest: 'build/packagedapp/temp/',            filter: 'isFile'},
                     {expand: true,  cwd: 'sources/packagedapp/', src: ['images/*.png'],                    dest: 'build/packagedapp/temp/',            filter: 'isFile'},
@@ -94,7 +94,7 @@ module.exports = function (grunt) {
                 ]
             }
         },
-        'curl': {
+        curl: {
             HostedWebApp: {
                 src: 'http://code.jquery.com/jquery-2.1.1.min.js',
                 dest: 'build/webapp/scripts/jquery.min.js'
@@ -104,14 +104,40 @@ module.exports = function (grunt) {
                 dest: 'build/packagedapp/temp/scripts/jquery.min.js'
             }
         },
-        'zip': {
+        zip: {
             FirefoxPackagedApp: {
                 cwd: 'build/packagedapp/temp/',
                 src: ['build/packagedapp/temp/**'],
                 dest: 'build/packagedapp/html5podcatcher.zip'
             }
         },
-        jslint: { // configure the jslint task
+        concat: {
+            'HostedWebApp-css': {
+                'src': ['sources/webapp/styles/*.css'],
+                'dest': 'build/webapp/styles/main.css'
+            },
+            'FirefoxPackagedApp-css': {
+                'src': ['sources/webapp/styles/*.css'],
+                'dest': 'build/packagedapp/temp/styles/main.css'
+            }
+        },
+        usemin: {
+            HostedWebApp: ['build/webapp/*.html'],
+            FirefoxPackagedApp: ['build/packagedapp/temp/*.html'],
+            options: {
+            }
+        },
+        autoprefixer: {
+            FirefoxPackagedApp: {
+                options: {
+                    browsers: ['ff >= 28'] //Gecko 28 is used in FirefoxOS 1.3
+                },
+                src: 'build/packagedapp/temp/styles/main.css',
+                dest: 'build/packagedapp/temp/styles/main.css'
+            }
+        },
+        //Test and Lint files
+        jslint: {
             client: { // lint your project's client code
                 src: [
                     'gruntfile.js',
@@ -167,7 +193,7 @@ module.exports = function (grunt) {
                 ]
             }
         },
-        'jasmine': {
+        jasmine: {
             client: {
                 src: [
                     'sources/webapp/scripts/*.js',
@@ -185,21 +211,10 @@ module.exports = function (grunt) {
                 }
             }
         },
-        concat: {
-            'HostedWebApp-css': {
-                'src': ['sources/webapp/styles/*.css'],
-                'dest': 'build/webapp/styles/main.css'
-            }
-        },
-        usemin: {
-            HostedWebApp: ['build/webapp/*.html'],
-            options: {
-            }
-        }
     });
     //Register Tasks
     grunt.registerTask('HostedWebApp',       ['clean:HostedWebApp', 'string-replace:HostedWebApp', 'concat:HostedWebApp-css', 'copy:HostedWebApp', 'curl:HostedWebApp', 'usemin:HostedWebApp']);
-    grunt.registerTask('FirefoxPackagedApp', ['string-replace:FirefoxPackagedApp', 'copy:FirefoxPackagedApp', 'curl:FirefoxPackagedApp', 'zip:FirefoxPackagedApp']); //, 'clean:FirefoxPackagedApp'
+    grunt.registerTask('FirefoxPackagedApp', ['string-replace:FirefoxPackagedApp', 'concat:FirefoxPackagedApp-css', 'autoprefixer:FirefoxPackagedApp', 'usemin:FirefoxPackagedApp', 'copy:FirefoxPackagedApp', 'curl:FirefoxPackagedApp', 'zip:FirefoxPackagedApp']); //, 'clean:FirefoxPackagedApp'
     grunt.registerTask('test',               ['htmllint', 'csslint', 'jslint', 'jasmine']);
     grunt.registerTask('default',            ['test', 'HostedWebApp', 'FirefoxPackagedApp']);
 };

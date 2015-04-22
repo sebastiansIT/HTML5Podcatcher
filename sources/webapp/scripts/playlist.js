@@ -305,6 +305,16 @@ $(document).ready(function () {
             localStorage.removeItem(localStorage.key(k));
         }
     }
+    // -------------------------- //
+    // -- Check Pre Conditions -- //
+    // -------------------------- //
+    POD.preConditionCheck(function (preConditionCheckResult) {
+        if (preConditionCheckResult === 'missing proxy') {
+            window.location.href = 'settings.html';
+        } else if (preConditionCheckResult === 'missing sources') {
+            window.location.href = 'sources.html';
+        }
+    });
     // ------------------- //
     // -- Initialise UI -- //
     // ------------------- //

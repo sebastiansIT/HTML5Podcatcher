@@ -30,6 +30,16 @@ $(document).ready(function () {
     POD.settings.uiLogger = UI.logHandler;
     POD.settings.uiLogger("Opens Source View", "debug");
     POD.web.settings.proxyUrlPattern = UI.settings.get("proxyUrl");
+    // -------------------------- //
+    // -- Check Pre Conditions -- //
+    // -------------------------- //
+    POD.preConditionCheck(function (preConditionCheckResult) {
+        if (preConditionCheckResult === 'missing proxy') {
+            window.location.href = 'settings.html';
+        } else if (preConditionCheckResult === 'missing sources') {
+            $('#addSourceView').toggleClass('fullscreen');
+        }
+    });
     // ------------------- //
     // -- Initialise UI -- //
     // ------------------- //

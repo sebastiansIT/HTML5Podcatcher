@@ -76,11 +76,18 @@ var GlobalUserInterfaceHelper = {
         default:
             console.log(loglevel + ': ' + message);
         }
-        var logEntryNode = document.createElement("p");
+        var messageNode, logEntryNode = document.createElement("p");
         logEntryNode.className = loglevel;
         logEntryNode.appendChild(document.createTextNode(message));
         if (document.getElementById('log')) {
             document.getElementById('log').insertBefore(logEntryNode, document.getElementById('log').firstChild);
+        }
+        if (document.getElementById('activeMessage') && (loglevel === 'warn' || loglevel === 'error' || loglevel === 'fatal')) {
+            messageNode = document.getElementById('activeMessage');
+            while (messageNode.hasChildNodes()) {
+                messageNode.removeChild(messageNode.lastChild);
+            }
+            messageNode.appendChild(logEntryNode.cloneNode(true));
         }
     },
     errorHandler: function (event) {

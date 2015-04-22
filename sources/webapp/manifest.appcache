@@ -33,6 +33,11 @@
 ### Fix a bug: RSS link elements have now higher priority than gudi element when selecting the uri of an episode
 ##0.33.5
 ### Transfer mime-type audio/opus to "audio/ogg; codec=opus" (Firefox only understand the last one)
+##0.33.6
+### Show error messages at foot of main region
+### some litle changes on css
+### fix open web app manifest for FirefoxOS
+### Use Autoprefixer in build process for Open Web App
 
 # VALIDATE this manifest on http://manifest-validator.com/
 

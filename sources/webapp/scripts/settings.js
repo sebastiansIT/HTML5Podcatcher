@@ -111,6 +111,14 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
         $('#FileSystemAPI').hide();
     }
+    // -------------------------- //
+    // -- Check Pre Conditions -- //
+    // -------------------------- //
+    POD.preConditionCheck(function (preConditionCheckResult) {
+        if (preConditionCheckResult === 'missing proxy') {
+            UI.logHandler('Please insert the URL of a HTTP proxy (Example: "https://domain.net/proxy.py?url=$url$"). Use $url$ as a placeholder for the URL (feed or file) the proxy should load.', 'warn');
+        }
+    });
     // -- Register Eventhandler -- //
     //General UI Events
     UI.initGeneralUIEvents();

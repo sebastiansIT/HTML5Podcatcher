@@ -1,5 +1,5 @@
 ﻿{
-	"name": "HTML5 Podcatcher",
+	"name": "H5P",
 	"description": "A Podcatcher based on HTML5 and Javascript",
 	"release_notes": "First testing release",
 	"version": "{{ VERSION }}",

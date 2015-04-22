@@ -222,7 +222,6 @@ var HTML5Podcatcher = {
                             ajaxRequest = new XMLHttpRequest();
                         }
                     } else {
-                        HTML5Podcatcher.logger("This Webapp isn't installed", 'debug');
                         ajaxRequest = new XMLHttpRequest();
                     }
                     completed(ajaxRequest);
@@ -285,11 +284,11 @@ var HTML5Podcatcher = {
             };
             errorfunction = function (xhrError) {
                 if (HTML5Podcatcher.web.settings.proxyUrlPattern) {
-                    HTML5Podcatcher.logger('Direct download failed. Try proxy: ' + HTML5Podcatcher.web.settings.proxyUrlPattern.replace("$url$", source.uri), 'warning');
+                    HTML5Podcatcher.logger('Direct download failed. Try proxy: ' + HTML5Podcatcher.web.settings.proxyUrlPattern.replace("$url$", source.uri), 'info');
                     HTML5Podcatcher.web.createXMLHttpRequest(function (proxyXhr) {
                         proxyXhr.open('GET', HTML5Podcatcher.web.settings.proxyUrlPattern.replace("$url$", source.uri), true);
                         proxyXhr.addEventListener("error", function (xhrError) {
-                            HTML5Podcatcher.logger("Can't download Source: " + xhrError.error);
+                            HTML5Podcatcher.logger("Can't download Source: " + xhrError.error, 'error');
                         });
                         proxyXhr.addEventListener("abort", HTML5Podcatcher.logger, false);
                         proxyXhr.onload = successfunction;
@@ -299,7 +298,7 @@ var HTML5Podcatcher = {
                         proxyXhr.send();
                     });
                 } else {
-                    HTML5Podcatcher.logger("Can't download Source: " + xhrError.error);
+                    HTML5Podcatcher.logger("Can't download Source: " + xhrError.error, 'error');
                 }
             };
             //Load Feed and Parse Entries
@@ -599,6 +598,57 @@ var HTML5Podcatcher = {
     errorLogger: function (message) {
         "use strict";
         HTML5Podcatcher.logger(message, 'error');
+    },
+    preConditionCheck: function (actionCallback) {
+        "use strict";
+        var appInfoRequest, proxyNeededCheck, feedExistingCheck;
+        feedExistingCheck = function () {
+            //Checks if some feeds exists in storage
+            HTML5Podcatcher.storage.readSources(function (sources) {
+                if (sources.length < 1) {
+                    actionCallback('missing sources');
+                } else {
+                    actionCallback('OK');
+                }
+            });
+        };
+        proxyNeededCheck = function () {
+            //Checks if Proxy is needed (Permission for System XHR is not set and proxy url is not set in configuration)
+            if (window.navigator.mozApps) { //is an Open Web App runtime 
+                appInfoRequest = window.navigator.mozApps.getSelf();
+                appInfoRequest.onsuccess = function () {
+                    var systemXhrStatus;
+                    if (appInfoRequest.result) { //checks for installed app
+                        HTML5Podcatcher.logger(appInfoRequest.result.manifest.name + " is a " + appInfoRequest.result.manifest.type + " app.", 'debug');
+                        if (appInfoRequest.result.manifest.type === 'privileged' || appInfoRequest.result.manifest.type === 'certified') {
+                            HTML5Podcatcher.logger('App is allowed to post System XHR requests.', 'debug');
+                            feedExistingCheck();
+                        } else {
+                            if (!UI.settings.get("proxyUrl") || UI.settings.get("proxyUrl").length < 11) {
+                                actionCallback('missing proxy');
+                            } else {
+                                feedExistingCheck();
+                            }
+                        }
+                    } else { //checks for app opend in browser 
+                        HTML5Podcatcher.logger("This Webapp isn't installed as an Mozilla Open Web App but you can install it from Firefox Marketplace.", 'debug');
+                        if (!UI.settings.get("proxyUrl") || UI.settings.get("proxyUrl").length < 11) {
+                            actionCallback('missing proxy');
+                        } else {
+                            feedExistingCheck();
+                        }
+                    }
+                };
+            } else { //is a runtime without support for Open Web Apps
+                HTML5Podcatcher.logger("This Webapp isn't installed as an Open Web App.", 'debug');
+                if (!UI.settings.get("proxyUrl") || UI.settings.get("proxyUrl").length < 11) {
+                    actionCallback("missing proxy");
+                } else {
+                    feedExistingCheck();
+                }
+            }
+        };
+        proxyNeededCheck();
     }
 };
 var POD = HTML5Podcatcher;
