@@ -70,6 +70,7 @@ div[role="toolbar"] a[data-icon]:before {
   margin-left:-1.5rem;
   background-size: 3rem 3rem;
 }
+
 [role="toolbar"] button[data-icon="reload"]:before { 
     background: url(icons/refresh.png) no-repeat center center;
 }
@@ -103,4 +104,25 @@ div[role="toolbar"] a[data-icon]:before {
 }
 [role="toolbar"] button[data-icon="delete"]:before {
     background: url("icons/delete.png") no-repeat center center;
+}
+
+#activeMessage p {
+	padding: 0.3rem 0.6rem;
+	color: #000000;
+	margin:0;
+	border-top: 1px solid #EEE;
+	max-height: 2rem;
+	overflow: hidden; 
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+#activeMessage p.warn {
+	background-color: #EE6400;
+	color:#EEEEEE;
+	border:none;
+}
+#activeMessage p.error {
+	background-color: #640000;
+	color:#EEEEEE;
+	border:none;
 }

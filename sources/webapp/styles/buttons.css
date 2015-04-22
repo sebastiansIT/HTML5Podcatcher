@@ -42,6 +42,7 @@ button,
   text-align: center;
   text-decoration: none;
   background-color: #006400;
+  background-image: none;
   color: #fff;
   cursor:pointer;
 }

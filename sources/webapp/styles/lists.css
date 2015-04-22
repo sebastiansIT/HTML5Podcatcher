@@ -33,6 +33,7 @@
 	border-bottom: solid 0.1rem #e7e7e7;
 	color: #333;
 	margin: 0;
+	padding: 0 0.3rem;
 	display: flex;
 	position: relative;
 	overflow: hidden;

@@ -55,7 +55,7 @@ section[role="region"] .content {
 }
 section[role="region"] .content > div,
 section[role="region"] .content > section {
-	margin: 1.5rem;
+	margin: 1.2rem;
 }
 
 /* Special Layout for Dialogs */
@@ -76,6 +76,7 @@ template, .template {
 	display: none;
 }
 
+/* Content-Style */
 h2 { /* = Headline of Content */
 	font-size: 2.2rem;
 	line-height:1.2em;
@@ -109,6 +110,33 @@ h3 a,
 h4 a { /*Links insite a Headline*/
 	color: inherit;
 	text-decoration: inherit;
+}
+
+/* Loging-Style */
+#log p {
+	padding-left: 0.5rem;
+}
+#log .fatal {
+	border-left: 0.5rem solid #640000;
+	color: #640000;
+	text-transform:uppercase;
+}
+#log .error {
+	border-left: 0.5rem solid #640000;
+	padding-left: 0.5rem;
+}
+#log .warn {
+	border-left: 0.5rem solid #EE6400;
+	padding-left: 0.5rem;
+}
+#log .info {
+	border-left: 0.5rem solid #444444;
+	padding-left: 0.5rem;
+}
+#log .debug {
+	border-left: 0.5rem solid #888888;
+	padding-left: 0.5rem;
+	color: #888888;
 }
 
 /* Layout for deskop displays and greater */
