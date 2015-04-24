@@ -37,16 +37,21 @@ Android, Chrome Web Store and other platforms.
 ### Design ###
 I'm not a Designer! Contact me if you would help.
 
+For the current design I have to thank Mozilla and there [Building Blocks](http://buildingfirefoxos.com/building-blocks).
+
 ## Build ##
 I use Grunt to build the app in different versions: A web app to host on 
 your own web server and a packaged app for Firefox OS/Firefox Marketplace. 
 More will come later.
 
 Installation and usaged
-At the moment you can use the web version 
-at http://podcatcher.sebastiansit.de/podcatcher.html but you need a 
-proxy to avoid SOP-Errors.
+At the moment you can test the web version 
+at http://podcatcher.sebastiansit.de/playlist.html. In addition you need a 
+http proxy to avoid SOP-Errors.
 
 ## Screenshots
 
 ![Playlist](/resources/images/HTML5Podcatcher_Playlist.png?raw=true "Playlist Screenshot")
+![Feed Management](/resources/images/HTML5Podcatcher_Feeds.png?raw=true "Feeds Screenshot")
+![Feed Details](/resources/images/HTML5Podcatcher_FeedDetails.png?raw=true "Feed Detail Screenshot")
+![Settings](/resources/images/HTML5Podcatcher_Settings.png?raw=true "Settings Screenshot")
