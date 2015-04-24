@@ -74,7 +74,7 @@ module.exports = function (grunt) {
             HostedWebApp: {
                 files: [
                     // includes files within path {expand: true,  cwd: 'sources/webapp/',    src: ['styles/*.css'],                    dest: 'build/webapp/',             filter: 'isFile'},
-                    {expand: true,  cwd: 'sources/webapp/',    src: ['styles/icons/*.png'],              dest: 'build/webapp/',             filter: 'isFile'},
+                    {expand: true,  cwd: 'sources/webapp/',    src: ['styles/icons/*.svg'],              dest: 'build/webapp/',             filter: 'isFile'},
                     {expand: true,  cwd: 'sources/webapp/',    src: ['images/*.png'],                    dest: 'build/webapp/',             filter: 'isFile'},
                     {expand: true,  cwd: 'sources/hostedapp/', src: ['images/*.png'],                    dest: 'build/webapp/',             filter: 'isFile'},
                     {expand: true,  cwd: 'sources/hostedapp/', src: ['scripts/*.js'],                    dest: 'build/webapp/',             filter: 'isFile'},
@@ -86,7 +86,7 @@ module.exports = function (grunt) {
             FirefoxPackagedApp: {
                 files: [
                     
-                    {expand: true,  cwd: 'sources/webapp/',      src: ['styles/icons/*.png'],              dest: 'build/packagedapp/temp/',            filter: 'isFile'},
+                    {expand: true,  cwd: 'sources/webapp/',      src: ['styles/icons/*.svg'],              dest: 'build/packagedapp/temp/',            filter: 'isFile'},
                     {expand: true,  cwd: 'sources/webapp/',      src: ['images/*.png'],                    dest: 'build/packagedapp/temp/',            filter: 'isFile'},
                     {expand: true,  cwd: 'sources/packagedapp/', src: ['images/*.png'],                    dest: 'build/packagedapp/temp/',            filter: 'isFile'},
                     {expand: false, cwd: 'sources/webapp/',      src: 'sources/webapp/images/favicon.ico', dest: 'build/packagedapp/temp/favicon.ico', filter: 'isFile'},

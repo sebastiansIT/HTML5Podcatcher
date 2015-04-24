@@ -289,6 +289,9 @@ GlobalUserInterfaceHelper.togglePauseStatus = function () {
 $(document).ready(function () {
     "use strict";
     var k, quota, multiMediaKeyDownTimestemp;
+    //Application Cache Events
+    UI.initApplicationCacheEvents();
+    //Configurate POD
     POD.settings.uiLogger = UI.logHandler;
     POD.settings.uiLogger("Open Playlist", "debug");
     POD.web.settings.proxyUrlPattern = UI.settings.get("proxyUrl");
@@ -329,16 +332,11 @@ $(document).ready(function () {
     }
     //Render playlist
     POD.storage.readPlaylist(false, UI.renderEpisodeList);
-    if (!navigator.onLine) {
-        $('#refreshPlaylist, .update, #showAddSourceView, .downloadFile').attr('disabled', 'disabled');
-    }
     //Initialise player
     UI.getLastPlayedEpisode(UI.playEpisode);
     // --------------------------- //
     // -- Register Eventhandler -- //
     // --------------------------- //
-    //Application Cache Events
-    UI.initApplicationCacheEvents();
     //Player UI Events
     $('#playPause').on('click', function (event) {
         event.preventDefault();
@@ -465,5 +463,9 @@ $(document).ready(function () {
         }
     }, false);
     UI.initGeneralUIEvents();
+    //Disable online functions when device is offline
+    if (!navigator.onLine) {
+        $('#refreshPlaylist, .update, #showAddSourceView, #updateSource, #openSourceWebsite, .origin, .downloadFile').attr('disabled', 'disabled');
+    }
     UI.initConnectionStateEvents();
 });

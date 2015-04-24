@@ -38,6 +38,9 @@
 ### some litle changes on css
 ### fix open web app manifest for FirefoxOS
 ### Use Autoprefixer in build process for Open Web App
+##0.33.7
+### litte changes handling app cache events
+### replace background images with SVG files
 
 # VALIDATE this manifest on http://manifest-validator.com/
 
@@ -66,23 +69,23 @@ styles/main.css
 # styles/buttons.css
 # styles/input_areas.css
 # styles/lists.css
-styles/icons/addSource.png
-styles/icons/back.png
-styles/icons/browsing.png
-styles/icons/close.png
-styles/icons/delete.png
-styles/icons/download.png
-styles/icons/notifications.png
-styles/icons/pause.png
-styles/icons/play.png
-styles/icons/playlist.png
-styles/icons/refresh.png
-styles/icons/seekback.png
-styles/icons/seekforward.png
-styles/icons/settings.png
-styles/icons/skipback.png
-styles/icons/skipforward.png
-styles/icons/sources.png
+styles/icons/addSource.svg
+styles/icons/back.svg
+styles/icons/browsing.svg
+styles/icons/close.svg
+styles/icons/delete.svg
+styles/icons/download.svg
+styles/icons/notifications.svg
+styles/icons/pause.svg
+styles/icons/play.svg
+styles/icons/playlist.svg
+styles/icons/refresh.svg
+styles/icons/seekback.svg
+styles/icons/seekforward.svg
+styles/icons/settings.svg
+styles/icons/skipback.svg
+styles/icons/skipforward.svg
+styles/icons/sources.svg
 # IMAGES
 favicon.ico
 images/logo60.png

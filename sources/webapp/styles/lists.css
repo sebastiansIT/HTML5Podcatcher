@@ -103,6 +103,7 @@ h4 { /* = Title of list item */
 .content .entries li button[data-icon]:focus,
 .content .entries li button[data-icon]:hover {
 	background-color:rgba(0, 100, 0, 0.2);
+	padding:0;
 }
 .content .entries li a[data-icon]:before,
 .content .entries li button[data-icon]:before {
@@ -114,18 +115,18 @@ h4 { /* = Title of list item */
     width: 4rem;
 }
 .content .entries li a[data-icon="reload"]:before {
-    background: url("icons/refresh.png") no-repeat scroll center center transparent ;
+	background: url("icons/refresh.svg") no-repeat scroll center center transparent;
 }
 .content .entries li button[data-icon="delete"]:before {
-    background: url("icons/delete.png") no-repeat scroll center center transparent ;
+	background: url("icons/delete.svg") no-repeat scroll center center transparent;
 }
 .content .entries li a[data-icon="download"]:before,
 .content .entries li button[data-icon="download"]:before {
-    background: url("icons/download.png") no-repeat scroll center center transparent ;
+	background: url("icons/download.svg") no-repeat scroll center center transparent;
 }
 .content .entries li a[data-icon="browsing"]:before,
 .content .entries li button[data-icon="browsing"]:before {
-    background: url("icons/browsing.png") no-repeat scroll center center transparent ;
+	background: url("icons/browsing.svg") no-repeat scroll center center transparent;
 }
 
 

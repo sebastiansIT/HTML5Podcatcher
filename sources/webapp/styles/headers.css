@@ -102,19 +102,19 @@ section[role="region"] > header:first-child .icon {
 }
 /* Symbols*/
 section[role="region"] > header:first-child .icon-close {
-  background-image: url(icons/close.png);
+  background-image: url(icons/close.svg);
 }
 section[role="region"] > header:first-child .icon-playlist {
-  background-image: url(icons/playlist.png);
+  background-image: url(icons/playlist.svg);
 }
 section[role="region"] > header:first-child .icon-feed {
-  background-image: url(icons/sources.png);
+  background-image: url(icons/sources.svg);
 }
 section[role="region"] > header:first-child .icon-settings {
-  background-image: url(icons/settings.png);
+  background-image: url(icons/settings.svg);
 }
 section[role="region"] > header:first-child .icon-back {
-  background-image: url(icons/back.png);
+  background-image: url(icons/back.svg);
 }
 
 /* ----------------------------------

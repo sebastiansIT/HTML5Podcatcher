@@ -138,52 +138,69 @@ var GlobalUserInterfaceHelper = {
     },
     initApplicationCacheEvents: function () {
         "use strict";
+        function statusName(statusNumber) {
+            var appCache = window.applicationCache;
+            switch (statusNumber) {
+            case appCache.UNCACHED: // UNCACHED == 0
+                return 'UNCACHED';
+            case appCache.IDLE: // IDLE == 1
+                return 'IDLE';
+            case appCache.CHECKING: // CHECKING == 2
+                return 'CHECKING';
+            case appCache.DOWNLOADING: // DOWNLOADING == 3
+                return 'DOWNLOADING';
+            case appCache.UPDATEREADY:  // UPDATEREADY == 4
+                return 'UPDATEREADY';
+            case appCache.OBSOLETE: // OBSOLETE == 5
+                return 'OBSOLETE';
+            default:
+                return 'UKNOWN CACHE STATUS';
+            }
+        }
         $(applicationCache).on('checking', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cache checks for updates (Cache status: " + applicationCache.status + ")", 'debug');
-            $('#applicationCacheLog').prepend('<span>' + "Application cache check for updates" + '</span></br>');
+            GlobalUserInterfaceHelper.logHandler("Application cache checks for updates (Cache status: " + statusName(applicationCache.status) + ")", 'debug');
         });
         $(applicationCache).on('noupdate', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cache founds no update (Cache status: " + applicationCache.status + ")", 'debug');
-            $('#applicationCacheLog').prepend('<span>' + "Application cache founds no update" + '</span></br>');
+            GlobalUserInterfaceHelper.logHandler("Application cache founds no update (Cache status: " + statusName(applicationCache.status) + ")", 'debug');
         });
         $(applicationCache).on('downloading', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cache download updated files (Cache status: " + applicationCache.status + ")", 'debug');
-            $('#applicationCacheLog').prepend('<span>' + "Application cache download updated files" + '</span></br>');
+            GlobalUserInterfaceHelper.logHandler("Application cache download updated files (Cache status: " + statusName(applicationCache.status) + ")", 'debug');
         });
         $(applicationCache).on('progress', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cache downloading files (Cache status: " + applicationCache.status + ")", 'debug');
-            $('#applicationCacheLog').prepend('<span>' + "Application cache downloading files" + '</span></br>');
+            GlobalUserInterfaceHelper.logHandler("Application cache downloading files (Cache status: " + statusName(applicationCache.status) + ")", 'debug');
         });
         $(applicationCache).on('cached', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cached (Cache status: " + applicationCache.status + ")", 'debug');
-            $('#applicationCacheLog').prepend('<span>' + "Application cached" + '</span></br>');
+            GlobalUserInterfaceHelper.logHandler("Application cached (Cache status: " + statusName(applicationCache.status) + ")", 'debug');
         });
         $(applicationCache).on('updateready', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cache is updated (Cache status: " + applicationCache.status + ")", 'info');
-            $('#applicationCacheLog').prepend('<span>' + "Application cache is updated" + '</span></br>');
+            GlobalUserInterfaceHelper.logHandler("Application cache is updated (Cache status: " + statusName(applicationCache.status) + ")", 'info');
             applicationCache.swapCache();
             if (confirm("An update of HTML5 Podcatcher is available. Do you want to reload now?")) {
                 window.location.reload();
             }
         });
         $(applicationCache).on('obsolete', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cache is corrupted and will be deletet (Cache status: " + applicationCache.status + ")", 'error');
-            $('#applicationCacheLog').prepend('<span>' + "Application cache is corrupted and will be deletet" + '</span></br>');
+            GlobalUserInterfaceHelper.logHandler("Application cache is corrupted and will be deletet (Cache status: " + statusName(applicationCache.status) + ")", 'error');
         });
         $(applicationCache).on('error', function () {
-            GlobalUserInterfaceHelper.logHandler("Error downloading manifest or resources (Cache status: " + applicationCache.status + ")", 'error');
-            $('#applicationCacheLog').prepend('<span>' + "Error downloading manifest or resources" + '</span></br>');
+            if (applicationCache.status !== 1) {
+                GlobalUserInterfaceHelper.logHandler("Error downloading manifest or resources (Cache status: " + statusName(applicationCache.status) + ")", 'error');
+            } else {
+                GlobalUserInterfaceHelper.logHandler("Can't download manifest or resources because app is offline (Cache status: " + statusName(applicationCache.status) + ")", 'debug');
+            }
         });
     },
     initConnectionStateEvents: function () {
         "use strict";
         window.addEventListener('online',  function () {
             GlobalUserInterfaceHelper.logHandler("Online now", 'info');
-            $('#updatePlaylist, .updateSource, .downloadFile').removeAttr('disabled');
+            $('#refreshPlaylist, .update, #showAddSourceView, #updateSource, #openSourceWebsite, .origin, .downloadFile').removeAttr('disabled');
+            $('#refreshPlaylist, .update, #showAddSourceView, #updateSource, #openSourceWebsite, .origin, .downloadFile').removeAttr('aria-disabled');
         }, false);
         window.addEventListener('offline', function () {
             GlobalUserInterfaceHelper.logHandler("Offline now", 'info');
-            $('#updatePlaylist, .updateSource, .downloadFile').attr('disabled', 'disabled');
+            $('#refreshPlaylist, .update, #showAddSourceView, #updateSource, #openSourceWebsite, .origin, .downloadFile').attr('disabled', 'disabled');
+            $('#refreshPlaylist, .update, #showAddSourceView, #updateSource, #openSourceWebsite, .origin, .downloadFile').attr('aria-disabled', 'true');
         }, false);
         /*if (navigator.connection.type) {
             // New version      

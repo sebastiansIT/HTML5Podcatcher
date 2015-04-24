@@ -57,6 +57,7 @@ div[role="toolbar"] a:focus {
 div[role="toolbar"] button[data-icon],
 div[role="toolbar"] a[data-icon] {
   font-size: 0;
+  outline: medium none;
 }
 div[role="toolbar"] button[data-icon]:before,
 div[role="toolbar"] a[data-icon]:before {
@@ -71,39 +72,39 @@ div[role="toolbar"] a[data-icon]:before {
   background-size: 3rem 3rem;
 }
 
-[role="toolbar"] button[data-icon="reload"]:before { 
-    background: url(icons/refresh.png) no-repeat center center;
+[role="toolbar"] button[data-icon="reload"]:before {
+    background: url(icons/refresh.svg) no-repeat center center;
 }
-[role="toolbar"] button[data-icon="play"]:before { 
-    background: url(icons/play.png) no-repeat center center;
+[role="toolbar"] button[data-icon="play"]:before {
+    background: url(icons/play.svg) no-repeat center center;
 }
-[role="toolbar"] button[data-icon="pause"]:before { 
-    background: url(icons/pause.png) no-repeat center center;
+[role="toolbar"] button[data-icon="pause"]:before {
+    background: url(icons/pause.svg) no-repeat center center;
 }
-[role="toolbar"] button[data-icon="previous"]:before { 
-    background: url(icons/skipback.png) no-repeat center center;
+[role="toolbar"] button[data-icon="previous"]:before {
+    background: url(icons/skipback.svg) no-repeat center center;
 }
-[role="toolbar"] button[data-icon="next"]:before { 
-    background: url(icons/skipforward.png) no-repeat center center;
+[role="toolbar"] button[data-icon="next"]:before {
+    background: url(icons/skipforward.svg) no-repeat center center;
 }
-[role="toolbar"] button[data-icon="jumpBackwards"]:before { 
-    background: url(icons/seekback.png) no-repeat center center;
+[role="toolbar"] button[data-icon="jumpBackwards"]:before {
+    background: url(icons/seekback.svg) no-repeat center center;
 }
-[role="toolbar"] button[data-icon="jumpForwards"]:before { 
-    background: url(icons/seekforward.png) no-repeat center center;
+[role="toolbar"] button[data-icon="jumpForwards"]:before {
+    background: url(icons/seekforward.svg) no-repeat center center;
 }
-[role="toolbar"] button[data-icon="show-log"]:before { 
-    background: url(icons/notifications.png) no-repeat center center;
+[role="toolbar"] button[data-icon="show-log"]:before {
+    background: url(icons/notifications.svg) no-repeat center center;
 }
 [role="toolbar"] button[data-icon="add-source"]:before { 
-    background: url(icons/addSource.png) no-repeat center center;
+    background: url(icons/addSource.svg) no-repeat center center;
 }
 [role="toolbar"] button[data-icon="browsing"]:before,
 [role="toolbar"] a[data-icon="browsing"]:before {
-    background: url("icons/browsing.png") no-repeat center center;
+    background: url(icons/browsing.svg) no-repeat center center;
 }
 [role="toolbar"] button[data-icon="delete"]:before {
-    background: url("icons/delete.png") no-repeat center center;
+    background: url(icons/delete.svg) no-repeat center center;
 }
 
 #activeMessage p {
