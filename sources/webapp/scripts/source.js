@@ -127,7 +127,7 @@ $(document).ready(function () {
             POD.storage.deleteFile(episode);
         });
     });
-    $('.content').on('click', '.origin', function (event) {
+    $('.content').on('click', '.external', function (event) {
         event.stopPropagation();
         event.preventDefault();
         window.open($(this).attr('href'), '_blank');
@@ -150,6 +150,16 @@ $(document).ready(function () {
     $('#updateSource').on('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
+        var button = this, progressListener;
+        $(button).attr('disabled', 'disabled');
+        $(button).addClass('spinner');
+        progressListener = function (event) {
+            event.stopPropagation();
+            $(button).removeAttr('disabled');
+            $(button).removeClass('spinner');
+            document.removeEventListener('writeSource', progressListener, false);
+        };
+        document.addEventListener('writeSource', progressListener, false);
         POD.storage.readSource(sourceUri, function (source) {
             POD.web.downloadSource(source);
         });
