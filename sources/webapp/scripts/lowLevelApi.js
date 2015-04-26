@@ -206,7 +206,7 @@ var HTML5Podcatcher = {
             downloadTimeout: 600000,
             proxyUrlPattern: undefined
         },
-        createXMLHttpRequest: function (completed) {
+        createXMLHttpRequest: function (onCompletedCallback) {
             "use strict";
             var ajaxRequest, appInfoRequest;
             //Detection of installed open web apps 
@@ -224,12 +224,12 @@ var HTML5Podcatcher = {
                     } else {
                         ajaxRequest = new XMLHttpRequest();
                     }
-                    completed(ajaxRequest);
+                    onCompletedCallback(ajaxRequest);
                 };
             } else {
                 HTML5Podcatcher.logger("This Webapp isn't run in a Open-Web-App-Container.", 'debug');
                 ajaxRequest = new XMLHttpRequest();
-                completed(ajaxRequest);
+                onCompletedCallback(ajaxRequest);
             }
         },
         downloadSource: function (source, limitOfNewEpisodes) {
@@ -265,12 +265,8 @@ var HTML5Podcatcher = {
                     HTML5Podcatcher.logger('No XML Document found instead found [' + this.response + "]", 'error');
                 } else {
                     parserresult = HTML5Podcatcher.parser.parseSource(data, source);
-                    //compute parser result
-                    // 1. merge existing data with actual one
-                    // TODO writing a multi episode write method
-                    // 2. filter top 5 episodes and check if unread
-                    //newestEpisodes = parserresult.episodes.slice(parserresult.episodes.length - 5, parserresult.episodes.length);
-                    // 3. save top 5 episodes with actualised data
+                    // compute parser result:
+                    // merge existing data with actual one and save episodes with actualised data
                     for (i = 0; i < parserresult.episodes.length; i++) {
                         if (i < parserresult.episodes.length - limitOfNewEpisodes) {
                             mergeFunction(parserresult.episodes[i], true);
@@ -598,57 +594,6 @@ var HTML5Podcatcher = {
     errorLogger: function (message) {
         "use strict";
         HTML5Podcatcher.logger(message, 'error');
-    },
-    preConditionCheck: function (actionCallback) {
-        "use strict";
-        var appInfoRequest, proxyNeededCheck, feedExistingCheck;
-        feedExistingCheck = function () {
-            //Checks if some feeds exists in storage
-            HTML5Podcatcher.storage.readSources(function (sources) {
-                if (sources.length < 1) {
-                    actionCallback('missing sources');
-                } else {
-                    actionCallback('OK');
-                }
-            });
-        };
-        proxyNeededCheck = function () {
-            //Checks if Proxy is needed (Permission for System XHR is not set and proxy url is not set in configuration)
-            if (window.navigator.mozApps) { //is an Open Web App runtime 
-                appInfoRequest = window.navigator.mozApps.getSelf();
-                appInfoRequest.onsuccess = function () {
-                    var systemXhrStatus;
-                    if (appInfoRequest.result) { //checks for installed app
-                        HTML5Podcatcher.logger(appInfoRequest.result.manifest.name + " is a " + appInfoRequest.result.manifest.type + " app.", 'debug');
-                        if (appInfoRequest.result.manifest.type === 'privileged' || appInfoRequest.result.manifest.type === 'certified') {
-                            HTML5Podcatcher.logger('App is allowed to post System XHR requests.', 'debug');
-                            feedExistingCheck();
-                        } else {
-                            if (!UI.settings.get("proxyUrl") || UI.settings.get("proxyUrl").length < 11) {
-                                actionCallback('missing proxy');
-                            } else {
-                                feedExistingCheck();
-                            }
-                        }
-                    } else { //checks for app opend in browser 
-                        HTML5Podcatcher.logger("This Webapp isn't installed as an Mozilla Open Web App but you can install it from Firefox Marketplace.", 'debug');
-                        if (!UI.settings.get("proxyUrl") || UI.settings.get("proxyUrl").length < 11) {
-                            actionCallback('missing proxy');
-                        } else {
-                            feedExistingCheck();
-                        }
-                    }
-                };
-            } else { //is a runtime without support for Open Web Apps
-                HTML5Podcatcher.logger("This Webapp isn't installed as an Open Web App.", 'debug');
-                if (!UI.settings.get("proxyUrl") || UI.settings.get("proxyUrl").length < 11) {
-                    actionCallback("missing proxy");
-                } else {
-                    feedExistingCheck();
-                }
-            }
-        };
-        proxyNeededCheck();
     }
 };
 var POD = HTML5Podcatcher;

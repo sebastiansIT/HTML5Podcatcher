@@ -118,6 +118,56 @@ var GlobalUserInterfaceHelper = {
             console.log(prefix + '...');
         }
     },
+    preConditionCheck: function (actionCallback) {
+        "use strict";
+        var appInfoRequest, proxyNeededCheck, feedExistingCheck;
+        feedExistingCheck = function () {
+            //Checks if some feeds exists in storage
+            HTML5Podcatcher.storage.readSources(function (sources) {
+                if (sources.length < 1) {
+                    actionCallback('missing sources');
+                } else {
+                    actionCallback('OK');
+                }
+            });
+        };
+        proxyNeededCheck = function () {
+            //Checks if Proxy is needed (Permission for System XHR is not set and proxy url is not set in configuration)
+            if (window.navigator.mozApps) { //is an Open Web App runtime 
+                appInfoRequest = window.navigator.mozApps.getSelf();
+                appInfoRequest.onsuccess = function () {
+                    if (appInfoRequest.result) { //checks for installed app
+                        HTML5Podcatcher.logger(appInfoRequest.result.manifest.name + " is a " + appInfoRequest.result.manifest.type + " app.", 'debug');
+                        if (appInfoRequest.result.manifest.type === 'privileged' || appInfoRequest.result.manifest.type === 'certified') {
+                            HTML5Podcatcher.logger('App is allowed to post System XHR requests.', 'debug');
+                            feedExistingCheck();
+                        } else {
+                            if (!GlobalUserInterfaceHelper.settings.get("proxyUrl") || GlobalUserInterfaceHelper.settings.get("proxyUrl").length < 11) {
+                                actionCallback('missing proxy');
+                            } else {
+                                feedExistingCheck();
+                            }
+                        }
+                    } else { //checks for app opend in browser 
+                        HTML5Podcatcher.logger("This Webapp isn't installed as an Mozilla Open Web App but you can install it from Firefox Marketplace.", 'debug');
+                        if (!GlobalUserInterfaceHelper.settings.get("proxyUrl") || GlobalUserInterfaceHelper.settings.get("proxyUrl").length < 11) {
+                            actionCallback('missing proxy');
+                        } else {
+                            feedExistingCheck();
+                        }
+                    }
+                };
+            } else { //is a runtime without support for Open Web Apps
+                HTML5Podcatcher.logger("This Webapp isn't installed as an Open Web App.", 'debug');
+                if (!GlobalUserInterfaceHelper.settings.get("proxyUrl") || GlobalUserInterfaceHelper.settings.get("proxyUrl").length < 11) {
+                    actionCallback("missing proxy");
+                } else {
+                    feedExistingCheck();
+                }
+            }
+        };
+        proxyNeededCheck();
+    },
     settings: {
         set: function (key, value) {
             "use strict";
@@ -314,6 +364,36 @@ var GlobalUserInterfaceHelper = {
             }
         });
         return episodeUI;
+    },
+    eventHandler: {
+        refreshAllSources: function (event) {
+            "use strict";
+            event.preventDefault();
+            event.stopPropagation();
+            var i, button;
+            button = this;
+            $(this).attr('disabled', 'disabled');
+            $(this).addClass('spinner');
+            POD.settings.uiLogger("Playlist will be refreshed", "debug");
+            POD.storage.readSources(function (sources) {
+                var amount, progressListener;
+                amount = sources.length;
+                progressListener = function (event) {
+                    event.stopPropagation();
+                    amount--;
+                    if (amount === 0) {
+                        POD.settings.uiLogger("All Feeds have been refreshed", "info");
+                        $(button).removeAttr('disabled');
+                        $(button).removeClass('spinner');
+                        document.removeEventListener('writeSource', progressListener, false);
+                    }
+                };
+                document.addEventListener('writeSource', progressListener, false);
+                for (i = 0; i < sources.length; i++) {
+                    POD.web.downloadSource(sources[i]);
+                }
+            });
+        }
     }
 };
 var UI = GlobalUserInterfaceHelper;

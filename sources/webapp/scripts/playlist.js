@@ -311,7 +311,7 @@ $(document).ready(function () {
     // -------------------------- //
     // -- Check Pre Conditions -- //
     // -------------------------- //
-    POD.preConditionCheck(function (preConditionCheckResult) {
+    UI.preConditionCheck(function (preConditionCheckResult) {
         if (preConditionCheckResult === 'missing proxy') {
             window.location.href = 'settings.html';
         } else if (preConditionCheckResult === 'missing sources') {
@@ -432,17 +432,7 @@ $(document).ready(function () {
         event.preventDefault();
         window.open($(this).attr('href'), '_blank');
     });
-    $('#refreshPlaylist').on('click', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        var i;
-        POD.settings.uiLogger("Playlist will refreshed now", "debug");
-        POD.storage.readSources(function (sources) {
-            for (i = 0; i < sources.length; i++) {
-                POD.web.downloadSource(sources[i]);
-            }
-        });
-    });
+    $('#refreshPlaylist').on('click', UI.eventHandler.refreshAllSources);
     document.addEventListener('writeEpisode', function (event) {
         var i, episode, episodeUI;
         episode = event.detail.episode;

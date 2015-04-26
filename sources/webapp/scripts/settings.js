@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // -------------------------- //
     // -- Check Pre Conditions -- //
     // -------------------------- //
-    POD.preConditionCheck(function (preConditionCheckResult) {
+    UI.preConditionCheck(function (preConditionCheckResult) {
         if (preConditionCheckResult === 'missing proxy') {
             UI.logHandler('Please insert the URL of a HTTP proxy (Example: "https://domain.net/proxy.py?url=$url$"). Use $url$ as a placeholder for the URL (feed or file) the proxy should load.', 'warn');
         }

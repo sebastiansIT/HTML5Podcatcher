@@ -33,7 +33,7 @@ $(document).ready(function () {
     // -------------------------- //
     // -- Check Pre Conditions -- //
     // -------------------------- //
-    POD.preConditionCheck(function (preConditionCheckResult) {
+    UI.preConditionCheck(function (preConditionCheckResult) {
         if (preConditionCheckResult === 'missing proxy') {
             window.location.href = 'settings.html';
         } else if (preConditionCheckResult === 'missing sources') {
@@ -66,6 +66,16 @@ $(document).ready(function () {
     $('#sourceslist').on('click', '.update', function (event) {
         event.preventDefault();
         event.stopPropagation();
+        var button = this, progressListener;
+        $(button).attr('disabled', 'disabled');
+        $(button).addClass('spinner');
+        progressListener = function (event) {
+            event.stopPropagation();
+            $(button).removeAttr('disabled');
+            $(button).removeClass('spinner');
+            document.removeEventListener('writeSource', progressListener, false);
+        };
+        document.addEventListener('writeSource', progressListener, false);
         POD.storage.readSource($(this).attr("href"), function (source) {
             POD.web.downloadSource(source);
         });
@@ -110,17 +120,7 @@ $(document).ready(function () {
         sourceUI.fadeIn();
     }, false);
     //Reload all Podcasts
-    $('#refreshPlaylist').on('click', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        var i;
-        POD.settings.uiLogger("Playlist will refreshed now", "debug");
-        POD.storage.readSources(function (sources) {
-            for (i = 0; i < sources.length; i++) {
-                POD.web.downloadSource(sources[i]);
-            }
-        });
-    });
+    $('#refreshPlaylist').on('click', UI.eventHandler.refreshAllSources);
     //Open and close the dialog to insert new Feeds/Sources
     $('#showAddSourceView, #addSourceView .closeDialog').on('click', function (event) {
         event.preventDefault();

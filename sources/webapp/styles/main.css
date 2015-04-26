@@ -59,12 +59,12 @@ section[role="region"] .content > section {
 }
 
 /* Special Layout for Dialogs */
-.dialog[role="region"] {
+section.dialog[role="region"] {
 	display:none;
 	width:100%;
 	background-color: rgba(255,255,255,0.9);
 }
-.fullscreen[role="region"] {
+section.fullscreen[role="region"] {
 	position: absolute;
 	display:flex;
 	top: 0;
@@ -149,4 +149,17 @@ h4 a { /*Links insite a Headline*/
 		border-right:0.3rem solid #006400;
 		border-bottom:0.3rem solid #006400;
 	}
+}
+
+.spinner::before {
+  animation: spinnerFrames linear 8s;
+  animation-iteration-count: infinite;
+}
+@keyframes spinnerFrames {
+  0% {
+    transform:  rotate(0deg) ;
+  }
+  100% {
+    transform:  rotate(360deg) ;
+  }
 }

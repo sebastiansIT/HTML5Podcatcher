@@ -19,9 +19,9 @@ I use different APIs and technologies, specified in the HTML5 universe, to reach
 At the moment the app can …
 
 - Parse RSS feeds (version 2)
-- Identify MP3-Files in this feeds
+- Identify Audio-Files in this feeds
 - Manage subscription of feeds
-- Download and save files (in some Browsers)
+- Download and save files (in Firefox and Chrome/Opera)
 - Play/Pause podcast episodes
 - Manage a playlist
 - Persist playback status (timecode) of podcast episodes
@@ -49,9 +49,16 @@ At the moment you can test the web version
 at http://podcatcher.sebastiansit.de/playlist.html. In addition you need a 
 http proxy to avoid SOP-Errors.
 
-## Screenshots
+## Screenshots ##
 
+### Playlist ###
 ![Playlist](/resources/images/HTML5Podcatcher_Playlist.png?raw=true "Playlist Screenshot")
+
+### Feed Management ###
 ![Feed Management](/resources/images/HTML5Podcatcher_Feeds.png?raw=true "Feeds Screenshot")
+
+### Feed Details ###
 ![Feed Details](/resources/images/HTML5Podcatcher_FeedDetails.png?raw=true "Feed Detail Screenshot")
+
+### Settings ###
 ![Settings](/resources/images/HTML5Podcatcher_Settings.png?raw=true "Settings Screenshot")

@@ -24,7 +24,7 @@
 	"chrome": {
 		"navigation": false
 	},
-	"fullscreen": "true",
+	"fullscreen": "false",
 	"csp": "default-src *; script-src 'self'; connect-src *; media-src *; style-src 'self' 'unsafe-inline'; img-src *",
 	"developer": {
 		"name": "SebastiansIT",

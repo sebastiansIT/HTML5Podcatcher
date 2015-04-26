@@ -117,12 +117,12 @@ div[role="toolbar"] a[data-icon]:before {
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
-#activeMessage p.warn {
+#activeMessage .warn {
 	background-color: #EE6400;
 	color:#EEEEEE;
 	border:none;
 }
-#activeMessage p.error {
+#activeMessage .error {
 	background-color: #640000;
 	color:#EEEEEE;
 	border:none;
