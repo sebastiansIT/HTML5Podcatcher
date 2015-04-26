@@ -168,6 +168,7 @@ module.exports = function (grunt) {
                 'unqualified-attributes': true,
                 'universal-selector': true,
                 'overqualified-elements': true,
+                'ids': false,
                 formatters: [
                     {id: 'junit-xml', dest: 'tests/csslint.result.junit.xml'},
                     {id: 'text', dest: 'tests/csslint.result.txt'}
