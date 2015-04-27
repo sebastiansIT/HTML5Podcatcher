@@ -15,17 +15,11 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
-/*global navigator */
-/*global window */
-/*global document */
-/*global console */
-/*global alert */
-/*global confirm */
-/*global localStorage */
-/*global applicationCache */
+/*global navigator, window, document */
+/*global console, global, alert, confirm */
+/*global localStorage, applicationCache */
 /*global $ */
-/*global POD */
-/*global UI */
+/*global POD, UI */
 UI.export = function (onExportCallback) {
     "use strict";
     var config, i, key;
@@ -127,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function () {
     //Connection State Events
     UI.initConnectionStateEvents();
     //Configuration UI Events
-    $('#configuration #memorySizeForm').on('submit', function (event) {
+    $('#memorySizeForm').on('submit', function (event) {
         event.preventDefault();
         event.stopPropagation();
         if ($('#memorySizeInput')[0].checkValidity()) {
@@ -145,16 +139,20 @@ document.addEventListener('DOMContentLoaded', function () {
             UI.logHandler('Please insert a URL', 'error');
         }
     });
-    $('#configuration #exportConfiguration').on('click', function () {
+    $('#exportConfiguration').on('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
         var button = this;
         $(button).attr('disabled', 'disabled');
         UI.export(function (config) {
             $(button).parent().find('#SerialisedConfigurationInput').val(JSON.stringify(config));
-            $(button).parent().find('#SerialisedConfigurationInput')[0].select();
+            //$(button).parent().find('#SerialisedConfigurationInput')[0].select();
             $(button).removeAttr('disabled');
         });
     });
-    $('#configuration #importConfiguration').on('click', function () {
+    $('#importConfiguration').on('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
         var config, button;
         button = this;
         $(button).attr('disabled', 'disabled');

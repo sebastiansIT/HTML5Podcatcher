@@ -15,7 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
-/*global navigator, window */
+/*global navigator, window, document */
 /*global jasmine, describe, it, expect, beforeEach, afterEach */
 /*global HTML5Podcatcher */
 /*global DOMParser */
@@ -73,6 +73,14 @@
                         });
                     });
                 });
+                it("should ignore a empty array of episodes when saving such an array", function (done) {
+                    HTML5Podcatcher.storage.writeEpisodes([], function (writenEpisodes) {
+                        HTML5Podcatcher.storage.readPlaylist(true, function (playlist) {
+                            expect(playlist).toEqual(episodes);
+                            done();
+                        });
+                    });
+                });
                 it("should get all new episodes", function (done) {
                     HTML5Podcatcher.storage.readPlaylist(false, function (episodes) {
                         expect(episodes.length).toEqual(2);
@@ -97,6 +105,14 @@
                             expect(writenSources.length).toEqual(2);
                             expect(writenSources).toEqual(sources);
                             expect(readedSources.length).toEqual(2);
+                            expect(readedSources).toEqual(sources);
+                            done();
+                        });
+                    });
+                });
+                it("should ignore a empty array of sources when saving such an array", function (done) {
+                    HTML5Podcatcher.storage.writeSources([], function (writenSources) {
+                        HTML5Podcatcher.storage.readSources(function (readedSources) {
                             expect(readedSources).toEqual(sources);
                             done();
                         });

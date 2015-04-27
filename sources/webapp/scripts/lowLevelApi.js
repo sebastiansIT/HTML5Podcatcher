@@ -62,13 +62,15 @@ var HTML5Podcatcher = {
         },
         writeSources: function (sources, onWriteCallback) {
             "use strict";
-            if (this.dataStorageEngine()) {
+            if (sources.length > 0 && this.dataStorageEngine()) {
                 this.dataStorageEngine().writeSources(sources, function (sources) {
                     if (onWriteCallback && typeof onWriteCallback === 'function') {
                         onWriteCallback(sources);
                     }
                     document.dispatchEvent(new CustomEvent('writeSources', {"detail": {'sources': sources}}));
                 });
+            } else if (sources.length === 0 && onWriteCallback && typeof onWriteCallback === 'function') {
+                onWriteCallback();
             }
         },
         deleteSource: function (source, onDeleteCallback) {
@@ -109,13 +111,15 @@ var HTML5Podcatcher = {
         },
         writeEpisodes: function (episodes, onWriteCallback) {
             "use strict";
-            if (this.dataStorageEngine()) {
+            if (episodes.length > 0 && this.dataStorageEngine()) {
                 this.dataStorageEngine().writeEpisodes(episodes, function (episodes) {
                     if (onWriteCallback && typeof onWriteCallback === 'function') {
                         onWriteCallback(episodes);
                     }
                     document.dispatchEvent(new CustomEvent('writeEpisodes', {"detail": {'episodes': episodes}}));
                 });
+            } else if (episodes.length === 0 && onWriteCallback && typeof onWriteCallback === 'function') {
+                onWriteCallback();
             }
         },
         //File Storage

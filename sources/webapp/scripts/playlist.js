@@ -136,6 +136,10 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
                     audioElement.autoplay = true;
                 });
             });
+            $('#player audio').on('pause', function () {
+                $('#playPause').data('icon', 'play');
+                $('#playPause').attr('data-icon', 'play');
+            });
             $('#player audio').on('ended', function () {
                 GlobalUserInterfaceHelper.activeEpisode(function (episode) {
                     GlobalUserInterfaceHelper.logHandler(episode.title + " is ended", 'debug:playback');
@@ -169,6 +173,8 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
                         break;
                     }
                 }
+                $('#playPause').data('icon', 'play');
+                $('#playPause').attr('data-icon', 'play');
                 GlobalUserInterfaceHelper.logHandler(errormessage, 'error:playback');
                 GlobalUserInterfaceHelper.nextEpisode(GlobalUserInterfaceHelper.playEpisode);
             });

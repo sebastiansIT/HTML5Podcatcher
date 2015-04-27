@@ -41,6 +41,11 @@
 ##0.33.7
 ### litte changes handling app cache events
 ### replace background images with SVG files
+##0.33.8
+### open links in source.html externaly
+##0.33.9
+### repair export/import functions in settings page
+### manipulate symbol of play/pause-Button when media events error or pause occures
 
 # VALIDATE this manifest on http://manifest-validator.com/
 
