@@ -46,6 +46,8 @@
 ##0.33.9
 ### repair export/import functions in settings page
 ### manipulate symbol of play/pause-Button when media events error or pause occures
+##0.33.10
+### using audio channel api on firefox os runtime
 
 # VALIDATE this manifest on http://manifest-validator.com/
 

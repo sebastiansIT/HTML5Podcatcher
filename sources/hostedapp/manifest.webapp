@@ -9,6 +9,9 @@
 		},
 		"storage": {
 			"description": "Needs to save audio files."
+		},
+		"audio-channel-content" : {
+			"description" : "Needed to play podcasts on the content audio channel."
 		}
 	},
     "launch_path": "/playlist.html",

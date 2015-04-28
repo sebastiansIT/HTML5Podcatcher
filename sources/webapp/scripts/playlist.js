@@ -77,11 +77,49 @@ GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
         POD.storage.readEpisode(lastPlayedEpisode, onReadCallback);
     });
 };
-
+/** Audio Element */
+GlobalUserInterfaceHelper.GenerateAudioElement = function () {
+    "use strict";
+    POD.settings.uiLogger("Audio element will be created", 'debug');
+    var mediaElement;
+    mediaElement = document.createElement("audio");
+    mediaElement.setAttribute('controls', 'controls');
+    mediaElement.setAttribute('preload', 'metadata');
+    mediaElement.appendChild(document.createElement("source"));
+    if (window.navigator.mozApps) {
+        //if app started in Firefox OS Runtime...    
+        mediaElement.setAttribute('mozaudiochannel', 'content');
+        POD.settings.uiLogger("Activate content audio channel", 'debug');
+        //Handling interruptions by heigher audio channels
+        mediaElement.addEventListener('mozinterruptbegin', function () {
+            POD.settings.uiLogger("Playback is interrupted", 'info');
+        });
+        mediaElement.addEventListener('mozinterruptend', function () {
+            POD.settings.uiLogger("Playback is resumed", 'info');
+        });
+        if (navigator.mozAudioChannelManager) {
+            //Set Volumn Control of device to "content" audio channel
+            navigator.mozAudioChannelManager.volumeControlChannel = 'content';
+            //Handling connection/disconnection of headphones
+            navigator.mozAudioChannelManager.onheadphoneschange = function () {
+                if (navigator.mozAudioChannelManager.headphones === true) {
+                    POD.settings.uiLogger('Headphones plugged in!', 'debug');
+                    if (mediaElement.autoplay === true) {
+                        mediaElement.play();
+                    }
+                } else {
+                    POD.settings.uiLogger('Headphones unplugged!', 'debug');
+                    mediaElement.pause();
+                }
+            };
+        }
+    }
+    return mediaElement;
+};
 /** Functions for playback */
 GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallback) {
     "use strict";
-    var mediaUrl, mediaType, audioTag, mp3SourceTag;
+    var mediaUrl, mediaType, audioTag;
     $('#player audio').off('timeupdate');
     GlobalUserInterfaceHelper.logHandler("Timeupdate off", 'debug:playback');
     if (episode) {
@@ -106,10 +144,8 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
                 $(audioTag).attr('title', episode.title);
             } else {
                 $('#mediacontrol > p').remove();
-                audioTag = $('<audio controls="controls" preload="metadata">');
-                mp3SourceTag = $('<source type="' + mediaType + '" />');
-                mp3SourceTag.attr('src', mediaUrl);
-                audioTag.append(mp3SourceTag);
+                audioTag = $(UI.GenerateAudioElement());
+                audioTag.find('source').attr('type', mediaType).attr('src', mediaUrl);
                 audioTag.attr('title', episode.title);
                 $('#mediacontrol').prepend(audioTag);
             }
