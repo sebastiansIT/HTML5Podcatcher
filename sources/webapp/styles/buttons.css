@@ -68,3 +68,7 @@ a.button[aria-disabled="true"] {
   cursor: default;
   pointer-events: none;
 }
+button[disabled]::before,
+a.button[aria-disabled="true"]::before {
+	filter: invert(80%);
+}
