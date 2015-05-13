@@ -26,7 +26,8 @@ input[type="tel"],
 input[type="search"],
 input[type="url"],
 input[type="number"],
-textarea {
+textarea ,
+select {
   font-family: sans-serif;
   box-sizing: border-box;
   display: block;

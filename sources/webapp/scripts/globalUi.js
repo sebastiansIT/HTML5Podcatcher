@@ -51,43 +51,51 @@ var GlobalUserInterfaceHelper = {
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     },
-    logHandler: function (message, loglevel) {
+    logHandler: function (message, logLevel) {
         "use strict";
-        if (loglevel && loglevel.indexOf(":") >= 0) {
-            loglevel = loglevel.substring(0, loglevel.indexOf(":"));
+        if (logLevel && logLevel.indexOf(":") >= 0) {
+            logLevel = logLevel.substring(0, logLevel.indexOf(":"));
         }
-        switch (loglevel) {
+        switch (logLevel) {
         case "debug":
+            logLevel = 1;
             console.debug(message);
             break;
         case "info":
+            logLevel = 2;
             console.info(message);
             break;
         case "warn":
+            logLevel = 3;
             console.warn(message);
             break;
         case "error":
+            logLevel = 4;
             console.error(message);
             break;
         case "fatal":
+            logLevel = 5;
             console.error(message);
             $('#logView').addClass("fullscreen");
             break;
         default:
-            console.log(loglevel + ': ' + message);
+            console.log(logLevel + ': ' + message);
         }
-        var messageNode, logEntryNode = document.createElement("p");
-        logEntryNode.className = loglevel;
-        logEntryNode.appendChild(document.createTextNode(message));
-        if (document.getElementById('log')) {
-            document.getElementById('log').insertBefore(logEntryNode, document.getElementById('log').firstChild);
-        }
-        if (document.getElementById('activeMessage') && (loglevel === 'warn' || loglevel === 'error' || loglevel === 'fatal')) {
-            messageNode = document.getElementById('activeMessage');
-            while (messageNode.hasChildNodes()) {
-                messageNode.removeChild(messageNode.lastChild);
+        var allowedLevel, messageNode, logEntryNode = document.createElement("p");
+        allowedLevel = GlobalUserInterfaceHelper.settings.get("logLevel") || 0;
+        if (logLevel >= allowedLevel) {
+            logEntryNode.className = logLevel;
+            logEntryNode.appendChild(document.createTextNode(message));
+            if (document.getElementById('log')) {
+                document.getElementById('log').insertBefore(logEntryNode, document.getElementById('log').firstChild);
             }
-            messageNode.appendChild(logEntryNode.cloneNode(true));
+            if (document.getElementById('activeMessage') && (logLevel === 'warn' || logLevel === 'error' || logLevel === 'fatal')) {
+                messageNode = document.getElementById('activeMessage');
+                while (messageNode.hasChildNodes()) {
+                    messageNode.removeChild(messageNode.lastChild);
+                }
+                messageNode.appendChild(logEntryNode.cloneNode(true));
+            }
         }
     },
     errorHandler: function (event) {

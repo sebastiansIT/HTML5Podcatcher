@@ -48,6 +48,8 @@
 ### manipulate symbol of play/pause-Button when media events error or pause occures
 ##0.33.10
 ### using audio channel api on firefox os runtime
+##0.33.11
+### now you can configure log level to reduce logging messages to debug, info, warning or error level
 
 # VALIDATE this manifest on http://manifest-validator.com/
 

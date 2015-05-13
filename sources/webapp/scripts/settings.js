@@ -81,11 +81,21 @@ UI.import = function (config, onImportCallback) {
 /** Central 'ready' event handler */
 document.addEventListener('DOMContentLoaded', function () {
     "use strict";
-    var quota;
+    var quota, appInfoRequest;
     POD.settings.uiLogger = UI.logHandler;
     POD.settings.uiLogger("Opens Settings View", "debug");
     // -- Initialise UI -- //
     //Init Proxy-Settings
+    if (window.navigator.mozApps) { //is an Open Web App runtime 
+        appInfoRequest = window.navigator.mozApps.getSelf();
+        appInfoRequest.onsuccess = function () {
+            if (appInfoRequest.result) { //checks for installed app
+                if (appInfoRequest.result.manifest.type === 'privileged' || appInfoRequest.result.manifest.type === 'certified') {
+                    $('#proxy').hide();
+                }
+            }
+        };
+    }
     if (UI.settings.get("proxyUrl")) {
         $('#httpProxyInput').val(UI.settings.get("proxyUrl"));
     }
@@ -104,6 +114,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     } else {
         $('#FileSystemAPI').hide();
+    }
+    //Init Settings for Loging
+    if (UI.settings.get("logLevel")) {
+        $('#logLevelSelect').val(UI.settings.get("logLevel"));
     }
     // -------------------------- //
     // -- Check Pre Conditions -- //
@@ -136,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if ($('#httpProxyInput')[0].checkValidity()) {
             UI.settings.set("proxyUrl", $('#httpProxyInput').val());
         } else {
-            UI.logHandler('Please insert a URL', 'error');
+            UI.logHandler('Please insert a URL!', 'error');
         }
     });
     $('#exportConfiguration').on('click', function (event) {
@@ -160,5 +174,11 @@ document.addEventListener('DOMContentLoaded', function () {
         UI.import(config, function () {
             $(button).removeAttr('disabled');
         });
+    });
+    $('#saveLogingConfiguration').on('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        UI.settings.set("logLevel", $('#logLevelSelect').val());
+        UI.logHandler('Save loging configuration.', 'debug');
     });
 }, false);
