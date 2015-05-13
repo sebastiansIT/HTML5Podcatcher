@@ -128,9 +128,16 @@ module.exports = function (grunt) {
             }
         },
         autoprefixer: {
+            HostedWebApp: {
+                options: {
+                    browsers: ['ff >= 28', 'ie >= 10', 'last 2 versions'] //Gecko[=Firefox] 28 is used in FirefoxOS 1.3
+                },
+                src: 'build/webapp/styles/main.css',
+                dest: 'build/webapp/styles/main.css'
+            },
             FirefoxPackagedApp: {
                 options: {
-                    browsers: ['ff >= 28'] //Gecko 28 is used in FirefoxOS 1.3
+                    browsers: ['ff >= 28'] //Gecko[=Firefox] 28 is used in FirefoxOS 1.3
                 },
                 src: 'build/packagedapp/temp/styles/main.css',
                 dest: 'build/packagedapp/temp/styles/main.css'
@@ -214,7 +221,7 @@ module.exports = function (grunt) {
         },
     });
     //Register Tasks
-    grunt.registerTask('HostedWebApp',       ['clean:HostedWebApp', 'string-replace:HostedWebApp', 'concat:HostedWebApp-css', 'copy:HostedWebApp', 'curl:HostedWebApp', 'usemin:HostedWebApp']);
+    grunt.registerTask('HostedWebApp',       ['clean:HostedWebApp', 'string-replace:HostedWebApp', 'concat:HostedWebApp-css', 'autoprefixer:HostedWebApp', 'copy:HostedWebApp', 'curl:HostedWebApp', 'usemin:HostedWebApp']);
     grunt.registerTask('FirefoxPackagedApp', ['string-replace:FirefoxPackagedApp', 'concat:FirefoxPackagedApp-css', 'autoprefixer:FirefoxPackagedApp', 'usemin:FirefoxPackagedApp', 'copy:FirefoxPackagedApp', 'curl:FirefoxPackagedApp', 'zip:FirefoxPackagedApp']); //, 'clean:FirefoxPackagedApp'
     grunt.registerTask('test',               ['htmllint', 'csslint', 'jslint', 'jasmine']);
     grunt.registerTask('default',            ['test', 'HostedWebApp', 'FirefoxPackagedApp']);
