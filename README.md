@@ -28,11 +28,15 @@ At the moment the app can …
 - hold code and markup in app cache for offline availability
 
 ## Problems ##
+### Firefox Marketplace ###
+Installing the app from marketplace have some restrictions:
+1. There is no copy&paste. So, you need to enter all URLs manualy and can't copy them from your browser.
+2. The app, launched on Andrid, can not open external links in browser. Instead it do nothing.
+
 ### SOP ###
 The same origin policy restricts the access to internet resources. 
-So I need a solution to solve this Problem. At the moment I try 
-transformations to installable webb apps for Firefox OS/Firefox Marketplace, 
-Android, Chrome Web Store and other platforms.
+So I need a solution to solve this Problem. To solve this I transfered the app to a Firefox "Open Web App". This is available for install on the 
+[Firefox Marketplace](https://marketplace.firefox.com/app/html5podcatcher/)
 
 ### Design ###
 I'm not a Designer! Contact me if you would help.
@@ -45,7 +49,8 @@ your own web server and a packaged app for Firefox OS/Firefox Marketplace.
 More will come later.
 
 Installation and usaged
-At the moment you can test the web version 
+1. Install it on FirefoxOS, Android, Linux, Windows and OS X from [Firefox Marketplace](https://marketplace.firefox.com/app/html5podcatcher/) (prefered).
+2. You can test the web version 
 at http://podcatcher.sebastiansit.de/playlist.html. In addition you need a 
 http proxy to avoid SOP-Errors.
 

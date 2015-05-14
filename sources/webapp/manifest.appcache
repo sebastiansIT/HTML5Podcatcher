@@ -53,6 +53,8 @@
 ##0.33.12
 ### Disabled buttons are now shown in light grey color
 ### using "autoprefixer" to get a better browser support
+##0.33.13
+### Fix a bug in source.html: class "external" is set to wrong element in feed markup
 
 # VALIDATE this manifest on http://manifest-validator.com/
 
