@@ -30,6 +30,7 @@ At the moment the app can …
 ## Problems ##
 ### Firefox Marketplace ###
 Installing the app from marketplace have some restrictions:
+
 1. There is no copy&paste. So, you need to enter all URLs manualy and can't copy them from your browser.
 2. The app, launched on Andrid, can not open external links in browser. Instead it do nothing.
 
@@ -48,10 +49,10 @@ I use Grunt to build the app in different versions: A web app to host on
 your own web server and a packaged app for Firefox OS/Firefox Marketplace. 
 More will come later.
 
-Installation and usaged
+## Installation and usaged ##
+
 1. Install it on FirefoxOS, Android, Linux, Windows and OS X from [Firefox Marketplace](https://marketplace.firefox.com/app/html5podcatcher/) (prefered).
-2. You can test the web version 
-at http://podcatcher.sebastiansit.de/playlist.html. In addition you need a 
+2. You can test the web version at http://podcatcher.sebastiansit.de/playlist.html. In addition you need a 
 http proxy to avoid SOP-Errors.
 
 ## Screenshots ##

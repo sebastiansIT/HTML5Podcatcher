@@ -59,7 +59,7 @@ GlobalUserInterfaceHelper.previousEpisode = function (onReadCallback) {
 GlobalUserInterfaceHelper.nextEpisode = function (onReadCallback) {
     "use strict";
     var activeEpisode = $('#playlist').find('.active');
-    POD.storage.readEpisode(activeEpisode.next().data('episodeUri'), onReadCallback);
+    POD.storage.readEpisode(activeEpisode.next(':not([aria-disabled="true"])').data('episodeUri'), onReadCallback);
 };
 GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
     "use strict";
@@ -189,11 +189,11 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
                 errormessage = e.toString();
                 readystate = $(this).parent()[0].readyState;
                 if (readystate === 0) {
-                    errormessage = "Can't load file";
+                    errormessage = "Can't load file " + $(this).parent()[0].currentSrc;
                 } else if ($(this).parent()[0].error) {
                     switch (e.target.error.code) {
                     case e.target.error.MEDIA_ERR_ABORTED:
-                        errormessage = 'You aborted the video playback.';
+                        errormessage = 'You aborted the media playback.';
                         break;
                     case e.target.error.MEDIA_ERR_NETWORK:
                         errormessage = 'A network error caused the audio download to fail.';

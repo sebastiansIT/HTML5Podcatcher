@@ -55,6 +55,11 @@
 ### using "autoprefixer" to get a better browser support
 ##0.33.13
 ### Fix a bug in source.html: class "external" is set to wrong element in feed markup
+##0.33.14
+### Fix a bug in logging function "logHandler()"
+### Disable some functions when device is offline
+##0.33.15
+### Disable episodes in offline mode when audio file isn't saved/downloaded to device
 
 # VALIDATE this manifest on http://manifest-validator.com/
 

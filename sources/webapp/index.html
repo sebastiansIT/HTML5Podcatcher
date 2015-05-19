@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 
 <!--
-    Copyright 2013, 2014 Sebastian Spautz
+    Copyright 2013 - 2015 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
     
@@ -44,17 +44,11 @@
 	<link href="styles/lists.css" rel="stylesheet" type="text/css" />
 	<link href="styles/main.css" rel="stylesheet" type="text/css" />
 	<!-- endbuild -->
-	<script src="scripts/globalUi.js"></script>
-	<script src="scripts/install.js"></script>
 </head>
 <body>
 	<section role="region">
 		<header role="banner">
 			<button title="Close" id="appClose"><span class="icon icon-close">Close</span></button>
-			<menu type="toolbar">
-				<a href="playlist.html" title="Playlist"><span class="icon icon-playlist">Playlist</span></a>
-				<a href="settings.html" title="Settings"><span class="icon icon-settings">Settings</span></a>
-			</menu>
 			<h1 title="HTML5 Podcatcher Version {{ VERSION }} {{ VARIANT }}">HTML5 Podcatcher</h1>
 		</header>
 
@@ -69,21 +63,22 @@
 				<header>
 					<h2>Installation</h2>
 				</header>
-				<p>To install the app on Desktop, Android ore Firefox OS please use the Mozilla Marketplace. Other option needs a proxy configuration to work.</p>
-				<p>
-					<a class="bb-button recommend" href="#" style="display:none;">Mozilla Marketplace</a>
-					<button id="installFirefoxOS">Hosted App for Firefox OS</button>
-					<a class="bb-button" href="playlist.html">Web-App</a>
+				<p>To install the app on Desktop Browsers, Android ore Firefox OS please use the Mozilla Marketplace:<br /><br />
+					<a class="button recommend" href="https://marketplace.firefox.com/app/html5podcatcher/">Install H5P</a>
+				</p>
+				<p>You can also use it as a Web-App. But in this case you need a proxy script to work around the 
+					<a href="https://de.wikipedia.org/wiki/Same-Origin-Policy">Same-Origin-Policy</a>and get access to feeds and audio files:<br /><br />
+					<a class="button" href="playlist.html">Open Web-App</a>
 				</p>
 			</section>
 			<section>
 				<header>
 					<h2>Development</h2>
 				</header>
-				<p>
-					<a class="bb-button" href="https://github.com/sebastiansIT/HTML5Podcatcher">Code (GitHub)</a>
-					<a class="bb-button" href="http://human-injection.de/kategorie/html5podcatcher/">Blog (in German)</a>
-				</p>
+				<ol>
+					<li><a class="bb-button" href="https://github.com/sebastiansIT/HTML5Podcatcher">Code (GitHub)</a></li>
+					<li><a class="bb-button" href="http://human-injection.de/kategorie/html5podcatcher/">Blog (in German)</a></li>
+				</ol>
 			</section>
 			<section>
 				<header>

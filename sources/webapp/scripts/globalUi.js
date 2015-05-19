@@ -51,12 +51,13 @@ var GlobalUserInterfaceHelper = {
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     },
-    logHandler: function (message, logLevel) {
+    logHandler: function (message, logLevelName) {
         "use strict";
-        if (logLevel && logLevel.indexOf(":") >= 0) {
-            logLevel = logLevel.substring(0, logLevel.indexOf(":"));
+        var allowedLevel, messageNode, logEntryNode, logLevel = 0;
+        if (logLevelName && logLevelName.indexOf(":") >= 0) {
+            logLevelName = logLevelName.substring(0, logLevelName.indexOf(":"));
         }
-        switch (logLevel) {
+        switch (logLevelName) {
         case "debug":
             logLevel = 1;
             console.debug(message);
@@ -81,15 +82,15 @@ var GlobalUserInterfaceHelper = {
         default:
             console.log(logLevel + ': ' + message);
         }
-        var allowedLevel, messageNode, logEntryNode = document.createElement("p");
+        logEntryNode = document.createElement("p");
         allowedLevel = GlobalUserInterfaceHelper.settings.get("logLevel") || 0;
         if (logLevel >= allowedLevel) {
-            logEntryNode.className = logLevel;
+            logEntryNode.className = logLevelName;
             logEntryNode.appendChild(document.createTextNode(message));
             if (document.getElementById('log')) {
                 document.getElementById('log').insertBefore(logEntryNode, document.getElementById('log').firstChild);
             }
-            if (document.getElementById('activeMessage') && (logLevel === 'warn' || logLevel === 'error' || logLevel === 'fatal')) {
+            if (document.getElementById('activeMessage') && logLevel >= 3) {
                 messageNode = document.getElementById('activeMessage');
                 while (messageNode.hasChildNodes()) {
                     messageNode.removeChild(messageNode.lastChild);
@@ -216,19 +217,19 @@ var GlobalUserInterfaceHelper = {
             }
         }
         $(applicationCache).on('checking', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cache checks for updates (Cache status: " + statusName(applicationCache.status) + ")", 'debug');
+            GlobalUserInterfaceHelper.logHandler("Application cache checks for updates (Cache status: " + statusName(applicationCache.status) + ")", 'debug:AppCache');
         });
         $(applicationCache).on('noupdate', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cache founds no update (Cache status: " + statusName(applicationCache.status) + ")", 'debug');
+            GlobalUserInterfaceHelper.logHandler("Application cache founds no update (Cache status: " + statusName(applicationCache.status) + ")", 'debug:AppCache');
         });
         $(applicationCache).on('downloading', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cache download updated files (Cache status: " + statusName(applicationCache.status) + ")", 'debug');
+            GlobalUserInterfaceHelper.logHandler("Application cache download updated files (Cache status: " + statusName(applicationCache.status) + ")", 'debug:AppCache');
         });
         $(applicationCache).on('progress', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cache downloading files (Cache status: " + statusName(applicationCache.status) + ")", 'debug');
+            GlobalUserInterfaceHelper.logHandler("Application cache downloading files (Cache status: " + statusName(applicationCache.status) + ")", 'debug:AppCache');
         });
         $(applicationCache).on('cached', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cached (Cache status: " + statusName(applicationCache.status) + ")", 'debug');
+            GlobalUserInterfaceHelper.logHandler("Application cached (Cache status: " + statusName(applicationCache.status) + ")", 'debug:AppCache');
         });
         $(applicationCache).on('updateready', function () {
             GlobalUserInterfaceHelper.logHandler("Application cache is updated (Cache status: " + statusName(applicationCache.status) + ")", 'info');
@@ -244,7 +245,7 @@ var GlobalUserInterfaceHelper = {
             if (applicationCache.status !== 1) {
                 GlobalUserInterfaceHelper.logHandler("Error downloading manifest or resources (Cache status: " + statusName(applicationCache.status) + ")", 'error');
             } else {
-                GlobalUserInterfaceHelper.logHandler("Can't download manifest or resources because app is offline (Cache status: " + statusName(applicationCache.status) + ")", 'debug');
+                GlobalUserInterfaceHelper.logHandler("Can't download manifest or resources because app is offline (Cache status: " + statusName(applicationCache.status) + ")", 'debug:AppCache');
             }
         });
     },
@@ -252,21 +253,14 @@ var GlobalUserInterfaceHelper = {
         "use strict";
         window.addEventListener('online',  function () {
             GlobalUserInterfaceHelper.logHandler("Online now", 'info');
-            $('#refreshPlaylist, .update, #showAddSourceView, #updateSource, #openSourceWebsite, .origin, .downloadFile').removeAttr('disabled');
-            $('#refreshPlaylist, .update, #showAddSourceView, #updateSource, #openSourceWebsite, .origin, .downloadFile').removeAttr('aria-disabled');
+            $('.onlineOnly').removeAttr('disabled');
+            $('.onlineOnly, a.external').removeAttr('aria-disabled');
         }, false);
         window.addEventListener('offline', function () {
             GlobalUserInterfaceHelper.logHandler("Offline now", 'info');
-            $('#refreshPlaylist, .update, #showAddSourceView, #updateSource, #openSourceWebsite, .origin, .downloadFile').attr('disabled', 'disabled');
-            $('#refreshPlaylist, .update, #showAddSourceView, #updateSource, #openSourceWebsite, .origin, .downloadFile').attr('aria-disabled', 'true');
+            $('.onlineOnly').attr('disabled', 'disabled');
+            $('.onlineOnly, a.external').attr('aria-disabled', 'true');
         }, false);
-        /*if (navigator.connection.type) {
-            // New version      
-            GlobalUserInterfaceHelper.logHandler("Connection changed to " + navigator.connection.type + " width a maximal downlink speed of " + navigator.connection.downlinkMax + " MiB", 'info');
-            navigator.connection.addEventListener('typechange', function () {
-                GlobalUserInterfaceHelper.logHandler("Connection changed to " + navigator.connection.type + " width a maximal downlink speed of " + navigator.connection.downlinkMax + " MiB", 'info');
-            }, false);
-        }*/
     },
     initGeneralUIEvents: function () {
         "use strict";
@@ -300,10 +294,17 @@ var GlobalUserInterfaceHelper = {
             if (episode.isFileSavedOffline) {
                 entryUI.find('.downloadFile').replaceWith('<button class="delete" href="' + episode.mediaUrl + '" data-icon="delete">Delete</button>');
             } else if (episode.mediaUrl) {
+                entryUI.addClass('onlineOnly');
                 entryUI.find('.downloadFile').attr('href', episode.mediaUrl).attr('download', episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/') + 1));
             }
         } else {
+            entryUI.addClass('news');
             entryUI.find('.downloadFile').remove();
+        }
+        //deactivate online-only-functions when offline
+        if (!navigator.onLine) {
+            entryUI.attr('aria-disabled', 'true');
+            entryUI.find('.onlineOnly, a.external').attr('aria-disabled', 'true');
         }
         return entryUI;
     },
@@ -344,6 +345,10 @@ var GlobalUserInterfaceHelper = {
             entryUI.find('.license').text(source.license);
         } else {
             entryUI.find('.license').text("All rights reserved or no information");
+        }
+        //deactivate online-only-functions when offline
+        if (!navigator.onLine) {
+            entryUI.find('.onlineOnly, a.external').attr('aria-disabled', 'true');
         }
         return entryUI;
     },

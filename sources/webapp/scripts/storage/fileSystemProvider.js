@@ -24,7 +24,7 @@ HTML5Podcatcher.storage.fileSystemStorage = {
     },
     saveFile: function (episode, arraybuffer, mimeType, onWriteCallback, onProgressCallback) {
         "use strict";
-        HTML5Podcatcher.logger('Saving file "' + episode.mediaUrl + '" to local file system starts now', 'debug');
+        HTML5Podcatcher.logger('Saving file "' + episode.mediaUrl + '" to local file system starts now', 'debug:FileSystemAPI');
         var blob, parts, fileName;
         blob = new Blob([arraybuffer], {type: mimeType});
         parts = episode.mediaUrl.split('/');
@@ -93,12 +93,12 @@ HTML5Podcatcher.storage.fileSystemStorage = {
         "use strict";
         if (navigator.persistentStorage) {
             navigator.persistentStorage.requestQuota(quota, function (grantedBytes) {
-                HTML5Podcatcher.logger('You gain access to ' + grantedBytes / 1024 / 1024 + ' MiB of memory', 'debug');
+                HTML5Podcatcher.logger('You gain access to ' + grantedBytes / 1024 / 1024 + ' MiB of memory', 'debug:FileSystemAPI');
                 navigator.persistentStorage.queryUsageAndQuota(function (usage, quota) {
                     var availableSpace;
                     availableSpace = quota - usage;
                     if (availableSpace <= (1024 * 1024 * 50)) {
-                        HTML5Podcatcher.logger('You are out of space! Please allow more then ' + Math.ceil(quota / 1024 / 1024) + ' MiB of space', 'warning');
+                        HTML5Podcatcher.logger('You are out of space! Please allow more then ' + Math.ceil(quota / 1024 / 1024) + ' MiB of space', 'warn');
                     } else {
                         HTML5Podcatcher.logger('There is ' + Math.floor(availableSpace / 1024 / 1024) + ' MiB of ' + Math.floor(quota / 1024 / 1024) + ' MiB memory available', 'info');
                     }

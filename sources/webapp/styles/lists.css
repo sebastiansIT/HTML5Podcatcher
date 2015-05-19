@@ -43,13 +43,19 @@
 .content .entries li:last-child {
 	border: none;
 }
-.content .entries .active {
+.content .entries .active,
+.content .entries li:last-child.active {
 	border-bottom: solid 0.3rem #006400;
 }
 /* Entry content */
 .content .entries li > :first-child {
 	flex-grow:1;
 	width: calc(100% - 10rem);
+}
+.content .entries li[aria-disabled="true"] > :first-child {
+	cursor: default;
+	pointer-events: none;
+	filter: invert(80%);
 }
 .content .entries li > a:hover,
 .content .entries li > a:active,

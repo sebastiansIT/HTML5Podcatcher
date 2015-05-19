@@ -80,8 +80,8 @@
 							</div>
 						</a>
 						<!--<button class="status">Status: played</button>-->
-						<a class="origin button" href="episode.uri" data-icon="browsing">Internet</a>
-						<a class="button downloadFile" href="episode.mediaUrl" download="episode.mediaUrl.fileName" data-icon="download">Download</a>
+						<a class="origin button onlineOnly" href="episode.uri" data-icon="browsing">Internet</a>
+						<a class="button downloadFile onlineOnly" href="episode.mediaUrl" download="episode.mediaUrl.fileName" data-icon="download">Download</a>
                     </li>
                 </ul>
             </div>
@@ -94,7 +94,7 @@
 			  <button id="playPause" data-icon="play">Play</button>
 			  <button id="jumpForwards" data-icon="jumpForwards">Skip 10 seconds</button>
 			  <button id="playNext" data-icon="next">Next Chapter</button>
-			  <button id="refreshPlaylist" data-icon="reload">Refresh Playlist</button>
+			  <button id="refreshPlaylist" data-icon="reload" class="onlineOnly">Refresh Playlist</button>
 			</div>
 		</footer>
 		<div id="activeMessage"></div>

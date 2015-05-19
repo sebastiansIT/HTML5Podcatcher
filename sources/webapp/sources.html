@@ -79,7 +79,7 @@
 							</div>
 						</a>
 						<button class="delete" data-icon="delete">Delete</button>
-						<a class="button update" href="source.uri" data-icon="reload">Update</a>
+						<a class="button update onlineOnly" href="source.uri" data-icon="reload">Update</a>
                     </li>
                 </ul>
             </div>
@@ -87,8 +87,8 @@
 		<footer>
 			<div role="toolbar">
 			  <button id="showLogView" data-icon="show-log">Show Log</button>
-			  <button id="showAddSourceView" data-icon="add-source">Add Feed</button>
-			  <button id="refreshPlaylist" data-icon="reload">Refresh Playlist</button>
+			  <button id="showAddSourceView" data-icon="add-source" class="onlineOnly">Add Feed</button>
+			  <button id="refreshPlaylist" data-icon="reload" class="onlineOnly">Refresh Playlist</button>
 			</div>
 		</footer>
 		<div id="activeMessage"></div>
@@ -104,7 +104,7 @@
 			<div>
 				<label for="addSourceUrlInput"><abbr title="Uniform Resource Locator">URL</abbr> of Podcast Feed</label>
 				<input type="url" id="addSourceUrlInput" required="required" />
-				<button id="loadSourceButton" class="recommend">Load</button>
+				<button id="loadSourceButton" class="recommend onlineOnly">Load</button>
 			</div>
 		</div>
 		<footer>

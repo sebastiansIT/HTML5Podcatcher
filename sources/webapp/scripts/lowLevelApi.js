@@ -219,7 +219,7 @@ var HTML5Podcatcher = {
                 appInfoRequest = window.navigator.mozApps.getSelf();
                 appInfoRequest.onsuccess = function () {
                     if (appInfoRequest.result) {
-                        HTML5Podcatcher.logger(appInfoRequest.result.manifest.name + " is a " + appInfoRequest.result.manifest.type + " app.", 'debug');
+                        HTML5Podcatcher.logger(appInfoRequest.result.manifest.name + " is a " + appInfoRequest.result.manifest.type + " app.", 'debug:Ajax');
                         if (appInfoRequest.result.manifest.type === 'privileged' || appInfoRequest.result.manifest.type === 'certified') {
                             ajaxRequest = new XMLHttpRequest({ mozSystem: true });
                         } else {
@@ -231,7 +231,7 @@ var HTML5Podcatcher = {
                     onCompletedCallback(ajaxRequest);
                 };
             } else {
-                HTML5Podcatcher.logger("This Webapp isn't run in a Open-Web-App-Container.", 'debug');
+                HTML5Podcatcher.logger("This Webapp isn't run in a Open-Web-App-Container.", 'debug:Ajax');
                 ajaxRequest = new XMLHttpRequest();
                 onCompletedCallback(ajaxRequest);
             }
@@ -245,7 +245,7 @@ var HTML5Podcatcher = {
             parserresult = {'source': source, 'episodes': []};
             successfunction = function () {
                 var data, /*newestEpisodes,*/ mergeFunction, i;
-                HTML5Podcatcher.logger('Download of source "' + source.uri + '" is finished', 'debug');
+                HTML5Podcatcher.logger('Download of source "' + source.uri + '" is finished', 'debug:Ajax');
                 data = this.responseXML;
                 mergeFunction = function (mergeEpisode, forcePlayed) {
                     HTML5Podcatcher.storage.readEpisode(mergeEpisode.uri, function (existingEpisode) {
@@ -298,7 +298,7 @@ var HTML5Podcatcher = {
                         proxyXhr.send();
                     });
                 } else {
-                    HTML5Podcatcher.logger("Can't download Source: " + xhrError.error, 'error');
+                    HTML5Podcatcher.logger("Can't download Source " + source.uri + ": " + xhrError.error, 'error');
                 }
             };
             //Load Feed and Parse Entries
@@ -322,7 +322,7 @@ var HTML5Podcatcher = {
             var successfunction, errorfunction, xhr;
             successfunction = function () {
                 if (this.status === 200) {
-                    HTML5Podcatcher.logger('Download of file "' + episode.mediaUrl + '" is finished', 'debug');
+                    HTML5Podcatcher.logger('Download of file "' + episode.mediaUrl + '" is finished', 'debug:Ajax');
                     HTML5Podcatcher.storage.saveFile(episode, xhr.response, mimeType, onDownloadCallback, onProgressCallback);
                 } else {
                     HTML5Podcatcher.logger('Error Downloading file "' + episode.mediaUrl + '": ' + this.statusText + ' (' + this.status + ')', 'error');
@@ -330,7 +330,7 @@ var HTML5Podcatcher = {
             };
             errorfunction = function (xhrError) {
                 if (HTML5Podcatcher.web.settings.proxyUrlPattern) {
-                    HTML5Podcatcher.logger('Direct download failed. Try proxy: ' + HTML5Podcatcher.web.settings.proxyUrlPattern.replace("$url$", episode.mediaUrl), 'warning');
+                    HTML5Podcatcher.logger('Direct download failed. Try proxy: ' + HTML5Podcatcher.web.settings.proxyUrlPattern.replace("$url$", episode.mediaUrl), 'warn');
                     HTML5Podcatcher.web.createXMLHttpRequest(function (xhrProxy) {
                         xhrProxy.open('GET', HTML5Podcatcher.web.settings.proxyUrlPattern.replace("$url$", episode.mediaUrl), true);
                         xhrProxy.responseType = 'arraybuffer';
@@ -344,7 +344,7 @@ var HTML5Podcatcher = {
                         xhrProxy.addEventListener("error", HTML5Podcatcher.errorLogger, false);
                         xhrProxy.onload = function () {
                             if (this.status === 200) {
-                                HTML5Podcatcher.logger('Download of file "' + episode.mediaUrl + '" via proxy is finished', 'debug');
+                                HTML5Podcatcher.logger('Download of file "' + episode.mediaUrl + '" via proxy is finished', 'debug:Ajax');
                                 HTML5Podcatcher.storage.saveFile(episode, xhrProxy.response, mimeType, onDownloadCallback);
                             } else {
                                 HTML5Podcatcher.logger('Error Downloading file "' + episode.mediaUrl + '" via proxy: ' + this.statusText + ' (' + this.status + ')', 'error');
@@ -356,7 +356,7 @@ var HTML5Podcatcher = {
                         xhrProxy.send(null);
                     });
                 } else {
-                    HTML5Podcatcher.logger("Can't download Source: " + xhrError.error);
+                    HTML5Podcatcher.logger("Can't download Source " + episode.mediaUrl + ": " + xhrError.error, 'error');
                 }
             };
             try {
@@ -375,7 +375,7 @@ var HTML5Podcatcher = {
                     xhr.addEventListener("error", errorfunction, false);
                     xhr.onload = successfunction;
                     xhr.ontimeout = function () {
-                        HTML5Podcatcher.logger("Timeout after " + (xhr.timeout / 60000) + " minutes.", "error");
+                        HTML5Podcatcher.logger("Timeout after " + (xhr.timeout / 60000) + " minutes.", 'error');
                     };
                     xhr.send(null);
                 });
@@ -388,7 +388,7 @@ var HTML5Podcatcher = {
         parseSource: function (xml, source) {
             "use strict";
             var rootElement, currentElementList, currentElement, contentElement, itemArray, enclosureArray, i, j, item, episode, episodes = [];
-            HTML5Podcatcher.logger('Parsing source file "' + source.uri + '" starts now', 'debug');
+            HTML5Podcatcher.logger('Parsing source file "' + source.uri + '" starts now', 'debug:Parser');
             //RSS-Feed
             rootElement = xml.querySelector('rss[version="2.0"]');
             if (rootElement) {
@@ -474,7 +474,7 @@ var HTML5Podcatcher = {
                             }
                             // check browser compatibility
                             if (document.createElement('audio').canPlayType(episode.mediaType) === '') {
-                                HTML5Podcatcher.logger('The media file found in item ' + episode.title + ' isn\'t supported in your browser. The Type of the unsuported file is ' + episode.mediaType + '.', 'warning');
+                                HTML5Podcatcher.logger('The media file found in item ' + episode.title + ' isn\'t supported in your browser. The Type of the unsuported file is ' + episode.mediaType + '.', 'warn');
                             } else {
                                 episode.mediaUrl = enclosureArray[j].attributes.url.value;
                                 break;
@@ -516,7 +516,7 @@ var HTML5Podcatcher = {
             "use strict";
             var chapters, jumppoints = [], i;
             if (node && node.length > 0) {
-                HTML5Podcatcher.logger('Found "Podlove Simple Chapters" in feed: ' + node, 'debug');
+                HTML5Podcatcher.logger('Found "Podlove Simple Chapters" in feed: ' + node, 'debug:Parser');
                 chapters = node[0].getElementsByTagNameNS('http://podlove.org/simple-chapters', 'chapter');
                 for (i = 0; i < chapters.length; i++) {
                     jumppoints.push({

@@ -92,8 +92,8 @@
 						<h4 class="title">episode.title</h4>
 						<p><a href="#" class="status"><time datetime="2014-01-01" class="updated">episode.updated</time></a> at <span class="source">episode.source</span></p>
 					</div>
-					<a class="origin button external" href="episode.uri" data-icon="browsing">Internet</a>
-					<a class="button downloadFile" href="episode.mediaUrl" download="episode.mediaUrl.fileName" data-icon="download">Download</a>
+					<a class="origin button external onlineOnly" href="episode.uri" data-icon="browsing">Internet</a>
+					<a class="button downloadFile onlineOnly" href="episode.mediaUrl" download="episode.mediaUrl.fileName" data-icon="download">Download</a>
 				</li>
 			</ul>
 		</div>
@@ -101,8 +101,8 @@
 			<div role="toolbar">
 			  <button id="showLogView" data-icon="show-log">Show Log</button>
 			  <button id="deleteSource" data-icon="delete">Delete Feed</button>
-			  <a      id="openSourceWebsite" data-icon="browsing">Website</a>
-			  <button id="updateSource" data-icon="reload">Update Feed</button>
+			  <a      id="openSourceWebsite" data-icon="browsing" class="onlineOnly">Website</a>
+			  <button id="updateSource" data-icon="reload" class="onlineOnly">Update Feed</button>
 			</div>
 		</footer>
 		<div id="activeMessage"></div>

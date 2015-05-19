@@ -85,7 +85,6 @@ module.exports = function (grunt) {
             },
             FirefoxPackagedApp: {
                 files: [
-                    
                     {expand: true,  cwd: 'sources/webapp/',      src: ['styles/icons/*.svg'],              dest: 'build/packagedapp/temp/',            filter: 'isFile'},
                     {expand: true,  cwd: 'sources/webapp/',      src: ['images/*.png'],                    dest: 'build/packagedapp/temp/',            filter: 'isFile'},
                     {expand: true,  cwd: 'sources/packagedapp/', src: ['images/*.png'],                    dest: 'build/packagedapp/temp/',            filter: 'isFile'},
@@ -191,8 +190,7 @@ module.exports = function (grunt) {
         htmllint: {
             client: {
                 options: {
-                    ignore: [ 'The “menu” element is not supported by browsers yet. It would probably be better to wait for implementations.'
-                    ],
+                    ignore: [ 'The “menu” element is not supported by browsers yet. It would probably be better to wait for implementations.'],
                     reporter: 'checkstyle',
                     reporterOutput: 'tests/htmllint.result.txt'
                 },
@@ -218,7 +216,7 @@ module.exports = function (grunt) {
                     }
                 }
             }
-        },
+        }
     });
     //Register Tasks
     grunt.registerTask('HostedWebApp',       ['clean:HostedWebApp', 'string-replace:HostedWebApp', 'concat:HostedWebApp-css', 'autoprefixer:HostedWebApp', 'copy:HostedWebApp', 'curl:HostedWebApp', 'usemin:HostedWebApp']);
