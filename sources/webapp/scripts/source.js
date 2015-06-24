@@ -33,7 +33,9 @@ GlobalUserInterfaceHelper.renderSourceDetails = function (source) {
     //set current values in toolbar
     $('#openSourceWebsite').attr('href', source.link);
     //read list of episodes and render them
-    POD.storage.readEpisodesBySource(source, UI.renderEpisodeList);
+    POD.storage.readEpisodesBySource(source, function (episodes) {
+        UI.renderEpisodeList(episodes, 'desc');
+    });
 };
 
 /** Central 'ready' event handler */
@@ -127,11 +129,6 @@ $(document).ready(function () {
             POD.storage.deleteFile(episode);
         });
     });
-    $('.content').on('click', '.external', function (event) {
-        event.stopPropagation();
-        event.preventDefault();
-        window.open($(this).attr('href'), '_blank');
-    });
     //Toolbar events
     $('#deleteSource').on('click', function (event) {
         event.preventDefault();
@@ -141,11 +138,6 @@ $(document).ready(function () {
         POD.storage.readSource(sourceUri, function (source) {
             POD.storage.deleteSource(source, removeFunction);
         });
-    });
-    $('#openSourceWebsite').on('click', function (event) {
-        event.stopPropagation();
-        event.preventDefault();
-        window.open($(this).attr('href'), '_blank');
     });
     $('#updateSource').on('click', function (event) {
         event.preventDefault();

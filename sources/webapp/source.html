@@ -64,9 +64,8 @@
 			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} Source/Feed Details">Feed Details</h1>
 		</header>
 		<div class="content">
+			<div class="loader"><div></div><div></div><div></div><div></div><div></div></div>
 			<section id="information">
-				<h2>unknown feed</h2>
-			</section>
 			<div class="template" id="sourceTemplate">
 				<div>
 					<!--<img class="image" alt="" />-->
@@ -86,6 +85,7 @@
 					</section>
 				</div>
 			</div>
+			</section>
 			<ul class="template" id="episodeTemplate">
 				<li>
 					<div>
@@ -101,7 +101,7 @@
 			<div role="toolbar">
 			  <button id="showLogView" data-icon="show-log">Show Log</button>
 			  <button id="deleteSource" data-icon="delete">Delete Feed</button>
-			  <a      id="openSourceWebsite" data-icon="browsing" class="onlineOnly">Website</a>
+			  <a      id="openSourceWebsite" data-icon="browsing" class="onlineOnly external">Website</a>
 			  <button id="updateSource" data-icon="reload" class="onlineOnly">Update Feed</button>
 			</div>
 		</footer>

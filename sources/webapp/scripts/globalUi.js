@@ -275,6 +275,12 @@ var GlobalUserInterfaceHelper = {
             window.open('', '_parent', '');
             window.close();
         });
+        //$('body').on('click', '.external', function (event) {
+        //    event.stopPropagation();
+        //    event.preventDefault();
+        //    window.open($(this).attr('href'), '_blank');
+        //});
+        $('.external').attr('target', '_blank');
     },
     renderEpisode: function (episode) {
         "use strict";
@@ -306,9 +312,10 @@ var GlobalUserInterfaceHelper = {
             entryUI.attr('aria-disabled', 'true');
             entryUI.find('.onlineOnly, a.external').attr('aria-disabled', 'true');
         }
+        entryUI.find('.external').attr('target', '_blank');
         return entryUI;
     },
-    renderEpisodeList: function (episodes) {
+    renderEpisodeList: function (episodes, order) {
         "use strict";
         var listUI, entryUI, i;
         listUI = $('#playlist .entries, #episodes .entries');
@@ -316,12 +323,17 @@ var GlobalUserInterfaceHelper = {
         if (episodes && episodes.length > 0) {
             for (i = 0; i < episodes.length; i++) {
                 entryUI = GlobalUserInterfaceHelper.renderEpisode(episodes[i]);
-                listUI.append(entryUI);
+                if (order && order === 'asc') {
+                    listUI.append(entryUI);
+                } else {
+                    listUI.prepend(entryUI);
+                }
             }
         } else {
             entryUI = $('<li class="emptyPlaceholder">no entries</li>');
             listUI.append(entryUI);
         }
+        $('.loader').remove();
     },
     renderSource: function (source) {
         "use strict";
@@ -350,6 +362,7 @@ var GlobalUserInterfaceHelper = {
         if (!navigator.onLine) {
             entryUI.find('.onlineOnly, a.external').attr('aria-disabled', 'true');
         }
+        entryUI.find('.external').attr('target', '_blank');
         return entryUI;
     },
     renderSourceList: function (sourcelist) {
@@ -366,6 +379,7 @@ var GlobalUserInterfaceHelper = {
             entryUI = $('<li class="emptyPlaceholder">no entries</li>');
             sourcelistUI.append(entryUI);
         }
+        $('.loader').remove();
     },
     findEpisodeUI: function (episode) {
         "use strict";

@@ -97,12 +97,6 @@ $(document).ready(function () {
             });
         });
     });
-    //Opens Links to Podcast Homepage in new Browser-Tab
-    $('#sourceslist').on('click', '.link', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        window.open($(this).attr('href'), '_blank');
-    });
     //New or Changed Source
     document.addEventListener('writeSource', function (event) {
         var i, source, sourceUI;

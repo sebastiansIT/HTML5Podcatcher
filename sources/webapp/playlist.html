@@ -64,11 +64,9 @@
 			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} Playlist">Playlist</h1>
 		</header>
 		<div class="content">
+			<div class="loader"><div></div><div></div><div></div><div></div><div></div></div>
 			<div id="playlist">
                 <ul class="entries">
-                    <li class="emptyPlaceholder" >
-                        <p>no entries</p>
-                    </li>
                 </ul>
                 <ul class="template" id="episodeTemplate">
                     <li>
@@ -80,7 +78,7 @@
 							</div>
 						</a>
 						<!--<button class="status">Status: played</button>-->
-						<a class="origin button onlineOnly" href="episode.uri" data-icon="browsing">Internet</a>
+						<a class="origin button external onlineOnly" href="episode.uri" data-icon="browsing">Internet</a>
 						<a class="button downloadFile onlineOnly" href="episode.mediaUrl" download="episode.mediaUrl.fileName" data-icon="download">Download</a>
                     </li>
                 </ul>

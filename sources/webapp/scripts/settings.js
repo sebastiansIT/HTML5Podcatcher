@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (UI.settings.get("proxyUrl")) {
         $('#httpProxyInput').val(UI.settings.get("proxyUrl"));
     }
-    //Init Quota and Filesystem initialisation
+    //Init quota and filesystem
     if (POD.storage.fileStorageEngine() === POD.storage.fileSystemStorage) {
         $('#FileSystemAPI').show();
         quota = UI.settings.get("quota");
@@ -115,9 +115,20 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
         $('#FileSystemAPI').hide();
     }
-    //Init Settings for Loging
+    //Init settings for logging
     if (UI.settings.get("logLevel")) {
         $('#logLevelSelect').val(UI.settings.get("logLevel"));
+    }
+    //Init settings for syncronisation
+    if (UI.settings.get("syncronisationEndpoint")) {
+        $('#syncEndpoint').val(UI.settings.get("syncronisationEndpoint"));
+    }
+    if (UI.settings.get("syncronisationKey")) {
+        $('#syncKey').val(UI.settings.get("syncronisationKey"));
+    }
+    //Init configuration for sortint of playlist
+    if (UI.settings.get("playlistSort")) {
+        $('#episodeSortSelect').val(UI.settings.get("playlistSort"));
     }
     // -------------------------- //
     // -- Check Pre Conditions -- //
@@ -152,6 +163,61 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             UI.logHandler('Please insert a URL!', 'error');
         }
+    });
+    $('#saveSortConfigurationButton').on('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        UI.settings.set("playlistSort", $('#episodeSortSelect').val());
+    });
+    $('#SyncronisationForm').on('submit', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (this.checkValidity()) {
+            var form = this;
+            UI.settings.set("syncronisationEndpoint", $(this).find('#syncEndpoint').val());
+            UI.settings.set("syncronisationKey", $(this).find('#syncKey').val());
+            UI.export(function (config) {
+                var syncEndpoint, syncKey, syncValue;
+                syncEndpoint = $(form).find('#syncEndpoint').val();
+                syncKey = $(form).find('#syncKey').val();
+                syncValue = encodeURIComponent(JSON.stringify(config));
+                POD.web.createXMLHttpRequest(function (xhr) {
+                    var params;
+                    params = "key=" + syncKey + "&value=" + syncValue;
+                    xhr.open('POST', syncEndpoint, true);
+                    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    xhr.setRequestHeader("Content-length", params.length);
+                    xhr.onload = function () {
+                        POD.logger("Sended syncronisation value succesfuly.", "info");
+                    };
+                    xhr.ontimeout = function () {
+                        POD.logger("Timeout after " + (xhr.timeout / 60000) + " minutes.", "error");
+                    };
+                    xhr.send(params);
+                });
+            });
+        } else {
+            POD.logger('Please insert a URL and a name!', 'error');
+        }
+    });
+    $('#receiveSyncData').on('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var syncEndpoint, syncKey, syncValue;
+        syncEndpoint = $(document.getElementById('syncEndpoint')).val();
+        syncKey = $(document.getElementById('syncKey')).val();
+        POD.web.createXMLHttpRequest(function (xhr) {
+            xhr.open('GET', syncEndpoint + '?key=' + syncKey, true);
+            xhr.onload = function () {
+                POD.logger("Loaded syncronisation value succesfuly.", "info");
+                syncValue = JSON.parse(xhr.responseText);
+                POD.logger("Receives " + syncValue.substring(0, 20), "info");
+            };
+            xhr.ontimeout = function () {
+                POD.logger("Timeout after " + (xhr.timeout / 60000) + " minutes.", "error");
+            };
+            xhr.send();
+        });
     });
     $('#exportConfiguration').on('click', function (event) {
         event.preventDefault();

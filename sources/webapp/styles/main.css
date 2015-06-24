@@ -156,10 +156,47 @@ h4 a { /*Links insite a Headline*/
   animation-iteration-count: infinite;
 }
 @keyframes spinnerFrames {
-  0% {
-    transform:  rotate(0deg) ;
-  }
-  100% {
-    transform:  rotate(360deg) ;
-  }
+	0% {
+		transform:  rotate(0deg);
+	}
+	100% {
+		transform:  rotate(360deg);
+	}
+}
+
+/* see http://connoratherton.com/loaders for this and other loader animations */
+.loader {
+	display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+}
+.loader > div {
+	background-color: #006400;
+	width: 0.4rem;
+	height: 3.5rem;
+	border-radius: 0.2rem;
+	margin: 0.2rem;
+	animation-fill-mode: both;
+	display: inline-block;  
+    animation: lineScalePulseOutFrames 0.9s -0.6s infinite cubic-bezier(.85, .25, .37, .85); 
+}
+.loader > div:nth-child(2), .loader > div:nth-child(4) {
+    animation-delay: -0.4s !important; 
+}
+.loader > div:nth-child(1), .loader > div:nth-child(5) {
+    animation-delay: -0.2s !important; 
+}
+@keyframes lineScalePulseOutFrames {
+	0% {
+        transform: scaley(1); 
+	}
+	50% {
+        transform: scaley(0.4); 
+	}
+	100% {
+		transform: scaley(1); 
+	} 
 }

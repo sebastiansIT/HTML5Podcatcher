@@ -75,11 +75,33 @@
 			<section id="Proxy">
 				<header><h2>Proxy</h2></header>
 				<form action="#" id="proxyForm">
-					<label for="httpProxyInput">Proxy-URL:</label>
+					<label for="httpProxyInput">Proxy URL:</label>
 					<input type="url" name="httpProxyInput" id="httpProxyInput" />
 					<button id="saveProxyConfigurationButton">Save</button>
 				</form>
 			</section>
+			<section id="PlaylistSort">
+				<header><h2>Sort</h2></header>
+				<form action="#" id="sortForm">
+					<label for="episodeSortSelect">Playlist Order:</label>
+					<select name="episodeSortSelect" id="episodeSortSelect" size="1">
+						<option value="asc">oldest episodes first</option>
+						<option value="desc">newest episode first</option>
+					</select>
+					<button id="saveSortConfigurationButton">Save</button>
+				</form>
+			</section>
+			<!--<section id="Syncronisation">
+				<header><h2>Syncronisation</h2></header>
+				<form action="sync.py" method="POST" id="SyncronisationForm">
+					<label for="syncEndpoint">Sync Endpoint (URL):</label>
+					<input name="syncEndpoint" id="syncEndpoint" required="required" type="url" value="http://podcatcher.sebastiansit.de/sync.py" />
+					<label for="syncKey">Sync Key:</label>
+					<input name="key" id="syncKey" required="required" type="text" />
+					<input type="submit" class="button" name="sendSyncData" id="sendSyncData" style="width:49%;" value="Send" />
+					<button name="receiveSyncData" id="receiveSyncData" style="width:49%;">Receive</button>
+				</form>
+			</section>--> 
 			<section id="ImportExport">
 				<header><h2>Import/Export</h2></header>
 				<form action="#" id="ExportImportForm">

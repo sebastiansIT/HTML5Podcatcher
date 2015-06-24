@@ -555,6 +555,29 @@ var HTML5Podcatcher = {
             return milliseconds;
         }
     },
+    system: {
+        isOpenWebAppContainer: function (onCompletedCallback) {
+            "use strict";
+            var appInfoRequest;
+            //Detection of installed open web apps 
+            //see https://developer.mozilla.org/en-US/Apps/Build/App_development_FAQ#How_can_I_detect_whether_an_app_is_privileged_or_certified.3F
+            if (window.navigator.mozApps) {
+                appInfoRequest = window.navigator.mozApps.getSelf();
+                appInfoRequest.onsuccess = function () {
+                    if (appInfoRequest.result) {
+                        HTML5Podcatcher.logger(appInfoRequest.result.manifest.name + " is a " + appInfoRequest.result.manifest.type + " app.", 'debug:system');
+                        onCompletedCallback(true, appInfoRequest.result.manifest.type);
+                    } else {
+                        HTML5Podcatcher.logger("This Webapp is run in a Bozilla Browser but isn't installed as open web app.", 'debug:system');
+                        onCompletedCallback(false);
+                    }
+                };
+            } else {
+                HTML5Podcatcher.logger("This Webapp isn't run in a Open-Web-App-Container.", 'debug:system');
+                onCompletedCallback(false);
+            }
+        }
+    },
     toggleEpisodeStatus: function (episode) {
         "use strict";
         episode.playback.played = !episode.playback.played;

@@ -373,7 +373,9 @@ $(document).ready(function () {
         });
     }
     //Render playlist
-    POD.storage.readPlaylist(false, UI.renderEpisodeList);
+    POD.storage.readPlaylist(false, function (episodes) {
+        UI.renderEpisodeList(episodes, UI.settings.get("playlistSort"));
+    });
     //Initialise player
     UI.getLastPlayedEpisode(UI.playEpisode);
     // --------------------------- //
@@ -435,12 +437,12 @@ $(document).ready(function () {
         multiMediaKeyDownTimestemp = undefined;
     });
     //Playlist UI Events
-    $('#playlist').on('click', 'li', function (event) {
+    $('#playlist').on('click', 'li .link', function (event) {
         event.preventDefault();
         event.stopPropagation();
         //Play episode
         //$('#player audio')[0].autoplay = true;
-        POD.storage.readEpisode($(this).data('episodeUri'), UI.playEpisode);
+        POD.storage.readEpisode($(this).parent('li').data('episodeUri'), UI.playEpisode);
     });
     $('#playlist').on('click', '.downloadFile', function (event) {
         event.preventDefault();
@@ -469,16 +471,12 @@ $(document).ready(function () {
             POD.toggleEpisodeStatus(episode);
         });
     });
-    $('#playlist').on('click', '.origin', function (event) {
-        event.stopPropagation();
-        event.preventDefault();
-        window.open($(this).attr('href'), '_blank');
-    });
     $('#refreshPlaylist').on('click', UI.eventHandler.refreshAllSources);
     document.addEventListener('writeEpisode', function (event) {
-        var i, episode, episodeUI;
+        var i, episode, episodeUI, order;
         episode = event.detail.episode;
         episodeUI = UI.renderEpisode(episode);
+        order = UI.settings.get("playlistSort");
         //find episode in HTML markup
         for (i = 0; i < $('#playlist').find('.entries li').length; i++) {
             if ($($('#playlist').find('.entries li')[i]).data('episodeUri') === episode.uri) {
@@ -490,7 +488,11 @@ $(document).ready(function () {
         //show unlisend episode if not listed before
         if (!episode.playback.played) {
             episodeUI.hide();
-            $('#playlist').find('.entries').append(episodeUI);
+            if (order && order === 'asc') {
+                $('#playlist').find('.entries').append(episodeUI);
+            } else {
+                $('#playlist').find('.entries').prepend(episodeUI);
+            }
             episodeUI.fadeIn();
         }
     }, false);
