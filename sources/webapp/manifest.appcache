@@ -64,6 +64,8 @@
 ### Add a Configuration to allow descending or ascending order of playlist
 ##0.35.0
 ### Add a loader animation to each page
+##0.35.1
+### Fix a bug in Firefox 40: Implementation of CSP changed behavior for "blob" URL-Schema (see https://developer.mozilla.org/en-US/Firefox/Releases/40#Security)
 
 # VALIDATE this manifest on http://manifest-validator.com/
 
