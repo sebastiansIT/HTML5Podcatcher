@@ -48,7 +48,7 @@ module.exports = function (grunt) {
             FirefoxPackagedApp: { // configure the string replacement task for the packaged app
                 files: [
                     {cwd: 'sources/webApp/', src: ['*.html', '!diagnostic.html'],                dest: 'build/packagedapp/temp/', expand: 'true' },
-                    {cwd: 'sources/webApp/', src: ['scripts/**/*.js', '!scripts/diagnostic.js'], dest: 'build/packagedapp/temp/', expand: 'true'},
+                    {cwd: 'sources/webApp/', src: ['scripts/**/*.js', '!scripts/diagnostic.js', '!scripts/storage/fileSystemProvider.js', '!scripts/storage/webStorageProvider.js'], dest: 'build/packagedapp/temp/', expand: 'true'},
                     {src: 'sources/packagedapp/manifest.webapp',   dest: 'build/packagedapp/temp/manifest.webapp'},
                     {src: 'sources/packagedapp/package.manifest',  dest: 'build/packagedapp/package.manifest'},
                     {src: 'sources/packagedapp/install.html',      dest: 'build/packagedapp/install.html'}
