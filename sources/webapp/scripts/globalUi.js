@@ -424,3 +424,4 @@ var GlobalUserInterfaceHelper = {
     }
 };
 var UI = GlobalUserInterfaceHelper;
+POD.storage = POD.api.storage.StorageProvider;

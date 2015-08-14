@@ -1,4 +1,6 @@
-﻿/*  Copyright 2013, 2014 Sebastian Spautz
+﻿/** @module  HTML5Podcatcher/Storage/IndexedDatabase
+    @author  SebastiansIT [sebastian@human-injection.de]
+    @license Copyright 2013-2015 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -17,50 +19,68 @@
 */
 /*global window, localStorage */
 /*global HTML5Podcatcher */
-HTML5Podcatcher.storage.webStorage = {
-    cleanStorage: function (onDeleteCallback) {
-        "use strict";
+HTML5Podcatcher.api.storage.webStorage = (function () {
+    "use strict";
+    var WebStorageDataProvider;
+    // ====================================== //
+    // === Implementation of DataProvider === //
+    // ====================================== //
+    /** Provides access to a data storage implemented with Local/Web Storage API.
+      * @class
+      * @param {string} [sourceIdentifier] - The prefix for all keys that references source objects.
+      * @param {string} [episodeIdentifier] - The prefix for all keys that references episode objects.
+      */
+    WebStorageDataProvider = function (sourceIdentifier, episodeIdentifier) {
+        var sourcePrefix = sourceIdentifier || 'source',
+            episodePrefix = episodeIdentifier || 'episode';
+        this.getSourcePrefix = function () { return sourcePrefix; };
+        this.getEpisodePrefix = function () { return episodePrefix; };
+        this.isSupportedByCurrentPlatform = window.localStorage;
+    };
+    WebStorageDataProvider.prototype = new HTML5Podcatcher.api.storage.IDataProvider();
+    WebStorageDataProvider.prototype.constructor = WebStorageDataProvider;
+    WebStorageDataProvider.prototype.toString = function () {
+        return "Data storage provider based on Web Storage API [Prefixes " + this.getSourcePrefix + " and " + this.getEpisodePrefix + "]";
+    };
+    WebStorageDataProvider.prototype.cleanStorage = function (onDeleteCallback) {
         localStorage.clear();
         if (onDeleteCallback && typeof onDeleteCallback === 'function') {
             onDeleteCallback();
         }
-    },
-    readSource: function (sourceUri, onReadCallback) {
-        "use strict";
+    };
+    // == Access on storage for sources
+    WebStorageDataProvider.prototype.readSource = function (sourceUri, onReadCallback) {
         var source;
-        source = JSON.parse(localStorage.getItem('source.' + sourceUri));
+        source = JSON.parse(localStorage.getItem(this.getSourcePrefix + '.' + sourceUri));
         if (!source) {
             source = { 'uri': sourceUri };
         }
         if (onReadCallback && typeof onReadCallback === 'function') {
             onReadCallback(source);
         }
-    },
-    /* Get a Array with all Sources from the persistent storage */
-    readSources: function (onReadCallback) {
-        "use strict";
+    };
+    /** Get a Array with all Sources from the persistent storage */
+    WebStorageDataProvider.prototype.readSources = function (onReadCallback) {
         var pushFunction, i, sourceArray = [];
         pushFunction = function (source) {
             sourceArray.push(source);
         };
         for (i = 0; i < localStorage.length; i++) {
-            if (localStorage.key(i).slice(0, 7) === 'source.') {
+            if (localStorage.key(i).slice(0, 7) === (this.getSourcePrefix + '.')) {
                 this.readSource(localStorage.key(i).substring(7), pushFunction);
             }
         }
         if (onReadCallback && typeof onReadCallback === 'function') {
             onReadCallback(sourceArray);
         }
-    },
-    writeSource: function (source, onWriteCallback) {
-        "use strict";
-        localStorage.setItem('source.' + source.uri, JSON.stringify(source));
+    };
+    WebStorageDataProvider.prototype.writeSource = function (source, onWriteCallback) {
+        localStorage.setItem(this.getSourcePrefix + '.' + source.uri, JSON.stringify(source));
         if (onWriteCallback && typeof onWriteCallback === 'function') {
             onWriteCallback(source);
         }
-    },
-    writeSources: function (sources, onWriteCallback) {
-        "use strict";
+    };
+    WebStorageDataProvider.prototype.writeSources = function (sources, onWriteCallback) {
         var i;
         for (i = 0; i < sources.length; i++) {
             this.writeSource(sources[i]);
@@ -68,20 +88,19 @@ HTML5Podcatcher.storage.webStorage = {
         if (onWriteCallback && typeof onWriteCallback === 'function') {
             onWriteCallback(sources);
         }
-    },
-    deleteSource: function (source, onDeleteCallback) {
-        "use strict";
-        localStorage.removeItem('source.' + source.uri);
+    };
+    WebStorageDataProvider.prototype.deleteSource = function (source, onDeleteCallback) {
+        localStorage.removeItem(this.getSourcePrefix + '.' + source.uri);
         if (onDeleteCallback && typeof onDeleteCallback === 'function') {
             onDeleteCallback(source);
         }
-    },
-    readEpisode: function (episodeUri, onReadCallback) {
-        "use strict";
+    };
+    // == Access on storage for episodes
+    WebStorageDataProvider.prototype.readEpisode = function (episodeUri, onReadCallback) {
         var episode;
         if (episodeUri) {
             //Read Episode from local DOM-Storage
-            episode = JSON.parse(localStorage.getItem('episode.' + episodeUri));
+            episode = JSON.parse(localStorage.getItem(this.getEpisodePrefix + '.' + episodeUri));
             if (!episode) {
                 episode = { 'uri': episodeUri };
             }
@@ -95,9 +114,8 @@ HTML5Podcatcher.storage.webStorage = {
         if (onReadCallback && typeof onReadCallback === 'function') {
             onReadCallback(episode);
         }
-    },
-    readPlaylist: function (showAll, onReadCallback) {
-        "use strict";
+    };
+    WebStorageDataProvider.prototype.readPlaylist = function (showAll, onReadCallback) {
         if (!showAll) {
             showAll = false;
         }
@@ -108,7 +126,7 @@ HTML5Podcatcher.storage.webStorage = {
             }
         };
         for (i = 0; i < localStorage.length; i++) {
-            if (localStorage.key(i).slice(0, 8) === 'episode.') {
+            if (localStorage.key(i).slice(0, 8) === (this.getEpisodePrefix + '.')) {
                 this.readEpisode(localStorage.key(i).substring(8), filter);
             }
         }
@@ -117,9 +135,8 @@ HTML5Podcatcher.storage.webStorage = {
         if (onReadCallback && typeof onReadCallback === 'function') {
             onReadCallback(playlist);
         }
-    },
-    readEpisodesBySource: function (source, onReadCallback) {
-        "use strict";
+    };
+    WebStorageDataProvider.prototype.readEpisodesBySource = function (source, onReadCallback) {
         var i, filter, episodes = [];
         filter = function (episode) {
             if (episode.source === source.title) {
@@ -127,7 +144,7 @@ HTML5Podcatcher.storage.webStorage = {
             }
         };
         for (i = 0; i < localStorage.length; i++) {
-            if (localStorage.key(i).slice(0, 8) === 'episode.') {
+            if (localStorage.key(i).slice(0, 8) === this.getEpisodePrefix + '.') {
                 this.readEpisode(localStorage.key(i).substring(8), filter);
             }
         }
@@ -136,16 +153,14 @@ HTML5Podcatcher.storage.webStorage = {
         if (onReadCallback && typeof onReadCallback === 'function') {
             onReadCallback(episodes);
         }
-    },
-    writeEpisode: function (episode, onWriteCallback) {
-        "use strict";
-        localStorage.setItem('episode.' + episode.uri, JSON.stringify(episode));
+    };
+    WebStorageDataProvider.prototype.writeEpisode = function (episode, onWriteCallback) {
+        localStorage.setItem(this.getEpisodePrefix + '.' + episode.uri, JSON.stringify(episode));
         if (onWriteCallback && typeof onWriteCallback === 'function') {
             onWriteCallback(episode);
         }
-    },
-    writeEpisodes: function (episodes, onWriteCallback) {
-        "use strict";
+    };
+    WebStorageDataProvider.prototype.writeEpisodes = function (episodes, onWriteCallback) {
         var i;
         for (i = 0; i < episodes.length; i++) {
             this.writeEpisode(episodes[i]);
@@ -153,5 +168,12 @@ HTML5Podcatcher.storage.webStorage = {
         if (onWriteCallback && typeof onWriteCallback === 'function') {
             onWriteCallback(episodes);
         }
-    }
-};//end WebStorage
+    };
+    // ====================================== //
+    // === Export public Elements         === //
+    // ====================================== //
+    return {
+        'WebStorageDataProvider': WebStorageDataProvider
+    };
+}());//end Modul webStorage
+HTML5Podcatcher.api.storage.StorageProvider.registerDataProvider(new HTML5Podcatcher.api.storage.webStorage.WebStorageDataProvider());

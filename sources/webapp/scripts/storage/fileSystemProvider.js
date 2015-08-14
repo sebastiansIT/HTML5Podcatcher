@@ -1,4 +1,6 @@
-﻿/*  Copyright 2013 - 2015 Sebastian Spautz
+﻿/** @module  HTML5Podcatcher/Storage/FileSystemAPI
+    @author  SebastiansIT [sebastian@human-injection.de]
+    @license Copyright 2013-2015 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -17,20 +19,56 @@
 */
 /*global window, navigator, Blob */
 /*global HTML5Podcatcher */
-HTML5Podcatcher.storage.fileSystemStorage = {
-    settings: {
-        fileSystemSize: 1024 * 1024 * 500, /*500 MB */
+
+/** @namespace */
+HTML5Podcatcher.api.storage.fileSystemAPIStorage = (function () {
+    "use strict";
+    var settings, FileSystemAPIFileProvider;
+    // === Private Felder
+    settings = {
         fileSystemStatus: window.PERSISTENT
-    },
-    saveFile: function (episode, arraybuffer, mimeType, onWriteCallback, onProgressCallback) {
-        "use strict";
+    };
+    // ====================================== //
+    // === Implementation of FileProvider === //
+    // ====================================== //
+    /** Provides access to a file storage implemented with Googles File System API.
+      * @class
+      * @param {string} [databaseName] - The name of the database.
+      * @param {number} [databaseVersion] - The version of the used database schema.
+      * @param {string} [storeNameFiles] - The name of the store with BLOBs.
+      */
+    FileSystemAPIFileProvider = function (fileSystemStatus) {
+        var fsStatus = fileSystemStatus || settings.fileSystemStatus;
+        this.fileSystemSize = 1024 * 1024 * 500; /*500 MB */
+        this.getFileSystemStatus = function () { return fsStatus; };
+        this.isSupportedByCurrentPlatform = window.requestFileSystem;
+        this.priority = 200;
+    };
+    FileSystemAPIFileProvider.prototype = new HTML5Podcatcher.api.storage.IFileProvider();
+    FileSystemAPIFileProvider.prototype.constructor = FileSystemAPIFileProvider;
+    FileSystemAPIFileProvider.prototype.toString = function () {
+        return "File storage provider based on Google File System API [Persistants Status: " + this.getFileSystemStatus() + "]";
+    };
+    FileSystemAPIFileProvider.prototype.init = function (parameters) {
+        if (!parameters.quota) { parameters.quota = 1024 * 1024 * 200; }
+        this.requestFileSystemQuota(parameters.quota, function (usage, quota) {
+            HTML5Podcatcher.logger("Usage: " + usage + " MiB of " + quota + 'MiB File Storage', 'info');
+        });
+    };
+    // == Access on storage for BLOBs
+    FileSystemAPIFileProvider.prototype.openFile = function (episode, onReadCallback) {
+        if (onReadCallback && typeof onReadCallback === 'function') {
+            onReadCallback(episode);
+        }
+    };
+    FileSystemAPIFileProvider.prototype.saveFile = function (episode, arraybuffer, mimeType, onWriteCallback, onProgressCallback) {
         HTML5Podcatcher.logger('Saving file "' + episode.mediaUrl + '" to local file system starts now', 'debug:FileSystemAPI');
         var blob, parts, fileName;
         blob = new Blob([arraybuffer], {type: mimeType});
         parts = episode.mediaUrl.split('/');
         fileName = parts[parts.length - 1];
         // Write file to the root directory.
-        window.requestFileSystem(this.settings.fileSystemStatus, this.settings.fileSystemSize, function (filesystem) {
+        window.requestFileSystem(this.getFileSystemStatus(), this.fileSystemSize, function (filesystem) {
             filesystem.root.getFile(fileName, {create: true, exclusive: false}, function (fileEntry) {
                 fileEntry.createWriter(function (writer) {
                     writer.onwrite = function (event) {
@@ -41,7 +79,7 @@ HTML5Podcatcher.storage.fileSystemStorage = {
                     writer.onwriteend = function () { //success
                         episode.isFileSavedOffline = true;
                         episode.offlineMediaUrl = fileEntry.toURL();
-                        HTML5Podcatcher.storage.writeEpisode(episode);
+                        HTML5Podcatcher.api.storage.StorageProvider.writeEpisode(episode);
                         HTML5Podcatcher.logger('Saving file "' + episode.mediaUrl + '" to local file system finished', 'info');
                         if (onWriteCallback && typeof onWriteCallback === 'function') {
                             onWriteCallback(episode);
@@ -54,9 +92,8 @@ HTML5Podcatcher.storage.fileSystemStorage = {
                 }, HTML5Podcatcher.errorLogger);
             }, HTML5Podcatcher.errorLogger);
         }, HTML5Podcatcher.errorLogger);
-    },
-    deleteFile: function (episode, onDeleteCallback) {
-        "use strict";
+    };
+    FileSystemAPIFileProvider.prototype.deleteFile = function (episode, onDeleteCallback) {
         if (episode.offlineMediaUrl) {
             window.resolveLocalFileSystemURL(episode.offlineMediaUrl, function (fileEntry) { //success
                 fileEntry.remove(function () { //success
@@ -64,7 +101,7 @@ HTML5Podcatcher.storage.fileSystemStorage = {
                     url = episode.offlineMediaUrl;
                     episode.isFileSavedOffline = false;
                     episode.offlineMediaUrl = undefined;
-                    HTML5Podcatcher.storage.writeEpisode(episode);
+                    HTML5Podcatcher.api.storage.StorageProvider.writeEpisode(episode);
                     HTML5Podcatcher.logger('Deleting file "' + url + '" finished', 'info');
                     if (onDeleteCallback && typeof onDeleteCallback === 'function') {
                         onDeleteCallback(episode);
@@ -75,22 +112,15 @@ HTML5Podcatcher.storage.fileSystemStorage = {
                     var url;
                     url = episode.offlineMediaUrl;
                     episode.offlineMediaUrl = undefined;
-                    HTML5Podcatcher.storage.writeEpisode(episode);
+                    HTML5Podcatcher.api.storage.StorageProvider.writeEpisode(episode);
                     HTML5Podcatcher.logger('File "' + url + '"not found. But that\'s OK', 'info');
                 } else {
                     HTML5Podcatcher.logger(event, 'error');
                 }
             });
         }
-    },
-    openFile: function (episode, onReadCallback) {
-        "use strict";
-        if (onReadCallback && typeof onReadCallback === 'function') {
-            onReadCallback(episode);
-        }
-    },
-    requestFileSystemQuota: function (quota, onRequestCallback) {
-        "use strict";
+    };
+    FileSystemAPIFileProvider.prototype.requestFileSystemQuota = function (quota, onRequestCallback) {
         if (navigator.persistentStorage) {
             navigator.persistentStorage.requestQuota(quota, function (grantedBytes) {
                 HTML5Podcatcher.logger('You gain access to ' + grantedBytes / 1024 / 1024 + ' MiB of memory', 'debug:FileSystemAPI');
@@ -108,5 +138,12 @@ HTML5Podcatcher.storage.fileSystemStorage = {
                 }, HTML5Podcatcher.errorLogger);
             }, HTML5Podcatcher.errorLogger);
         }
-    }
-};
+    };
+    // ====================================== //
+    // === Export public Elements         === //
+    // ====================================== //
+    return {
+        'FileSystemAPIFileProvider': FileSystemAPIFileProvider
+    };
+}());
+HTML5Podcatcher.api.storage.StorageProvider.registerFileProvider(new HTML5Podcatcher.api.storage.fileSystemAPIStorage.FileSystemAPIFileProvider());

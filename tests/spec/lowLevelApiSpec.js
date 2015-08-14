@@ -22,16 +22,16 @@
 (function () {
     'use strict';
     describe("HTML5 Podcatcher Low Level API", function () {
-        describe("Storage Provider", function () {
+        describe("Storage API", function () {
             var originalTimeout;
             beforeEach(function () {
                 originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
                 jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
             });
             it("can clean all data in the storage subsystem", function (done) {
-                HTML5Podcatcher.storage.cleanStorage(function () {
-                    HTML5Podcatcher.storage.readPlaylist(true, function (readedEpisodes) {
-                        HTML5Podcatcher.storage.readSources(function (readedSources) {
+                HTML5Podcatcher.api.storage.StorageProvider.cleanStorage(function () {
+                    HTML5Podcatcher.api.storage.StorageProvider.readPlaylist(true, function (readedEpisodes) {
+                        HTML5Podcatcher.api.storage.StorageProvider.readSources(function (readedSources) {
                             expect(readedEpisodes.length).toEqual(0);
                             expect(readedSources.length).toEqual(0);
                             done();
@@ -41,19 +41,19 @@
             });
             describe("Selection of applicable storage provider in different browsers", function () {
                 it("should available at least one storage provider for files (in Firefox, Chrome, Interet Explorer or Opera on Windows, Android or Firefox OS; Safarie on iOS don't support one of the implemented providers)", function () {
-                    expect(HTML5Podcatcher.storage.isFileStorageAvailable()).toEqual(true);
+                    expect(HTML5Podcatcher.api.storage.StorageProvider.isFileStorageAvailable()).toEqual(true);
                 });
                 it("should select Indexed DB storage provider for data when called in Firefox, Chrome, Opera or Internet Explorer on Windows, Android or Firefox OS", function () {
-                    expect(HTML5Podcatcher.storage.dataStorageEngine()).toEqual(HTML5Podcatcher.storage.indexedDbStorage);
+                    expect(POD.api.storage.StorageProvider.dataStorageProvider() instanceof POD.api.storage.indexedDbStorage.IndexedDbDataProvider).toBeTruthy();
                 });
                 it("should select Indexed DB storage provider for files when called in Firefox", function () {
                     if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
-                        expect(HTML5Podcatcher.storage.fileStorageEngine()).toEqual(HTML5Podcatcher.storage.indexedDbStorage);
+                        expect(HTML5Podcatcher.api.storage.StorageProvider.fileStorageProvider()).toEqual(jasmine.any(HTML5Podcatcher.api.storage.indexedDbStorage.IndexedDbFileProvider));
                     }
                 });
                 it("should select File System API storage provider for files when called in Chrome or Opera on Windows or Android", function () {
                     if (window.chrome) {
-                        expect(HTML5Podcatcher.storage.fileStorageEngine()).toEqual(HTML5Podcatcher.storage.fileSystemStorage);
+                        expect(HTML5Podcatcher.api.storage.StorageProvider.fileStorageProvider()).toEqual(jasmine.any(HTML5Podcatcher.api.storage.fileSystemAPIStorage.FileSystemAPIFileProvider));
                     }
                 });
             });
@@ -65,30 +65,30 @@
                     {"uri": "https://another.web.site.new/episode1", "playback": {"played": false, "currentTime": 0}, "title": "Another Episode One Title", "updated": new Date("14 Sep 2014 7:20:50 +0000"), "mediaUrl": "https://another.web.site.new/files/episode1.mp3", "source": "Another.Podcast", "isFileSavedOffline": false}
                 ];
                 it("should save and read an array of episodes without any errors", function (done) {
-                    HTML5Podcatcher.storage.writeEpisodes(episodes, function (writenEpisodes) {
-                        HTML5Podcatcher.storage.readPlaylist(true, function (playlist) {
+                    HTML5Podcatcher.api.storage.StorageProvider.writeEpisodes(episodes, function (writenEpisodes) {
+                        HTML5Podcatcher.api.storage.StorageProvider.readPlaylist(true, function (playlist) {
                             expect(writenEpisodes).toEqual(episodes);
                             expect(playlist).toEqual(episodes);
                             done();
                         });
                     });
                 });
-                it("should ignore a empty array of episodes when saving such an array", function (done) {
-                    HTML5Podcatcher.storage.writeEpisodes([], function (writenEpisodes) {
-                        HTML5Podcatcher.storage.readPlaylist(true, function (playlist) {
+                it("should ignore an empty array of episodes when saving such an array", function (done) {
+                    HTML5Podcatcher.api.storage.StorageProvider.writeEpisodes([], function (writenEpisodes) {
+                        HTML5Podcatcher.api.storage.StorageProvider.readPlaylist(true, function (playlist) {
                             expect(playlist).toEqual(episodes);
                             done();
                         });
                     });
                 });
                 it("should get all new episodes", function (done) {
-                    HTML5Podcatcher.storage.readPlaylist(false, function (episodes) {
+                    HTML5Podcatcher.api.storage.StorageProvider.readPlaylist(false, function (episodes) {
                         expect(episodes.length).toEqual(2);
                         done();
                     });
                 });
                 it("should return all episodes from given source", function (done) {
-                    HTML5Podcatcher.storage.readEpisodesBySource({"title": "Podcast"}, function (episodes) {
+                    HTML5Podcatcher.api.storage.StorageProvider.readEpisodesBySource({"title": "Podcast"}, function (episodes) {
                         expect(episodes.length).toEqual(3);
                         done();
                     });
@@ -100,8 +100,8 @@
                     {"uri": "https://podcast2.web.site.new/", "link": "https://podcast2.web.site.new/", "title": "Podcast 2", "description": "The second never existing example podcast."}
                 ];
                 it("should save and read an array of sources without any errors", function (done) {
-                    HTML5Podcatcher.storage.writeSources(sources, function (writenSources) {
-                        HTML5Podcatcher.storage.readSources(function (readedSources) {
+                    HTML5Podcatcher.api.storage.StorageProvider.writeSources(sources, function (writenSources) {
+                        HTML5Podcatcher.api.storage.StorageProvider.readSources(function (readedSources) {
                             expect(writenSources.length).toEqual(2);
                             expect(writenSources).toEqual(sources);
                             expect(readedSources.length).toEqual(2);
@@ -111,8 +111,8 @@
                     });
                 });
                 it("should ignore a empty array of sources when saving such an array", function (done) {
-                    HTML5Podcatcher.storage.writeSources([], function (writenSources) {
-                        HTML5Podcatcher.storage.readSources(function (readedSources) {
+                    HTML5Podcatcher.api.storage.StorageProvider.writeSources([], function (writenSources) {
+                        HTML5Podcatcher.api.storage.StorageProvider.readSources(function (readedSources) {
                             expect(readedSources).toEqual(sources);
                             done();
                         });

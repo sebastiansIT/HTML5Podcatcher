@@ -100,11 +100,11 @@ document.addEventListener('DOMContentLoaded', function () {
         $('#httpProxyInput').val(UI.settings.get("proxyUrl"));
     }
     //Init quota and filesystem
-    if (POD.storage.fileStorageEngine() === POD.storage.fileSystemStorage) {
+    if (POD.api.storage.fileSystemAPIStorage !== undefined && POD.api.storage.StorageProvider.fileStorageProvider() instanceof POD.api.storage.fileSystemAPIStorage.FileSystemAPIFileProvider) {
         $('#FileSystemAPI').show();
         quota = UI.settings.get("quota");
         if (!quota) { quota = 1024 * 1024 * 200; }
-        POD.storage.fileSystemStorage.requestFileSystemQuota(quota, function (usage, quota) {
+        POD.api.storage.StorageProvider.fileStorageProvider().requestFileSystemQuota(quota, function (usage, quota) {
             UI.settings.set("quota", quota);
             var quotaConfigurationMarkup;
             quotaConfigurationMarkup = $('#memorySizeInput');
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function () {
         event.preventDefault();
         event.stopPropagation();
         if ($('#memorySizeInput')[0].checkValidity()) {
-            POD.storage.fileSystemStorage.requestFileSystemQuota($('#memorySizeInput').val() * 1024 * 1024);
+            POD.api.storage.StorageProvider.fileStorageProvider().requestFileSystemQuota($('#memorySizeInput').val() * 1024 * 1024);
         } else {
             UI.logHandler('Please insert a number', 'error');
         }

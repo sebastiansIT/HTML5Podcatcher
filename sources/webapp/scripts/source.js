@@ -59,14 +59,7 @@ $(document).ready(function () {
     // -- Initialise UI -- //
     // ------------------- //
     //Quota and Filesystem initialisation
-    if (POD.storage.fileStorageEngine() === POD.storage.fileSystemStorage) {
-        quota = UI.settings.get("quota");
-        if (!quota) { quota = 1024 * 1024 * 200; }
-        POD.storage.fileSystemStorage.requestFileSystemQuota(quota, function (usage, quota) {
-            GlobalUserInterfaceHelper.logHandler("Usage: " + usage + " MiB of " + quota + 'MiB File Storage', 'info');
-            UI.settings.set("quota", quota);
-        });
-    }
+    HTML5Podcatcher.api.storage.StorageProvider.init({quota: UI.settings.get("quota")});
     //Render Feed Details
     //Load Source and render Markup
     POD.storage.readSource(sourceUri, function (source) {

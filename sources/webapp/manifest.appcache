@@ -66,6 +66,8 @@
 ### Add a loader animation to each page
 ##0.35.1
 ### Fix a bug in Firefox 40: Implementation of CSP changed behavior for "blob" URL-Schema (see https://developer.mozilla.org/en-US/Firefox/Releases/40#Security)
+##0.36.0
+### Refactor Storage API
 
 # VALIDATE this manifest on http://manifest-validator.com/
 
@@ -79,6 +81,7 @@ settings.html
 scripts/jquery.min.js
 scripts/normalise.js
 scripts/lowLevelApi.js
+scripts/storage/storage.js
 scripts/storage/indexedDbProvider.js
 scripts/storage/fileSystemProvider.js
 scripts/storage/webStorageProvider.js

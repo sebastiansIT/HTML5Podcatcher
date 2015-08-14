@@ -25,185 +25,9 @@
 /*global localStorage */
 var HTML5Podcatcher = {
     version: "Alpha {{ VERSION }}",
+    api: {},
     settings: {
         uiLogger: undefined
-    },
-    storage: {
-        //Public Storage Interface
-        cleanStorage: function (onDeleteCallback) {
-            "use strict";
-            if (this.dataStorageEngine()) {
-                this.dataStorageEngine().cleanStorage(onDeleteCallback);
-            }
-        },
-        //Source Storage
-        readSource: function (sourceUri, onReadCallback) {
-            "use strict";
-            if (this.dataStorageEngine()) {
-                this.dataStorageEngine().readSource(sourceUri, onReadCallback);
-            }
-        },
-        readSources: function (onReadCallback) {
-            "use strict";
-            if (this.dataStorageEngine()) {
-                this.dataStorageEngine().readSources(onReadCallback);
-            }
-        },
-        writeSource: function (source, onWriteCallback) {
-            "use strict";
-            if (this.dataStorageEngine()) {
-                this.dataStorageEngine().writeSource(source, function (source) {
-                    if (onWriteCallback && typeof onWriteCallback === 'function') {
-                        onWriteCallback(source);
-                    }
-                    document.dispatchEvent(new CustomEvent('writeSource', {"detail": {'source': source}}));
-                });
-            }
-        },
-        writeSources: function (sources, onWriteCallback) {
-            "use strict";
-            if (sources.length > 0 && this.dataStorageEngine()) {
-                this.dataStorageEngine().writeSources(sources, function (sources) {
-                    if (onWriteCallback && typeof onWriteCallback === 'function') {
-                        onWriteCallback(sources);
-                    }
-                    document.dispatchEvent(new CustomEvent('writeSources', {"detail": {'sources': sources}}));
-                });
-            } else if (sources.length === 0 && onWriteCallback && typeof onWriteCallback === 'function') {
-                onWriteCallback();
-            }
-        },
-        deleteSource: function (source, onDeleteCallback) {
-            "use strict";
-            if (this.dataStorageEngine()) {
-                this.dataStorageEngine().deleteSource(source, onDeleteCallback);
-            }
-        },
-        //Episode Storage
-        readEpisode: function (episodeUri, onReadCallback) {
-            "use strict";
-            if (this.dataStorageEngine()) {
-                this.dataStorageEngine().readEpisode(episodeUri, onReadCallback);
-            }
-        },
-        readPlaylist: function (showAll, onReadCallback) {
-            "use strict";
-            if (this.dataStorageEngine()) {
-                this.dataStorageEngine().readPlaylist(showAll, onReadCallback);
-            }
-        },
-        readEpisodesBySource: function (source, onReadCallback) {
-            "use strict";
-            if (this.dataStorageEngine()) {
-                this.dataStorageEngine().readEpisodesBySource(source, onReadCallback);
-            }
-        },
-        writeEpisode: function (episode, onWriteCallback) {
-            "use strict";
-            if (this.dataStorageEngine()) {
-                this.dataStorageEngine().writeEpisode(episode, function (episode) {
-                    if (onWriteCallback && typeof onWriteCallback === 'function') {
-                        onWriteCallback(episode);
-                    }
-                    document.dispatchEvent(new CustomEvent('writeEpisode', {"detail": {'episode': episode}}));
-                });
-            }
-        },
-        writeEpisodes: function (episodes, onWriteCallback) {
-            "use strict";
-            if (episodes.length > 0 && this.dataStorageEngine()) {
-                this.dataStorageEngine().writeEpisodes(episodes, function (episodes) {
-                    if (onWriteCallback && typeof onWriteCallback === 'function') {
-                        onWriteCallback(episodes);
-                    }
-                    document.dispatchEvent(new CustomEvent('writeEpisodes', {"detail": {'episodes': episodes}}));
-                });
-            } else if (episodes.length === 0 && onWriteCallback && typeof onWriteCallback === 'function') {
-                onWriteCallback();
-            }
-        },
-        //File Storage
-        openFile: function (episode, onReadCallback) {
-            "use strict";
-            if (episode.isFileSavedOffline) {
-                if (this.fileStorageEngine()) {
-                    this.fileStorageEngine().openFile(episode, onReadCallback);
-                }
-            } else {
-                if (onReadCallback && typeof onReadCallback === 'function') {
-                    onReadCallback(episode);
-                }
-            }
-        },
-        saveFile: function (episode, arraybuffer, mimeType, onWriteCallback, onProgressCallback) {
-            "use strict";
-            if (this.fileStorageEngine()) {
-                this.fileStorageEngine().saveFile(episode, arraybuffer, mimeType, onWriteCallback, onProgressCallback);
-            }
-        },
-        deleteFile: function (episode, onDeleteCallback) {
-            "use strict";
-            if (this.fileStorageEngine()) {
-                this.fileStorageEngine().deleteFile(episode, onDeleteCallback);
-            }
-        },
-        //Storage Engine Selection
-        dataStorageEngine: function () {
-            "use strict";
-            var engine;
-            if (window.indexedDB) {
-                engine = this.indexedDbStorage;
-            } else if (window.localStorage) {
-                engine = this.webStorage;
-            } else {
-                HTML5Podcatcher.logger("Missing persistent data storage", "error");
-            }
-            return engine;
-        },
-        fileStorageEngine: function () {
-            "use strict";
-            var engine;
-            if (window.requestFileSystem) {
-                engine = this.fileSystemStorage;
-            } else if (window.indexedDB) {
-                engine = this.indexedDbStorage;
-            } else {
-                HTML5Podcatcher.logger("Missing persistent file storage", "error");
-            }
-            return engine;
-        },
-        isFileStorageAvailable: function () {
-            "use strict";
-            var returnvalue = false;
-            if (this.fileStorageEngine()) {
-                returnvalue = true;
-            }
-            return returnvalue;
-        },
-        //Migration betwean storage engines
-        migradeData: function (oldStorageEngine, newStorageEngine) {
-            "use strict";
-            oldStorageEngine.readSources(function (sourcesList) {
-                var i;
-                for (i = 0; i < sourcesList.length; i++) {
-                    newStorageEngine.writeSource(sourcesList[i], HTML5Podcatcher.web.downloadSource);
-                    oldStorageEngine.deleteSource(sourcesList[i]);
-                }
-            });
-            newStorageEngine.readPlaylist(false, function (episodeList) {
-                var i;
-                for (i = 0; i < episodeList.length; i++) {
-                    episodeList[i].playback.played = true;
-                    newStorageEngine.writeEpisode(episodeList[i]);
-                }
-            });
-            oldStorageEngine.readPlaylist(false, function (episodeList) {
-                var i;
-                for (i = 0; i < episodeList.length; i++) {
-                    newStorageEngine.writeEpisode(episodeList[i]);
-                }
-            });
-        }
     },
     web: {
         settings: {
@@ -341,7 +165,10 @@ var HTML5Podcatcher = {
                             }
                         }, false);
                         xhrProxy.addEventListener("abort", HTML5Podcatcher.logger, false);
-                        xhrProxy.addEventListener("error", HTML5Podcatcher.errorLogger, false);
+                        xhrProxy.addEventListener("error", function (xhrError) {
+                            HTML5Podcatcher.logger("Can't download File: " + xhrError.error, 'error');
+                            HTML5Podcatcher.logger(xhrError, 'debug');
+                        }, false);
                         xhrProxy.onload = function () {
                             if (this.status === 200) {
                                 HTML5Podcatcher.logger('Download of file "' + episode.mediaUrl + '" via proxy is finished', 'debug:Ajax');

@@ -1,4 +1,6 @@
-﻿/*  Copyright 2013-2015 Sebastian Spautz
+﻿/** @module  HTML5Podcatcher/Storage/IndexedDatabase
+    @author  SebastiansIT [sebastian@human-injection.de]
+    @license Copyright 2013-2015 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -18,51 +20,50 @@
 /*global window, Blob, ArrayBuffer */
 /*global IDBKeyRange */
 /*global HTML5Podcatcher */
-HTML5Podcatcher.storage.indexedDbStorage = {
-    settings: {
+
+/** @namespace */
+HTML5Podcatcher.api.storage.indexedDbStorage = (function () {
+    "use strict";
+    var settings, updateIndexedDB, cleanStorage, IndexedDbDataProvider, IndexedDbFileProvider;
+    // === Private Felder
+    settings = {
         name: 'HTML5Podcatcher',
         version: 7,
         sourcesStore: 'sources',
         episodesStore: 'episodes',
         filesStore: 'files',
         chunkSize: 1024 * 1024 //1 MByte
-    },
-    updateIndexedDB: function (event) {
-        "use strict";
+    };
+    updateIndexedDB = function (event) {
         HTML5Podcatcher.logger("Database Update from Version " + event.oldVersion + " to Version " + event.newVersion, 'info');
-        //Migrate from Local Storage API
-        if (event.oldVersion <= 4) {
-            HTML5Podcatcher.storage.migradeData(HTML5Podcatcher.storage.webStorage, HTML5Podcatcher.storage.indexedDbStorage);
-        }
         var db, episodeStore;
         db = this.result;
-        //Add object store for sorces/feeds
-        if (!db.objectStoreNames.contains(HTML5Podcatcher.storage.indexedDbStorage.settings.sourcesStore)) {
-            db.createObjectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.sourcesStore, { keyPath: 'uri' });
+        //Add object store for sources/feeds
+        if (!db.objectStoreNames.contains(settings.sourcesStore)) {
+            db.createObjectStore(settings.sourcesStore, { keyPath: 'uri' });
         }
         //Add object store for episodes
-        if (!db.objectStoreNames.contains(HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore)) {
-            episodeStore = db.createObjectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore, { keyPath: 'uri' });
+        if (!db.objectStoreNames.contains(settings.episodesStore)) {
+            episodeStore = db.createObjectStore(settings.episodesStore, { keyPath: 'uri' });
             episodeStore.createIndex('source', 'source', {unique: false});
         }
         //Add index "status" to episode store
-        episodeStore = event.currentTarget.transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore);
+        episodeStore = event.currentTarget.transaction.objectStore(settings.episodesStore);
         if (!episodeStore.indexNames.contains("status")) {
             episodeStore.createIndex("status", "playback.played", { unique: false });
         }
         //Add index "source" to episode store
-        episodeStore = event.currentTarget.transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore);
+        episodeStore = event.currentTarget.transaction.objectStore(settings.episodesStore);
         if (!episodeStore.indexNames.contains("sources")) {
             episodeStore.createIndex("sources", "source", { unique: false });
         }
         //Add object store for Files
-        if (!db.objectStoreNames.contains(HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore)) {
-            db.createObjectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore, {});
+        if (!db.objectStoreNames.contains(settings.filesStore)) {
+            db.createObjectStore(settings.filesStore, {});
         }
-    },
-    cleanStorage: function (onDeleteCallback) {
-        "use strict";
-        var requestDeleteDB = window.indexedDB.deleteDatabase(this.settings.name);
+    };
+    cleanStorage = function (onDeleteCallback) {
+        var requestDeleteDB = window.indexedDB.deleteDatabase(this.getDatabaseName());
         requestDeleteDB.onsuccess = function () {
             HTML5Podcatcher.logger("Indexed database deleted", 'info');
             if (onDeleteCallback && typeof onDeleteCallback === 'function') {
@@ -72,12 +73,40 @@ HTML5Podcatcher.storage.indexedDbStorage = {
         requestDeleteDB.onerror = function (event) {
             HTML5Podcatcher.logger(event.target.error.name + " deleting IndexedDB database (" + event.target.error.message + ")", 'error');
         };
-    },
-    //Source Storage
-    readSource: function (sourceUri, onReadCallback) {
-        "use strict";
-        var requestOpenDB;
-        requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+    };
+    // ====================================== //
+    // === Implementation of DataProvider === //
+    // ====================================== //
+    /** Provides access to a data storage implemented with Indexed Database API.
+      * @class
+      * @param {string} [databaseName] - The name of the database.
+      * @param {number} [databaseVersion] - The version of the used database schema.
+      * @param {string} [storeNameSources] - The name of the store with source Objects.
+      * @param {string} [storeNameEpisodes] - The name of the store with episode Objects.
+      */
+    IndexedDbDataProvider = function (databaseName, databaseVersion) {
+        var dbName = databaseName || settings.name,
+            dbVersion = databaseVersion || settings.version,
+            dbStoreSources = settings.sourcesStore,
+            dbStoreEpisodes = settings.episodesStore;
+        this.getDatabaseName = function () { return dbName; };
+        this.getDatabaseVersion = function () { return dbVersion; };
+        this.getStoreNameSources = function () { return dbStoreSources; };
+        this.getStoreNameEpisodes = function () { return dbStoreEpisodes; };
+        this.isSupportedByCurrentPlatform = window.indexedDB;
+        this.priority = 100;
+    };
+    IndexedDbDataProvider.prototype = new HTML5Podcatcher.api.storage.IDataProvider();
+    IndexedDbDataProvider.prototype.constructor = IndexedDbDataProvider;
+    IndexedDbDataProvider.prototype.toString = function () {
+        return "Data storage provider based on Indexed Database API [Database: " + this.getDatabaseName() + " | Version: " + this.getDatabaseVersion() + "]";
+    };
+    IndexedDbDataProvider.prototype.updateIndexedDB = updateIndexedDB;
+    IndexedDbDataProvider.prototype.cleanStorage = cleanStorage;
+    // == Access on storage for sources
+    IndexedDbDataProvider.prototype.readSource = function (sourceUri, onReadCallback) {
+        var requestOpenDB, provider = this;
+        requestOpenDB = window.indexedDB.open(provider.getDatabaseName(), provider.getDatabaseVersion());
         requestOpenDB.onupgradeneeded = this.updateIndexedDB;
         requestOpenDB.onblocked = function () {
             HTML5Podcatcher.logger("Database blocked", 'debug:IndexedDatabaseAPI');
@@ -86,10 +115,9 @@ HTML5Podcatcher.storage.indexedDbStorage = {
             HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug:IndexedDatabaseAPI');
             var db, transaction, store, request;
             db = this.result;
-            transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.sourcesStore], 'readonly');
-            store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.sourcesStore);
+            transaction = db.transaction([provider.getStoreNameSources()], 'readonly');
+            store = transaction.objectStore(provider.getStoreNameSources());
             request = store.get(sourceUri);
-            // Erfolgs-Event
             request.onsuccess = function (event) {
                 var source;
                 if (event.target.result) {
@@ -109,19 +137,18 @@ HTML5Podcatcher.storage.indexedDbStorage = {
         requestOpenDB.onerror = function (event) {
             HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
         };
-    },
-    readSources: function (onReadCallback) {
-        "use strict";
-        var request;
-        request = window.indexedDB.open(this.settings.name, this.settings.version);
+    };
+    IndexedDbDataProvider.prototype.readSources = function (onReadCallback) {
+        var request, provider = this;
+        request = window.indexedDB.open(provider.getDatabaseName(), provider.getDatabaseVersion());
         request.onupgradeneeded = this.updateIndexedDB;
         request.onblocked = function () { HTML5Podcatcher.logger("Database blocked", 'debug:IndexedDatabaseAPI'); };
         request.onsuccess = function () {
             HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug:IndexedDatabaseAPI');
             var db, transaction, store, cursorRequest, sourcelist;
             db = this.result;
-            transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.sourcesStore], 'readonly');
-            store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.sourcesStore);
+            transaction = db.transaction([provider.getStoreNameSources()], 'readonly');
+            store = transaction.objectStore(provider.getStoreNameSources());
             cursorRequest = store.openCursor();
             sourcelist = [];
             cursorRequest.onsuccess = function (event) {
@@ -142,11 +169,10 @@ HTML5Podcatcher.storage.indexedDbStorage = {
         request.onerror = function (event) {
             HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
         };
-    },
-    writeSource: function (source, onWriteCallback) {
-        "use strict";
-        var requestOpenDB;
-        requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+    };
+    IndexedDbDataProvider.prototype.writeSource = function (source, onWriteCallback) {
+        var requestOpenDB, provider = this;
+        requestOpenDB = window.indexedDB.open(provider.getDatabaseName(), provider.getDatabaseVersion());
         requestOpenDB.onupgradeneeded = this.updateIndexedDB;
         requestOpenDB.onblocked = function () {
             HTML5Podcatcher.logger("Database blocked while saving source", 'debug:IndexedDatabaseAPI');
@@ -155,8 +181,8 @@ HTML5Podcatcher.storage.indexedDbStorage = {
             HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug:IndexedDatabaseAPI');
             var db, transaction, store, request;
             db = this.result;
-            transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.sourcesStore], 'readwrite');
-            store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.sourcesStore);
+            transaction = db.transaction([provider.getStoreNameSources()], 'readwrite');
+            store = transaction.objectStore(provider.getStoreNameSources());
             request = store.put(source);
             // Erfolgs-Event
             request.onsuccess = function (event) {
@@ -172,11 +198,16 @@ HTML5Podcatcher.storage.indexedDbStorage = {
         requestOpenDB.onerror = function (event) {
             HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
         };
-    },
-    writeSources: function (sources, onWriteCallback) {
-        "use strict";
-        var requestOpenDB;
-        requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+    };
+    IndexedDbDataProvider.prototype.writeSources = function (sources, onWriteCallback) {
+        var requestOpenDB, provider = this;
+        //check parameter "sources"
+        if (sources === 'undefined' || sources.length === 0) {
+            if (onWriteCallback && typeof onWriteCallback === 'function') {
+                onWriteCallback([]);
+            }
+        }
+        requestOpenDB = window.indexedDB.open(this.getDatabaseName(), this.getDatabaseVersion());
         requestOpenDB.onupgradeneeded = this.updateIndexedDB;
         requestOpenDB.onblocked = function () {
             HTML5Podcatcher.logger("Database blocked while writing source", 'debug:IndexedDatabaseAPI');
@@ -186,8 +217,8 @@ HTML5Podcatcher.storage.indexedDbStorage = {
             var db, transaction, store, request, i, saveFunction;
             db = this.result;
             i = 0;
-            transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.sourcesStore], 'readwrite');
-            store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.sourcesStore);
+            transaction = db.transaction([provider.getStoreNameSources()], 'readwrite');
+            store = transaction.objectStore(provider.getStoreNameSources());
             saveFunction = function () {
                 request = store.put(sources[i]);
                 request.onsuccess = function (event) {
@@ -214,10 +245,10 @@ HTML5Podcatcher.storage.indexedDbStorage = {
         requestOpenDB.onerror = function (event) {
             HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
         };
-    },
-    deleteSource: function (source, onDeleteCallback) {
-        "use strict";
-        var requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+    };
+    IndexedDbDataProvider.prototype.deleteSource = function (source, onDeleteCallback) {
+        var requestOpenDB, provider = this;
+        requestOpenDB = window.indexedDB.open(this.getDatabaseName(), this.getDatabaseVersion());
         requestOpenDB.onupgradeneeded = this.updateIndexedDB;
         requestOpenDB.onblocked = function () {
             HTML5Podcatcher.logger("Database blocked while deleting source", 'debug:IndexedDatabaseAPI');
@@ -226,8 +257,8 @@ HTML5Podcatcher.storage.indexedDbStorage = {
             HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug:IndexedDatabaseAPI');
             var db, transaction, store, request;
             db = this.result;
-            transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.sourcesStore], 'readwrite');
-            store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.sourcesStore);
+            transaction = db.transaction([provider.getStoreNameSources()], 'readwrite');
+            store = transaction.objectStore(provider.getStoreNameSources());
             request = store.delete(source.uri);
             request.onsuccess = function () {
                 HTML5Podcatcher.logger('Source ' + source.uri + ' deleted from database', 'debug:IndexedDatabaseAPI');
@@ -242,13 +273,12 @@ HTML5Podcatcher.storage.indexedDbStorage = {
         requestOpenDB.onerror = function (event) {
             HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
         };
-    },
-    //Episode Storage
-    readEpisode: function (episodeUri, onReadCallback) {
-        "use strict";
-        var requestOpenDB;
+    };
+    // == Access on storage for episodes
+    IndexedDbDataProvider.prototype.readEpisode = function (episodeUri, onReadCallback) {
+        var requestOpenDB, provider = this;
         if (episodeUri) {
-            requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+            requestOpenDB = window.indexedDB.open(provider.getDatabaseName(), provider.getDatabaseVersion());
             requestOpenDB.onupgradeneeded = this.updateIndexedDB;
             requestOpenDB.onblocked = function () {
                 HTML5Podcatcher.logger("Database blocked while reading episode", 'debug:IndexedDatabaseAPI');
@@ -257,8 +287,8 @@ HTML5Podcatcher.storage.indexedDbStorage = {
                 HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug:IndexedDatabaseAPI');
                 var db, transaction, store, request;
                 db = this.result;
-                transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore], 'readonly');
-                store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore);
+                transaction = db.transaction([provider.getStoreNameEpisodes()], 'readonly');
+                store = transaction.objectStore(provider.getStoreNameEpisodes());
                 request = store.get(episodeUri);
                 // Erfolgs-Event
                 request.onsuccess = function (event) {
@@ -293,22 +323,21 @@ HTML5Podcatcher.storage.indexedDbStorage = {
                 HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
             };
         }
-    },
-    readPlaylist: function (showAll, onReadCallback) {
-        "use strict";
+    };
+    IndexedDbDataProvider.prototype.readPlaylist = function (showAll, onReadCallback) {
         if (!showAll) {
             showAll = false;
         }
-        var request;
-        request = window.indexedDB.open(this.settings.name, this.settings.version);
-        request.onupgradeneeded = this.updateIndexedDB;
-        request.onblocked = function () { HTML5Podcatcher.logger("Database blocked while reading playlist", 'debug:IndexedDatabaseAPI'); };
-        request.onsuccess = function () {
+        var requestOpenDB, provider = this;
+        requestOpenDB = window.indexedDB.open(provider.getDatabaseName(), provider.getDatabaseVersion());
+        requestOpenDB.onupgradeneeded = this.updateIndexedDB;
+        requestOpenDB.onblocked = function () { HTML5Podcatcher.logger("Database blocked while reading playlist", 'debug:IndexedDatabaseAPI'); };
+        requestOpenDB.onsuccess = function () {
             HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug:IndexedDatabaseAPI');
             var db, transaction, store, cursor, playlist = [];
             db = this.result;
-            transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore], 'readonly');
-            store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore);
+            transaction = db.transaction([provider.getStoreNameEpisodes()], 'readonly');
+            store = transaction.objectStore(provider.getStoreNameEpisodes());
             cursor = store.openCursor();
             playlist = [];
             cursor.onsuccess = function (event) {
@@ -329,26 +358,25 @@ HTML5Podcatcher.storage.indexedDbStorage = {
                     }
                 }
             };
-            request.onerror = function (event) {
+            cursor.onerror = function (event) {
                 HTML5Podcatcher.logger(event.target.error.name + ' while reading playlist from IndexedDB (' + event.target.error.message + ')', 'error');
             };
         };
-        request.onerror = function (event) {
+        requestOpenDB.onerror = function (event) {
             HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
         };
-    },
-    readEpisodesBySource: function (source, onReadCallback) {
-        "use strict";
-        var request;
-        request = window.indexedDB.open(this.settings.name, this.settings.version);
-        request.onupgradeneeded = this.updateIndexedDB;
-        request.onblocked = function () { HTML5Podcatcher.logger("Database blocked", 'debug:IndexedDatabaseAPI'); };
-        request.onsuccess = function () {
+    };
+    IndexedDbDataProvider.prototype.readEpisodesBySource = function (source, onReadCallback) {
+        var requestOpenDB, provider = this;
+        requestOpenDB = window.indexedDB.open(provider.getDatabaseName(), provider.getDatabaseVersion());
+        requestOpenDB.onupgradeneeded = this.updateIndexedDB;
+        requestOpenDB.onblocked = function () { HTML5Podcatcher.logger("Database blocked", 'debug:IndexedDatabaseAPI'); };
+        requestOpenDB.onsuccess = function () {
             HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug:IndexedDatabaseAPI');
             var db, transaction, store, index, cursor, episodes = [];
             db = this.result;
-            transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore], 'readonly');
-            store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore);
+            transaction = db.transaction([provider.getStoreNameEpisodes()], 'readonly');
+            store = transaction.objectStore(provider.getStoreNameEpisodes());
             index = store.index("sources");
             cursor = index.openCursor(IDBKeyRange.only(source.title));
             episodes = [];
@@ -368,18 +396,17 @@ HTML5Podcatcher.storage.indexedDbStorage = {
                     }
                 }
             };
-            request.onerror = function (event) {
+            cursor.onerror = function (event) {
                 HTML5Podcatcher.logger(event.target.error.name + ' while reading playlist from IndexedDB (' + event.target.error.message + ')', 'error');
             };
         };
-        request.onerror = function (event) {
+        requestOpenDB.onerror = function (event) {
             HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
         };
-    },
-    writeEpisode: function (episode, onWriteCallback) {
-        "use strict";
-        var requestOpenDB;
-        requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+    };
+    IndexedDbDataProvider.prototype.writeEpisode = function (episode, onWriteCallback) {
+        var requestOpenDB, provider = this;
+        requestOpenDB = window.indexedDB.open(provider.getDatabaseName(), provider.getDatabaseVersion());
         requestOpenDB.onupgradeneeded = this.updateIndexedDB;
         requestOpenDB.onblocked = function () {
             HTML5Podcatcher.logger("Database blocked", 'debug:IndexedDatabaseAPI');
@@ -388,8 +415,8 @@ HTML5Podcatcher.storage.indexedDbStorage = {
             HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug:IndexedDatabaseAPI');
             var db, transaction, store, request;
             db = this.result;
-            transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore], 'readwrite');
-            store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore);
+            transaction = db.transaction([provider.getStoreNameEpisodes()], 'readwrite');
+            store = transaction.objectStore(provider.getStoreNameEpisodes());
             request = store.put(episode);
             // Erfolgs-Event
             request.onsuccess = function (event) {
@@ -405,11 +432,16 @@ HTML5Podcatcher.storage.indexedDbStorage = {
         requestOpenDB.onerror = function (event) {
             HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
         };
-    },
-    writeEpisodes: function (episodes, onWriteCallback) {
-        "use strict";
-        var requestOpenDB;
-        requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+    };
+    IndexedDbDataProvider.prototype.writeEpisodes = function (episodes, onWriteCallback) {
+        var requestOpenDB, provider = this;
+        //check parameter "episodes"
+        if (episodes === 'undefined' || episodes.length === 0) {
+            if (onWriteCallback && typeof onWriteCallback === 'function') {
+                onWriteCallback([]);
+            }
+        }
+        requestOpenDB = window.indexedDB.open(provider.getDatabaseName(), provider.getDatabaseVersion());
         requestOpenDB.onupgradeneeded = this.updateIndexedDB;
         requestOpenDB.onblocked = function () {
             HTML5Podcatcher.logger("Database blocked", 'debug:IndexedDatabaseAPI');
@@ -419,8 +451,8 @@ HTML5Podcatcher.storage.indexedDbStorage = {
             var db, transaction, store, request, i, saveFunction;
             db = this.result;
             i = 0;
-            transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore], 'readwrite');
-            store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.episodesStore);
+            transaction = db.transaction([provider.getStoreNameEpisodes()], 'readwrite');
+            store = transaction.objectStore(provider.getStoreNameEpisodes());
             saveFunction = function () {
                 request = store.put(episodes[i]);
                 request.onsuccess = function (event) {
@@ -447,14 +479,41 @@ HTML5Podcatcher.storage.indexedDbStorage = {
         requestOpenDB.onerror = function (event) {
             HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
         };
-    },
-    //File Storage
-    openFile: function (episode, onReadCallback) {
-        "use strict";
+    };
+    // ====================================== //
+    // === Implementation of FileProvider === //
+    // ====================================== //
+    /** Provides access to a file storage implemented with Indexed Database API.
+      * @class
+      * @param {string} [databaseName] - The name of the database.
+      * @param {number} [databaseVersion] - The version of the used database schema.
+      * @param {string} [storeNameFiles] - The name of the store with BLOBs.
+      */
+    IndexedDbFileProvider = function (databaseName, databaseVersion) {
+        var dbName = databaseName || settings.name,
+            dbVersion = databaseVersion || settings.version,
+            dbStoreFiles = settings.filesStore,
+            dbChunkSize = settings.chunkSize;
+        this.getDatabaseName = function () { return dbName; };
+        this.getDatabaseVersion = function () { return dbVersion; };
+        this.getStoreNameFiles = function () { return dbStoreFiles; };
+        this.getChunkSize = function () { return dbChunkSize; };
+        this.isSupportedByCurrentPlatform = window.indexedDB;
+        this.priority = 100;
+    };
+    IndexedDbFileProvider.prototype = new HTML5Podcatcher.api.storage.IFileProvider();
+    IndexedDbFileProvider.prototype.constructor = IndexedDbFileProvider;
+    IndexedDbFileProvider.prototype.toString = function () {
+        return "File storage provider based on Indexed Database API [Database: " + this.getDatabaseName() + " | Version: " + this.getDatabaseVersion() + "]";
+    };
+    IndexedDbFileProvider.prototype.updateIndexedDB = updateIndexedDB;
+    IndexedDbFileProvider.prototype.cleanStorage = cleanStorage;
+    // == Access on storage for BLOBs
+    IndexedDbFileProvider.prototype.openFile = function (episode, onReadCallback) {
         if (episode.isFileSavedOffline) {
             HTML5Podcatcher.logger('Opening file "' + episode.mediaUrl + '" from IndexedDB starts now', 'debug:IndexedDatabaseAPI');
-            var requestOpenDB;
-            requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+            var requestOpenDB, provider = this;
+            requestOpenDB = window.indexedDB.open(provider.getDatabaseName(), provider.getDatabaseVersion());
             requestOpenDB.onupgradeneeded = this.updateIndexedDB;
             requestOpenDB.onblocked = function () {
                 HTML5Podcatcher.logger("Database blocked", 'debug:IndexedDatabaseAPI');
@@ -463,8 +522,8 @@ HTML5Podcatcher.storage.indexedDbStorage = {
                 HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug:IndexedDatabaseAPI');
                 var db, transaction, store, request;
                 db = this.result;
-                transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore], 'readonly');
-                store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore);
+                transaction = db.transaction([provider.getStoreNameFiles()], 'readonly');
+                store = transaction.objectStore(provider.getStoreNameFiles());
                 request = store.get(episode.mediaUrl);
                 // Erfolgs-Event
                 request.onsuccess = function (event) {
@@ -478,7 +537,7 @@ HTML5Podcatcher.storage.indexedDbStorage = {
                         HTML5Podcatcher.logger("Can not find offline file " + episode.mediaUrl + " in Indexed DB. Reset download state.", 'error');
                         episode.offlineMediaUrl = undefined;
                         episode.isFileSavedOffline = false;
-                        HTML5Podcatcher.storage.writeEpisode(episode);
+                        HTML5Podcatcher.api.storage.StorageProvider.writeEpisode(episode);
                     }
                     if (onReadCallback && typeof onReadCallback === 'function') {
                         onReadCallback(episode);
@@ -496,15 +555,14 @@ HTML5Podcatcher.storage.indexedDbStorage = {
                 onReadCallback(episode);
             }
         }
-    },
-    saveFile: function (episode, content, mimeType, onWriteCallback, onProgressCallback) {
-        "use strict";
+    };
+    IndexedDbFileProvider.prototype.saveFile = function (episode, content, mimeType, onWriteCallback, onProgressCallback) {
         HTML5Podcatcher.logger('Saving file "' + episode.mediaUrl + '" to IndexedDB starts now', 'debug:IndexedDatabaseAPI');
-        var blob, requestOpenDB, i, chunkArray = [];
+        var blob, requestOpenDB, i, chunkArray = [], provider = this;
         if (content instanceof ArrayBuffer) {
-            for (i = 0; i < content.byteLength; i += this.settings.chunkSize) {
-                if (i + this.settings.chunkSize < content.byteLength) {
-                    chunkArray.push(content.slice(i, i + this.settings.chunkSize));
+            for (i = 0; i < content.byteLength; i += this.getChunkSize()) {
+                if (i + this.getChunkSize() < content.byteLength) {
+                    chunkArray.push(content.slice(i, i + this.getChunkSize()));
                 } else {
                     chunkArray.push(content.slice(i));
                 }
@@ -513,7 +571,7 @@ HTML5Podcatcher.storage.indexedDbStorage = {
         } else if (content instanceof Blob) {
             blob = content;
         }
-        requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+        requestOpenDB = window.indexedDB.open(provider.getDatabaseName(), provider.getDatabaseVersion());
         requestOpenDB.onupgradeneeded = this.updateIndexedDB;
         requestOpenDB.onblocked = function () {
             HTML5Podcatcher.logger("Database blocked", 'debug:IndexedDatabaseAPI');
@@ -522,14 +580,14 @@ HTML5Podcatcher.storage.indexedDbStorage = {
             HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug:IndexedDatabaseAPI');
             var db, transaction, store, request;
             db = this.result;
-            transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore], 'readwrite');
-            store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore);
+            transaction = db.transaction([provider.getStoreNameFiles()], 'readwrite');
+            store = transaction.objectStore(provider.getStoreNameFiles());
             request = store.put(blob, episode.mediaUrl);
             // Erfolgs-Event
             request.onsuccess = function () {
                 episode.isFileSavedOffline = true;
                 episode.FileMimeType = mimeType;
-                HTML5Podcatcher.storage.writeEpisode(episode);
+                HTML5Podcatcher.api.storage.StorageProvider.writeEpisode(episode);
                 HTML5Podcatcher.logger('Saving file "' + episode.mediaUrl + '" to IndexedDB finished', 'info');
                 if (onWriteCallback && typeof onWriteCallback === 'function') {
                     onWriteCallback(episode);
@@ -542,13 +600,12 @@ HTML5Podcatcher.storage.indexedDbStorage = {
         requestOpenDB.onerror = function (event) {
             HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
         };
-    },
-    deleteFile: function (episode, onDeleteCallback) {
-        "use strict";
-        var requestOpenDB;
+    };
+    IndexedDbFileProvider.prototype.deleteFile = function (episode, onDeleteCallback) {
+        var requestOpenDB, provider = this;
         window.URL.revokeObjectURL(episode.offlineMediaUrl);
         if (episode && episode.mediaUrl) {
-            requestOpenDB = window.indexedDB.open(this.settings.name, this.settings.version);
+            requestOpenDB = window.indexedDB.open(provider.getDatabaseName(), provider.getDatabaseVersion());
             requestOpenDB.onupgradeneeded = this.updateIndexedDB;
             requestOpenDB.onblocked = function () {
                 HTML5Podcatcher.logger("Database blocked", 'debug:IndexedDatabaseAPI');
@@ -557,14 +614,14 @@ HTML5Podcatcher.storage.indexedDbStorage = {
                 HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug:IndexedDatabaseAPI');
                 var db, transaction, store, request;
                 db = this.result;
-                transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore], 'readwrite');
-                store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore);
+                transaction = db.transaction([provider.getStoreNameFiles()], 'readwrite');
+                store = transaction.objectStore(provider.getStoreNameFiles());
                 request = store.delete(episode.mediaUrl);
                 // Erfolgs-Event
                 request.onsuccess = function () {
                     episode.isFileSavedOffline = false;
                     episode.offlineMediaUrl = undefined;
-                    HTML5Podcatcher.storage.writeEpisode(episode);
+                    HTML5Podcatcher.api.storage.StorageProvider.writeEpisode(episode);
                     HTML5Podcatcher.logger('Deleting file "' + episode.mediaUrl + '" from IndexedDB finished', 'info');
                     if (onDeleteCallback && typeof onDeleteCallback === 'function') {
                         onDeleteCallback(episode);
@@ -580,19 +637,18 @@ HTML5Podcatcher.storage.indexedDbStorage = {
         } else {
             HTML5Podcatcher.logger('Nothing to delete from IndexedDB', 'info');
         }
-    },
-    listFiles: function (onReadCallback) {
-        "use strict";
-        var request;
-        request = window.indexedDB.open(this.settings.name, this.settings.version);
-        request.onupgradeneeded = this.updateIndexedDB;
-        request.onblocked = function () { HTML5Podcatcher.logger("Database blocked", 'debug:IndexedDatabaseAPI'); };
-        request.onsuccess = function () {
+    };
+    IndexedDbFileProvider.prototype.listFiles = function (onReadCallback) {
+        var requestOpenDB, provider = this;
+        requestOpenDB = window.indexedDB.open(provider.getDatabaseName(), provider.getDatabaseVersion());
+        requestOpenDB.onupgradeneeded = this.updateIndexedDB;
+        requestOpenDB.onblocked = function () { HTML5Podcatcher.logger("Database blocked", 'debug:IndexedDatabaseAPI'); };
+        requestOpenDB.onsuccess = function () {
             HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug:IndexedDatabaseAPI');
             var db, transaction, store, cursorRequest, filelist;
             db = this.result;
-            transaction = db.transaction([HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore], 'readonly');
-            store = transaction.objectStore(HTML5Podcatcher.storage.indexedDbStorage.settings.filesStore);
+            transaction = db.transaction([provider.getStoreNameFiles()], 'readonly');
+            store = transaction.objectStore(provider.getStoreNameFiles());
             cursorRequest = store.openCursor();
             filelist = [];
             cursorRequest.onsuccess = function (event) {
@@ -606,12 +662,21 @@ HTML5Podcatcher.storage.indexedDbStorage = {
                     }
                 }
             };
-            request.onerror = function (event) {
+            cursorRequest.onerror = function (event) {
                 HTML5Podcatcher.logger(event.target.error.name + ' while reading list of sources from IndexedDB (' + event.target.error.message + ')', 'error');
             };
         };
-        request.onerror = function (event) {
+        requestOpenDB.onerror = function (event) {
             HTML5Podcatcher.logger(event.target.error.name + " creating/accessing IndexedDB database (" + event.target.error.message + ")", 'error');
         };
-    }
-};
+    };
+    // ====================================== //
+    // === Export public Elements         === //
+    // ====================================== //
+    return {
+        'IndexedDbDataProvider': IndexedDbDataProvider,
+        'IndexedDbFileProvider': IndexedDbFileProvider
+    };
+}());
+HTML5Podcatcher.api.storage.StorageProvider.registerDataProvider(new HTML5Podcatcher.api.storage.indexedDbStorage.IndexedDbDataProvider());
+HTML5Podcatcher.api.storage.StorageProvider.registerFileProvider(new HTML5Podcatcher.api.storage.indexedDbStorage.IndexedDbFileProvider());

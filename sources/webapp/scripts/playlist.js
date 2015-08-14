@@ -364,14 +364,15 @@ $(document).ready(function () {
     // -- Initialise UI -- //
     // ------------------- //
     //Quota and Filesystem initialisation
-    if (POD.storage.fileStorageEngine() === POD.storage.fileSystemStorage) {
-        quota = UI.settings.get("quota");
-        if (!quota) { quota = 1024 * 1024 * 200; }
-        POD.storage.fileSystemStorage.requestFileSystemQuota(quota, function (usage, quota) {
-            GlobalUserInterfaceHelper.logHandler("Usage: " + usage + " MiB of " + quota + 'MiB File Storage', 'info');
-            UI.settings.set("quota", quota);
-        });
-    }
+    HTML5Podcatcher.api.storage.StorageProvider.init({quota: UI.settings.get("quota")});
+    // if (POD.storage.fileStorageEngine() === POD.storage.fileSystemStorage) {
+        // quota = UI.settings.get("quota");
+        // if (!quota) { quota = 1024 * 1024 * 200; }
+        // POD.storage.fileSystemStorage.requestFileSystemQuota(quota, function (usage, quota) {
+            // GlobalUserInterfaceHelper.logHandler("Usage: " + usage + " MiB of " + quota + 'MiB File Storage', 'info');
+            // UI.settings.set("quota", quota);
+        // });
+    // }
     //Render playlist
     POD.storage.readPlaylist(false, function (episodes) {
         UI.renderEpisodeList(episodes, UI.settings.get("playlistSort"));
