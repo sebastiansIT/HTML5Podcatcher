@@ -1,7 +1,7 @@
 AddType text/cache-manifest .appcache
 AddType application/x-web-app-manifest+json .webapp
 
-Header set Content-Security-Policy "default-src *; script-src 'self'; connect-src *; media-src blob: *; style-src 'self' 'unsafe-inline'; img-src *"
+Header set Content-Security-Policy "default-src *; script-src 'self'; connect-src *; media-src blob: *; style-src 'self' 'unsafe-inline'; img-src blob: *"
 
 <IfModule mod_expires.c>
    ExpiresActive Off

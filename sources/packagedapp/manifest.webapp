@@ -28,7 +28,7 @@
 		"navigation": false
 	},
 	"fullscreen": "false",
-	"csp": "default-src *; script-src 'self'; connect-src *; media-src *; style-src 'self' 'unsafe-inline'; img-src *",
+	"csp": "default-src *; script-src 'self'; connect-src *; media-src blob: *; style-src 'self' 'unsafe-inline'; img-src blob: *",
 	"developer": {
 		"name": "SebastiansIT",
 		"url": "http://human-injection.de"
