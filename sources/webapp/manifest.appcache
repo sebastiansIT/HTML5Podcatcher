@@ -68,6 +68,13 @@
 ### Fix a bug in Firefox 40: Implementation of CSP changed behavior for "blob" URL-Schema (see https://developer.mozilla.org/en-US/Firefox/Releases/40#Security)
 ##0.36.0
 ### Refactor Storage API
+##0.36.3
+### Fix a bug on rendering Episodes when App is offline
+##0.37.1
+### Testing a syncronisation Endpoint
+##0.37.2
+##0.37.3
+### Add Settings and Episodes to sync data receiver
 
 # VALIDATE this manifest on http://manifest-validator.com/
 
@@ -85,6 +92,7 @@ scripts/storage/storage.js
 scripts/storage/indexedDbProvider.js
 scripts/storage/fileSystemProvider.js
 scripts/storage/webStorageProvider.js
+scripts/configuration/configuration.js
 scripts/globalUi.js
 scripts/playlist.js
 scripts/sources.js

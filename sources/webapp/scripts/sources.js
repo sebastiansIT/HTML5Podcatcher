@@ -26,113 +26,112 @@
 
 /** Central 'ready' event handler */
 $(document).ready(function () {
-    "use strict";
-    POD.settings.uiLogger = UI.logHandler;
-    POD.settings.uiLogger("Opens Source View", "debug");
-    POD.web.settings.proxyUrlPattern = UI.settings.get("proxyUrl");
-    // -------------------------- //
-    // -- Check Pre Conditions -- //
-    // -------------------------- //
-    UI.preConditionCheck(function (preConditionCheckResult) {
-        if (preConditionCheckResult === 'missing proxy') {
-            window.location.href = 'settings.html';
-        } else if (preConditionCheckResult === 'missing sources') {
-            $('#addSourceView').toggleClass('fullscreen');
-        }
-    });
-    // ------------------- //
-    // -- Initialise UI -- //
-    // ------------------- //
-    POD.storage.readSources(function (sources) {
-        UI.renderSourceList(sources);
-        if (!navigator.onLine) {
-            $('#refreshPlaylist, #showAddSourceView').attr('disabled', 'disabled');
-        }
-    });
-    // --------------------------- //
-    // -- Register Eventhandler -- //
-    // --------------------------- //
-    //Application Cache Events
-    UI.initApplicationCacheEvents();
-    //Connection State Events
-    UI.initConnectionStateEvents();
-    $('#sourceslist').on('click', '.details', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        UI.settings.set('ShowDetailsForSource', $(this).closest('li').data('sourceUri'));
-        window.location.href = 'source.html';
-    });
-    //Update one Source
-    $('#sourceslist').on('click', '.update', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        var button = this, progressListener;
-        $(button).attr('disabled', 'disabled');
-        $(button).addClass('spinner');
-        progressListener = function (event) {
-            event.stopPropagation();
-            $(button).removeAttr('disabled');
-            $(button).removeClass('spinner');
-            document.removeEventListener('writeSource', progressListener, false);
-        };
-        document.addEventListener('writeSource', progressListener, false);
-        POD.storage.readSource($(this).attr("href"), function (source) {
-            POD.web.downloadSource(source);
-        });
-    });
-    //Delete Source from Database
-    $('#sourceslist').on('click', '.delete', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        var i, removeFunction;
-        removeFunction = function (element) { $(element).remove(); };
-        POD.storage.readSource($(this).closest('li').data('sourceUri'), function (source) {
-            POD.storage.deleteSource(source, function (source) {
-                for (i = 0; i < $('#sourceslist .entries li').length; i++) {
-                    if ($($('#sourceslist .entries li')[i]).data('sourceUri') === source.uri) {
-                        $($('#sourceslist .entries li')[i]).slideUp(400, removeFunction(this));
-                        break;
-                    }
-                }
-            });
-        });
-    });
-    //New or Changed Source
-    document.addEventListener('writeSource', function (event) {
-        var i, source, sourceUI;
-        source = event.detail.source;
-        sourceUI = UI.renderSource(source);
-        for (i = 0; i < $('#sourceslist').find('.entries li').length; i++) {
-            if ($($('#sourceslist').find('.entries li')[i]).data('sourceUri') === source.uri) {
-                $($('#sourceslist').find('.entries li')[i]).slideUp().html(sourceUI.html()).slideDown();
-                return;
+   "use strict";
+   POD.logger("Opens Source View", "debug");
+   POD.web.settings.proxyUrlPattern = UI.settings.get("proxyUrl");
+   // -------------------------- //
+   // -- Check Pre Conditions -- //
+   // -------------------------- //
+   UI.preConditionCheck(function (preConditionCheckResult) {
+      if (preConditionCheckResult === 'missing proxy') {
+         window.location.href = 'settings.html';
+      } else if (preConditionCheckResult === 'missing sources') {
+         $('#addSourceView').toggleClass('fullscreen');
+      }
+   });
+   // ------------------- //
+   // -- Initialise UI -- //
+   // ------------------- //
+   POD.storage.readSources(function (sources) {
+      UI.renderSourceList(sources);
+      if (!navigator.onLine) {
+         $('#refreshPlaylist, #showAddSourceView').attr('disabled', 'disabled');
+      }
+   });
+   // --------------------------- //
+   // -- Register Eventhandler -- //
+   // --------------------------- //
+   //Application Cache Events
+   UI.initApplicationCacheEvents();
+   //Connection State Events
+   UI.initConnectionStateEvents();
+   $('#sourceslist').on('click', '.details', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      UI.settings.set('ShowDetailsForSource', $(this).closest('li').data('sourceUri'));
+      window.location.href = 'source.html';
+   });
+   //Update one Source
+   $('#sourceslist').on('click', '.update', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      var button = this, progressListener;
+      $(button).attr('disabled', 'disabled');
+      $(button).addClass('spinner');
+      progressListener = function (event) {
+         event.stopPropagation();
+         $(button).removeAttr('disabled');
+         $(button).removeClass('spinner');
+         document.removeEventListener('writeSource', progressListener, false);
+      };
+      document.addEventListener('writeSource', progressListener, false);
+      POD.storage.readSource($(this).attr("href"), function (source) {
+         POD.web.downloadSource(source);
+      });
+   });
+   //Delete Source from Database
+   $('#sourceslist').on('click', '.delete', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      var i, removeFunction;
+      removeFunction = function (element) { $(element).remove(); };
+      POD.storage.readSource($(this).closest('li').data('sourceUri'), function (source) {
+         POD.storage.deleteSource(source, function (source) {
+            for (i = 0; i < $('#sourceslist .entries li').length; i++) {
+               if ($($('#sourceslist .entries li')[i]).data('sourceUri') === source.uri) {
+                  $($('#sourceslist .entries li')[i]).slideUp(400, removeFunction(this));
+                  break;
+               }
             }
-        }
-        //show source if not listed before
-        sourceUI.hide();
-        $('#sourceslist').find('.entries').append(sourceUI);
-        sourceUI.fadeIn();
-    }, false);
-    //Reload all Podcasts
-    $('#refreshPlaylist').on('click', UI.eventHandler.refreshAllSources);
-    //Open and close the dialog to insert new Feeds/Sources
-    $('#showAddSourceView, #addSourceView .closeDialog').on('click', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        $('#addSourceView').toggleClass('fullscreen');
-    });
-    //Adds a new feed/source
-    $('#loadSourceButton').on('click', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        if ($('#addSourceUrlInput')[0].checkValidity()) {
-            POD.storage.readSource($('#addSourceUrlInput').val(), function (source) {
-                POD.web.downloadSource(source);
-                $('#addSourceView').toggleClass('fullscreen');
-                $('#addSourceUrlInput').val("");
-            });
-        }
-    });
-    UI.initGeneralUIEvents();
-    UI.initConnectionStateEvents();
+         });
+      });
+   });
+   //New or Changed Source
+   document.addEventListener('writeSource', function (event) {
+      var i, source, sourceUI;
+      source = event.detail.source;
+      sourceUI = UI.renderSource(source);
+      for (i = 0; i < $('#sourceslist').find('.entries li').length; i++) {
+         if ($($('#sourceslist').find('.entries li')[i]).data('sourceUri') === source.uri) {
+            $($('#sourceslist').find('.entries li')[i]).slideUp().html(sourceUI.html()).slideDown();
+            return;
+         }
+      }
+      //show source if not listed before
+      sourceUI.hide();
+      $('#sourceslist').find('.entries').append(sourceUI);
+      sourceUI.fadeIn();
+   }, false);
+   //Reload all Podcasts
+   $('#refreshPlaylist').on('click', UI.eventHandler.refreshAllSources);
+   //Open and close the dialog to insert new Feeds/Sources
+   $('#showAddSourceView, #addSourceView .closeDialog').on('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      $('#addSourceView').toggleClass('fullscreen');
+   });
+   //Adds a new feed/source
+   $('#loadSourceButton').on('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      if ($('#addSourceUrlInput')[0].checkValidity()) {
+         POD.storage.readSource($('#addSourceUrlInput').val(), function (source) {
+            POD.web.downloadSource(source);
+            $('#addSourceView').toggleClass('fullscreen');
+            $('#addSourceUrlInput').val("");
+         });
+      }
+   });
+   UI.initGeneralUIEvents();
+   UI.initConnectionStateEvents();
 });

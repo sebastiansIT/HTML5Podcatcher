@@ -117,6 +117,11 @@ div[role="toolbar"] a[data-icon]:before {
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
+#activeMessage .note {
+	background-color: #006400;
+	color:#EEEEEE;
+	border:none;
+}
 #activeMessage .warn {
 	background-color: #EE6400;
 	color:#EEEEEE;

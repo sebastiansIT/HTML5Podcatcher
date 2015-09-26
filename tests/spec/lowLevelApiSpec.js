@@ -20,110 +20,9 @@
 /*global HTML5Podcatcher */
 /*global DOMParser */
 (function () {
-    'use strict';
-    describe("HTML5 Podcatcher Low Level API", function () {
-        describe("Storage API", function () {
-            var originalTimeout;
-            beforeEach(function () {
-                originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-                jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
-            });
-            it("can clean all data in the storage subsystem", function (done) {
-                HTML5Podcatcher.api.storage.StorageProvider.cleanStorage(function () {
-                    HTML5Podcatcher.api.storage.StorageProvider.readPlaylist(true, function (readedEpisodes) {
-                        HTML5Podcatcher.api.storage.StorageProvider.readSources(function (readedSources) {
-                            expect(readedEpisodes.length).toEqual(0);
-                            expect(readedSources.length).toEqual(0);
-                            done();
-                        });
-                    });
-                });
-            });
-            describe("Selection of applicable storage provider in different browsers", function () {
-                it("should available at least one storage provider for files (in Firefox, Chrome, Interet Explorer or Opera on Windows, Android or Firefox OS; Safarie on iOS don't support one of the implemented providers)", function () {
-                    expect(HTML5Podcatcher.api.storage.StorageProvider.isFileStorageAvailable()).toEqual(true);
-                });
-                it("should select Indexed DB storage provider for data when called in Firefox, Chrome, Opera or Internet Explorer on Windows, Android or Firefox OS", function () {
-                    expect(POD.api.storage.StorageProvider.dataStorageProvider() instanceof POD.api.storage.indexedDbStorage.IndexedDbDataProvider).toBeTruthy();
-                });
-                it("should select Indexed DB storage provider for files when called in Firefox", function () {
-                    if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
-                        expect(HTML5Podcatcher.api.storage.StorageProvider.fileStorageProvider()).toEqual(jasmine.any(HTML5Podcatcher.api.storage.indexedDbStorage.IndexedDbFileProvider));
-                    }
-                });
-                it("should select File System API storage provider for files when called in Chrome or Opera on Windows or Android", function () {
-                    if (window.chrome) {
-                        expect(HTML5Podcatcher.api.storage.StorageProvider.fileStorageProvider()).toEqual(jasmine.any(HTML5Podcatcher.api.storage.fileSystemAPIStorage.FileSystemAPIFileProvider));
-                    }
-                });
-            });
-            describe("Episode Storage", function () {
-                var episodes = [
-                    {"uri": "https://podcast.web.site.new/episode1", "playback": {"played": false, "currentTime": 10}, "title": "Episode One Title", "updated": new Date("Fri, 05 Sep 2014 06:00:20 +0000"), "mediaUrl": "https://podcast.web.site.new/files/episode1.mp3", "source": "Podcast", "isFileSavedOffline": true},
-                    {"uri": "https://podcast.web.site.new/episode2", "playback": {"played": true, "currentTime": 70}, "title": "Episode Two Title", "updated": new Date("12 Sep 2014 17:20:50 +0000"), "mediaUrl": "https://podcast.web.site.new/files/episode2.mp3", "source": "Podcast", "isFileSavedOffline": false},
-                    {"uri": "https://podcast.web.site.new/episode3", "playback": {"played": true, "currentTime": 140}, "title": "Episode 3 Title", "updated": new Date("13 Sep 2014 17:20:50 +0000"), "mediaUrl": "https://podcast.web.site.new/files/episode3.mp3", "source": "Podcast", "isFileSavedOffline": false},
-                    {"uri": "https://another.web.site.new/episode1", "playback": {"played": false, "currentTime": 0}, "title": "Another Episode One Title", "updated": new Date("14 Sep 2014 7:20:50 +0000"), "mediaUrl": "https://another.web.site.new/files/episode1.mp3", "source": "Another.Podcast", "isFileSavedOffline": false}
-                ];
-                it("should save and read an array of episodes without any errors", function (done) {
-                    HTML5Podcatcher.api.storage.StorageProvider.writeEpisodes(episodes, function (writenEpisodes) {
-                        HTML5Podcatcher.api.storage.StorageProvider.readPlaylist(true, function (playlist) {
-                            expect(writenEpisodes).toEqual(episodes);
-                            expect(playlist).toEqual(episodes);
-                            done();
-                        });
-                    });
-                });
-                it("should ignore an empty array of episodes when saving such an array", function (done) {
-                    HTML5Podcatcher.api.storage.StorageProvider.writeEpisodes([], function (writenEpisodes) {
-                        HTML5Podcatcher.api.storage.StorageProvider.readPlaylist(true, function (playlist) {
-                            expect(playlist).toEqual(episodes);
-                            done();
-                        });
-                    });
-                });
-                it("should get all new episodes", function (done) {
-                    HTML5Podcatcher.api.storage.StorageProvider.readPlaylist(false, function (episodes) {
-                        expect(episodes.length).toEqual(2);
-                        done();
-                    });
-                });
-                it("should return all episodes from given source", function (done) {
-                    HTML5Podcatcher.api.storage.StorageProvider.readEpisodesBySource({"title": "Podcast"}, function (episodes) {
-                        expect(episodes.length).toEqual(3);
-                        done();
-                    });
-                });
-            });
-            describe("Source Storage", function () {
-                var sources = [
-                    {"uri": "https://podcast.web.site.new/", "link": "https://podcast.web.site.new/", "title": "Podcast", "description": "The never existing example podcast."},
-                    {"uri": "https://podcast2.web.site.new/", "link": "https://podcast2.web.site.new/", "title": "Podcast 2", "description": "The second never existing example podcast."}
-                ];
-                it("should save and read an array of sources without any errors", function (done) {
-                    HTML5Podcatcher.api.storage.StorageProvider.writeSources(sources, function (writenSources) {
-                        HTML5Podcatcher.api.storage.StorageProvider.readSources(function (readedSources) {
-                            expect(writenSources.length).toEqual(2);
-                            expect(writenSources).toEqual(sources);
-                            expect(readedSources.length).toEqual(2);
-                            expect(readedSources).toEqual(sources);
-                            done();
-                        });
-                    });
-                });
-                it("should ignore a empty array of sources when saving such an array", function (done) {
-                    HTML5Podcatcher.api.storage.StorageProvider.writeSources([], function (writenSources) {
-                        HTML5Podcatcher.api.storage.StorageProvider.readSources(function (readedSources) {
-                            expect(readedSources).toEqual(sources);
-                            done();
-                        });
-                    });
-                });
-            });
-            afterEach(function () {
-                jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
-            });
-        });
-        describe("Parser", function () {
+   'use strict';
+   describe("HTML5 Podcatcher Low Level API", function () {
+      describe("Parser", function () {
             var xml, psc, source;
             source = { uri: "http://podcast.web.site/feed/", link: "http://podcast.web.site/", title: "Podcast", description: "The not existing example podcast." };
             describe("Parser for \"Normal Play Time\" (RFC 2326)", function () {
@@ -470,6 +369,6 @@
                     expect(result.episodes[0].jumppoints.length).toEqual(4);
                 });
             });
-        });
-    });
+      });
+   });
 }());
