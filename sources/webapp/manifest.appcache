@@ -75,6 +75,9 @@
 ##0.37.2
 ##0.37.3
 ### Add Settings and Episodes to sync data receiver
+##0.37.4
+### Fix a bug detecting the next (or previous) episode in the playlist
+##0.38.0 Button "Fast Forward" now changes playback to double speed when the button is pressed for more than 500 miliseconds
 
 # VALIDATE this manifest on http://manifest-validator.com/
 

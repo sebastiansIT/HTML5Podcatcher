@@ -54,12 +54,12 @@ GlobalUserInterfaceHelper.activeEpisode = function (onReadCallback) {
 GlobalUserInterfaceHelper.previousEpisode = function (onReadCallback) {
    "use strict";
    var activeEpisode = $('#playlist').find('.active');
-   POD.storage.readEpisode(activeEpisode.prev().data('episodeUri'), onReadCallback);
+   POD.storage.readEpisode(activeEpisode.prevAll(':not([aria-disabled="true"])').not('.news').first().data('episodeUri'), onReadCallback);
 };
 GlobalUserInterfaceHelper.nextEpisode = function (onReadCallback) {
    "use strict";
    var activeEpisode = $('#playlist').find('.active');
-   POD.storage.readEpisode(activeEpisode.next(':not([aria-disabled="true"])').data('episodeUri'), onReadCallback);
+   POD.storage.readEpisode(activeEpisode.nextAll(':not([aria-disabled="true"])').not('.news').first().data('episodeUri'), onReadCallback);
 };
 GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
    "use strict";
@@ -129,123 +129,125 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
          } else {
             mediaUrl = episode.mediaUrl;
          }
-         if (episode.mediaType) {
-            mediaType = episode.mediaType;
-         } else {
-            //the most audio files in the internet i have ever sean are MP3-Files, so i expect the media type of 'audio/mpeg' when nothing else is set.
-            mediaType = "audio/mpeg";
-         }
-         //Add media fragment to playback URI
-         mediaUrl = mediaUrl + "#t=" + episode.playback.currentTime;
-         if ($('#player audio').length > 0) {
-            audioTag = $('#player audio')[0];
-            $(audioTag).off();
-            $(audioTag).find('source').attr('type', mediaType).attr('src', mediaUrl);
-            $(audioTag).attr('title', episode.title);
-         } else {
-            $('#mediacontrol > p').remove();
-            audioTag = $(UI.GenerateAudioElement());
-            audioTag.find('source').attr('type', mediaType).attr('src', mediaUrl);
-            audioTag.attr('title', episode.title);
-            $('#mediacontrol').prepend(audioTag);
-         }
-         //Bind or rebind event handler for the audio element
-         $('#player audio').on('loadstart', function () {
-            GlobalUserInterfaceHelper.logHandler("==============================================", 'debug');
-            GlobalUserInterfaceHelper.activeEpisode(function (episode) { GlobalUserInterfaceHelper.logHandler("Start loading " + episode.title, 'debug:playback'); });
-         });
-         $('#player audio').on('loadedmetadata', function () {
-            GlobalUserInterfaceHelper.activeEpisode(function (episode) { GlobalUserInterfaceHelper.logHandler("Load metadata of " + episode.title, 'debug:playback'); });
-         });
-         $('#player audio').on('canplay', function () {
-            GlobalUserInterfaceHelper.activeEpisode(function (episode) { GlobalUserInterfaceHelper.logHandler(episode.title + " is ready to play", 'debug:playback'); });
-         });
-         $('#player audio').on('canplaythrough', function () {
-            GlobalUserInterfaceHelper.activeEpisode(function (episode) { GlobalUserInterfaceHelper.logHandler(episode.title + " is realy ready to play (\"canplaythrough\")", 'debug:playback'); });
-         });
-         $('#player audio').on('playing', function (event) {
-            var audioElement = event.target;
-            $('#playPause').data('icon', 'pause');
-            $('#playPause').attr('data-icon', 'pause');
-            GlobalUserInterfaceHelper.activeEpisode(function (episode) {
-               GlobalUserInterfaceHelper.logHandler(episode.title + " is playing", 'info:playback');
-               audioElement.autoplay = true;
+         if (mediaUrl) {
+            if (episode.mediaType) {
+               mediaType = episode.mediaType;
+            } else {
+               //the most audio files in the internet i have ever sean are MP3-Files, so i expect the media type of 'audio/mpeg' when nothing else is set.
+               mediaType = "audio/mpeg";
+            }
+            //Add media fragment to playback URI
+            mediaUrl = mediaUrl + "#t=" + episode.playback.currentTime;
+            if ($('#player audio').length > 0) {
+               audioTag = $('#player audio')[0];
+               $(audioTag).off();
+               $(audioTag).find('source').attr('type', mediaType).attr('src', mediaUrl);
+               $(audioTag).attr('title', episode.title);
+            } else {
+               $('#mediacontrol > p').remove();
+               audioTag = $(UI.GenerateAudioElement());
+               audioTag.find('source').attr('type', mediaType).attr('src', mediaUrl);
+               audioTag.attr('title', episode.title);
+               $('#mediacontrol').prepend(audioTag);
+            }
+            //Bind or rebind event handler for the audio element
+            $('#player audio').on('loadstart', function () {
+               GlobalUserInterfaceHelper.logHandler("==============================================", 'debug');
+               GlobalUserInterfaceHelper.activeEpisode(function (episode) { GlobalUserInterfaceHelper.logHandler("Start loading " + episode.title, 'debug:playback'); });
             });
-         });
-         $('#player audio').on('pause', function () {
-            $('#playPause').data('icon', 'play');
-            $('#playPause').attr('data-icon', 'play');
-         });
-         $('#player audio').on('ended', function () {
-            GlobalUserInterfaceHelper.activeEpisode(function (episode) {
-               GlobalUserInterfaceHelper.logHandler(episode.title + " is ended", 'debug:playback');
-               POD.toggleEpisodeStatus(episode);
-               //Plays next Episode in Playlist
+            $('#player audio').on('loadedmetadata', function () {
+               GlobalUserInterfaceHelper.activeEpisode(function (episode) { GlobalUserInterfaceHelper.logHandler("Load metadata of " + episode.title, 'debug:playback'); });
+            });
+            $('#player audio').on('canplay', function () {
+               GlobalUserInterfaceHelper.activeEpisode(function (episode) { GlobalUserInterfaceHelper.logHandler(episode.title + " is ready to play", 'debug:playback'); });
+            });
+            $('#player audio').on('canplaythrough', function () {
+               GlobalUserInterfaceHelper.activeEpisode(function (episode) { GlobalUserInterfaceHelper.logHandler(episode.title + " is realy ready to play (\"canplaythrough\")", 'debug:playback'); });
+            });
+            $('#player audio').on('playing', function (event) {
+               var audioElement = event.target;
+               $('#playPause').data('icon', 'pause');
+               $('#playPause').attr('data-icon', 'pause');
+               GlobalUserInterfaceHelper.activeEpisode(function (episode) {
+                  GlobalUserInterfaceHelper.logHandler(episode.title + " is playing", 'info:playback');
+                  audioElement.autoplay = true;
+               });
+            });
+            $('#player audio').on('pause', function () {
+               $('#playPause').data('icon', 'play');
+               $('#playPause').attr('data-icon', 'play');
+            });
+            $('#player audio').on('ended', function () {
+               GlobalUserInterfaceHelper.activeEpisode(function (episode) {
+                  GlobalUserInterfaceHelper.logHandler(episode.title + " is ended", 'debug:playback');
+                  POD.toggleEpisodeStatus(episode);
+                  //Plays next Episode in Playlist
+                  GlobalUserInterfaceHelper.nextEpisode(GlobalUserInterfaceHelper.playEpisode);
+               });
+            });
+            $('#player audio, #player audio source').on('error', function (e) {
+               var errormessage, readystate;
+               errormessage = e.toString();
+               readystate = $(this).parent()[0].readyState;
+               if (readystate === 0) {
+                  errormessage = "Can't load file " + $(this).parent()[0].currentSrc;
+               } else if ($(this).parent()[0].error) {
+                  switch (e.target.error.code) {
+                  case e.target.error.MEDIA_ERR_ABORTED:
+                     errormessage = 'You aborted the media playback.';
+                     break;
+                  case e.target.error.MEDIA_ERR_NETWORK:
+                     errormessage = 'A network error caused the audio download to fail.';
+                     break;
+                  case e.target.error.MEDIA_ERR_DECODE:
+                     errormessage = 'The audio playback was aborted due to a corruption problem or because the video used features your browser did not support.';
+                     break;
+                  case e.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                     errormessage = 'The video audio not be loaded, either because the server or network failed or because the format is not supported.';
+                     break;
+                  default:
+                     errormessage = 'An unknown error occurred.';
+                     break;
+                  }
+               }
+               $('#playPause').data('icon', 'play');
+               $('#playPause').attr('data-icon', 'play');
+               GlobalUserInterfaceHelper.logHandler(errormessage, 'error:playback');
                GlobalUserInterfaceHelper.nextEpisode(GlobalUserInterfaceHelper.playEpisode);
             });
-         });
-         $('#player audio, #player audio source').on('error', function (e) {
-            var errormessage, readystate;
-            errormessage = e.toString();
-            readystate = $(this).parent()[0].readyState;
-            if (readystate === 0) {
-               errormessage = "Can't load file " + $(this).parent()[0].currentSrc;
-            } else if ($(this).parent()[0].error) {
-               switch (e.target.error.code) {
-               case e.target.error.MEDIA_ERR_ABORTED:
-                  errormessage = 'You aborted the media playback.';
-                  break;
-               case e.target.error.MEDIA_ERR_NETWORK:
-                  errormessage = 'A network error caused the audio download to fail.';
-                  break;
-               case e.target.error.MEDIA_ERR_DECODE:
-                  errormessage = 'The audio playback was aborted due to a corruption problem or because the video used features your browser did not support.';
-                  break;
-               case e.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
-                  errormessage = 'The video audio not be loaded, either because the server or network failed or because the format is not supported.';
-                  break;
-               default:
-                  errormessage = 'An unknown error occurred.';
-                  break;
-               }
-            }
-            $('#playPause').data('icon', 'play');
-            $('#playPause').attr('data-icon', 'play');
-            GlobalUserInterfaceHelper.logHandler(errormessage, 'error:playback');
-            GlobalUserInterfaceHelper.nextEpisode(GlobalUserInterfaceHelper.playEpisode);
-         });
-         $('#player audio').on('durationchange', function (event) {
-            var percentPlayed, episodeUI, audioElement = event.target;
-            GlobalUserInterfaceHelper.activeEpisode(function (episode) {
-               GlobalUserInterfaceHelper.logHandler("Duration of " + episode.title + " is changed to " + UI.formatTimeCode(event.currentTarget.duration) + ".", 'debug:playback');
-               if (episode && audioElement.duration > episode.playback.currentTime) {
-                  $(audioElement).off('durationchange');
-                  if (audioElement.currentTime <= episode.playback.currentTime) {
-                     GlobalUserInterfaceHelper.logHandler("CurrentTime will set to " + UI.formatTimeCode(episode.playback.currentTime) + " seconds", 'debug');
-                     audioElement.currentTime = episode.playback.currentTime;
+            $('#player audio').on('durationchange', function (event) {
+               var percentPlayed, episodeUI, audioElement = event.target;
+               GlobalUserInterfaceHelper.activeEpisode(function (episode) {
+                  GlobalUserInterfaceHelper.logHandler("Duration of " + episode.title + " is changed to " + UI.formatTimeCode(event.currentTarget.duration) + ".", 'debug:playback');
+                  if (episode && audioElement.duration > episode.playback.currentTime) {
+                     $(audioElement).off('durationchange');
+                     if (audioElement.currentTime <= episode.playback.currentTime) {
+                        GlobalUserInterfaceHelper.logHandler("CurrentTime will set to " + UI.formatTimeCode(episode.playback.currentTime) + " seconds", 'debug');
+                        audioElement.currentTime = episode.playback.currentTime;
+                     }
+                     $(audioElement).on('timeupdate', function (event) {
+                        if (episode && (event.target.currentTime > (episode.playback.currentTime + 10) || event.target.currentTime < (episode.playback.currentTime - 10))) {
+                           episode.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10;
+                           POD.storage.writeEpisode(episode);
+                           GlobalUserInterfaceHelper.logHandler('Current timecode is ' + UI.formatTimeCode(episode.playback.currentTime) + '.', 'debug');
+                        }
+                        if (episode && (event.target.currentTime > (episode.playback.currentTime + 2) || event.target.currentTime < (episode.playback.currentTime - 2))) {
+                           //Show Progress as background Gradient of Episode-UI
+                           episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode);
+                           percentPlayed = event.target.currentTime / audioElement.duration;
+                           $(episodeUI).attr('style', 'background: linear-gradient(to right, rgba(0, 100, 0, 0.2) 0%,rgba(0, 100, 0, 0.2) ' + (percentPlayed * 100).toFixed(2) + '%, #ffffff ' + (percentPlayed * 100).toFixed(2) + '%);');
+                        }
+                     });
+                     GlobalUserInterfaceHelper.logHandler("Timeupdate on", 'debug');
                   }
-                  $(audioElement).on('timeupdate', function (event) {
-                     if (episode && (event.target.currentTime > (episode.playback.currentTime + 10) || event.target.currentTime < (episode.playback.currentTime - 10))) {
-                        episode.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10;
-                        POD.storage.writeEpisode(episode);
-                        GlobalUserInterfaceHelper.logHandler('Current timecode is ' + UI.formatTimeCode(episode.playback.currentTime) + '.', 'debug');
-                     }
-                     if (episode && (event.target.currentTime > (episode.playback.currentTime + 2) || event.target.currentTime < (episode.playback.currentTime - 2))) {
-                        //Show Progress as background Gradient of Episode-UI
-                        episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode);
-                        percentPlayed = event.target.currentTime / audioElement.duration;
-                        $(episodeUI).attr('style', 'background: linear-gradient(to right, rgba(0, 100, 0, 0.2) 0%,rgba(0, 100, 0, 0.2) ' + (percentPlayed * 100).toFixed(2) + '%, #ffffff ' + (percentPlayed * 100).toFixed(2) + '%);');
-                     }
-                  });
-                  GlobalUserInterfaceHelper.logHandler("Timeupdate on", 'debug');
-               }
+               });
             });
-         });
-         //Styling
-         $('#playlist').find('.active').removeClass('active');
-         $('#playlist li').filter(function () { return $(this).data('episodeUri') === episode.uri; }).addClass('active');
-         if (onActivatedCallback && typeof onActivatedCallback === 'function') {
-            onActivatedCallback(episode);
+            //Styling
+            $('#playlist').find('.active').removeClass('active');
+            $('#playlist li').filter(function () { return $(this).data('episodeUri') === episode.uri; }).addClass('active');
+            if (onActivatedCallback && typeof onActivatedCallback === 'function') {
+               onActivatedCallback(episode);
+            }
          }
       });
    }
@@ -330,7 +332,7 @@ GlobalUserInterfaceHelper.togglePauseStatus = function () {
 /** Central 'ready' event handler */
 $(document).ready(function () {
    "use strict";
-   var k, multiMediaKeyDownTimestemp;
+   var k, multiMediaKeyDownTimestemp, stoppedPressMouse;
    //Application Cache Events
    UI.initApplicationCacheEvents();
    //Configurate POD
@@ -397,10 +399,26 @@ $(document).ready(function () {
       var audioTag = $('#player audio')[0];
       audioTag.currentTime = Math.max(0, audioTag.currentTime - 10);
    });
-   $('#jumpForwards').on('click', function () {
+   document.getElementById('jumpForwards').addEventListener("mousedown", function( event ) {
+      stoppedPressMouse = false;
+      setTimeout(function () { 
+         if (stoppedPressMouse === false) {
+            $('#player audio')[0].playbackRate = 2;
+         }
+         POD.logger("Playback speed " + $('#player audio')[0].playbackRate, "debug");
+      }, 500);
+   }, false);
+   document.getElementById('jumpForwards').addEventListener("mouseup", function( event ) {
       var audioTag = $('#player audio')[0];
-      audioTag.currentTime = Math.min(audioTag.duration, audioTag.currentTime + 10);
-   });
+      if (audioTag.playbackRate === 1) { //skip 10 seconds
+         audioTag.currentTime = Math.min(audioTag.duration, audioTag.currentTime + 10);
+      }
+      else { //come back from fast forward
+         audioTag.playbackRate = 1;
+      }
+      stoppedPressMouse = true;
+   }, false);
+   
    $(document).on('keydown', function (event) {
       if (event.key === 'MediaNextTrack' || event.key === 'MediaTrackNext' || event.keyCode === 176) {
          var now = new Date();
@@ -436,6 +454,7 @@ $(document).ready(function () {
       }
       multiMediaKeyDownTimestemp = undefined;
    });
+   
    //Playlist UI Events
    $('#playlist').on('click', 'li .link', function (event) {
       event.preventDefault();
