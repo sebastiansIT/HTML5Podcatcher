@@ -21,6 +21,24 @@
 (function () {
     'use strict';
     describe("HTML5 Podcatcher UI", function () {
+        describe("Logging", function() {
+            it('should not throw an exeption when the optional parameter "tag" is missed', function() {
+                var test = function () {
+                    GlobalUserInterfaceHelper.logHandler('Log Message', 'debug');
+                }
+                expect(test).not.toThrow();
+            });
+            it('should never throw an exeption while parsing parameter "logLevelName"', function() {
+                var test = function () {
+                    GlobalUserInterfaceHelper.logHandler('Log Message with undefined level', undefined);
+                    GlobalUserInterfaceHelper.logHandler('Log Message with empty level ', '');
+                    GlobalUserInterfaceHelper.logHandler('Log Message with debug level', 'debug');
+                    GlobalUserInterfaceHelper.logHandler('Log Message with debug level and empty category', 'debug:');
+                    GlobalUserInterfaceHelper.logHandler('Log Message with debug level an category "tag"', 'debug:tag');
+                }
+                expect(test).not.toThrow();
+            });
+        })
         describe("Utilities", function () {
             it("should format a number of seconds as a human readable string in format hh:mm:ss", function () {
                 var formatedTimeCode = GlobalUserInterfaceHelper.formatTimeCode(3600);

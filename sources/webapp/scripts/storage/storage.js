@@ -265,7 +265,9 @@ var storageAPI = (function () {
       }
    };
    StorageProviderFacade.prototype.init = function (parameters) {
-      this.fileStorageProvider(parameters);
+      if (this.fileStorageProvider()) {
+         this.fileStorageProvider().init(parameters);
+      }
    };
    /** Migration between storage engines
      */

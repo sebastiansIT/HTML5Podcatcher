@@ -95,11 +95,11 @@ module.exports = function (grunt) {
         },
         curl: {
             HostedWebApp: {
-                src: 'http://code.jquery.com/jquery-2.1.1.min.js',
+                src: 'http://code.jquery.com/jquery-2.1.4.min.js',
                 dest: 'build/webapp/scripts/jquery.min.js'
             },
             FirefoxPackagedApp: {
-                src: 'http://code.jquery.com/jquery-2.1.1.min.js',
+                src: 'http://code.jquery.com/jquery-2.1.4.min.js',
                 dest: 'build/packagedapp/temp/scripts/jquery.min.js'
             }
         },

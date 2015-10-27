@@ -19,7 +19,7 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 -->
 
-<html manifest="manifest.appcache">
+<html>
     <head>
         <meta charset="utf-8">
         <title>Settings &mdash; HTML5 Podcatcher</title>
@@ -61,22 +61,18 @@
 				</form>
 			</section>
 			<section>
-				<h2>Files</h2>
-				<p><a href="#" onclick="showFileSystemEntries(); return false;">List Files (File System API)</a></p>
-				<p><a href="#" onclick="showIndexedDBEntries(); return false;">List Files (Indexed Database API)</a></p>
-				<p><a href="#" onclick="deleteFileSystemEntries(); return false;">Delete Files (File System API)</a></p>
-				<ul id="filelist"></ul>
-				<p><a href="chrome://settings/cookies">chrome://settings/cookies</a></p>
-			</section>
-			<section>
-				<h2>Test MP3-Playback</h2>
-				<audio controls="controls">
-					<source src="http://workingdraft.de/podpress_trac/web/1/0/Revision1_-Sencha-Animator-Webfernsehen-und-Firesheep.mp3" type='audio/mpeg; codecs="mp3"' />
-				</audio>
+				<h2>Test Ogg Opus</h2>
+            <audio title="TRO031 – Trojanischer Krieg 1 – Verbotene Liebe" mozaudiochannel="content" preload="metadata" controls="controls">
+               <source src="http://trojaalert.bildungsangst.de/podlove/file/1809/s/feed/c/opus/tro031-trojanischer-krieg-1-verbotene-liebe.opus#t=0" type="audio/ogg; codecs=opus">
+            </audio>
+            <h2>Test MP3-Playback</h2>
+				<audio title="VorSpiel 2015" mozaudiochannel="content" preload="metadata" controls="controls">
+               <source src="http://ausgespielt-podcast.de/podpress_trac/feed/7717/0/VorSpiel2015.mp3#t=0" type="audio/mpeg">
+            </audio>
 			</section>
 			<section>
 				<h2>Application Cache</h2>
-				<p><a href="chrome://appcache-internals/">chrome://appcache-internals/</a></p>
+				<p>Config on Chrome: <a href="chrome://appcache-internals/">chrome://appcache-internals/</a></p>
 			</section>
 		</div>
 		<footer>

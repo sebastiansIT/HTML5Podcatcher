@@ -14,7 +14,7 @@ from urlparse import urlparse, parse_qsl
 cgitb.enable()
 	
 def DoPost():
-	print( "Access-Control-Allow-Origin: http://human-injection.de")
+	print "Access-Control-Allow-Origin: http://lab.human-injection.de"
 	
 	request = json.load(sys.stdin)
 	key = request["key"];
@@ -114,3 +114,6 @@ if os.environ['REQUEST_METHOD'] == 'GET':
 	DoGet()
 if os.environ['REQUEST_METHOD'] == 'DELETE':
 	DoDelete()
+if os.environ['REQUEST_METHOD'] == 'OPTIONS':
+   print "Access-Control-Allow-Origin: http://lab.human-injection.de"
+   print
