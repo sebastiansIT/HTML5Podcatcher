@@ -53,7 +53,7 @@ $(document).ready(function () {
       window.location.href = 'sources.html';
    }
    POD.logger("Open Source Details", "debug");
-   POD.web.settings.proxyUrlPattern = UI.settings.get("proxyUrl");
+   HTML5Podcatcher.api.configuration.proxyUrlPattern = UI.settings.get("proxyUrl");
    // ------------------- //
    // -- Initialise UI -- //
    // ------------------- //

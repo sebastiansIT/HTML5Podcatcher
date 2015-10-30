@@ -27,10 +27,7 @@
 var webAPI = (function () {
     "use strict";
 
-    var downloadTimeout, proxyUrlPattern, createXMLHttpRequest, downloadXML, downloadArrayBuffer;
-
-    downloadTimeout = HTML5Podcatcher.api.configuration.downloadTimeout;
-    proxyUrlPattern = HTML5Podcatcher.api.configuration.proxyUrlPattern;
+    var createXMLHttpRequest, downloadXML, downloadArrayBuffer;
 
     /** The `CompletedAjaxRequestCreationCallback` is called after the creation of a XMLHttpRequest object.
       *
@@ -96,7 +93,8 @@ var webAPI = (function () {
       * @param {module:HTML5Podcatcher/Web~XMLLoadedCallback} [onLoadCallback] - Function that is called when XML Resource is successfuly loaded.
       */
     downloadXML = function (url, onLoadCallback) {
-        var successfunction, errorfunction;
+        var successfunction, errorfunction, proxyUrlPattern;
+        proxyUrlPattern = HTML5Podcatcher.api.configuration.proxyUrlPattern;
 
         successfunction = function () {
             var xmlData;
@@ -115,7 +113,7 @@ var webAPI = (function () {
             if (proxyUrlPattern) {
                 HTML5Podcatcher.logger('Direct download failed. Try proxy: ' + proxyUrlPattern.replace("$url$", url), 'info:Web');
                 HTML5Podcatcher.web.createXMLHttpRequest(function (proxyXhr) {
-                    proxyXhr.open('GET', HTML5Podcatcher.web.settings.proxyUrlPattern.replace("$url$", url), true);
+                    proxyXhr.open('GET', proxyUrlPattern.replace("$url$", url), true);
                     proxyXhr.addEventListener("error", function (xhrError) {
                         HTML5Podcatcher.logger("Can't download Source: " + xhrError.error, 'error:Web');
                     }, false);
@@ -155,21 +153,23 @@ var webAPI = (function () {
       * @param {module:HTML5Podcatcher/Web~XHRProgressCallback} [onProgressCallback] - The callback funktion to notify the program about progress information.
       */
     downloadArrayBuffer = function (url, onLoadCallback, onProgressCallback) {
-        var successfunction, errorfunction;
+        var successfunction, errorfunction, proxyUrlPattern, downloadTimeout;
+        proxyUrlPattern = HTML5Podcatcher.api.configuration.proxyUrlPattern;
+        downloadTimeout = HTML5Podcatcher.api.configuration.downloadTimeout;
 
         successfunction = function () {
             if (this.status === 200) {
-                HTML5Podcatcher.logger('Download of file "' + url + '" is finished', 'debug:Web');
+                HTML5Podcatcher.logger('Download of file "' + url + '" is finished', 'debug', 'Web');
                 if (onLoadCallback && typeof onLoadCallback === 'function') {
                     onLoadCallback(this.response);
                 }
             } else {
-                HTML5Podcatcher.logger('Error Downloading file "' + url + '": ' + this.statusText + ' (' + this.status + ')', 'error:Web');
+                HTML5Podcatcher.logger('Error Downloading file "' + url + '": ' + this.statusText + ' (' + this.status + ')', 'error', 'Web');
             }
         };
 
         errorfunction = function (xhrError) {
-            if (HTML5Podcatcher.web.settings.proxyUrlPattern) {
+            if (proxyUrlPattern) {
                 HTML5Podcatcher.logger('Direct download failed. Try proxy: ' + proxyUrlPattern.replace("$url$", url), 'warn:Web');
                 HTML5Podcatcher.web.createXMLHttpRequest(function (xhrProxy) {
                     xhrProxy.open('GET', proxyUrlPattern.replace("$url$", url), true);
@@ -177,7 +177,7 @@ var webAPI = (function () {
                     xhrProxy.timeout = downloadTimeout;
                     xhrProxy.addEventListener("progress", function (event) {
                         if (onProgressCallback && typeof onProgressCallback === 'function') {
-                            onProgressCallback(event, 'Download', url);
+                            onProgressCallback(event, url);
                         }
                     }, false);
                     xhrProxy.addEventListener("abort", HTML5Podcatcher.logger, false);
@@ -203,7 +203,7 @@ var webAPI = (function () {
                 xhr.timeout = downloadTimeout;
                 xhr.addEventListener("progress", function (event) {
                     if (onProgressCallback && typeof onProgressCallback === 'function') {
-                        onProgressCallback(event, 'Download', url);
+                        onProgressCallback(event, url);
                     }
                 }, false);
                 xhr.addEventListener("error", errorfunction, false);
@@ -220,8 +220,8 @@ var webAPI = (function () {
     };
 
     return {
-        'downloadSource': downloadXML,
-        'downloadFile': downloadArrayBuffer
+        'downloadXML': downloadXML,
+        'downloadArrayBuffer': downloadArrayBuffer
     };
 }());
 

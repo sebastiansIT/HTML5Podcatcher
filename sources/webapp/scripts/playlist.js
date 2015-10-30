@@ -342,7 +342,7 @@ $(document).ready(function () {
     UI.initApplicationCacheEvents();
     //Configurate POD
     POD.logger("Open Playlist", "debug");
-    POD.web.settings.proxyUrlPattern = UI.settings.get("proxyUrl");
+    HTML5Podcatcher.api.configuration.proxyUrlPattern = UI.settings.get("proxyUrl");
     // --------------------- //
     // -- Database Update -- //
     // --------------------- //

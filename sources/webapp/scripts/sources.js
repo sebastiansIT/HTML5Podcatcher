@@ -28,7 +28,7 @@
 $(document).ready(function () {
    "use strict";
    POD.logger("Opens Source View", "debug");
-   POD.web.settings.proxyUrlPattern = UI.settings.get("proxyUrl");
+   HTML5Podcatcher.api.configuration.proxyUrlPattern = UI.settings.get("proxyUrl");
    // -------------------------- //
    // -- Check Pre Conditions -- //
    // -------------------------- //
