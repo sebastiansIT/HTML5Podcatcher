@@ -48,50 +48,33 @@ var configurationAPI = (function () {
       */
 
     /** @summary Access to the user settings.
-      * @desc Access to the application settings as part of the entire Configuration. Application settings are a key/value-store. In this store you can save all kind of information you need for your application.
+      * @desc Access to the user settings as part of the entire Configuration. User settings are a key/value-store. In this store you can save all kind of user defined information for your application.
       * @namespace
       */
     settings = {
-        /** Set a value for the given application setting. 
-          * @param {string} key - The key of the application setting you want to set.
-          * @param {(string|number)}  - The value for the application setting you want to set.
+        /** Set a value for the given key of a user setting. 
+          * @param {string} key - The key of the user setting you want to set.
+          * @param {(string|number)} value - The value for the user setting you want to set.
           */
         'set': function (key, value) {
-            localStorage.setItem('settings.' + key, value);
+            storage.writeSettingsValue(key, value);
         },
-        /** Get the value for the given application setting.
-          * @param {string} key - The key of the application setting you want to get.
+        /** Get the value for the given user setting.
+          * @param {string} key - The key of the application setting you ask for.
           */
         'get': function (key) {
-            try {
-                var value = localStorage.getItem('settings.' + key);
-                if (value === null) {
-                    return undefined;
-                }
-                return value;
-            } catch (exception) {
-                if (exception.code === 18) {
-                    HTML5Podcatcher.logger('Please activate Cookies in your Browser settings! [' + exception.name + ': ' + exception.message + ']', 'fatal');
-                } else {
-                    HTML5Podcatcher.logger(exception, 'error');
-                }
-            }
+            return storage.readSettingsValue(key);
         }
     };
 
-    /** Collect all configuration values (Application settings + sources + new episodes) into one object.
+    /** Collect all configuration values (User settings + sources + new episodes) into one object.
       * @param {module:HTML5Podcatcher/Configuration~ConfigurationReadedCallback} [onReadCallback] - The function that is called when the export is finished.
       */
     readConfiguration = function (onReadCallback) {
         var config, i, key;
         config = {'episodes': [], 'sources': [], 'settings': {}};
         //Export Settings
-        for (i = 0; i < localStorage.length; i++) {
-            key = localStorage.key(i);
-            if (localStorage.key(i).slice(0, 9) === 'settings.') {
-                config.settings[localStorage.key(i).slice(9)] = localStorage.getItem(key);
-            }
-        }
+        config.settings = storage.listSettings();
         //Export active storage engine data
         storage.readSources(function (sourceArray) {
             for (i = 0; i < sourceArray.length; i++) {
@@ -153,7 +136,6 @@ var configurationAPI = (function () {
       * @param {module:HTML5Podcatcher/Configuration~ConfigurationChangedCallback} [onResetCallback] - The function that is called when the reset is finished and all data is deleted.
       */
     resetConfiguration = function (onResetCallback) {
-        localStorage.clear();
         storage.cleanStorage(function () {
             if (onResetCallback && typeof onResetCallback === 'function') {
                 onResetCallback({sources: [], episodes: [], settings: {}});

@@ -56,8 +56,7 @@ var webAPI = (function () {
 
     /** @summary Creates a XMLHttpRequest.
       * @desc Creates a 'normal' XMLHttpRequest in most cases. When called within a packaged FirefoxOS-App, 
-        it creates a system request (mozSystem property) to avoid conflicts with the Same Origin Policy.
-      * 
+      * it creates a system request (mozSystem property) to avoid conflicts with the Same Origin Policy. 
       * @private
       * @param {module:HTML5Podcatcher/Web~CompletedAjaxRequestCreationCallback} onCompletedCallback
       */

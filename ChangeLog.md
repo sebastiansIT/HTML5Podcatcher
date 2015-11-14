@@ -131,3 +131,67 @@
 - 0.32.2
 	*  Jumps now one second bevor the target when skip to previous section. This avoids endless Jump to same chapter when clicking multiple times on "previous Chapter"-Button;
 	*  Better handling of multimedia keys (can now also use Chapters) 
+- 0.33.0
+    * Add a detail page for feeds
+- 0.33.1
+	* Use Local Storage to transfer parameters to new detail page (instead of URL parameters; URL parameters are problematic in combination with App Cache)
+- 0.33.2
+	* Adding a index over the source of episodes (Indexed Database API)
+- 0.33.3
+	* Save all episodes in a feed instead of the top 5; alle episodes without the newest 5 are set automaticaly to played
+- 0.33.4
+	* Fix a bug: RSS link elements have now higher priority than gudi element when selecting the uri of an episode
+- 0.33.5
+	* Transfer mime-type audio/opus to "audio/ogg; codec=opus" (Firefox only understand the last one)
+- 0.33.6
+	* Show error messages at foot of main region
+	* some litle changes on css
+	* fix open web app manifest for FirefoxOS
+	* Use Autoprefixer in build process for Open Web App
+- 0.33.7
+	* litte changes handling app cache events
+	* replace background images with SVG files
+- 0.33.8
+	* open links in source.html externaly
+- 0.33.9
+	* repair export/import functions in settings page
+	* manipulate symbol of play/pause-Button when media events error or pause occures
+- 0.33.10
+	* using audio channel api on firefox os runtime
+- 0.33.11
+	* now you can configure log level to reduce logging messages to debug, info, warning or error level
+- 0.33.12
+	* Disabled buttons are now shown in light grey color
+	* using "autoprefixer" to get a better browser support
+- 0.33.13
+	* Fix a bug in source.html: class "external" is set to wrong element in feed markup
+- 0.33.14
+	* Fix a bug in logging function "logHandler()"
+	* Disable some functions when device is offline
+- 0.33.15
+	* Disable episodes in offline mode when audio file isn't saved/downloaded to device
+- 0.34.0
+	* Add a Configuration to allow descending or ascending order of playlist
+- 0.35.0
+	* Add a loader animation to each page
+- 0.35.1
+	* Fix a bug in Firefox 40: Implementation of CSP changed behavior for "blob" URL-Schema (see https://developer.mozilla.org/en-US/Firefox/Releases/40#Security)
+- 0.36.0
+	* Refactor Storage API
+- 0.36.3
+	* Fix a bug on rendering Episodes when App is offline
+- 0.37.1
+	* Testing a syncronisation Endpoint
+- 0.37.2
+- 0.37.3
+	* Add Settings and Episodes to sync data receiver
+- 0.37.4
+	* Fix a bug detecting the next (or previous) episode in the playlist
+- 0.38.0 
+	* Button "Fast Forward" now changes playback to double speed when the button is pressed for more than 500 miliseconds
+- 0.38.1
+	* Replace jquery event registration to find a bug in Firefox for Android 41
+- 0.38.2
+	* Try to solve strange error situation in Firefox 41
+- 0.38.3
+	* Fix a Bug: Initialisation of file storage provider isn't called
