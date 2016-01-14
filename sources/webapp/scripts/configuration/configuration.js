@@ -52,17 +52,17 @@ var configurationAPI = (function () {
       * @namespace
       */
     settings = {
-        /** Set a value for the given key of a user setting. 
+        /** Set a value for the given key of a user setting.
           * @param {string} key - The key of the user setting you want to set.
           * @param {(string|number)} value - The value for the user setting you want to set.
           */
-        'set': function (key, value) {
+        set: function (key, value) {
             storage.writeSettingsValue(key, value);
         },
         /** Get the value for the given user setting.
           * @param {string} key - The key of the application setting you ask for.
           */
-        'get': function (key) {
+        get: function (key) {
             return storage.readSettingsValue(key);
         }
     };
@@ -71,21 +71,29 @@ var configurationAPI = (function () {
       * @param {module:HTML5Podcatcher/Configuration~ConfigurationReadedCallback} [onReadCallback] - The function that is called when the export is finished.
       */
     readConfiguration = function (onReadCallback) {
-        var config, i, key;
-        config = {'episodes': [], 'sources': [], 'settings': {}};
+        var config;
+        config = {episodes: [], sources: [], settings: {}};
         //Export Settings
         config.settings = storage.listSettings();
         //Export active storage engine data
         storage.readSources(function (sourceArray) {
-            for (i = 0; i < sourceArray.length; i++) {
+            sourceArray.forEach(function (source) {
+                config.sources.push(source);
+            });
+            /*for (i = 0; i < sourceArray.length; i += 1) {
                 config.sources.push(sourceArray[i]);
-            }
+            }*/
             storage.readPlaylist(false, function (episodeArray) {
-                for (i = 0; i < episodeArray.length; i++) {
-                    //remove information about download status - downloaded files aren't exportet 
+                episodeArray.forEach(function (episode) {
+                    //remove information about download status - downloaded files aren't exportet
+                    delete episode.isFileSavedOffline;
+                    config.episodes.push(episode);
+                });
+                /*for (i = 0; i < episodeArray.length; i += 1) {
+                    //remove information about download status - downloaded files aren't exportet
                     delete episodeArray[i].isFileSavedOffline;
                     config.episodes.push(episodeArray[i]);
-                }
+                }*/
                 if (onReadCallback && typeof onReadCallback === 'function') {
                     onReadCallback(config);
                 }
@@ -110,20 +118,25 @@ var configurationAPI = (function () {
       * @param {module:HTML5Podcatcher/Configuration~ConfigurationChangedCallback} [onMergedCallback] - The function that is called when import is finished.
       */
     mergeConfigurations = function (config, onMergedCallback) {
-        var property, episodes = config.episodes, sources = config.sources;
+        var episodes = config.episodes, sources = config.sources;
         //... (1) copy all new settings and...
-        for (property in config.settings) {
+        Object.keys(config.settings).forEach(function (property) {
+            if (!settings.get(property)) {
+                settings.set(property, config.settings[property]);
+            }
+        });
+        /*for (property in config.settings) {
             if (config.settings.hasOwnProperty(property)) {
                 if (!settings.get(property)) {
                     settings.set(property, config.settings[property]);
                 }
             }
-        }
+        }*/
         //... (2) write all sources/feeds to the storage. Afterwards...
         storage.writeSources(sources, function () {
             //TODO ... (3) update all sources and...
             //... (4) write all given episodes to the storage.
-            //TODO don't override complete episodes - only override the attributes. 
+            //TODO don't override complete episodes - only override the attributes.
             storage.writeEpisodes(episodes, function () {
                 if (onMergedCallback && typeof onMergedCallback === 'function') {
                     onMergedCallback(config);
@@ -132,7 +145,7 @@ var configurationAPI = (function () {
         });
     };
 
-    /** Reset all configuration values (Application settings + sources + new episodes). Attention: This deletes all you Podcasts! 
+    /** Reset all configuration values (Application settings + sources + new episodes). Attention: This deletes all you Podcasts!
       * @param {module:HTML5Podcatcher/Configuration~ConfigurationChangedCallback} [onResetCallback] - The function that is called when the reset is finished and all data is deleted.
       */
     resetConfiguration = function (onResetCallback) {
@@ -163,7 +176,7 @@ var configurationAPI = (function () {
           * @type {number}
           */
         downloadTimeout: 600000,
-        /** Configures a URL pattern that is used when a file or a feed can't download directly. 
+        /** Configures a URL pattern that is used when a file or a feed can't download directly.
           * In this URL the placeholder $url$ is replaced with the adress of the file or feed you want to load.
           * @example 'http://podcatcher.sebastiansit.de/proxy.py?url=$url$'
           * @type {string}
@@ -173,7 +186,7 @@ var configurationAPI = (function () {
 }());
 
 /** The modul "Configuration" is available at document.HTML5Podcatcher.api.configuration.
-  * @global 
+  * @global
   * @name "HTML5Podcatcher.api.configuration"
   * @see module:HTML5Podcatcher/Configuration
   */
