@@ -20,6 +20,7 @@
 
 /*global document, CustomEvent */
 /*global HTML5Podcatcher */
+/*jslint this: true */
 
 var storageAPI = (function () {
     "use strict";
@@ -81,14 +82,14 @@ var storageAPI = (function () {
       * @param {string} sourceUri - The URI of the source-feed you want to read from storage.
       * @param {ReadedSourceCallback} [onReadCallback] - The function that is called when reading is finished.
       */
-    IDataProvider.prototype.readSource = function (sourceUri, onReadCallback) {
+    IDataProvider.prototype.readSource = function (/*sourceUri, onReadCallback*/) {
         throw new Error('not implemented');
     };
 
     /** Reads all available sources from storage.
     * @param {ReadedSourcesCallback} [onReadCallback] - The function that is called when reading is finished.
     */
-    IDataProvider.prototype.readSources = function (onReadCallback) {
+    IDataProvider.prototype.readSources = function (/*onReadCallback*/) {
         throw new Error('not implemented');
     };
 
@@ -96,7 +97,7 @@ var storageAPI = (function () {
     * @param {Source} source - The source you want to write to the storage.
     * @param {WritenSourceCallback} [onWriteCallback] - The function that is called when writing is finished.
     */
-    IDataProvider.prototype.writeSource = function (source, onWriteCallback) {
+    IDataProvider.prototype.writeSource = function (/*source, onWriteCallback*/) {
         throw new Error('not implemented');
     };
 
@@ -104,7 +105,7 @@ var storageAPI = (function () {
     * @param {Source[]} source - The sources you want to write to the storage.
     * @param {WritenSourcesCallback} [onWriteCallback] - The function that is called when writing is finished.
     */
-    IDataProvider.prototype.writeSources = function (sources, onWriteCallback) {
+    IDataProvider.prototype.writeSources = function (/*sources, onWriteCallback*/) {
         throw new Error('not implemented');
     };
 
@@ -112,7 +113,7 @@ var storageAPI = (function () {
     * @param {Source} source - The source you want to delete from the storage.
     * @param {DeletedSourceCallback} [onDeleteCallback] - The function that is called when deleting is finished.
     */
-    IDataProvider.prototype.deleteSource = function (source, onDeleteCallback) {
+    IDataProvider.prototype.deleteSource = function (/*source, onDeleteCallback*/) {
         throw new Error('not implemented');
     };
 
@@ -123,7 +124,7 @@ var storageAPI = (function () {
     * @param {string} episodeUri - The URI of the episode you want to read from the storage.
     * @param {ReadedEpisodeCallback} [onReadCallback] - The function that is called when reading is finished.
     */
-    IDataProvider.prototype.readEpisode = function (episodeUri, onReadCallback) {
+    IDataProvider.prototype.readEpisode = function (/*episodeUri, onReadCallback*/) {
         throw new Error('not implemented');
     };
 
@@ -131,7 +132,7 @@ var storageAPI = (function () {
     * @param {boolean} showAll=false - If true you get all episodes. Otherwise you get only the new one.
     * @param {ReadedEpisodesCallback} [onReadCallback] - The function that is called when reading is finished.
     */
-    IDataProvider.prototype.readPlaylist = function (showAll, onReadCallback) {
+    IDataProvider.prototype.readPlaylist = function (/*showAll, onReadCallback*/) {
         throw new Error('not implemented');
     };
 
@@ -139,7 +140,7 @@ var storageAPI = (function () {
     * @param {Source} source - The source you want.
     * @param {ReadedEpisodesCallback} [onReadCallback] - The function that is called when reading is finished.
     */
-    IDataProvider.prototype.readEpisodesBySource = function (source, onReadCallback) {
+    IDataProvider.prototype.readEpisodesBySource = function (/*source, onReadCallback*/) {
         throw new Error('not implemented');
     };
 
@@ -147,7 +148,7 @@ var storageAPI = (function () {
     * @param {Episode} episode - The episode to write to the storage.
     * @param {WritenEpisodeCallback} [onWriteCallback] - The function that is called when writing is finished.
     */
-    IDataProvider.prototype.writeEpisode = function (episode, onWriteCallback) {
+    IDataProvider.prototype.writeEpisode = function (/*episode, onWriteCallback*/) {
         throw new Error('not implemented');
     };
 
@@ -155,14 +156,17 @@ var storageAPI = (function () {
     * @param {Episode[]} episodes - The episodes to write to the storage.
     * @param {WritenEpisodesCallback} [onWriteCallback] - The function that is called when writing is finished.
     */
-    IDataProvider.prototype.writeEpisodes = function (episodes, onWriteCallback) {
+    IDataProvider.prototype.writeEpisodes = function (/*episodes, onWriteCallback*/) {
         throw new Error('not implemented');
     };
 
     // -------------------------------------- //
     // ---  General storage functions     --- //
     // -------------------------------------- //
-    IDataProvider.prototype.cleanStorage = function (onDeleteCallback) {
+    /** Delete all content from the data storage.
+     * @param {CleandStorageCallback} onCleanupCallback - The function that is called when all data from data storage is deletet.
+     */
+    IDataProvider.prototype.cleanStorage = function (/*onCleanupCallback*/) {
         throw new Error('not implemented');
     };
 
@@ -177,10 +181,10 @@ var storageAPI = (function () {
         this.isSupportedByCurrentPlatform = false;
         this.priority = 0;
     };
-    IFileProvider.prototype.openFile = function (episode, onReadCallback) {
+    IFileProvider.prototype.openFile = function (/*episode, onReadCallback*/) {
         throw new Error('not implemented');
     };
-    IFileProvider.prototype.saveFile = function (episode, content, mimeType, onWriteCallback, onProgressCallback) {
+    IFileProvider.prototype.saveFile = function (/*episode, content, mimeType, onWriteCallback, onProgressCallback*/) {
         throw new Error('not implemented');
     };
 
@@ -188,18 +192,22 @@ var storageAPI = (function () {
      * @param {Episode} episode - The episode whose files should deleted from the storage.
      * @param {DeletedFileCallback} [onDeleteCallback] - The function that is called when deleting is finished.
      */
-    IFileProvider.prototype.deleteFile = function (episode, onDeleteCallback) {
+    IFileProvider.prototype.deleteFile = function (/*episode, onDeleteCallback*/) {
         throw new Error('not implemented');
     };
 
-    IFileProvider.prototype.listFiles = function (onReadCallback) {
+    IFileProvider.prototype.listFiles = function (/*onReadCallback*/) {
         throw new Error('not implemented');
     };
     // === General storage functions
     IFileProvider.prototype.init = function (parameters) {
         HTML5Podcatcher.logger('Init abstract file storage provider with' + parameters, 'debug');
     };
-    IFileProvider.prototype.cleanStorage = function (onDeleteCallback) {
+
+    /** Delete all content from the file storage.
+     * @param {CleandStorageCallback} onCleanupCallback - The function that is called when all data from file storage is deletet.
+     */
+    IFileProvider.prototype.cleanStorage = function (/*onCleanupCallback*/) {
         throw new Error('not implemented');
     };
 
@@ -218,14 +226,14 @@ var storageAPI = (function () {
     /** Get the value for the given user setting.
       * @param {string} key - The key of the application setting you want to get.
       */
-    ISettingsProvider.prototype.readSettingsValue = function (key) {
+    ISettingsProvider.prototype.readSettingsValue = function (/*key*/) {
         throw new Error('not implemented');
     };
-    /** Set a value for the given key of a user setting. 
+    /** Set a value for the given key of a user setting.
       * @param {string} key - The key of the application setting you want to set.
       * @param {(string|number)}  - The value for the application setting you want to set.
       */
-    ISettingsProvider.prototype.writeSettingsValue = function (key, value) {
+    ISettingsProvider.prototype.writeSettingsValue = function (/*key, value*/) {
         throw new Error('not implemented');
     };
     ISettingsProvider.prototype.listSettings = function () {
@@ -254,39 +262,39 @@ var storageAPI = (function () {
             settingsProviderList.push(settingsProvider);
         };
         this.dataStorageProvider = function () {
-            var i = 0, provider, priority = -1;
-            for (i = 0; i < dataProviderList.length; i++) {
-                if (dataProviderList[i].isSupportedByCurrentPlatform && dataProviderList[i].priority > priority) {
-                    provider = dataProviderList[i];
+            var provider, priority = -1;
+            dataProviderList.forEach(function (listedProvider) {
+                if (listedProvider.isSupportedByCurrentPlatform && listedProvider.priority > priority) {
+                    provider = listedProvider;
                     priority = provider.priority;
                 }
-            }
+            });
             if (!provider) {
-                HTML5Podcatcher.logger("Missing persistent data storage", 'error');
+                HTML5Podcatcher.logger('Missing persistent data storage', 'error');
             }
             return provider;
         };
         this.fileStorageProvider = function () {
-            var i = 0, provider, priority = -1;
-            for (i = 0; i < fileProviderList.length; i++) {
-                if (fileProviderList[i].isSupportedByCurrentPlatform && fileProviderList[i].priority > priority) {
-                    provider = fileProviderList[i];
+            var provider, priority = -1;
+            fileProviderList.forEach(function (listedProvider) {
+                if (listedProvider.isSupportedByCurrentPlatform && listedProvider.priority > priority) {
+                    provider = listedProvider;
                     priority = provider.priority;
                 }
-            }
+            });
             if (!provider) {
                 HTML5Podcatcher.logger("Missing persistent file storage", 'error');
             }
             return provider;
         };
         this.settingsStorageProvider = function () {
-            var i = 0, provider, priority = -1;
-            for (i = 0; i < settingsProviderList.length; i++) {
-                if (settingsProviderList[i].isSupportedByCurrentPlatform && settingsProviderList[i].priority > priority) {
-                    provider = settingsProviderList[i];
+            var provider, priority = -1;
+            settingsProviderList.forEach(function (listedProvider) {
+                if (listedProvider.isSupportedByCurrentPlatform && listedProvider.priority > priority) {
+                    provider = listedProvider;
                     priority = provider.priority;
                 }
-            }
+            });
             if (!provider) {
                 HTML5Podcatcher.logger("Missing persistent settings storage", 'error');
             }
@@ -326,24 +334,21 @@ var storageAPI = (function () {
       */
     StorageProviderFacade.prototype.migradeData = function (oldStorageEngine, newStorageEngine) {
         oldStorageEngine.readSources(function (sourcesList) {
-            var i;
-            for (i = 0; i < sourcesList.length; i++) {
-                newStorageEngine.writeSource(sourcesList[i], HTML5Podcatcher.web.downloadSource);
-                oldStorageEngine.deleteSource(sourcesList[i]);
-            }
+            sourcesList.forEach(function (source) {
+                newStorageEngine.writeSource(source, HTML5Podcatcher.web.downloadSource);
+                oldStorageEngine.deleteSource(source);
+            });
         });
         newStorageEngine.readPlaylist(false, function (episodeList) {
-            var i;
-            for (i = 0; i < episodeList.length; i++) {
-                episodeList[i].playback.played = true;
-                newStorageEngine.writeEpisode(episodeList[i]);
-            }
+            episodeList.forEach(function (episode) {
+                episode.playback.played = true;
+                newStorageEngine.writeEpisode(episode);
+            });
         });
         oldStorageEngine.readPlaylist(false, function (episodeList) {
-            var i;
-            for (i = 0; i < episodeList.length; i++) {
-                newStorageEngine.writeEpisode(episodeList[i]);
-            }
+            episodeList.forEach(function (episode) {
+                newStorageEngine.writeEpisode(episode);
+            });
         });
     };
     StorageProviderFacade.prototype.isFileStorageAvailable = function () {
@@ -480,9 +485,6 @@ var storageAPI = (function () {
     };
     StorageProviderFacade.prototype.listSettings = function () {
         return this.settingsStorageProvider().listSettings();
-    };
-    StorageProviderFacade.prototype.cleanStorage = function () {
-        return this.settingsStorageProvider().cleanStorage();
     };
 
     // ====================================== //
