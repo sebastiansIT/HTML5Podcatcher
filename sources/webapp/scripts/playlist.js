@@ -1,4 +1,4 @@
-/*  Copyright 2013 - 2015 Sebastian Spautz
+/*  Copyright 2013 - 2016 Sebastian Spautz
 
      This file is part of "HTML5 Podcatcher".
 
@@ -64,7 +64,7 @@ GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
     lastPlayedEpisode = $('#playlist li:first-child').data('episodeUri');
     POD.storage.readPlaylist(false, function (playlist) {
         if (playlist && playlist.length > 0) {
-            for (i = 0; i < playlist.length; i++) {
+            for (i = 0; i < playlist.length; i += 1) {
                 if (playlist[i].uri === UI.settings.get('lastPlayed')) {
                     lastPlayedEpisode = playlist[i].uri;
                     break;
@@ -74,17 +74,25 @@ GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
         POD.storage.readEpisode(lastPlayedEpisode, onReadCallback);
     });
 };
-/** Audio Element */
+
+/** Creates a HTML-Audio-Element.
+  * @return {HTMLAudioElement} The created HTML-Audio-Element.
+  */
 GlobalUserInterfaceHelper.GenerateAudioElement = function () {
     "use strict";
-    POD.logger("Audio element will be created", 'debug');
-    var mediaElement;
+    var mediaElement, playbackRate;
+    playbackRate = POD.api.configuration.settings.get('playbackRate') || 1;
+
+    POD.logger('Audio element will be created', 'debug');
+
     mediaElement = document.createElement("audio");
     mediaElement.setAttribute('controls', 'controls');
     mediaElement.setAttribute('preload', 'metadata');
+    mediaElement.defaultPlaybackRate = playbackRate;
     mediaElement.appendChild(document.createElement("source"));
+
     if (window.navigator.mozApps) {
-        //if app started in Firefox OS Runtime...    
+        //if app started in Firefox OS Runtime...
         mediaElement.setAttribute('mozaudiochannel', 'content');
         POD.logger("Activate content audio channel", 'debug');
         //Handling interruptions by heigher audio channels
@@ -111,8 +119,12 @@ GlobalUserInterfaceHelper.GenerateAudioElement = function () {
             };
         }
     }
+
+    POD.logger('Audio element is created', 'debug');
+
     return mediaElement;
 };
+
 /** Functions for playback */
 GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallback) {
     "use strict";
@@ -122,7 +134,7 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
     if (episode) {
         POD.storage.openFile(episode, function (episode) {
             if (episode.offlineMediaUrl) {
-                mediaUrl =  episode.offlineMediaUrl;
+                mediaUrl = episode.offlineMediaUrl;
             } else {
                 mediaUrl = episode.mediaUrl;
             }
@@ -278,7 +290,7 @@ GlobalUserInterfaceHelper.playPrevious = function () {
         currentTime = audioTag.currentTime;
         jumppoint.time = 0;
         if (episode.jumppoints) {
-            for (i = 0; i < episode.jumppoints.length; i++) {
+            for (i = 0; i < episode.jumppoints.length; i += 1) {
                 if (episode.jumppoints[i].time < currentTime && episode.jumppoints[i].time > jumppoint.time) {
                     jumppoint = episode.jumppoints[i];
                 }
@@ -304,7 +316,7 @@ GlobalUserInterfaceHelper.playNext = function () {
         currentTime = audioTag.currentTime;
         jumppoint.time = audioTag.duration;
         if (episode.jumppoints) {
-            for (i = 0; i < episode.jumppoints.length; i++) {
+            for (i = 0; i < episode.jumppoints.length; i += 1) {
                 if (episode.jumppoints[i].time > currentTime && episode.jumppoints[i].time < jumppoint.time) {
                     jumppoint = episode.jumppoints[i];
                 }
@@ -347,7 +359,7 @@ $(document).ready(function () {
     // -- Database Update -- //
     // --------------------- //
     // -- Update local storage to actual version of key-names (changed "track" to "episode"; changed "configuration" to "settings")
-    for (k = 0; k < localStorage.length; k++) {
+    for (k = 0; k < localStorage.length; k += 1) {
         if (localStorage.key(k).slice(0, 6) === 'track.') {
             localStorage.setItem(localStorage.key(k).replace('track.', 'episode.'), localStorage.getItem(localStorage.key(k)));
             localStorage.removeItem(localStorage.key(k));
@@ -499,7 +511,7 @@ $(document).ready(function () {
         episodeUI = UI.renderEpisode(episode);
         order = UI.settings.get("playlistSort");
         //find episode in HTML markup
-        for (i = 0; i < $('#playlist').find('.entries li').length; i++) {
+        for (i = 0; i < $('#playlist').find('.entries li').length; i += 1) {
             if ($($('#playlist').find('.entries li')[i]).data('episodeUri') === episode.uri) {
                 //Actualise episodes markup
                 $($('#playlist').find('.entries li')[i]).html(episodeUI.html());

@@ -1,6 +1,6 @@
 ﻿CACHE MANIFEST
 
-#  Copyright 2013-2015 Sebastian Spautz
+#  Copyright 2013-2016 Sebastian Spautz
 #
 #	This file is part of "HTML5 Podcatcher".
 #	
@@ -27,6 +27,8 @@
 ### Fix a Bug in settings page (relevant on Chrome only)
 ##0.39.2
 ### Add a storage provider interface for settings
+##0.40.0
+### Add a user setting to configure the playback rate
 
 # VALIDATE this manifest on http://manifest-validator.com/
 

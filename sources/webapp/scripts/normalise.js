@@ -16,10 +16,7 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 /* Version: {{ VERSION }} */
-/*jslint sloppy: true */
-/*global navigator */
-/*global window */
-/*global document */
+/*global navigator, window, document */
 /*global CustomEvent */
 
 // Take care of vendor prefixes.

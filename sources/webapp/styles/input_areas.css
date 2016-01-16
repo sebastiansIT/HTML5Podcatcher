@@ -1,4 +1,4 @@
-/*  Copyright 2015 Sebastian Spautz
+/*  Copyright 2015, 2016 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -76,4 +76,30 @@ input:invalid:focus,
 textarea:invalid:focus {
   box-shadow: inset 0 -0.1rem 0 #820000;
   border-bottom-color: #820000;
+}
+
+.inputWidget {
+    box-sizing: border-box;
+    display: block;
+    height: 4rem;
+    padding: 0 1.5rem;
+    border: 0.1rem solid #c7c7c7;
+    color: #333;
+    margin: 0 0 1rem 0;
+}
+
+input[type="range"] {
+    display:inline-block;
+    height:100%;
+    vertical-align:middle;
+    width: calc(100% - 4rem);
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+input[type="range"] + .rangeInputValue {
+    display: inline-block;
+    width: calc(4rem - 5px);
+    text-align: right;
 }

@@ -288,6 +288,11 @@ var GlobalUserInterfaceHelper = {
         }
         $('.external').attr('target', '_blank');
     },
+
+    /** Renders the html markup for a single episode.
+      * @param {Episode} episode - The Episode to render.
+      * @return {Node} HTML-Element with the visualisation of an Episode.
+      */
     renderEpisode: function (episode) {
         "use strict";
         var entryUI;
@@ -323,6 +328,7 @@ var GlobalUserInterfaceHelper = {
         entryUI.find('.external').attr('target', '_blank');
         return entryUI;
     },
+
     renderEpisodeList: function (episodes, order) {
         "use strict";
         var listUI, entryUI, i;

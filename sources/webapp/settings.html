@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 
 <!--
-    Copyright 2014, 2015 Sebastian Spautz
+    Copyright 2014 - 2016 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
     
@@ -81,6 +81,17 @@
 					<label for="httpProxyInput">Proxy URL:</label>
 					<input type="url" name="httpProxyInput" id="httpProxyInput" />
 					<button id="saveProxyConfigurationButton">Save</button>
+				</form>
+			</section>
+            <section id="Playback">
+				<header><h2>Playback</h2></header>
+				<form action="#" id="playbackForm">
+					<label for="playbackRateSelect">Playback rate:</label>
+					<div class="inputWidget">
+                        <input type="range" name="playbackRateSelect" id="playbackRateSelect" min="0.4" max="2.6" step="0.2" value="1" />
+                        <span class="rangeInputValue" id="playbackRateValue">1</span>
+                    </div>
+					<button id="savePlaybackSettingsButton">Save</button>
 				</form>
 			</section>
 			<section id="PlaylistSort">
