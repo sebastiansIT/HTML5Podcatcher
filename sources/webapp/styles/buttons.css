@@ -45,6 +45,7 @@ button,
   background-image: none;
   color: #fff;
   cursor:pointer;
+  touch-action: none;
 }
 
 /* Pressed */

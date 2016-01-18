@@ -163,16 +163,24 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
                 //Bind or rebind event handler for the audio element
                 $('#player audio').on('loadstart', function () {
                     HTML5Podcatcher.logger("==============================================", 'debug');
-                    GlobalUserInterfaceHelper.activeEpisode(function (episode) { HTML5Podcatcher.logger("Start loading " + episode.title, 'debug', 'playback'); });
+                    GlobalUserInterfaceHelper.activeEpisode(function (episode) {
+                        HTML5Podcatcher.logger("Start loading " + episode.title, 'debug', 'playback');
+                    });
                 });
                 $('#player audio').on('loadedmetadata', function () {
-                    GlobalUserInterfaceHelper.activeEpisode(function (episode) { HTML5Podcatcher.logger("Load metadata of " + episode.title, 'debug', 'playback'); });
+                    GlobalUserInterfaceHelper.activeEpisode(function (episode) {
+                        HTML5Podcatcher.logger("Load metadata of " + episode.title, 'debug', 'playback');
+                    });
                 });
                 $('#player audio').on('canplay', function () {
-                    GlobalUserInterfaceHelper.activeEpisode(function (episode) { HTML5Podcatcher.logger(episode.title + " is ready to play", 'debug', 'playback'); });
+                    GlobalUserInterfaceHelper.activeEpisode(function (episode) {
+                        HTML5Podcatcher.logger(episode.title + " is ready to play", 'debug', 'playback');
+                    });
                 });
                 $('#player audio').on('canplaythrough', function () {
-                    GlobalUserInterfaceHelper.activeEpisode(function (episode) { HTML5Podcatcher.logger(episode.title + " is realy ready to play (\"canplaythrough\")", 'debug', 'playback'); });
+                    GlobalUserInterfaceHelper.activeEpisode(function (episode) {
+                        HTML5Podcatcher.logger(episode.title + " is realy ready to play (\"canplaythrough\")", 'debug', 'playback');
+                    });
                 });
                 $('#player audio').on('playing', function (event) {
                     var audioElement = event.target;
@@ -208,7 +216,7 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
                         errormessage = "There is no valid source for " + episode.title + ". See " + episode.mediaUrl + " of type " + episode.mediaType;
                     } else if (readystate === HTMLMediaElement.HAVE_NOTHING) {
                         errormessage = "Can't load file " + $(event.target).parent()[0].currentSrc;
-                    } else if ($(this).parent()[0].error) {
+                    } else if ($(event.target).parent()[0].error) {
                         switch (event.target.error.code) {
                         case event.target.error.MEDIA_ERR_ABORTED:
                             errormessage = 'You aborted the media playback.';
@@ -251,8 +259,9 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
                                 if (episode && (event.target.currentTime > (episode.playback.currentTime + 2) || event.target.currentTime < (episode.playback.currentTime - 2))) {
                                     //Show Progress as background Gradient of Episode-UI
                                     episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode);
-                                    percentPlayed = event.target.currentTime / audioElement.duration;
-                                    $(episodeUI).attr('style', 'background: linear-gradient(to right, rgba(0, 100, 0, 0.2) 0%,rgba(0, 100, 0, 0.2) ' + (percentPlayed * 100).toFixed(2) + '%, #ffffff ' + (percentPlayed * 100).toFixed(2) + '%);');
+                                    percentPlayed = ((event.target.currentTime / audioElement.duration) * 100);
+                                    percentPlayed = percentPlayed.toFixed(2);
+                                    $(episodeUI).attr('style', 'background: linear-gradient(to right, rgba(0, 100, 0, 0.2) 0%,rgba(0, 100, 0, 0.2) ' + percentPlayed + '%, #ffffff ' + percentPlayed + '%);');
                                 }
                             });
                             HTML5Podcatcher.logger("Timeupdate on", 'debug');
@@ -261,7 +270,9 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
                 });
                 //Styling
                 $('#playlist').find('.active').removeClass('active');
-                $('#playlist li').filter(function () { return $(this).data('episodeUri') === episode.uri; }).addClass('active');
+                $('#playlist li').filter(function () {
+                    return $(this).data('episodeUri') === episode.uri;
+                }).addClass('active');
                 if (onActivatedCallback && typeof onActivatedCallback === 'function') {
                     onActivatedCallback(episode);
                 }
@@ -412,28 +423,39 @@ $(document).ready(function () {
     $('#playNext').on('click', function () {
         UI.playNext();
     });
-    $('#jumpBackwards').on('click', function () {
-        var audioTag = $('#player audio')[0];
-        audioTag.currentTime = Math.max(0, audioTag.currentTime - 10);
+
+    document.getElementById('jumpBackwards').addEventListener('click', function () {
+        var secondsToSkip, audioTag = document.querySelector('#player audio');
+
+        secondsToSkip = 10 * audioTag.defaultPlaybackRate;
+        audioTag.currentTime = Math.max(0, audioTag.currentTime - secondsToSkip);
     });
-    document.getElementById('jumpForwards').addEventListener("mousedown", function () {
+
+    window.registerPointerEventListener(document.getElementById('jumpForwards'), 'pointerdown', function () {
+        var audioTag = document.querySelector('#player audio');
+
         stoppedPressMouse = false;
         window.setTimeout(function () {
             if (stoppedPressMouse === false) {
-                $('#player audio')[0].playbackRate = 2;
+                audioTag.playbackRate = Math.min(4, 2 + audioTag.defaultPlaybackRate);
             }
-            POD.logger("Playback speed " + $('#player audio')[0].playbackRate, "debug");
+            POD.logger('Playback speed ' + audioTag.playbackRate, 'debug');
         }, 500);
     }, false);
-    document.getElementById('jumpForwards').addEventListener("mouseup", function () {
-        var audioTag = $('#player audio')[0];
-        if (audioTag.playbackRate === 1) { //skip 10 seconds
-            audioTag.currentTime = Math.min(audioTag.duration, audioTag.currentTime + 10);
+
+    window.registerPointerEventListener(document.getElementById('jumpForwards'), 'pointerup', function () {
+        var secondsToSkip, audioTag = document.querySelector('#player audio');
+
+        if (audioTag.playbackRate === 1) { //skip some seconds
+            secondsToSkip = 10 * audioTag.defaultPlaybackRate;
+            audioTag.currentTime = Math.min(audioTag.duration, audioTag.currentTime + secondsToSkip);
         } else { //come back from fast forward
-            audioTag.playbackRate = 1;
+            audioTag.playbackRate = audioTag.defaultPlaybackRate;
+            POD.logger('Playback speed ' + audioTag.playbackRate, 'debug');
         }
         stoppedPressMouse = true;
     }, false);
+
     $(document).on('keydown', function (event) {
         if (event.key === 'MediaNextTrack' || event.key === 'MediaTrackNext' || event.keyCode === 176) {
             var now = new Date();
