@@ -412,24 +412,37 @@ $(document).ready(function () {
     // -- Register Eventhandler -- //
     // --------------------------- //
     //Player UI Events
-    $('#playPause').on('click', function (event) {
+    document.getElementById('playPause').addEventListener('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
-        GlobalUserInterfaceHelper.togglePauseStatus();
-    });
-    $('#playPrevious').on('click', function () {
-        UI.playPrevious();
-    });
-    $('#playNext').on('click', function () {
-        UI.playNext();
-    });
+        
+		GlobalUserInterfaceHelper.togglePauseStatus();
+    }, false);
+    document.getElementById('playPrevious').addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+		
+		UI.playPrevious();
+    }, false);
+    document.getElementById('playNext').addEventListener('click', function (event) {
+		event.preventDefault();
+        event.stopPropagation();
+		
+		UI.playNext();
+    }, false);
+    document.getElementById('jumpBackwards').addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+		
+		var secondsToSkip, audioTag = document.querySelector('#player audio');
 
-    document.getElementById('jumpBackwards').addEventListener('click', function () {
-        var secondsToSkip, audioTag = document.querySelector('#player audio');
-
-        secondsToSkip = 10 * audioTag.defaultPlaybackRate;
-        audioTag.currentTime = Math.max(0, audioTag.currentTime - secondsToSkip);
-    });
+		if (audioTag.currentTime < 10) {
+			UI.playPrevious();
+		} else {
+			secondsToSkip = 10 * audioTag.defaultPlaybackRate;
+			audioTag.currentTime = Math.max(0, audioTag.currentTime - secondsToSkip);
+		}
+    }, false);
 
     window.registerPointerEventListener(document.getElementById('jumpForwards'), 'pointerdown', function () {
         var audioTag = document.querySelector('#player audio');
@@ -446,7 +459,7 @@ $(document).ready(function () {
     window.registerPointerEventListener(document.getElementById('jumpForwards'), 'pointerup', function () {
         var secondsToSkip, audioTag = document.querySelector('#player audio');
 
-        if (audioTag.playbackRate === 1) { //skip some seconds
+        if (audioTag.playbackRate === audioTag.defaultPlaybackRate) { //skip some seconds
             secondsToSkip = 10 * audioTag.defaultPlaybackRate;
             audioTag.currentTime = Math.min(audioTag.duration, audioTag.currentTime + secondsToSkip);
         } else { //come back from fast forward
