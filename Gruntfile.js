@@ -24,6 +24,9 @@ module.exports = function (grunt) {
             },
             FirefoxPackagedApp: {
                 src: ['build/packagedapp/temp']
+            },
+            ChromePackagedApp: {
+                src: ['build/chromeapp/temp']
             }
         },
         'string-replace': { // configure the string replacement task for the hostet app
@@ -48,10 +51,34 @@ module.exports = function (grunt) {
             FirefoxPackagedApp: { // configure the string replacement task for the packaged app
                 files: [
                     {cwd: 'sources/webApp/', src: ['*.html', '!diagnostic.html'],                dest: 'build/packagedapp/temp/', expand: 'true' },
-                    {cwd: 'sources/webApp/', src: ['scripts/**/*.js', '!scripts/diagnostic.js', '!scripts/storage/fileSystemProvider.js', '!scripts/storage/webStorageProvider.js'], dest: 'build/packagedapp/temp/', expand: 'true'},
+                    {cwd: 'sources/webApp/', src: ['scripts/**/*.js', '!scripts/diagnostic.js', '!scripts/storage/fileSystemProvider.js', '!scripts/worker/*.js'], dest: 'build/packagedapp/temp/', expand: 'true'},
                     {src: 'sources/packagedapp/manifest.webapp',   dest: 'build/packagedapp/temp/manifest.webapp'},
                     {src: 'sources/packagedapp/package.manifest',  dest: 'build/packagedapp/package.manifest'},
                     {src: 'sources/packagedapp/install.html',      dest: 'build/packagedapp/install.html'}
+                ],
+                options: {
+                    replacements: [
+                        {
+                            pattern: /\{\{ VERSION \}\}/g,
+                            replacement: '<%= pkg.version %>'
+                        },
+                        {
+                            pattern: /\{\{ VARIANT \}\}/g,
+                            replacement: 'F'
+                        },
+                        { //remove App-Cache from Packaged apps
+                            pattern: / manifest="manifest\.appcache"/g,
+                            replacement: ''
+                        }]
+                }
+            },
+            ChromePackagedApp: { // configure the string replacement task for the chrome packaged app
+                files: [
+                    {cwd: 'sources/webApp/',    src: ['*.html', '!diagnostic.html'],                dest: 'build/chromeapp/temp/', expand: 'true' },
+                    {cwd: 'sources/webApp/',    src: ['scripts/**/*.js', '!scripts/diagnostic.js', '!scripts/storage/webStorageProvider.js'], dest: 'build/chromeapp/temp/', expand: 'true'},
+                    {cwd: 'sources/chromeapp/', src: ['scripts/**/*.js'],                                                                     dest: 'build/chromeapp/temp/', expand: 'true'},
+                    {src: 'sources/chromeapp/background.js',   dest: 'build/chromeapp/temp/background.js'},
+                    {src: 'sources/chromeapp/manifest.json',   dest: 'build/chromeapp/temp/manifest.json'}
                 ],
                 options: {
                     replacements: [
@@ -91,6 +118,14 @@ module.exports = function (grunt) {
                     {expand: false, cwd: 'sources/webapp/',      src: 'sources/webapp/images/favicon.ico', dest: 'build/packagedapp/temp/favicon.ico', filter: 'isFile'},
                     {expand: true,  cwd: 'sources/packagedapp/', src: ['scripts/*.js'],                    dest: 'build/packagedapp/',                 filter: 'isFile'}
                 ]
+            },
+            ChromePackagedApp: {
+                files: [
+                    {expand: true,  cwd: 'sources/webapp/',      src: ['styles/icons/*.svg'],              dest: 'build/chromeapp/temp/',            filter: 'isFile'},
+                    {expand: true,  cwd: 'sources/webapp/',      src: ['images/*.png'],                    dest: 'build/chromeapp/temp/',            filter: 'isFile'},
+                    {expand: true,  cwd: 'sources/chromeapp/',   src: ['images/*.png'],                    dest: 'build/chromeapp/temp/',            filter: 'isFile'},
+                    {expand: false, cwd: 'sources/webapp/',      src: 'sources/webapp/images/favicon.ico', dest: 'build/chromeapp/temp/favicon.ico', filter: 'isFile'}
+                ]
             }
         },
         curl: {
@@ -101,6 +136,10 @@ module.exports = function (grunt) {
             FirefoxPackagedApp: {
                 src: 'http://code.jquery.com/jquery-2.1.4.min.js',
                 dest: 'build/packagedapp/temp/scripts/jquery.min.js'
+            },
+            ChromePackagedApp: {
+                src: 'http://code.jquery.com/jquery-2.1.4.min.js',
+                dest: 'build/chromeapp/temp/scripts/jquery.min.js'
             }
         },
         zip: {
@@ -118,11 +157,16 @@ module.exports = function (grunt) {
             'FirefoxPackagedApp-css': {
                 'src': ['sources/webapp/styles/*.css'],
                 'dest': 'build/packagedapp/temp/styles/main.css'
+            },
+            'ChromePackagedApp-css': {
+                'src': ['sources/webapp/styles/*.css'],
+                'dest': 'build/chromeapp/temp/styles/main.css'
             }
         },
         usemin: {
             HostedWebApp: ['build/webapp/*.html'],
             FirefoxPackagedApp: ['build/packagedapp/temp/*.html'],
+            ChromePackagedApp: ['build/chromeapp/temp/*.html'],
             options: {
             }
         },
@@ -140,6 +184,13 @@ module.exports = function (grunt) {
                 },
                 src: 'build/packagedapp/temp/styles/main.css',
                 dest: 'build/packagedapp/temp/styles/main.css'
+            },
+            ChromePackagedApp: {
+                options: {
+                    browsers: ['chrome >= 37']
+                },
+                src:  'build/chromeapp/temp/styles/main.css',
+                dest: 'build/chromeapp/temp/styles/main.css'
             }
         },
         //Test and Lint files
@@ -221,6 +272,7 @@ module.exports = function (grunt) {
     //Register Tasks
     grunt.registerTask('HostedWebApp',       ['clean:HostedWebApp', 'string-replace:HostedWebApp', 'concat:HostedWebApp-css', 'autoprefixer:HostedWebApp', 'copy:HostedWebApp', 'curl:HostedWebApp', 'usemin:HostedWebApp']);
     grunt.registerTask('FirefoxPackagedApp', ['string-replace:FirefoxPackagedApp', 'concat:FirefoxPackagedApp-css', 'autoprefixer:FirefoxPackagedApp', 'usemin:FirefoxPackagedApp', 'copy:FirefoxPackagedApp', 'curl:FirefoxPackagedApp', 'zip:FirefoxPackagedApp']); //, 'clean:FirefoxPackagedApp'
+    grunt.registerTask('ChromePackagedApp',  ['string-replace:ChromePackagedApp', 'concat:ChromePackagedApp-css', 'autoprefixer:ChromePackagedApp', 'usemin:ChromePackagedApp', 'copy:ChromePackagedApp', 'curl:ChromePackagedApp']); //, 'clean:ChromePackagedApp'
     grunt.registerTask('test',               ['htmllint', 'csslint', 'jslint', 'jasmine']);
     grunt.registerTask('default',            ['test', 'HostedWebApp', 'FirefoxPackagedApp']);
 };

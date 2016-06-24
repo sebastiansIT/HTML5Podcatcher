@@ -415,35 +415,34 @@ $(document).ready(function () {
     document.getElementById('playPause').addEventListener('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
-        
-		GlobalUserInterfaceHelper.togglePauseStatus();
+
+        GlobalUserInterfaceHelper.togglePauseStatus();
     }, false);
     document.getElementById('playPrevious').addEventListener('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
-		
-		UI.playPrevious();
+
+        UI.playPrevious();
     }, false);
     document.getElementById('playNext').addEventListener('click', function (event) {
-		event.preventDefault();
+        event.preventDefault();
         event.stopPropagation();
-		
-		UI.playNext();
+
+        UI.playNext();
     }, false);
     document.getElementById('jumpBackwards').addEventListener('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
-		
-		var secondsToSkip, audioTag = document.querySelector('#player audio');
 
-		if (audioTag.currentTime < 10) {
-			UI.playPrevious();
-		} else {
-			secondsToSkip = 10 * audioTag.defaultPlaybackRate;
-			audioTag.currentTime = Math.max(0, audioTag.currentTime - secondsToSkip);
-		}
+        var secondsToSkip, audioTag = document.querySelector('#player audio');
+
+        if (audioTag.currentTime < 10) {
+            UI.playPrevious();
+        } else {
+            secondsToSkip = 10 * audioTag.defaultPlaybackRate;
+            audioTag.currentTime = Math.max(0, audioTag.currentTime - secondsToSkip);
+        }
     }, false);
-
     window.registerPointerEventListener(document.getElementById('jumpForwards'), 'pointerdown', function () {
         var audioTag = document.querySelector('#player audio');
 
@@ -455,7 +454,6 @@ $(document).ready(function () {
             POD.logger('Playback speed ' + audioTag.playbackRate, 'debug');
         }, 500);
     }, false);
-
     window.registerPointerEventListener(document.getElementById('jumpForwards'), 'pointerup', function () {
         var secondsToSkip, audioTag = document.querySelector('#player audio');
 
@@ -468,27 +466,32 @@ $(document).ready(function () {
         }
         stoppedPressMouse = true;
     }, false);
+    document.addEventListener('keydown', function (event) {
+        var now, audioTag;
 
-    $(document).on('keydown', function (event) {
         if (event.key === 'MediaNextTrack' || event.key === 'MediaTrackNext' || event.keyCode === 176) {
-            var now = new Date();
+            now = new Date();
             if (!multiMediaKeyDownTimestemp) {
                 multiMediaKeyDownTimestemp = new Date();
             } else if (now - multiMediaKeyDownTimestemp >= 1000) {
-                if ($('#player audio').length && $('#player audio')[0].playbackRate === 1) {
-                    $('#player audio')[0].playbackRate = 2;
+                audioTag = document.querySelector('#player audio');
+                if (audioTag && audioTag.playbackRate === audioTag.defaultPlaybackRate) {
+                    audioTag.playbackRate = Math.min(4, 2 + audioTag.defaultPlaybackRate);
                 }
             }
         }
-    });
-    $(document).on('keyup', function (event) {
+    }, false);
+    document.addEventListener('keyup', function (event) {
+        var now, audioTag;
+
         if (event.key === 'MediaNextTrack' || event.key === 'MediaTrackNext' || event.keyCode === 176) {
-            var now = new Date();
+            now = new Date();
             if (now - multiMediaKeyDownTimestemp < 1000) { //Play next Track when key is pressed short (< 1000 miliseconds)
                 UI.playNext();
             } else { //Stop fast forward when release the key
-                if ($('#player audio').length && $('#player audio')[0].playbackRate !== 1) {
-                    $('#player audio')[0].playbackRate = 1;
+                audioTag = document.querySelector('#player audio');
+                if (audioTag && audioTag.playbackRate !== audioTag.defaultPlaybackRate) {
+                    audioTag.playbackRate = audioTag.defaultPlaybackRate;
                 }
             }
         } else if (event.key === 'MediaPreviousTrack' || event.key === 'MediaTrackPrevious' || event.keyCode === 177) {
@@ -496,14 +499,16 @@ $(document).ready(function () {
         } else if (event.key === 'MediaPlayPause' || event.key === 'MediaPlay' || event.keyCode === 179) {
             GlobalUserInterfaceHelper.togglePauseStatus();
         } else if (event.key === 'MediaStop' || event.keyCode === 178) {
-            if ($('#player audio').length) {
-                $('#player audio')[0].pause();
-                $('#playPause').data('icon', 'play');
-                $('#playPause').attr('data-icon', 'play');
+            audioTag = document.querySelector('#player audio');
+            if (audioTag) {
+                audioTag.pause();
+                audioTag.setAttribute('data-icon', 'play');
             }
         }
         multiMediaKeyDownTimestemp = undefined;
-    });
+    }, false);
+
+    document.getElementById('refreshPlaylist').addEventListener('click', UI.eventHandler.refreshAllSources, false);
 
     //Playlist UI Events
     $('#playlist').on('click', 'li .link', function (event) {
@@ -512,18 +517,7 @@ $(document).ready(function () {
         //Read episode from storage an then start playback
         POD.storage.readEpisode($(this).parent('li').data('episodeUri'), UI.playEpisode);
     });
-    $('#playlist').on('click', '.downloadFile', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        var episodeUI;
-        episodeUI = $(this).closest('li');
-        POD.storage.readEpisode(episodeUI.data('episodeUri'), function (episode) {
-            UI.logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info');
-            POD.web.downloadFile(episode, 'audio/mpeg', function (episode) {
-                episodeUI.replaceWith(UI.renderEpisode(episode));
-            }, UI.progressHandler);
-        });
-    });
+    $('#playlist').on('click', '.downloadFile', UI.eventHandler.downloadEpisodeFile);
     $('#playlist').on('click', '.delete', function (event) {
         event.preventDefault();
         event.stopPropagation();
@@ -539,7 +533,7 @@ $(document).ready(function () {
             POD.toggleEpisodeStatus(episode);
         });
     });
-    $('#refreshPlaylist').on('click', UI.eventHandler.refreshAllSources);
+
     document.addEventListener('writeEpisode', function (event) {
         var i, episode, episodeUI, order;
         episode = event.detail.episode;

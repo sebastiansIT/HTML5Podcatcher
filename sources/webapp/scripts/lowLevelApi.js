@@ -33,46 +33,26 @@ var HTML5Podcatcher = {
             downloadTimeout: 600000,
             proxyUrlPattern: undefined
         },
-        createXMLHttpRequest: function (onCompletedCallback) {
-            "use strict";
-            var ajaxRequest, appInfoRequest;
-            //Detection of installed open web apps 
-            //see https://developer.mozilla.org/en-US/Apps/Build/App_development_FAQ#How_can_I_detect_whether_an_app_is_privileged_or_certified.3F
-            if (window.navigator.mozApps) {
-                appInfoRequest = window.navigator.mozApps.getSelf();
-                appInfoRequest.onsuccess = function () {
-                    if (appInfoRequest.result) {
-                        HTML5Podcatcher.logger(appInfoRequest.result.manifest.name + " is a " + appInfoRequest.result.manifest.type + " app.", 'debug:Ajax');
-                        if (appInfoRequest.result.manifest.type === 'privileged' || appInfoRequest.result.manifest.type === 'certified') {
-                            ajaxRequest = new XMLHttpRequest({ mozSystem: true });
-                        } else {
-                            ajaxRequest = new XMLHttpRequest();
-                        }
-                    } else {
-                        ajaxRequest = new XMLHttpRequest();
-                    }
-                    onCompletedCallback(ajaxRequest);
-                };
-            } else {
-                HTML5Podcatcher.logger("This Webapp isn't run in a Open-Web-App-Container.", 'debug:Ajax');
-                ajaxRequest = new XMLHttpRequest();
-                onCompletedCallback(ajaxRequest);
-            }
-        },
+
+        /** Updates a source from its feed.
+          * @param {Source} source  Source to update.
+          * @param {number} limitOfNewEpisodes Maximal amount of episodes imported as 'new'.
+          */
         downloadSource: function (source, limitOfNewEpisodes) {
             "use strict";
-            var parserresult;
             if (!limitOfNewEpisodes) {
                 limitOfNewEpisodes = 5;
             }
-            parserresult = {'source': source, 'episodes': []};
+            // start update of the source
+            HTML5Podcatcher.api.web.downloadXML(source.uri, function (xmlDocument) {
+                var parserResult, mergeNewEpisodeDataWithOldPlaybackStatus;
 
-            //Load Feed and Parse Entries
-            HTML5Podcatcher.api.web.downloadXML(source.uri, function (xmlData) {
-                var data, mergeFunction, i;
-                data = xmlData;
-                mergeFunction = function (mergeEpisode, forcePlayed) {
-                    HTML5Podcatcher.storage.readEpisode(mergeEpisode.uri, function (existingEpisode) {
+                HTML5Podcatcher.logger('Downloaded source feed from ' + source.uri, 'debug');
+                parserResult = HTML5Podcatcher.api.parser.SourceParser.parse(source, xmlDocument);
+                HTML5Podcatcher.logger('Parsed source feed from ' + source.uri, 'debug');
+
+                mergeNewEpisodeDataWithOldPlaybackStatus = function (mergeEpisode, forcePlayed) {
+                    HTML5Podcatcher.api.storage.StorageProvider.readEpisode(mergeEpisode.uri, function (existingEpisode) {
                         existingEpisode.link = mergeEpisode.link;
                         existingEpisode.title = mergeEpisode.title;
                         existingEpisode.updated = mergeEpisode.updated;
@@ -85,41 +65,39 @@ var HTML5Podcatcher = {
                         if (forcePlayed && existingEpisode.playback.played === undefined) {
                             existingEpisode.playback.played = true;
                         }
-                        HTML5Podcatcher.storage.writeEpisode(existingEpisode);
+                        HTML5Podcatcher.api.storage.StorageProvider.writeEpisode(existingEpisode);
                     });
                 };
-                if (!data) {
-                    HTML5Podcatcher.logger('No XML Document found, instead found [' + this.response + "]", 'error');
-                } else {
-                    parserresult = HTML5Podcatcher.parser.parseSource(data, source);
-                    // compute parser result:
-                    // merge existing data with actual one and save episodes with actualised data
-                    for (i = 0; i < parserresult.episodes.length; i++) {
-                        if (i < parserresult.episodes.length - limitOfNewEpisodes) {
-                            mergeFunction(parserresult.episodes[i], true);
-                        } else {
-                            mergeFunction(parserresult.episodes[i], false);
-                        }
-                    }
-                    // Save Source
-                    HTML5Podcatcher.storage.writeSource(source);
-                }
+
+                // compute parser result:
+                // merge existing data with actual one and save episodes with actualised data
+                parserResult.episodes.forEach(function (episode, index, episodes) {
+                    mergeNewEpisodeDataWithOldPlaybackStatus(episode, index < episodes.length - limitOfNewEpisodes);
+                });
+                // Save Source
+                HTML5Podcatcher.api.storage.StorageProvider.writeSource(parserResult.source);
             });
         },
+
         downloadFile: function (episode, mimeType, onDownloadCallback, onProgressCallback) {
             "use strict";
 
             //Download File
-            HTML5Podcatcher.api.web.downloadArrayBuffer(episode.mediaUrl, function (arrayBuffer) {
-                HTML5Podcatcher.storage.saveFile(episode, arrayBuffer, mimeType, onDownloadCallback, onProgressCallback);
-            }, function (event, url) {
-                if (onProgressCallback && typeof onProgressCallback === 'function') {
-                    onProgressCallback(event, 'download', url);
+            HTML5Podcatcher.api.web.downloadArrayBuffer(
+                episode.mediaUrl,
+                function (arrayBuffer) {
+                    HTML5Podcatcher.storage.saveFile(episode, arrayBuffer, mimeType, onDownloadCallback, onProgressCallback);
+                },
+                function (event/*, url*/) {
+                    if (onProgressCallback && typeof onProgressCallback === 'function') {
+                        onProgressCallback(event, 'download', episode);
+                    }
                 }
-            });
+            );
         }
     },
-    parser: {
+    //TODO remove
+    /*parser: {
         parseSource: function (xml, source) {
             "use strict";
             var rootElement, currentElementList, currentElement, contentElement, itemArray, enclosureArray, i, j, item, episode, episodes = [];
@@ -141,7 +119,7 @@ var HTML5Podcatcher = {
                 //   uses same list of elements (currentElementList) as the previous section
                 for (i = 0; i < currentElementList.length; i++) {
                     currentElement = currentElementList[i];
-                    if (!currentElement.namespaceURI) { //undefined Namespace is mostly the rss 'namespace' ;) 
+                    if (!currentElement.namespaceURI) { //undefined Namespace is mostly the rss 'namespace' ;)
                         source.link = currentElement.childNodes[0].nodeValue;
                         break;
                     }
@@ -152,7 +130,7 @@ var HTML5Podcatcher = {
                 }
                 // * Title (<title>)
                 currentElement = rootElement.querySelector('channel > title');
-                if (currentElement) {
+                if (currentElement && currentElement.childNodes.length > 0) {
                     source.title = currentElement.childNodes[0].nodeValue;
                 } else {
                     source.title = source.link;
@@ -289,12 +267,12 @@ var HTML5Podcatcher = {
             }
             return milliseconds;
         }
-    },
+    },*/
     system: {
         isOpenWebAppContainer: function (onCompletedCallback) {
             "use strict";
             var appInfoRequest;
-            //Detection of installed open web apps 
+            //Detection of installed open web apps
             //see https://developer.mozilla.org/en-US/Apps/Build/App_development_FAQ#How_can_I_detect_whether_an_app_is_privileged_or_certified.3F
             if (window.navigator.mozApps) {
                 appInfoRequest = window.navigator.mozApps.getSelf();

@@ -29,6 +29,10 @@
 ### Add a storage provider interface for settings
 ##0.40.0
 ### Add a user setting to configure the playback rate
+##0.40.1
+### Add a default value parameter to settings.get(key) and visualise playback rate as percent
+##0.40.2
+### Fix a critical Bug: A File is lost while publishing to Mozilla Webstore
 
 # VALIDATE this manifest on http://manifest-validator.com/
 

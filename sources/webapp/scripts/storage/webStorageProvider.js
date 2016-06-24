@@ -37,7 +37,7 @@ var webStorageImplementation = (function () {
             episodePrefix = episodeIdentifier || 'episode';
         this.getSourcePrefix = function () { return sourcePrefix; };
         this.getEpisodePrefix = function () { return episodePrefix; };
-        this.isSupportedByCurrentPlatform = window.localStorage;
+        this.isSupportedByCurrentPlatform = localStorage;
     };
     WebStorageDataProvider.prototype = new HTML5Podcatcher.api.storage.IDataProvider();
     WebStorageDataProvider.prototype.constructor = WebStorageDataProvider;

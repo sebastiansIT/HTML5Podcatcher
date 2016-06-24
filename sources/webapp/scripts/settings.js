@@ -94,10 +94,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     //Init settings for playback
-    if (UI.settings.get('playbackRate')) {
-        document.getElementById('playbackRateSelect').value = UI.settings.get('playbackRate');
-        document.getElementById('playbackRateValue').textContent = UI.settings.get('playbackRate');
-    }
+    document.getElementById('playbackRateSelect').value = UI.settings.get('playbackRate', 1);
+    document.getElementById('playbackRateValue').textContent = UI.settings.get('playbackRate', 1) * 100 + '%';
+
     // -------------------------- //
     // -- Check Pre Conditions -- //
     // -------------------------- //
@@ -151,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('playbackRateSelect').addEventListener('change', function (event) {
         event.preventDefault();
         event.stopPropagation();
-        document.getElementById('playbackRateValue').textContent = document.getElementById('playbackRateSelect').value;
+        document.getElementById('playbackRateValue').textContent = document.getElementById('playbackRateSelect').value * 100 + '%';
     }, false);
 
     // Transfer a JSON-Object with the whole configuration to a HTTP endpoint
@@ -167,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
             UI.settings.set('syncronisationEndpoint', syncEndpoint);
             UI.settings.set('syncronisationKey', syncKey);
             POD.api.configuration.readConfiguration(function (config) {
-                POD.web.createXMLHttpRequest(function (xhr) {
+                POD.api.web.createXMLHttpRequest(function (xhr) {
                     xhr.open('POST', syncEndpoint, true);
                     xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
                     xhr.onload = function () {
@@ -196,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function () {
         syncEndpoint = document.getElementById('syncEndpoint').value;
         syncKey = document.getElementById('syncKey').value;
 
-        POD.web.createXMLHttpRequest(function (xhr) {
+        POD.api.web.createXMLHttpRequest(function (xhr) {
             xhr.open('GET', syncEndpoint + '?key=' + syncKey, true);
             xhr.onload = function () {
                 POD.logger('Loaded syncronisation value successfully.', 'info');

@@ -1,4 +1,4 @@
-﻿/*  Copyright 2014 Sebastian Spautz
+/*  Copyright 2016 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -15,14 +15,22 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
-chrome.app.runtime.onLaunched.addListener(function() {
-	chrome.app.window.create('podcatcher.html', {
-		id: 'PodcatcherMainWindow',
-		bounds: {
-			width: 320,
-			height: 420,
-			left: 100,
-			top: 100
-		}
-	});
-});
+/*global self */
+"use strict";
+
+self.HTML5Podcatcher = {
+    api: {
+        configuration: {
+            proxyUrlPattern: undefined
+        }
+    },
+    logger: function (message, level) {
+        self.postMessage({
+            cmd: 'log',
+            parameter: {
+                level: level,
+                message: 'From WebWorker: ' + message
+            }
+        });
+    }
+};

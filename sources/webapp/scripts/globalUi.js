@@ -16,6 +16,7 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 /*global window, navigator, document, console, confirm */
+/*global Worker */
 /*global applicationCache, localStorage, Notification */
 /*global $ */
 /*global HTML5Podcatcher, POD */
@@ -135,17 +136,14 @@ var GlobalUserInterfaceHelper = {
     },
     progressHandler: function (progressEvent, prefix, episode) {
         "use strict";
-        var percentComplete, episodeUI; //progressbar, 
+        var percentComplete, episodeUI; //progressbar,
         episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode);
         $(episodeUI).find('.downloadFile').attr('disabled', 'disabled');
         if (progressEvent.lengthComputable) {
             //Downloaded Bytes / (total Bytes + 5% for saving on local system)
             percentComplete = progressEvent.loaded / (progressEvent.total + (progressEvent.total / 20));
-            console.log(prefix + ': ' + (percentComplete * 100).toFixed(2) + '%');
-            $(episodeUI).data('progress', percentComplete);
+            //$(episodeUI).data('progress', percentComplete);
             $(episodeUI).attr('style', 'background: linear-gradient(to right, rgba(0, 100, 0, 0.2) 0%,rgba(0, 100, 0, 0.2) ' + (percentComplete * 100).toFixed(2) + '%, #ffffff ' + (percentComplete * 100).toFixed(2) + '%);');
-        } else {
-            console.log(prefix + '...');
         }
     },
     preConditionCheck: function (actionCallback) {
@@ -163,7 +161,7 @@ var GlobalUserInterfaceHelper = {
         };
         proxyNeededCheck = function () {
             //Checks if Proxy is needed (Permission for System XHR is not set and proxy url is not set in configuration)
-            if (window.navigator.mozApps) { //is an Open Web App runtime 
+            if (window.navigator.mozApps) { //is an Open Web App runtime
                 appInfoRequest = window.navigator.mozApps.getSelf();
                 appInfoRequest.onsuccess = function () {
                     if (appInfoRequest.result) { //checks for installed app
@@ -178,7 +176,7 @@ var GlobalUserInterfaceHelper = {
                                 feedExistingCheck();
                             }
                         }
-                    } else { //checks for app opend in browser 
+                    } else { //checks for app opend in browser
                         HTML5Podcatcher.logger("This Webapp isn't installed as an Mozilla Open Web App but you can install it from Firefox Marketplace.", 'debug');
                         if (!GlobalUserInterfaceHelper.settings.get("proxyUrl") || GlobalUserInterfaceHelper.settings.get("proxyUrl").length < 11) {
                             actionCallback('missing proxy');
@@ -274,7 +272,7 @@ var GlobalUserInterfaceHelper = {
             event.stopPropagation();
             $('#logView').toggleClass('fullscreen');
         };
-        for (i = 0; i < logViewOpenCloseButtons.length; i++) {
+        for (i = 0; i < logViewOpenCloseButtons.length; i += 1) {
             logViewOpenCloseButtons[i].addEventListener('click', openLogViewClickListener, false);
         }
         appCloseButton = document.getElementById('appClose');
@@ -295,7 +293,7 @@ var GlobalUserInterfaceHelper = {
       */
     renderEpisode: function (episode) {
         "use strict";
-        var entryUI;
+        var entryUI/*, jumppointUI*/;
         entryUI = $($('#episodeTemplate li')[0].cloneNode(true));
         entryUI.data('episodeUri', episode.uri);
         entryUI.find('a.link').attr('href', episode.uri);
@@ -318,6 +316,17 @@ var GlobalUserInterfaceHelper = {
             entryUI.addClass('news');
             entryUI.find('.downloadFile').remove();
         }
+        // if (episode.jumppoints) {
+            // entryUI.find('.jumppoints').empty();
+            // episode.jumppoints.forEach(function (jumppoint) {
+                // jumppointUI = $('<li>');
+                // jumppointUI.text(jumppoint.title);
+                // jumppointUI.data('timecode', jumppoint.time);
+                // entryUI.find('.jumppoints').append(jumppointUI);
+            // });
+        // } else {
+            // entryUI.remove('.jumppoints');
+        // }
         //deactivate online-only-functions when offline
         if (!navigator.onLine) {
             if (entryUI.hasClass('onlineOnly')) {
@@ -335,7 +344,7 @@ var GlobalUserInterfaceHelper = {
         listUI = $('#playlist .entries, #episodes .entries');
         listUI.empty();
         if (episodes && episodes.length > 0) {
-            for (i = 0; i < episodes.length; i++) {
+            for (i = 0; i < episodes.length; i += 1) {
                 entryUI = GlobalUserInterfaceHelper.renderEpisode(episodes[i]);
                 if (order && order === 'asc') {
                     listUI.append(entryUI);
@@ -385,7 +394,7 @@ var GlobalUserInterfaceHelper = {
         sourcelistUI = $('#sourceslist .entries');
         sourcelistUI.empty();
         if (sourcelist && sourcelist.length > 0) {
-            for (i = 0; i < sourcelist.length; i++) {
+            for (i = 0; i < sourcelist.length; i += 1) {
                 entryUI = this.renderSource(sourcelist[i]);
                 sourcelistUI.append(entryUI);
             }
@@ -407,6 +416,29 @@ var GlobalUserInterfaceHelper = {
         return episodeUI;
     },
     eventHandler: {
+        downloadEpisodeFile: function (event) {
+            var episodeUI, eventTarget;
+            
+            episodeUI = $(this).closest('li');
+            eventTarget = this;
+            
+            event.preventDefault();
+            event.stopPropagation();
+
+            // TODO replace Download-Link with cancel-Button while download isn't finished   
+           
+            // load data of episode from storage...  
+            POD.storage.readEpisode(episodeUI.data('episodeUri'), function (episode) {
+                UI.logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info');
+                // ... then download file to storage...
+                // TODO Why using static MIME-Type?
+                POD.web.downloadFile(episode, 'audio/mpeg', function (episode) {
+                    // ... and update UI
+                    episodeUI.replaceWith(UI.renderEpisode(episode));
+                }, UI.progressHandler);
+            });
+        },
+        
         refreshAllSources: function (event) {
             "use strict";
             event.preventDefault();
@@ -430,9 +462,50 @@ var GlobalUserInterfaceHelper = {
                     }
                 };
                 document.addEventListener('writeSource', progressListener, false);
-                for (i = 0; i < sources.length; i++) {
+                for (i = 0; i < sources.length; i += 1) {
                     POD.web.downloadSource(sources[i]);
                 }
+            });
+        },
+        
+        refreshAllSources_widthWorker: function (event) {
+            "use strict";
+            event.preventDefault();
+            event.stopPropagation();
+
+            var button;
+            button = this;
+
+            $(button).attr('disabled', 'disabled');
+            $(button).addClass('spinner');
+
+            POD.logger("Playlist will be refreshed", "debug");
+
+            POD.storage.readSources(function (sources) {
+                var worker = new Worker('scripts/worker/actualisePlaylist.js');
+                worker.addEventListener('message', function (event) {
+                    if (event.data.cmd === 'log') {
+                        POD.logger(event.data.parameter.message, event.data.parameter.level);
+                    } else if (event.data.cmd === 'exit') {
+                        POD.logger(event.data.parameter.message, 'info');
+                        result = event.data.parameter.data;
+                    } else {
+                        console.log('Worker said: ', event.data);
+                    }
+                }, false);
+                worker.addEventListener('error', function (event) {
+                    POD.logger(event.message + '[' + event.filename + ':' + event.lineno + ']', 'error');
+                }, false);
+
+                worker.postMessage({ //Start Worker.
+                    cmd: 'start',
+                    parameter: {
+                        sources: sources,
+                        settings: {
+                            proxyUrl: HTML5Podcatcher.api.configuration.proxyUrlPattern
+                        }
+                    }
+                });
             });
         }
     }

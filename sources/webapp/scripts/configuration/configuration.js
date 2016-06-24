@@ -2,7 +2,7 @@
     @module  HTML5Podcatcher/Configuration
     @requires HTML5Podcatcher/Storage
     @author  Sebastian Spautz [sebastian@human-injection.de]
-    @license Copyright 2015 Sebastian Spautz
+    @license Copyright 2015, 2016 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -59,11 +59,15 @@ var configurationAPI = (function () {
         set: function (key, value) {
             storage.writeSettingsValue(key, value);
         },
+
         /** Get the value for the given user setting.
           * @param {string} key - The key of the application setting you ask for.
+          * @param {(string|number)} defaultValue - The default.
+          * @return The value or, if not set, the default.
           */
-        get: function (key) {
-            return storage.readSettingsValue(key);
+        get: function (key, defaultValue) {
+            var value = storage.readSettingsValue(key) || defaultValue;
+            return value;
         }
     };
 

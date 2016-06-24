@@ -96,7 +96,7 @@ var indexedDbStorageImplementation = (function () {
         this.getDatabaseVersion = function () { return dbVersion; };
         this.getStoreNameSources = function () { return dbStoreSources; };
         this.getStoreNameEpisodes = function () { return dbStoreEpisodes; };
-        this.isSupportedByCurrentPlatform = window.indexedDB;
+        this.isSupportedByCurrentPlatform = indexedDB;
         this.priority = 100;
     };
     IndexedDbDataProvider.prototype = new HTML5Podcatcher.api.storage.IDataProvider();
@@ -144,8 +144,8 @@ var indexedDbStorageImplementation = (function () {
     };
     IndexedDbDataProvider.prototype.readSources = function (onReadCallback) {
         var request, provider = this;
-        request = window.indexedDB.open(provider.getDatabaseName(), provider.getDatabaseVersion());
-        request.onupgradeneeded = this.updateIndexedDB;
+        request = indexedDB.open(provider.getDatabaseName(), provider.getDatabaseVersion());
+        request.onupgradeneeded = provider.updateIndexedDB;
         request.onblocked = function () { HTML5Podcatcher.logger("Database blocked", 'debug:IndexedDatabaseAPI'); };
         request.onsuccess = function () {
             HTML5Podcatcher.logger("Success creating/accessing IndexedDB database", 'debug:IndexedDatabaseAPI');
@@ -512,7 +512,7 @@ var indexedDbStorageImplementation = (function () {
         this.getDatabaseVersion = function () { return dbVersion; };
         this.getStoreNameFiles = function () { return dbStoreFiles; };
         this.getChunkSize = function () { return dbChunkSize; };
-        this.isSupportedByCurrentPlatform = window.indexedDB;
+        this.isSupportedByCurrentPlatform = indexedDB;
         this.priority = 100;
     };
     IndexedDbFileProvider.prototype = new HTML5Podcatcher.api.storage.IFileProvider();

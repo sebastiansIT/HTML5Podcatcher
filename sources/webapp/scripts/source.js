@@ -93,6 +93,7 @@ $(document).ready(function () {
             }
         }
     }, false);
+
     //Events in list of episodes
     $('.content').on('click', '.status', function (event) {
         event.preventDefault();
@@ -101,18 +102,7 @@ $(document).ready(function () {
             POD.toggleEpisodeStatus(episode);
         });
     });
-    $('.content').on('click', '.downloadFile', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        var episodeUI;
-        episodeUI = $(this).closest('li');
-        POD.storage.readEpisode(episodeUI.data('episodeUri'), function (episode) {
-            UI.logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info');
-            POD.web.downloadFile(episode, 'audio/mpeg', function (episode) {
-                episodeUI.replaceWith(UI.renderEpisode(episode));
-            }, UI.progressHandler);
-        });
-    });
+    $('.content').on('click', '.downloadFile', UI.eventHandler.downloadEpisodeFile);
     $('.content').on('click', '.delete', function (event) {
         event.preventDefault();
         event.stopPropagation();
@@ -131,23 +121,30 @@ $(document).ready(function () {
             POD.storage.deleteSource(source, removeFunction);
         });
     });
+
     $('#updateSource').on('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
-        var button = this, progressListener;
-        $(button).attr('disabled', 'disabled');
+
+        var limitOfNewEpisodes = 5, source, button = event.target, progressListener;
+        source = {uri: sourceUri};
+
+        button.setAttribute('disabled', 'disabled');
         $(button).addClass('spinner');
+
+        // add Listener for the 'writeSource' event. This event signals the end of the update process.
         progressListener = function (event) {
             event.stopPropagation();
-            $(button).removeAttr('disabled');
+            button.removeAttribute('disabled');
             $(button).removeClass('spinner');
             document.removeEventListener('writeSource', progressListener, false);
         };
         document.addEventListener('writeSource', progressListener, false);
-        POD.storage.readSource(sourceUri, function (source) {
-            POD.web.downloadSource(source);
-        });
+
+        // start update of the source
+        HTML5Podcatcher.web.downloadSource(source, limitOfNewEpisodes)
     });
+
     UI.initGeneralUIEvents();
     UI.initConnectionStateEvents();
 });

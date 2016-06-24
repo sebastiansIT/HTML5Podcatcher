@@ -1,4 +1,4 @@
-/** This modul contains functions load informations and files from the internet. 
+/** This modul contains functions load informations and files from the internet.
 
     @module  HTML5Podcatcher/Parser
     @author  Sebastian Spautz [sebastian@human-injection.de]
@@ -26,14 +26,106 @@
 
 var parserAPI = (function () {
     "use strict";
-    
+
+    var ISourceParser, SourceParserFacade;
+
+    // ====================================== //
+    // === Interface ISourceParser        === //
+    // ====================================== //
+    /** Interface defining functions which parses documents for information about a source and its episodes.
+      * @interface
+      */
+    ISourceParser = function () {};
+
+    ISourceParser.prototype.parse = function (/*source, doc*/) {
+        throw new Error('not implemented');
+    };
+
+    //See http://podlove.org/simple-chapters/
+    ISourceParser.prototype.parsePodloveSimpleChapters = function (node) {
+        var i, chapters, chapter, jumppoints = [];
+        if (node && node.length > 0) {
+            HTML5Podcatcher.logger('Found "Podlove Simple Chapters" in feed: ' + node, 'debug:Parser');
+            chapters = node[0].getElementsByTagNameNS('http://podlove.org/simple-chapters', 'chapter');
+            for (i = 0; i < chapters.length; i += 1) {
+                chapter = chapters[i];
+                jumppoints.push({
+                    type: 'chapter',
+                    time: HTML5Podcatcher.parser.parseNormalPlayTime(chapter.attributes.start.value) / 1000,
+                    title: chapter.attributes.title.value,
+                    uri: chapter.attributes.href ? chapter.attributes.href.value : undefined,
+                    image: chapter.attributes.image ? chapter.attributes.image.value : undefined
+                });
+            }
+        }
+        return jumppoints;
+    };
+
+    //See https://www.ietf.org/rfc/rfc2326.txt Chapter 3.6
+    ISourceParser.prototype.parseNormalPlayTime = function (normalPlayTime) {
+        var parts, milliseconds;
+        parts = normalPlayTime.split(".");
+        if (parts[1]) {
+            milliseconds = parseFloat('0.' + parts[1]) * 1000;
+        } else {
+            milliseconds = 0;
+        }
+        parts = parts[0].split(":");
+        if (parts.length === 3) {
+            milliseconds = milliseconds + parseInt(parts[2], 10) * 1000;
+            milliseconds = milliseconds + parseInt(parts[1], 10) * 60 * 1000;
+            milliseconds = milliseconds + parseInt(parts[0], 10) * 60 * 60 * 1000;
+        } else if (parts.length === 2) {
+            milliseconds = milliseconds + parseInt(parts[1], 10) * 1000;
+            milliseconds = milliseconds + parseInt(parts[0], 10) * 60 * 1000;
+        } else if (parts.length === 1) {
+            milliseconds = milliseconds + parseInt(parts[0], 10) * 1000;
+        }
+        return milliseconds;
+    };
+
+    // ====================================== //
+    // === Singelton SourceParserFacade=== //
+    // ====================================== //
+    /** Singelton facade for source parser.
+      * It is exported as the global member "document.HTML5Podcatcher.api.parser.StorageParser".
+      * @class
+      */
+    SourceParserFacade = function () {
+        var sourceParserList = [];
+        this.registerSourceParser = function (sourceParser) {
+            sourceParserList.push(sourceParser);
+        };
+
+        this.sourceParser = function () {
+            var parser;
+
+            sourceParserList.forEach(function (listedParser) {
+                // TODO zuständigkeit checken
+                parser = listedParser;
+            });
+            if (!parser) {
+                HTML5Podcatcher.logger('Missing source parser', 'error');
+            }
+            return parser;
+        };
+    };
+
+    SourceParserFacade.prototype.parse = function (source, doc) {
+        var sourceParser = this.sourceParser();
+        if (sourceParser) {
+            return sourceParser.parse(source, doc);
+        }
+    };
+
     return {
-        
+        'ISourceParser': ISourceParser,
+        'SourceParser': new SourceParserFacade()
     };
 }());
 
 /** The modul "Parser" is available at document.HTML5Podcatcher.api.parser.
-  * @global 
+  * @global
   * @name "HTML5Podcatcher.api.parser"
   * @see module:HTML5Podcatcher/Parser
   */

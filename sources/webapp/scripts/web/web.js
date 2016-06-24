@@ -1,9 +1,9 @@
-/** This modul contains functions load informations and files from the internet. 
+/** This modul contains functions load informations and files from the internet.
 
     @module  HTML5Podcatcher/Web
     @author  Sebastian Spautz [sebastian@human-injection.de]
     @requires module:HTML5Podcatcher/Configuration
-    @license Copyright 2015 Sebastian Spautz
+    @license Copyright 2015, 2016 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -21,7 +21,7 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 
-/*global document, window, XMLHttpRequest, CustomEvent */
+/*global document, navigator, XMLHttpRequest, CustomEvent */
 /*global HTML5Podcatcher */
 
 var webAPI = (function () {
@@ -55,22 +55,22 @@ var webAPI = (function () {
       */
 
     /** @summary Creates a XMLHttpRequest.
-      * @desc Creates a 'normal' XMLHttpRequest in most cases. When called within a packaged FirefoxOS-App, 
-      * it creates a system request (mozSystem property) to avoid conflicts with the Same Origin Policy. 
-      * @private
+      * @desc Creates a 'normal' XMLHttpRequest in most cases. When called within a packaged FirefoxOS-App,
+      * it creates a system request (mozSystem property) to avoid conflicts with the Same Origin Policy.
+      * @public
       * @param {module:HTML5Podcatcher/Web~CompletedAjaxRequestCreationCallback} onCompletedCallback
       */
     createXMLHttpRequest = function (onCompletedCallback) {
         var ajaxRequest, appInfoRequest;
-        //Detection of installed open web apps 
+        //Detection of installed open web apps
         //see https://developer.mozilla.org/en-US/Apps/Build/App_development_FAQ#How_can_I_detect_whether_an_app_is_privileged_or_certified.3F
-        if (window.navigator.mozApps) {
-            appInfoRequest = window.navigator.mozApps.getSelf();
+        if (navigator.mozApps) {
+            appInfoRequest = navigator.mozApps.getSelf();
             appInfoRequest.onsuccess = function () {
                 if (appInfoRequest.result) {
                     HTML5Podcatcher.logger(appInfoRequest.result.manifest.name + " is a " + appInfoRequest.result.manifest.type + " app.", 'debug:Web');
                     if (appInfoRequest.result.manifest.type === 'privileged' || appInfoRequest.result.manifest.type === 'certified') {
-                        ajaxRequest = new XMLHttpRequest({ mozSystem: true });
+                        ajaxRequest = new XMLHttpRequest({mozSystem: true});
                     } else {
                         ajaxRequest = new XMLHttpRequest();
                     }
@@ -93,28 +93,29 @@ var webAPI = (function () {
       */
     downloadXML = function (url, onLoadCallback) {
         var successfunction, errorfunction, proxyUrlPattern;
-        proxyUrlPattern = HTML5Podcatcher.api.configuration.proxyUrlPattern;
 
-        successfunction = function () {
-            var xmlData;
+        proxyUrlPattern = HTML5Podcatcher.api.configuration.proxyUrlPattern;
+        successfunction = function (event) {
+            var ajaxCall = event.target,
+                xmlData;
+
             HTML5Podcatcher.logger('Download of "' + url + '" is finished', 'debug:Web');
-            xmlData = this.responseXML;
+            xmlData = ajaxCall.responseXML;
             if (xmlData) {
                 if (onLoadCallback && typeof onLoadCallback === 'function') {
                     onLoadCallback(xmlData);
                 }
             } else {
-                HTML5Podcatcher.logger('No XML Document found instead found [' + this.response + "]", 'error:Web');
+                HTML5Podcatcher.logger('No XML Document found instead found [' + ajaxCall.response + "]", 'error:Web');
             }
         };
-
         errorfunction = function (xhrError) {
             if (proxyUrlPattern) {
                 HTML5Podcatcher.logger('Direct download failed. Try proxy: ' + proxyUrlPattern.replace("$url$", url), 'info:Web');
-                HTML5Podcatcher.web.createXMLHttpRequest(function (proxyXhr) {
+                createXMLHttpRequest(function (proxyXhr) {
                     proxyXhr.open('GET', proxyUrlPattern.replace("$url$", url), true);
                     proxyXhr.addEventListener("error", function (xhrError) {
-                        HTML5Podcatcher.logger("Can't download Source: " + xhrError.error, 'error:Web');
+                        HTML5Podcatcher.logger('Can\'t download Source ' + proxyUrlPattern.replace('$url$', url) + ': ' + xhrError.error, 'error:Web');
                     }, false);
                     proxyXhr.addEventListener("abort", HTML5Podcatcher.logger, false);
                     proxyXhr.onload = successfunction;
@@ -130,7 +131,7 @@ var webAPI = (function () {
 
         //Load Feed and Parse Entries
         try {
-            HTML5Podcatcher.web.createXMLHttpRequest(function (xhr) {
+            createXMLHttpRequest(function (xhr) {
                 xhr.open('GET', url, true);
                 xhr.addEventListener("error", errorfunction, false);
                 xhr.addEventListener("abort", HTML5Podcatcher.logger, false);
@@ -152,33 +153,49 @@ var webAPI = (function () {
       * @param {module:HTML5Podcatcher/Web~XHRProgressCallback} [onProgressCallback] - The callback funktion to notify the program about progress information.
       */
     downloadArrayBuffer = function (url, onLoadCallback, onProgressCallback) {
-        var successfunction, errorfunction, proxyUrlPattern, downloadTimeout;
+        var successfunction, errorfunction, progressfunction,
+            proxyUrlPattern, downloadTimeout;
+
         proxyUrlPattern = HTML5Podcatcher.api.configuration.proxyUrlPattern;
         downloadTimeout = HTML5Podcatcher.api.configuration.downloadTimeout;
+        // Function called on progress events
+        progressfunction = function (event) {
+            var percentComplete;
 
-        successfunction = function () {
-            if (this.status === 200) {
-                HTML5Podcatcher.logger('Download of file "' + url + '" is finished', 'debug', 'Web');
-                if (onLoadCallback && typeof onLoadCallback === 'function') {
-                    onLoadCallback(this.response);
-                }
+            if (event.lengthComputable) {
+                //Downloaded Bytes / total Bytes
+                percentComplete = event.loaded / event.total;
+                HTML5Podcatcher.logger('Download array buffer: ' + (percentComplete * 100).toFixed(2) + '%', 'debug', 'Web');
             } else {
-                HTML5Podcatcher.logger('Error Downloading file "' + url + '": ' + this.statusText + ' (' + this.status + ')', 'error', 'Web');
+                HTML5Podcatcher.logger('Downloading array buffer...', 'debug', 'Web');
+            }
+
+            if (onProgressCallback && typeof onProgressCallback === 'function') {
+                onProgressCallback(event, url);
             }
         };
+        // Function called after successful download
+        successfunction = function (event) {
+            var ajaxCall = event.target;
 
+            if (ajaxCall.status === 200) {
+                HTML5Podcatcher.logger('Download of file "' + url + '" is finished', 'debug', 'Web');
+                if (onLoadCallback && typeof onLoadCallback === 'function') {
+                    onLoadCallback(ajaxCall.response);
+                }
+            } else {
+                HTML5Podcatcher.logger('Error Downloading file "' + url + '": ' + ajaxCall.statusText + ' (' + ajaxCall.status + ')', 'error', 'Web');
+            }
+        };
+        // Function called when an error occured downloading the array buffer
         errorfunction = function (xhrError) {
             if (proxyUrlPattern) {
                 HTML5Podcatcher.logger('Direct download failed. Try proxy: ' + proxyUrlPattern.replace("$url$", url), 'warn:Web');
-                HTML5Podcatcher.web.createXMLHttpRequest(function (xhrProxy) {
+                createXMLHttpRequest(function (xhrProxy) {
                     xhrProxy.open('GET', proxyUrlPattern.replace("$url$", url), true);
                     xhrProxy.responseType = 'arraybuffer';
                     xhrProxy.timeout = downloadTimeout;
-                    xhrProxy.addEventListener("progress", function (event) {
-                        if (onProgressCallback && typeof onProgressCallback === 'function') {
-                            onProgressCallback(event, url);
-                        }
-                    }, false);
+                    xhrProxy.addEventListener("progress", progressfunction, false);
                     xhrProxy.addEventListener("abort", HTML5Podcatcher.logger, false);
                     xhrProxy.addEventListener("error", function (xhrError) {
                         HTML5Podcatcher.logger("Can't download File: " + xhrError.error, 'error:Web');
@@ -196,15 +213,11 @@ var webAPI = (function () {
         };
 
         try {
-            HTML5Podcatcher.web.createXMLHttpRequest(function (xhr) {
+            createXMLHttpRequest(function (xhr) {
                 xhr.open('GET', url, true);
                 xhr.responseType = 'arraybuffer';
                 xhr.timeout = downloadTimeout;
-                xhr.addEventListener("progress", function (event) {
-                    if (onProgressCallback && typeof onProgressCallback === 'function') {
-                        onProgressCallback(event, url);
-                    }
-                }, false);
+                xhr.addEventListener("progress", progressfunction, false);
                 xhr.addEventListener("error", errorfunction, false);
                 xhr.addEventListener("abort", HTML5Podcatcher.logger, false);
                 xhr.onload = successfunction;
@@ -219,13 +232,14 @@ var webAPI = (function () {
     };
 
     return {
+        'createXMLHttpRequest': createXMLHttpRequest,
         'downloadXML': downloadXML,
         'downloadArrayBuffer': downloadArrayBuffer
     };
 }());
 
 /** The modul "Web" is available at document.HTML5Podcatcher.api.web.
-  * @global 
+  * @global
   * @name "HTML5Podcatcher.api.web"
   * @see module:HTML5Podcatcher/Web
   */

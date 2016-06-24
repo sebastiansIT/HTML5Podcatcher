@@ -27,7 +27,7 @@
 $(document).ready(function () {
     "use strict";
     POD.logger("Opens Source View", "debug");
-    HTML5Podcatcher.api.configuration.proxyUrlPattern = UI.settings.get("proxyUrl");
+    HTML5Podcatcher.api.configuration.proxyUrlPattern = HTML5Podcatcher.api.configuration.settings.get("proxyUrl");
     // -------------------------- //
     // -- Check Pre Conditions -- //
     // -------------------------- //
@@ -60,30 +60,39 @@ $(document).ready(function () {
         UI.settings.set('ShowDetailsForSource', $(this).closest('li').data('sourceUri'));
         window.location.href = 'source.html';
     });
+
     //Update one Source
     $('#sourceslist').on('click', '.update', function (event) {
         event.preventDefault();
         event.stopPropagation();
-        var button = this, progressListener;
-        $(button).attr('disabled', 'disabled');
+
+        var limitOfNewEpisodes = 5, source, button = event.target, progressListener;
+        source = {uri: button.getAttribute('href')};
+
+        button.setAttribute('disabled', 'disabled');
         $(button).addClass('spinner');
+
+        // add Listener for the 'writeSource' event. This event signals the end of the update process.
         progressListener = function (event) {
             event.stopPropagation();
-            $(button).removeAttr('disabled');
+            button.removeAttribute('disabled');
             $(button).removeClass('spinner');
             document.removeEventListener('writeSource', progressListener, false);
         };
         document.addEventListener('writeSource', progressListener, false);
-        POD.storage.readSource($(this).attr("href"), function (source) {
-            POD.web.downloadSource(source);
-        });
+
+        // start update of the source
+        HTML5Podcatcher.web.downloadSource(source, limitOfNewEpisodes)
     });
+
     //Delete Source from Database
     $('#sourceslist').on('click', '.delete', function (event) {
         event.preventDefault();
         event.stopPropagation();
         var i, removeFunction;
-        removeFunction = function (element) { $(element).remove(); };
+        removeFunction = function (element) {
+            $(element).remove();
+        };
         POD.storage.readSource($(this).closest('li').data('sourceUri'), function (source) {
             POD.storage.deleteSource(source, function (source) {
                 for (i = 0; i < $('#sourceslist .entries li').length; i++) {
