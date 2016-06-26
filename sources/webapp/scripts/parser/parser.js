@@ -45,13 +45,13 @@ var parserAPI = (function () {
     ISourceParser.prototype.parsePodloveSimpleChapters = function (node) {
         var i, chapters, chapter, jumppoints = [];
         if (node && node.length > 0) {
-            HTML5Podcatcher.logger('Found "Podlove Simple Chapters" in feed: ' + node, 'debug:Parser');
+            HTML5Podcatcher.logger('Found "Podlove Simple Chapters" in feed', 'debug', 'Parser');
             chapters = node[0].getElementsByTagNameNS('http://podlove.org/simple-chapters', 'chapter');
             for (i = 0; i < chapters.length; i += 1) {
                 chapter = chapters[i];
                 jumppoints.push({
                     type: 'chapter',
-                    time: HTML5Podcatcher.parser.parseNormalPlayTime(chapter.attributes.start.value) / 1000,
+                    time: this.parseNormalPlayTime(chapter.attributes.start.value) / 1000,
                     title: chapter.attributes.title.value,
                     uri: chapter.attributes.href ? chapter.attributes.href.value : undefined,
                     image: chapter.attributes.image ? chapter.attributes.image.value : undefined
@@ -88,11 +88,12 @@ var parserAPI = (function () {
     // === Singelton SourceParserFacade=== //
     // ====================================== //
     /** Singelton facade for source parser.
-      * It is exported as the global member "document.HTML5Podcatcher.api.parser.StorageParser".
+      * It is exported as the global member "document.HTML5Podcatcher.api.parser.SourceParser".
       * @class
       */
     SourceParserFacade = function () {
         var sourceParserList = [];
+        
         this.registerSourceParser = function (sourceParser) {
             sourceParserList.push(sourceParser);
         };

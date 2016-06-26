@@ -134,7 +134,7 @@ var GlobalUserInterfaceHelper = {
         "use strict";
         this.logHandler(event, 'info');
     },
-    progressHandler: function (progressEvent, prefix, episode) {
+    progressHandler: function (progressEvent, episode) {
         "use strict";
         var percentComplete, episodeUI; //progressbar,
         episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode);
@@ -143,7 +143,7 @@ var GlobalUserInterfaceHelper = {
             //Downloaded Bytes / (total Bytes + 5% for saving on local system)
             percentComplete = progressEvent.loaded / (progressEvent.total + (progressEvent.total / 20));
             //$(episodeUI).data('progress', percentComplete);
-            $(episodeUI).attr('style', 'background: linear-gradient(to right, rgba(0, 100, 0, 0.2) 0%,rgba(0, 100, 0, 0.2) ' + (percentComplete * 100).toFixed(2) + '%, #ffffff ' + (percentComplete * 100).toFixed(2) + '%);');
+            episodeUI.style.background = 'linear-gradient(to right, rgba(0, 100, 0, 0.2) 0%,rgba(0, 100, 0, 0.2) ' + (percentComplete * 100).toFixed(2) + '%, #ffffff ' + (percentComplete * 100).toFixed(2) + '%)';
         }
     },
     preConditionCheck: function (actionCallback) {
@@ -407,27 +407,25 @@ var GlobalUserInterfaceHelper = {
     findEpisodeUI: function (episode) {
         "use strict";
         var episodeUI;
+        
         $('#playlist .entries li, #episodes .entries li').each(function () {
             if ($(this).data('episodeUri') === episode.uri) {
                 episodeUI = this;
-                return false;
             }
         });
         return episodeUI;
     },
     eventHandler: {
         downloadEpisodeFile: function (event) {
-            var episodeUI, eventTarget;
-            
-            episodeUI = $(this).closest('li');
-            eventTarget = this;
-            
+            "use strict";
+            var episodeUI = $(event.target).closest('li');
+
             event.preventDefault();
             event.stopPropagation();
 
-            // TODO replace Download-Link with cancel-Button while download isn't finished   
-           
-            // load data of episode from storage...  
+            // TODO replace Download-Link with cancel-Button while download isn't finished
+
+            // load data of episode from storage...
             POD.storage.readEpisode(episodeUI.data('episodeUri'), function (episode) {
                 UI.logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info');
                 // ... then download file to storage...
@@ -438,36 +436,42 @@ var GlobalUserInterfaceHelper = {
                 }, UI.progressHandler);
             });
         },
-        
+
         refreshAllSources: function (event) {
             "use strict";
+            var button = event.target;
+
             event.preventDefault();
             event.stopPropagation();
-            var i, button;
-            button = this;
-            $(this).attr('disabled', 'disabled');
-            $(this).addClass('spinner');
-            POD.logger("Playlist will be refreshed", "debug");
+
+            button.setAttribute('disabled', 'disabled');
+            button.classList.add('spinner');
+            POD.logger('Playlist will be refreshed', 'debug');
             POD.storage.readSources(function (sources) {
-                var amount, progressListener;
-                amount = sources.length;
-                progressListener = function (event) {
-                    event.stopPropagation();
-                    amount--;
-                    if (amount === 0) {
-                        POD.logger("All Feeds have been refreshed", "info");
-                        $(button).removeAttr('disabled');
-                        $(button).removeClass('spinner');
-                        document.removeEventListener('writeSource', progressListener, false);
-                    }
-                };
-                document.addEventListener('writeSource', progressListener, false);
-                for (i = 0; i < sources.length; i += 1) {
-                    POD.web.downloadSource(sources[i]);
-                }
+                var numberOfSourcesToDownload = sources.length;
+
+                //for (i = 0; i < sources.length; i += 1) {
+                sources.forEach(function (source, index, array) {
+                    POD.web.downloadSource(source, null, function () {
+                        var percentCompleted;
+                        
+                        numberOfSourcesToDownload--;
+                        if (numberOfSourcesToDownload === 0) {
+                            POD.logger('All Feeds have been refreshed', 'info');
+                            button.removeAttribute('disabled');
+                            button.classList.remove('spinner');
+                            button.style.removeProperty('background');
+                            POD.logger('All Podcasts are up to date now.', 'note');
+                        } else {
+                            // actualise the progress in the button
+                            percentCompleted = (100 / sources.length * (sources.length - numberOfSourcesToDownload)).toFixed(2) + '%';
+                            button.style.background = 'linear-gradient(to right, rgba(0, 100, 0, 0.2) 0%, rgba(0, 100, 0, 0.2) ' + percentCompleted + ', #ffffff ' + percentCompleted + ')';
+                        }
+                    });
+                });
             });
         },
-        
+
         refreshAllSources_widthWorker: function (event) {
             "use strict";
             event.preventDefault();

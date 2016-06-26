@@ -89,9 +89,10 @@ var webAPI = (function () {
     /** Load an XML document from the given URL.
       *
       * @param {URL} url - The URL to load.
-      * @param {module:HTML5Podcatcher/Web~XMLLoadedCallback} [onLoadCallback] - Function that is called when XML Resource is successfuly loaded.
+      * @param {module:HTML5Podcatcher/Web~XMLLoadedCallback} [onLoadCallback] - Function that is called when the XML resource is successfuly loaded.
+      * @param {function} [onFailureCallback] - Function that is called when a failure occured.
       */
-    downloadXML = function (url, onLoadCallback) {
+    downloadXML = function (url, onLoadCallback, onFailureCallback) {
         var successfunction, errorfunction, proxyUrlPattern;
 
         proxyUrlPattern = HTML5Podcatcher.api.configuration.proxyUrlPattern;
@@ -99,33 +100,39 @@ var webAPI = (function () {
             var ajaxCall = event.target,
                 xmlData;
 
-            HTML5Podcatcher.logger('Download of "' + url + '" is finished', 'debug:Web');
+            HTML5Podcatcher.logger('Download of "' + url + '" is finished', 'debug', 'Web');
             xmlData = ajaxCall.responseXML;
             if (xmlData) {
                 if (onLoadCallback && typeof onLoadCallback === 'function') {
                     onLoadCallback(xmlData);
                 }
             } else {
-                HTML5Podcatcher.logger('No XML Document found instead found [' + ajaxCall.response + "]", 'error:Web');
+                HTML5Podcatcher.logger('No XML Document found instead found [' + ajaxCall.response + ']', 'error:Web');
             }
         };
         errorfunction = function (xhrError) {
             if (proxyUrlPattern) {
-                HTML5Podcatcher.logger('Direct download failed. Try proxy: ' + proxyUrlPattern.replace("$url$", url), 'info:Web');
+                HTML5Podcatcher.logger('Direct download failed. Try proxy: ' + proxyUrlPattern.replace('$url$', url), 'info', 'Web');
                 createXMLHttpRequest(function (proxyXhr) {
                     proxyXhr.open('GET', proxyUrlPattern.replace("$url$", url), true);
                     proxyXhr.addEventListener("error", function (xhrError) {
-                        HTML5Podcatcher.logger('Can\'t download Source ' + proxyUrlPattern.replace('$url$', url) + ': ' + xhrError.error, 'error:Web');
+                        HTML5Podcatcher.logger('Can\'t download Source ' + proxyUrlPattern.replace('$url$', url) + ': ' + xhrError.error, 'error', 'Web');
+                        if (onFailureCallback && typeof onFailureCallback === 'function') {
+                            onFailureCallback();
+                        }
                     }, false);
-                    proxyXhr.addEventListener("abort", HTML5Podcatcher.logger, false);
+                    proxyXhr.addEventListener('abort', HTML5Podcatcher.logger, false);
                     proxyXhr.onload = successfunction;
                     proxyXhr.ontimeout = function () {
-                        HTML5Podcatcher.logger("Timeout after " + (proxyXhr.timeout / 60000) + " minutes.", "error:Web");
+                        HTML5Podcatcher.logger('Timeout after ' + (proxyXhr.timeout / 60000) + ' minutes.', 'error', 'Web');
+                        if (onFailureCallback && typeof onFailureCallback === 'function') {
+                            onFailureCallback();
+                        }  
                     };
                     proxyXhr.send();
                 });
             } else {
-                HTML5Podcatcher.logger("Can't download Source " + url + ": " + xhrError.error, 'error:Web');
+                HTML5Podcatcher.logger('Can\'t download Source ' + url + ': ' + xhrError.error, 'error', 'Web');
             }
         };
 
@@ -133,16 +140,22 @@ var webAPI = (function () {
         try {
             createXMLHttpRequest(function (xhr) {
                 xhr.open('GET', url, true);
-                xhr.addEventListener("error", errorfunction, false);
-                xhr.addEventListener("abort", HTML5Podcatcher.logger, false);
+                xhr.addEventListener('error', errorfunction, false);
+                xhr.addEventListener('abort', HTML5Podcatcher.logger, false);
                 xhr.onload = successfunction;
                 xhr.ontimeout = function () {
-                    HTML5Podcatcher.logger("Timeout after " + (xhr.timeout / 60000) + " minutes.", "error:Web");
+                    HTML5Podcatcher.logger('Timeout after ' + (xhr.timeout / 60000) + ' minutes.', 'error', 'Web');
+                    if (onFailureCallback && typeof onFailureCallback === 'function') {
+                        onFailureCallback();
+                    }
                 };
                 xhr.send();
             });
         } catch (exeption) {
-            HTML5Podcatcher.logger(exeption, 'error:Web');
+            HTML5Podcatcher.logger(exeption, 'error', 'Web');
+            if (onFailureCallback && typeof onFailureCallback === 'function') {
+                onFailureCallback();
+            }
         }
     };
 

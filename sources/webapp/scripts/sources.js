@@ -63,26 +63,20 @@ $(document).ready(function () {
 
     //Update one Source
     $('#sourceslist').on('click', '.update', function (event) {
+        var limitOfNewEpisodes = 5, 
+            button = event.target, 
+            source = {uri: button.getAttribute('href')};
+        
         event.preventDefault();
         event.stopPropagation();
-
-        var limitOfNewEpisodes = 5, source, button = event.target, progressListener;
-        source = {uri: button.getAttribute('href')};
-
+       
         button.setAttribute('disabled', 'disabled');
-        $(button).addClass('spinner');
-
-        // add Listener for the 'writeSource' event. This event signals the end of the update process.
-        progressListener = function (event) {
-            event.stopPropagation();
-            button.removeAttribute('disabled');
-            $(button).removeClass('spinner');
-            document.removeEventListener('writeSource', progressListener, false);
-        };
-        document.addEventListener('writeSource', progressListener, false);
-
+        button.classList.add('spinner');
         // start update of the source
-        HTML5Podcatcher.web.downloadSource(source, limitOfNewEpisodes)
+        HTML5Podcatcher.web.downloadSource(source, limitOfNewEpisodes, function () {
+            button.removeAttribute('disabled');
+            button.classList.remove('spinner');
+        });
     });
 
     //Delete Source from Database

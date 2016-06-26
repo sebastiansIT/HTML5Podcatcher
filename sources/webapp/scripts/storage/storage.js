@@ -63,7 +63,6 @@ var storageAPI = (function () {
       * @param {Source} sources - The sourc objects deleted from storage.
       */
 
-
     // ====================================== //
     // === Interface IDataProvider        === //
     // ====================================== //

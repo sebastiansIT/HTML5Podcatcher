@@ -36,47 +36,65 @@ var HTML5Podcatcher = {
 
         /** Updates a source from its feed.
           * @param {Source} source  Source to update.
-          * @param {number} limitOfNewEpisodes Maximal amount of episodes imported as 'new'.
+          * @param {number} [limitOfNewEpisodes=5] Maximal amount of episodes imported as 'new'.
+          * @param {function} [onFinishedCallback] Function called when download of Source is completed.
           */
-        downloadSource: function (source, limitOfNewEpisodes) {
+        downloadSource: function (source, limitOfNewEpisodes, onFinishedCallback) {
             "use strict";
-            if (!limitOfNewEpisodes) {
-                limitOfNewEpisodes = 5;
-            }
+            
+            limitOfNewEpisodes = limitOfNewEpisodes || 5;
+            
             // start update of the source
-            HTML5Podcatcher.api.web.downloadXML(source.uri, function (xmlDocument) {
-                var parserResult, mergeNewEpisodeDataWithOldPlaybackStatus;
+            HTML5Podcatcher.api.web.downloadXML(
+                source.uri, 
+                function (xmlDocument) {
+                    var parserResult, 
+                        mergeNewEpisodeDataWithOldPlaybackStatus;
 
-                HTML5Podcatcher.logger('Downloaded source feed from ' + source.uri, 'debug');
-                parserResult = HTML5Podcatcher.api.parser.SourceParser.parse(source, xmlDocument);
-                HTML5Podcatcher.logger('Parsed source feed from ' + source.uri, 'debug');
+                    mergeNewEpisodeDataWithOldPlaybackStatus = function (mergeEpisode, forcePlayed) {
+                        HTML5Podcatcher.api.storage.StorageProvider.readEpisode(mergeEpisode.uri, function (existingEpisode) {
+                            existingEpisode.link = mergeEpisode.link;
+                            existingEpisode.title = mergeEpisode.title;
+                            existingEpisode.updated = mergeEpisode.updated;
+                            existingEpisode.mediaUrl = mergeEpisode.mediaUrl;
+                            existingEpisode.mediaType = mergeEpisode.mediaType;
+                            existingEpisode.source = mergeEpisode.source;
+                            existingEpisode.jumppoints = mergeEpisode.jumppoints;
+                            //ATTENTION! never change playback information if episode updated from internet
+                            //Only Exception: If the forcedPlayed parameter is set - then the actual playback state is overriden
+                            if (forcePlayed && existingEpisode.playback.played === undefined) {
+                                existingEpisode.playback.played = true;
+                            }
+                            HTML5Podcatcher.api.storage.StorageProvider.writeEpisode(existingEpisode);
+                        });
+                    };
 
-                mergeNewEpisodeDataWithOldPlaybackStatus = function (mergeEpisode, forcePlayed) {
-                    HTML5Podcatcher.api.storage.StorageProvider.readEpisode(mergeEpisode.uri, function (existingEpisode) {
-                        existingEpisode.link = mergeEpisode.link;
-                        existingEpisode.title = mergeEpisode.title;
-                        existingEpisode.updated = mergeEpisode.updated;
-                        existingEpisode.mediaUrl = mergeEpisode.mediaUrl;
-                        existingEpisode.mediaType = mergeEpisode.mediaType;
-                        existingEpisode.source = mergeEpisode.source;
-                        existingEpisode.jumppoints = mergeEpisode.jumppoints;
-                        //ATTENTION! never change playback information if episode updated from internet
-                        //Only Exception: If the forcedPlayed parameter is set - then the actual playback state is overriden
-                        if (forcePlayed && existingEpisode.playback.played === undefined) {
-                            existingEpisode.playback.played = true;
+                    HTML5Podcatcher.logger('Downloaded source feed from ' + source.uri, 'debug');
+                    try {
+                        parserResult = HTML5Podcatcher.api.parser.SourceParser.parse(source, xmlDocument);
+                        HTML5Podcatcher.logger('Parsed source feed from ' + source.uri, 'debug');
+                        
+                        // compute parser result:
+                        // merge existing data with actual one and save episodes with actualised data
+                        parserResult.episodes.forEach(function (episode, index, episodes) {
+                            mergeNewEpisodeDataWithOldPlaybackStatus(episode, index < episodes.length - limitOfNewEpisodes);
+                        });
+                        // Save Source
+                        HTML5Podcatcher.api.storage.StorageProvider.writeSource(parserResult.source, function () {
+                            if (onFinishedCallback && typeof onFinishedCallback === 'function') {
+                                onFinishedCallback();
+                            }
+                        });
+                    } catch (exception) {
+                        HTML5Podcatcher.logger('An excpeption ocurred while parsing source ' + source.uri, 'fatal')
+                        console.error(exception);
+                        if (onFinishedCallback && typeof onFinishedCallback === 'function') {
+                            onFinishedCallback();
                         }
-                        HTML5Podcatcher.api.storage.StorageProvider.writeEpisode(existingEpisode);
-                    });
-                };
-
-                // compute parser result:
-                // merge existing data with actual one and save episodes with actualised data
-                parserResult.episodes.forEach(function (episode, index, episodes) {
-                    mergeNewEpisodeDataWithOldPlaybackStatus(episode, index < episodes.length - limitOfNewEpisodes);
-                });
-                // Save Source
-                HTML5Podcatcher.api.storage.StorageProvider.writeSource(parserResult.source);
-            });
+                    }
+                },
+                onFinishedCallback
+            );
         },
 
         downloadFile: function (episode, mimeType, onDownloadCallback, onProgressCallback) {
@@ -90,184 +108,13 @@ var HTML5Podcatcher = {
                 },
                 function (event/*, url*/) {
                     if (onProgressCallback && typeof onProgressCallback === 'function') {
-                        onProgressCallback(event, 'download', episode);
+                        onProgressCallback(event, episode);
                     }
                 }
             );
         }
     },
-    //TODO remove
-    /*parser: {
-        parseSource: function (xml, source) {
-            "use strict";
-            var rootElement, currentElementList, currentElement, contentElement, itemArray, enclosureArray, i, j, item, episode, episodes = [];
-            HTML5Podcatcher.logger('Parsing source file "' + source.uri + '" starts now', 'debug:Parser');
-            //RSS-Feed
-            rootElement = xml.querySelector('rss[version="2.0"]');
-            if (rootElement) {
-                //RSS-Channel
-                // * Actualise URI from atom link element with relation of "self"
-                currentElementList = rootElement.querySelectorAll('channel > link'); //find all Link-Elements in the feed
-                for (i = 0; i < currentElementList.length; i++) {
-                    currentElement = currentElementList[i];
-                    if (currentElement.namespaceURI === 'http://www.w3.org/2005/Atom' && currentElement.attributes.rel === 'self') {
-                        source.uri = currentElement.href;
-                        break;
-                    }
-                }
-                // * Link to Website (<link> or <atom:link rel="self">)
-                //   uses same list of elements (currentElementList) as the previous section
-                for (i = 0; i < currentElementList.length; i++) {
-                    currentElement = currentElementList[i];
-                    if (!currentElement.namespaceURI) { //undefined Namespace is mostly the rss 'namespace' ;)
-                        source.link = currentElement.childNodes[0].nodeValue;
-                        break;
-                    }
-                }
-                //   set default: Website is equals to Feed-URI
-                if (!source.link) {
-                    source.link = source.uri;
-                }
-                // * Title (<title>)
-                currentElement = rootElement.querySelector('channel > title');
-                if (currentElement && currentElement.childNodes.length > 0) {
-                    source.title = currentElement.childNodes[0].nodeValue;
-                } else {
-                    source.title = source.link;
-                }
-                // * Description (<description>)
-                currentElement = rootElement.querySelector('channel > description');
-                if (currentElement && currentElement.childNodes.length > 0) {
-                    source.description = currentElement.childNodes[0].nodeValue;
-                } else {
-                    source.description = '';
-                }
-                // * License (<copyright>)
-                currentElement = rootElement.querySelector('channel > copyright');
-                if (currentElement && currentElement.childNodes.length > 0) {
-                    source.license = currentElement.childNodes[0].nodeValue;
-                } else {
-                    source.license = undefined;
-                }
-                //RSS-Entries
-                itemArray = rootElement.querySelectorAll('channel > item');
-                for (i = 0; i < itemArray.length; i++) {
-                    item = itemArray[i];
-                    episode = {};
-                    // * URI of Episode
-                    if (item.querySelector('link')) {
-                        // Try to get from RSS link element
-                        episode.uri = item.querySelector('link').childNodes[0].nodeValue;
-                    } else if (item.querySelector('guid')) {
-                        // If there is no link element try to get it from GUID element
-                        episode.uri = item.querySelector('guid').childNodes[0].nodeValue;
-                    } else {
-                        HTML5Podcatcher.logger('No URI found - invalid RSS item', 'error');
-                        break;
-                    }
-                    // * Title of Episode
-                    episode.title = item.querySelector('title').childNodes[0].nodeValue;
-                    if (/^\d/.test(item.querySelector('pubDate').childNodes[0].nodeValue)) {
-                        episode.updated = new Date("Sun " + item.querySelector('pubDate').childNodes[0].nodeValue);
-                    } else {
-                        episode.updated = new Date(item.querySelector('pubDate').childNodes[0].nodeValue);
-                    }
-                    episode.source = source.title;
-                    // * Audio-File (Atachement | Enclosure)
-                    // use files linked with enclosure elements or ...
-                    enclosureArray = item.querySelectorAll('enclosure');
-                    for (j = 0; j < enclosureArray.length; j++) {
-                        // accept only audio files
-                        if (enclosureArray[j].attributes.type.value.indexOf("audio") >= 0) {
-                            // map audio/opus to audio/ogg with codec of opus (Firefox don't understand audio/opus)
-                            if (enclosureArray[j].attributes.type.value === 'audio/opus') {
-                                episode.mediaType = 'audio/ogg; codecs=opus';
-                            } else {
-                                episode.mediaType = enclosureArray[j].attributes.type.value;
-                            }
-                            // check browser compatibility
-                            if (document.createElement('audio').canPlayType(episode.mediaType) === '') {
-                                HTML5Podcatcher.logger('The media file found in item ' + episode.title + ' isn\'t supported in your browser. The Type of the unsuported file is ' + episode.mediaType + '.', 'warn');
-                            } else {
-                                episode.mediaUrl = enclosureArray[j].attributes.url.value;
-                                break;
-                            }
-                        }
-                    }
-                    // ... or use anker tags in the full content markup of the item
-                    if (!episode.mediaUrl && item.querySelector('encoded') && item.querySelector('encoded').childNodes[0].nodeValue) {
-                        contentElement = document.createElement("encoded");
-                        contentElement.innerHTML = item.querySelector('encoded').childNodes[0].nodeValue;
-                        if (contentElement.querySelector('a[href$=".m4a"]')) {
-                            episode.mediaUrl = contentElement.querySelector('a[href$=".m4a"]').attributes.href.value;
-                            episode.mediaType = 'audio/mp4';
-                        } else if (contentElement.querySelector('a[href$=".mp3"]')) {
-                            episode.mediaUrl = contentElement.querySelector('a[href$=".mp3"]').attributes.href.value;
-                            episode.mediaType = 'audio/mpeg';
-                        } else if (contentElement.querySelector('a[href$=".oga"]')) {
-                            episode.mediaUrl = contentElement.querySelector('a[href$=".oga"]').attributes.href.value;
-                            episode.mediaType = 'audio/ogg';
-                        } else if (contentElement.querySelector('a[href$=".opus"]')) {
-                            episode.mediaUrl = contentElement.querySelector('a[href$=".opus"]').attributes.href.value;
-                            episode.mediaType = 'audio/ogg; codecs=opus';
-                        }
-                    }
-                    //Parse Podlove Simple Chapters Format
-                    episode.jumppoints = HTML5Podcatcher.parser.parsePodloveSimpleChapters(item.getElementsByTagNameNS('http://podlove.org/simple-chapters', 'chapters'), episode);
-                    episodes.push(episode);
-                }
-                episodes.sort(HTML5Podcatcher.sortEpisodes);
-            } else {
-                HTML5Podcatcher.logger('No root element (&lt;rss&gt;) found in parsed RSS response: ' + xml, 'error');
-                return undefined;
-            }
-            HTML5Podcatcher.logger('Parsing source file "' + source.uri + '" finished (found ' + episodes.length + ' episodes for "' + source.title + '")', 'info');
-            return {'source': source, 'episodes': episodes};
-        },
-        //See http://podlove.org/simple-chapters/
-        parsePodloveSimpleChapters: function (node) {
-            "use strict";
-            var chapters, jumppoints = [], i;
-            if (node && node.length > 0) {
-                HTML5Podcatcher.logger('Found "Podlove Simple Chapters" in feed: ' + node, 'debug:Parser');
-                chapters = node[0].getElementsByTagNameNS('http://podlove.org/simple-chapters', 'chapter');
-                for (i = 0; i < chapters.length; i++) {
-                    jumppoints.push({
-                        type: 'chapter',
-                        time: HTML5Podcatcher.parser.parseNormalPlayTime(chapters[i].attributes.start.value) / 1000,
-                        title: chapters[i].attributes.title.value,
-                        uri: chapters[i].attributes.href ? chapters[i].attributes.href.value : undefined,
-                        image: chapters[i].attributes.image ? chapters[i].attributes.image.value : undefined
-                    });
-                }
-            }
-            return jumppoints;
-            //321 < x < 5649
-        },
-        //See https://www.ietf.org/rfc/rfc2326.txt Chapter 3.6
-        parseNormalPlayTime: function (normalPlayTime) {
-            "use strict";
-            var parts, milliseconds;
-            parts = normalPlayTime.split(".");
-            if (parts[1]) {
-                milliseconds = parseFloat('0.' + parts[1]) * 1000;
-            } else {
-                milliseconds = 0;
-            }
-            parts = parts[0].split(":");
-            if (parts.length === 3) {
-                milliseconds = milliseconds + parseInt(parts[2], 10) * 1000;
-                milliseconds = milliseconds + parseInt(parts[1], 10) * 60 * 1000;
-                milliseconds = milliseconds + parseInt(parts[0], 10) * 60 * 60 * 1000;
-            } else if (parts.length === 2) {
-                milliseconds = milliseconds + parseInt(parts[1], 10) * 1000;
-                milliseconds = milliseconds + parseInt(parts[0], 10) * 60 * 1000;
-            } else if (parts.length === 1) {
-                milliseconds = milliseconds + parseInt(parts[0], 10) * 1000;
-            }
-            return milliseconds;
-        }
-    },*/
+
     system: {
         isOpenWebAppContainer: function (onCompletedCallback) {
             "use strict";
@@ -318,6 +165,9 @@ var HTML5Podcatcher = {
                 console.debug(message);
                 break;
             case "info":
+                console.info(message);
+                break;
+            case "note":
                 console.info(message);
                 break;
             case "warn":

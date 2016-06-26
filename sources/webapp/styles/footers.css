@@ -127,7 +127,8 @@ div[role="toolbar"] a[data-icon]:before {
 	color:#EEEEEE;
 	border:none;
 }
-#activeMessage .error {
+#activeMessage .error,
+#activeMessage .fatal {
 	background-color: #640000;
 	color:#EEEEEE;
 	border:none;

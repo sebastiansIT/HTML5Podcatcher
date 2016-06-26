@@ -33,6 +33,9 @@
 ### Add a default value parameter to settings.get(key) and visualise playback rate as percent
 ##0.40.2
 ### Fix a critical Bug: A File is lost while publishing to Mozilla Webstore
+##0.40.3
+### Fix some UI bugs
+### add a progress visualisation for "Update Playlilst" button
 
 # VALIDATE this manifest on http://manifest-validator.com/
 
@@ -43,19 +46,23 @@ sources.html
 source.html
 settings.html
 # SCRIPTS
+scripts/globalUi.js
 scripts/jquery.min.js
-scripts/normalise.js
 scripts/lowLevelApi.js
+scripts/normalise.js
+scripts/playlist.js
+scripts/settings.js
+scripts/source.js
+scripts/sources.js
+scripts/configuration/configuration.js
+scripts/parser/parser.js
+scripts/parser/rss_2-0.js
 scripts/storage/storage.js
 scripts/storage/indexedDbProvider.js
 scripts/storage/fileSystemProvider.js
 scripts/storage/webStorageProvider.js
+scripts/web/web.js
 scripts/configuration/configuration.js
-scripts/globalUi.js
-scripts/playlist.js
-scripts/sources.js
-scripts/source.js
-scripts/settings.js
 # STYLES
 styles/main.css
 # styles/headers.css

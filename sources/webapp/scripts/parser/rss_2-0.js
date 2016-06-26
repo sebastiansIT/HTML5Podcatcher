@@ -1,4 +1,4 @@
-/** @module  HTML5Podcatcher/Parser/RSS_2-0
+﻿/** @module  HTML5Podcatcher/Parser/RSS_2-0
     @author  SebastiansIT [sebastian@human-injection.de]
     @license Copyright 2016 Sebastian Spautz
 
@@ -122,7 +122,7 @@ var RssParser = (function () {
                     if (currentElement > 0 && currentElement.childNotes.length > 0) {
                         episode.subTitle = currentElement.childNodes[0].nodeValue;
                     }
-                    // * Subtitle of episode
+                    // * Duration of episode
                     var currentElement = item.getElementsByTagNameNS('http://www.itunes.com/dtds/podcast-1.0.dtd', 'duration');
                     if (currentElement > 0 && currentElement.childNotes.length > 0) {
                         episode.duration = this.parseNormalPlayTime(currentElement.childNodes[0].nodeValue);
@@ -151,9 +151,10 @@ var RssParser = (function () {
                     }
                     // ... or use anker tags in the full content markup of the item
                     if (!episode.mediaUrl && item.querySelector('encoded') && item.querySelector('encoded').childNodes[0].nodeValue) {
-                        contentElement = xmlDocument.createElement("encoded");
-                        
-                        contentElement.innerHTML = item.querySelector('encoded').childNodes[0].nodeValue;
+                        //contentElement = xmlDocument.createElement('encoded');
+                        contentElement = document.createElement('span'); // use document instead of xmlDocument because the nodeValue can contains HTML-Entities that are not supported in XML.
+                        var nodeValue = item.querySelector('encoded').childNodes[0].nodeValue;
+                        contentElement.innerHTML = nodeValue;
                         if (contentElement.querySelector('a[href$=".m4a"]')) {
                             episode.mediaUrl = contentElement.querySelector('a[href$=".m4a"]').attributes.href.value;
                             episode.mediaType = 'audio/mp4';
