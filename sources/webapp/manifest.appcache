@@ -36,7 +36,9 @@
 ##0.40.3
 ### Fix some UI bugs
 ### add a progress visualisation for "Update Playlilst" button
-
+##0.40.4
+### Add status information to finished callback functions
+    
 # VALIDATE this manifest on http://manifest-validator.com/
 
 CACHE:

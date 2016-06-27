@@ -82,18 +82,20 @@ var HTML5Podcatcher = {
                         // Save Source
                         HTML5Podcatcher.api.storage.StorageProvider.writeSource(parserResult.source, function () {
                             if (onFinishedCallback && typeof onFinishedCallback === 'function') {
-                                onFinishedCallback();
+                                onFinishedCallback({status: 'success'});
                             }
                         });
                     } catch (exception) {
                         HTML5Podcatcher.logger('An excpeption ocurred while parsing source ' + source.uri, 'fatal')
                         console.error(exception);
                         if (onFinishedCallback && typeof onFinishedCallback === 'function') {
-                            onFinishedCallback();
+                            onFinishedCallback({status: 'failure'});
                         }
                     }
                 },
-                onFinishedCallback
+                function () {
+                    onFinishedCallback({status: 'failure'});
+                }
             );
         },
 

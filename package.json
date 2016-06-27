@@ -1,6 +1,6 @@
 {
   "name": "HTML5Podcatcher",
-  "version": "0.40.3",
+  "version": "0.40.4",
   "description": "A HTML5 based podcast player.",
   "license": "GPL-3.0",
   "main": "Gruntfile.js",

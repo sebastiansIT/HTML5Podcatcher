@@ -439,7 +439,8 @@ var GlobalUserInterfaceHelper = {
 
         refreshAllSources: function (event) {
             "use strict";
-            var button = event.target;
+            var button = event.target,
+                statusOverall = true;
 
             event.preventDefault();
             event.stopPropagation();
@@ -452,16 +453,23 @@ var GlobalUserInterfaceHelper = {
 
                 //for (i = 0; i < sources.length; i += 1) {
                 sources.forEach(function (source, index, array) {
-                    POD.web.downloadSource(source, null, function () {
+                    POD.web.downloadSource(source, null, function (parameters) {
                         var percentCompleted;
                         
                         numberOfSourcesToDownload--;
+                        if (parameters.status === 'failure') {
+                            statusOverall = false;
+                        }
                         if (numberOfSourcesToDownload === 0) {
                             POD.logger('All Feeds have been refreshed', 'info');
                             button.removeAttribute('disabled');
                             button.classList.remove('spinner');
                             button.style.removeProperty('background');
-                            POD.logger('All Podcasts are up to date now.', 'note');
+                            if (statusOverall) {
+                                POD.logger('All Podcasts are up to date now.', 'note');
+                            } else  {
+                                POD.logger('At least on Source can\'t be updated', 'error');
+                            }
                         } else {
                             // actualise the progress in the button
                             percentCompleted = (100 / sources.length * (sources.length - numberOfSourcesToDownload)).toFixed(2) + '%';
