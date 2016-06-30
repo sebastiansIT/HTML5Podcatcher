@@ -38,6 +38,8 @@
 ### add a progress visualisation for "Update Playlilst" button
 ##0.40.4
 ### Add status information to finished callback functions
+##0.41.0
+### Add Subtitle of episodes to Detail-View of Sources
     
 # VALIDATE this manifest on http://manifest-validator.com/
 

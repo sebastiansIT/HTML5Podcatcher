@@ -119,13 +119,13 @@ var RssParser = (function () {
                     episode.title = item.querySelector('title').childNodes[0].nodeValue;
                     // * Subtitle of episode
                     var currentElement = item.getElementsByTagNameNS('http://www.itunes.com/dtds/podcast-1.0.dtd', 'subtitle');
-                    if (currentElement > 0 && currentElement.childNotes.length > 0) {
-                        episode.subTitle = currentElement.childNodes[0].nodeValue;
+                    if (currentElement && currentElement.length > 0 && currentElement[0].childNodes.length > 0) {
+                        episode.subTitle = currentElement[0].childNodes[0].nodeValue;
                     }
                     // * Duration of episode
-                    var currentElement = item.getElementsByTagNameNS('http://www.itunes.com/dtds/podcast-1.0.dtd', 'duration');
-                    if (currentElement > 0 && currentElement.childNotes.length > 0) {
-                        episode.duration = this.parseNormalPlayTime(currentElement.childNodes[0].nodeValue);
+                    currentElement = item.getElementsByTagNameNS('http://www.itunes.com/dtds/podcast-1.0.dtd', 'duration');
+                    if (currentElement && currentElement.length > 0 && currentElement[0].childNodes.length > 0) {
+                        episode.duration = this.parseNormalPlayTime(currentElement[0].childNodes[0].nodeValue);
                     }
                     // * pubDate of episode
                     if (/^\d/.test(item.querySelector('pubDate').childNodes[0].nodeValue)) {

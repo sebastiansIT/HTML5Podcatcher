@@ -539,6 +539,7 @@ $(document).ready(function () {
         episode = event.detail.episode;
         episodeUI = UI.renderEpisode(episode);
         order = UI.settings.get("playlistSort");
+        
         //find episode in HTML markup
         for (i = 0; i < $('#playlist').find('.entries li').length; i += 1) {
             if ($($('#playlist').find('.entries li')[i]).data('episodeUri') === episode.uri) {
@@ -547,8 +548,9 @@ $(document).ready(function () {
                 return;
             }
         }
-      //show unlisend episode if not listed before
+        //show unlisend episode if not listed before
         if (!episode.playback.played) {
+            $('.emptyPlaceholder').remove();
             episodeUI.hide();
             if (order && order === 'asc') {
                 $('#playlist').find('.entries').append(episodeUI);

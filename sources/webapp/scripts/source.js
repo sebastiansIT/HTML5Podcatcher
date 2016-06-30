@@ -44,7 +44,7 @@ $(document).ready(function () {
     var sourceUri;
     //Get source URI from query string
     sourceUri = window.location.search.split('uri=')[1];
-    //Get alternativly URI from Local Storage Setting 
+    //Get alternativly the URI from Local Storage Setting 
     if (!sourceUri) {
         sourceUri = UI.settings.get('ShowDetailsForSource');
     }

@@ -55,9 +55,11 @@ var HTML5Podcatcher = {
                         HTML5Podcatcher.api.storage.StorageProvider.readEpisode(mergeEpisode.uri, function (existingEpisode) {
                             existingEpisode.link = mergeEpisode.link;
                             existingEpisode.title = mergeEpisode.title;
+                            existingEpisode.subTitle = mergeEpisode.subTitle;
                             existingEpisode.updated = mergeEpisode.updated;
                             existingEpisode.mediaUrl = mergeEpisode.mediaUrl;
                             existingEpisode.mediaType = mergeEpisode.mediaType;
+                            existingEpisode.duration = mergeEpisode.duration;
                             existingEpisode.source = mergeEpisode.source;
                             existingEpisode.jumppoints = mergeEpisode.jumppoints;
                             //ATTENTION! never change playback information if episode updated from internet

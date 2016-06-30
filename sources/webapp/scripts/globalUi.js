@@ -298,6 +298,11 @@ var GlobalUserInterfaceHelper = {
         entryUI.data('episodeUri', episode.uri);
         entryUI.find('a.link').attr('href', episode.uri);
         entryUI.find('.title').text(episode.title);
+        if (episode.subTitle) {
+            entryUI.find('.subtitle').text(episode.subTitle);
+        } else {
+            entryUI.find('.subtitle').remove();
+        }
         entryUI.find('.source').text(episode.source);
         if (episode.playback.played) {
             entryUI.find('.updated').attr('datetime', episode.updated.toISOString()).text(episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString());
