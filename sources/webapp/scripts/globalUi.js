@@ -138,7 +138,7 @@ var GlobalUserInterfaceHelper = {
         "use strict";
         var percentComplete, episodeUI; //progressbar,
         episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode);
-        $(episodeUI).find('.downloadFile').attr('disabled', 'disabled');
+        episodeUI.querySelector('.downloadFile').setAttribute('aria-disabled', 'disabled');
         if (progressEvent.lengthComputable) {
             //Downloaded Bytes / (total Bytes + 5% for saving on local system)
             percentComplete = progressEvent.loaded / (progressEvent.total + (progressEvent.total / 20));
@@ -391,6 +391,10 @@ var GlobalUserInterfaceHelper = {
             entryUI.find('.onlineOnly, a.external').attr('aria-disabled', 'true');
         }
         entryUI.find('.external').attr('target', '_blank');
+        entryUI.find('[nodeid]').each(function () {
+            this.setAttribute('id', this.getAttribute('nodeid'));
+            this.removeAttribute('nodeid');
+        });
         return entryUI;
     },
     renderSourceList: function (sourcelist) {
@@ -411,14 +415,14 @@ var GlobalUserInterfaceHelper = {
     },
     findEpisodeUI: function (episode) {
         "use strict";
-        var episodeUI;
+        var i, entries;
         
-        $('#playlist .entries li, #episodes .entries li').each(function () {
-            if ($(this).data('episodeUri') === episode.uri) {
-                episodeUI = this;
-            }
-        });
-        return episodeUI;
+        entries = document.querySelectorAll('#playlist .entries li, #episodes .entries li');
+        for (i = 0; i < entries.length; i++) {
+           if ($(entries[i]).data('episodeUri') === episode.uri) {
+                return entries[i];
+           }
+        }
     },
     eventHandler: {
         downloadEpisodeFile: function (event) {

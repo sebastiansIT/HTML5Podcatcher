@@ -40,6 +40,8 @@
 ### Add status information to finished callback functions
 ##0.41.0
 ### Add Subtitle of episodes to Detail-View of Sources
+##0.40.1
+### Fix a Bug: Visualisation of download status of episodes is't shown on podcast details page
     
 # VALIDATE this manifest on http://manifest-validator.com/
 
