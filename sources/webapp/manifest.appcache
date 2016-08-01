@@ -44,6 +44,8 @@
 ### Fix a Bug: Visualisation of download status of episodes is't shown on podcast details page
 ##0.40.2
 ### Update jQuery to 3.1 (slim build)
+##0.40.3
+### Prevent multiple downloads of the same file
     
 # VALIDATE this manifest on http://manifest-validator.com/
 

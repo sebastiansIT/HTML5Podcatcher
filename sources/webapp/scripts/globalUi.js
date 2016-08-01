@@ -134,18 +134,19 @@ var GlobalUserInterfaceHelper = {
         "use strict";
         this.logHandler(event, 'info');
     },
+
     progressHandler: function (progressEvent, episode) {
         "use strict";
-        var percentComplete, episodeUI; //progressbar,
+        var percentComplete, episodeUI;
+        
         episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode);
-        episodeUI.querySelector('.downloadFile').setAttribute('aria-disabled', 'disabled');
         if (progressEvent.lengthComputable) {
-            //Downloaded Bytes / (total Bytes + 5% for saving on local system)
-            percentComplete = progressEvent.loaded / (progressEvent.total + (progressEvent.total / 20));
-            //$(episodeUI).data('progress', percentComplete);
+            //Downloaded Bytes / (total Bytes + 3% for saving to local storage)
+            percentComplete = progressEvent.loaded / (progressEvent.total + (progressEvent.total / 33));
             episodeUI.style.background = 'linear-gradient(to right, rgba(0, 100, 0, 0.2) 0%,rgba(0, 100, 0, 0.2) ' + (percentComplete * 100).toFixed(2) + '%, #ffffff ' + (percentComplete * 100).toFixed(2) + '%)';
         }
     },
+
     preConditionCheck: function (actionCallback) {
         "use strict";
         var appInfoRequest, proxyNeededCheck, feedExistingCheck;
@@ -431,19 +432,23 @@ var GlobalUserInterfaceHelper = {
 
             event.preventDefault();
             event.stopPropagation();
-
-            // TODO replace Download-Link with cancel-Button while download isn't finished
-
-            // load data of episode from storage...
-            POD.storage.readEpisode(episodeUI.data('episodeUri'), function (episode) {
-                UI.logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info');
-                // ... then download file to storage...
-                // TODO Why using static MIME-Type?
-                POD.web.downloadFile(episode, 'audio/mpeg', function (episode) {
-                    // ... and update UI
-                    episodeUI.replaceWith(UI.renderEpisode(episode));
-                }, UI.progressHandler);
-            });
+            if (event.target.getAttribute('aria-disabled') !== 'true') {
+                event.target.setAttribute('aria-disabled', 'true');
+                // TODO replace Download-Link with cancel-Button while download isn't finished
+                
+                // load data of episode from storage...
+                POD.storage.readEpisode(episodeUI.data('episodeUri'), function (episode) {
+                    UI.logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info');
+                    // ... then download file to storage...
+                    // TODO Why using static MIME-Type?
+                    POD.web.downloadFile(episode, 'audio/mpeg', function (episode) {
+                        // ... and update UI
+                        episodeUI.replaceWith(UI.renderEpisode(episode));
+                    }, UI.progressHandler);
+                });
+            } else {
+                UI.logHandler('Download is allways in progress', 'debug');
+            }
         },
 
         refreshAllSources: function (event) {
