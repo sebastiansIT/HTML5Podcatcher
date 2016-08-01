@@ -38,8 +38,10 @@ var chromeFileSystemStorageImplementation = (function () {
     ChromeFileSystemFileProvider = function (fileSystemStatus) {
         var fsStatus = fileSystemStatus || settings.fileSystemStatus;
         this.fileSystemSize = 1024 * 1024 * 500; /*500 MB */
-        this.getFileSystemStatus = function () { return fsStatus; };
-        this.isSupportedByCurrentPlatform = window.requestFileSystem;
+        this.getFileSystemStatus = function () {
+            return fsStatus;
+        };
+        this.isSupportedByCurrentPlatform = !!window.requestFileSystem;
         this.priority = 200;
     };
     ChromeFileSystemFileProvider.prototype = new HTML5Podcatcher.api.storage.IFileProvider();
@@ -48,7 +50,9 @@ var chromeFileSystemStorageImplementation = (function () {
         return "File storage provider based on Google File System API [Persistants Status: " + this.getFileSystemStatus() + "]";
     };
     ChromeFileSystemFileProvider.prototype.init = function (parameters) {
-        if (!parameters.quota) { parameters.quota = 1024 * 1024 * 200; }
+        if (!parameters.quota) {
+            parameters.quota = 1024 * 1024 * 200;
+        }
         this.requestFileSystemQuota(parameters.quota, function (usage, quota) {
             HTML5Podcatcher.logger("Usage: " + usage + " MiB of " + quota + 'MiB File Storage', 'info');
         });
@@ -59,12 +63,14 @@ var chromeFileSystemStorageImplementation = (function () {
             onReadCallback(episode);
         }
     };
-    ChromeFileSystemFileProvider.prototype.saveFile = function (episode, arraybuffer, mimeType, onWriteCallback, onProgressCallback) {
-        HTML5Podcatcher.logger('Saving file "' + episode.mediaUrl + '" to local file system starts now', 'debug:FileSystemAPI');
-        var blob, parts, fileName;
-        blob = new Blob([arraybuffer], {type: mimeType});
-        parts = episode.mediaUrl.split('/');
-        fileName = parts[parts.length - 1];
+    ChromeFileSystemFileProvider.prototype.saveFile = function (episode, arraybuffer, onWriteCallback, onProgressCallback) {
+        var mimeType = episode.mediaType || 'audio/mpeg',
+            blob = new Blob([arraybuffer], {type: mimeType}),
+            parts = episode.mediaUrl.split('/'),
+            fileName = parts[parts.length - 1];
+
+        HTML5Podcatcher.logger('Saving file "' + episode.mediaUrl + '" to local file system starts now', 'debug', 'FileSystemAPI');
+
         // Write file to the root directory.
         window.requestFileSystem(this.getFileSystemStatus(), this.fileSystemSize, function (filesystem) {
             filesystem.root.getFile(fileName, {create: true, exclusive: false}, function (fileEntry) {
@@ -147,7 +153,7 @@ var chromeFileSystemStorageImplementation = (function () {
 
 /** The modul "ChromeFileSystem" is available at document.HTML5Podcatcher.api.storage.chromeFileSystem.
   * @global
-  * @name "HTML5Podcatcher.api.storage.ChromeFileSystem" 
+  * @name "HTML5Podcatcher.api.storage.ChromeFileSystem"
   * @see module:HTML5Podcatcher/Storage/ChromeFileSystem
   */
 HTML5Podcatcher.api.storage.chromeFileSystem = chromeFileSystemStorageImplementation;

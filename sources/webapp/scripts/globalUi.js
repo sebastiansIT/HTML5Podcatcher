@@ -440,8 +440,7 @@ var GlobalUserInterfaceHelper = {
                 POD.storage.readEpisode(episodeUI.data('episodeUri'), function (episode) {
                     UI.logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info');
                     // ... then download file to storage...
-                    // TODO Why using static MIME-Type?
-                    POD.web.downloadFile(episode, 'audio/mpeg', function (episode) {
+                    POD.web.downloadFile(episode, function (episode) {
                         // ... and update UI
                         episodeUI.replaceWith(UI.renderEpisode(episode));
                     }, UI.progressHandler);

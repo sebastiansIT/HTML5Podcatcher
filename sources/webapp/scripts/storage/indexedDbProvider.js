@@ -542,7 +542,7 @@ var indexedDbStorageImplementation = (function () {
                 // Erfolgs-Event
                 request.onsuccess = function (event) {
                     var objectUrl, blob;
-                    //blob = new Blob([event.target.result], {type: episode.FileMimeType});
+                    //blob = new Blob([event.target.result], {type: episode.mediaType});
                     if (event.target.result) { //if file exists
                         blob = event.target.result;
                         objectUrl = window.URL.createObjectURL(blob);
@@ -570,9 +570,14 @@ var indexedDbStorageImplementation = (function () {
             }
         }
     };
-    IndexedDbFileProvider.prototype.saveFile = function (episode, content, mimeType, onWriteCallback, onProgressCallback) {
-        HTML5Podcatcher.logger('Saving file "' + episode.mediaUrl + '" to IndexedDB starts now', 'debug:IndexedDatabaseAPI');
-        var blob, requestOpenDB, i, chunkArray = [], provider = this;
+    IndexedDbFileProvider.prototype.saveFile = function (episode, content, onWriteCallback, onProgressCallback) {
+        var chunkArray = [], 
+            provider = this,
+            mimeType = episode.mediaType || 'audio/mpeg',
+            blob, requestOpenDB, i;
+        
+        HTML5Podcatcher.logger('Saving file "' + episode.mediaUrl + '" to IndexedDB starts now', 'debug', 'IndexedDatabaseAPI');
+        
         if (content instanceof ArrayBuffer) {
             for (i = 0; i < content.byteLength; i += this.getChunkSize()) {
                 if (i + this.getChunkSize() < content.byteLength) {
@@ -600,7 +605,6 @@ var indexedDbStorageImplementation = (function () {
             // Erfolgs-Event
             request.onsuccess = function () {
                 episode.isFileSavedOffline = true;
-                episode.FileMimeType = mimeType;
                 HTML5Podcatcher.api.storage.StorageProvider.writeEpisode(episode);
                 HTML5Podcatcher.logger('Saving file "' + episode.mediaUrl + '" to IndexedDB finished', 'info');
                 if (onWriteCallback && typeof onWriteCallback === 'function') {

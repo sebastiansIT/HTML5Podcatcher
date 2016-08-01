@@ -80,16 +80,17 @@ GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
   */
 GlobalUserInterfaceHelper.GenerateAudioElement = function () {
     "use strict";
-    var mediaElement, playbackRate;
-    playbackRate = POD.api.configuration.settings.get('playbackRate') || 1;
+    var playbackRate = POD.api.configuration.settings.get('playbackRate') || 1,
+        mediaElement, 
+        playbackRate;
 
     POD.logger('Audio element will be created', 'debug');
 
-    mediaElement = document.createElement("audio");
+    mediaElement = document.createElement('audio');
     mediaElement.setAttribute('controls', 'controls');
     mediaElement.setAttribute('preload', 'metadata');
     mediaElement.defaultPlaybackRate = playbackRate;
-    mediaElement.appendChild(document.createElement("source"));
+    mediaElement.appendChild(document.createElement('source'));
 
     if (window.navigator.mozApps) {
         //if app started in Firefox OS Runtime...

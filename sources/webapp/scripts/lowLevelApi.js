@@ -101,14 +101,14 @@ var HTML5Podcatcher = {
             );
         },
 
-        downloadFile: function (episode, mimeType, onDownloadCallback, onProgressCallback) {
+        downloadFile: function (episode, onDownloadCallback, onProgressCallback) {
             "use strict";
-
+            
             //Download File
             HTML5Podcatcher.api.web.downloadArrayBuffer(
                 episode.mediaUrl,
                 function (arrayBuffer) {
-                    HTML5Podcatcher.storage.saveFile(episode, arrayBuffer, mimeType, onDownloadCallback, onProgressCallback);
+                    HTML5Podcatcher.storage.saveFile(episode, arrayBuffer, onDownloadCallback, onProgressCallback);
                 },
                 function (event/*, url*/) {
                     if (onProgressCallback && typeof onProgressCallback === 'function') {

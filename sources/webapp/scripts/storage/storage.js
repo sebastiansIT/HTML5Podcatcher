@@ -183,7 +183,7 @@ var storageAPI = (function () {
     IFileProvider.prototype.openFile = function (/*episode, onReadCallback*/) {
         throw new Error('not implemented');
     };
-    IFileProvider.prototype.saveFile = function (/*episode, content, mimeType, onWriteCallback, onProgressCallback*/) {
+    IFileProvider.prototype.saveFile = function (/*episode, content, onWriteCallback, onProgressCallback*/) {
         throw new Error('not implemented');
     };
 
