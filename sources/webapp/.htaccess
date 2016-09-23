@@ -5,6 +5,7 @@ Header always set X-Frame-Options "SAMEORIGIN"
 Header always set X-Xss-Protection "1; mode=block"
 Header always set X-Content-Type-Options "nosniff"
 Header set Content-Security-Policy "default-src *; script-src 'self'; connect-src *; media-src blob: *; style-src 'self' 'unsafe-inline'; img-src blob: *"
+Header set Referrer-Policy "no-referrer"
 
 <IfModule mod_expires.c>
    ExpiresActive Off
