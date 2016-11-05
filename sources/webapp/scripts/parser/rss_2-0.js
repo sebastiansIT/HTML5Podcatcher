@@ -18,6 +18,9 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 
+/* 
+    Specification of RSS 2.0: https://cyber.harvard.edu/rss/rss.html
+*/
 /*global HTML5Podcatcher */
 
 var RssParser = (function () {
@@ -30,7 +33,7 @@ var RssParser = (function () {
     // ======================================= //
     /** Parses RSS 2.0 XML documents.
     * @class
-    * @implements module:HTML5Podcatcher/Parser~IDataProvider
+    * @implements module:HTML5Podcatcher/Parser~ISourceParser
     */
     RSS20SourceParser = function () {
         this.allowedDocumentMimeTypes = ['application/xml+rss'];
@@ -99,11 +102,20 @@ var RssParser = (function () {
                 } else {
                     parserResult.source.license = undefined;
                 }
+                // * Language (<language>)
+                currentElement = rootElement.querySelector('channel > language');
+                if (currentElement && currentElement.childNodes.length > 0) {
+                    parserResult.source.language = currentElement.childNodes[0].nodeValue;
+                } else {
+                    parserResult.source.language = undefined;
+                }
                 //RSS-Entries
                 itemArray = rootElement.querySelectorAll('channel > item');
                 for (i = 0; i < itemArray.length; i += 1) {
                     item = itemArray[i];
-                    episode = {};
+                    episode = {
+                        'language': parserResult.source.language
+                    };
                     // * URI of episode
                     if (item.querySelector('link')) {
                         // Try to get from RSS link element

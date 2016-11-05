@@ -1,4 +1,4 @@
-/*  Copyright 2013-2015 Sebastian Spautz
+/*  Copyright 2013-2016 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -57,6 +57,7 @@ var HTML5Podcatcher = {
                             existingEpisode.title = mergeEpisode.title;
                             existingEpisode.subTitle = mergeEpisode.subTitle;
                             existingEpisode.updated = mergeEpisode.updated;
+                            existingEpisode.language = mergeEpisode.language;
                             existingEpisode.mediaUrl = mergeEpisode.mediaUrl;
                             existingEpisode.mediaType = mergeEpisode.mediaType;
                             existingEpisode.duration = mergeEpisode.duration;

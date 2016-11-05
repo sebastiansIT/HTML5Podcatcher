@@ -1,4 +1,4 @@
-/*  Copyright 2014, 2015 Sebastian Spautz
+/*  Copyright 2014 - 2016 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -295,7 +295,11 @@ var GlobalUserInterfaceHelper = {
     renderEpisode: function (episode) {
         "use strict";
         var entryUI/*, jumppointUI*/;
-        entryUI = $($('#episodeTemplate li')[0].cloneNode(true));
+        entryUI = document.querySelector('#episodeTemplate li').cloneNode(true);
+        if (episode.language) {
+            entryUI.setAttribute('lang', episode.language);
+        }
+        entryUI = $(entryUI);
         entryUI.data('episodeUri', episode.uri);
         entryUI.find('a.link').attr('href', episode.uri);
         entryUI.find('.title').text(episode.title);
@@ -367,9 +371,16 @@ var GlobalUserInterfaceHelper = {
     renderSource: function (source) {
         "use strict";
         var entryUI;
-        entryUI = $($('#sourceTemplate > *')[0].cloneNode(true));
-        entryUI.find('a.details').attr('href', 'source.html?uri=' + source.uri);
-        entryUI.find('a.details').attr('title', 'Details for ' + source.title);
+        
+        entryUI = document.querySelector('#sourceTemplate > *').cloneNode(true);
+        if (source.language) {
+            entryUI.setAttribute('lang', source.language);
+        }
+        if (entryUI.querySelector('a.details')) {
+            entryUI.querySelector('a.details').setAttribute('href', 'source.html?uri=' + source.uri);
+            entryUI.querySelector('a.details').setAttribute('title', 'Details for ' + source.title);
+        }
+        entryUI = $(entryUI);
         entryUI.data('sourceUri', source.uri);
         entryUI.find('.title').text(source.title);
         entryUI.find('a.uri').attr('href', source.uri);

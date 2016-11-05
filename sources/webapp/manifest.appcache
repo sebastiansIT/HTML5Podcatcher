@@ -48,6 +48,8 @@
 ### Prevent multiple downloads of the same file
 ##0.40.4
 ### Remove redundant function parameter "mime-Type"
+##0.42.0
+### Use language information from RSS 2.0 feeds and activate hyphens in UI
     
 # VALIDATE this manifest on http://manifest-validator.com/
 

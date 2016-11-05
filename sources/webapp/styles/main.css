@@ -32,6 +32,7 @@ body {
 	position: relative;
 	overflow: hidden;
 	font-size:1.6rem;
+    hyphens: auto;
 }
 /* Each Region is a Scene */
 section[role="region"] {
