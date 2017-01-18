@@ -3,14 +3,15 @@
 import cgi, cgitb
 import sys
 import os
-import urllib
+import urllib2
+import ssl
 
 #Ausgabe bei Fehler
 cgitb.enable()
 
 def DoGet():
 	httpGetParameter = cgi.FieldStorage()
-	if not ("secret" in httpGetParameter and httpGetParameter["secret"].value.decode('utf-8') == "mysecret"):
+	if not ("secret" in httpGetParameter and httpGetParameter["secret"].value.decode('utf-8') == "yyse4rfvv"):
 		print("Status:401 Unauthorized")
 		print
 		print("401 Unauthorized")
@@ -20,7 +21,12 @@ def DoGet():
 	else:
 		url = None
 	if url:
-		filehandle = urllib.urlopen(url)
+		ctx = ssl.create_default_context()
+		#ctx.check_hostname = False
+		#ctx.verify_mode = ssl.CERT_NONE
+		hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11'}
+		req = urllib2.Request(url, headers=hdr)
+		filehandle = urllib2.urlopen(req, context=ctx)
 		for header in filehandle.info().headers:
 			if not header.startswith("Server") and not header.startswith("Set-Cookie"):
 				sys.stdout.write(header.replace("\n", "").replace("\r", "")+"\n")
