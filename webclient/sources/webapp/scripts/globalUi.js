@@ -197,7 +197,6 @@ var GlobalUserInterfaceHelper = {
         };
         proxyNeededCheck();
     },
-    settings: HTML5Podcatcher.api.configuration.settings,
     initApplicationCacheEvents: function () {
         "use strict";
         function statusName(statusNumber) {
@@ -547,5 +546,3 @@ var GlobalUserInterfaceHelper = {
     }
 };
 var UI = GlobalUserInterfaceHelper;
-POD.api.configuration.logger = UI.logHandler;
-POD.storage = POD.api.storage.StorageProvider;

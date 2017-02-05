@@ -1,13 +1,14 @@
 ﻿# Grunt #
 #########
 node_modules
-build
-tests/bin
-tests/jasmine.result
-tests/jslint.result.xml
-tests/csslint.result.junit.xml
-tests/csslint.result.txt
-tests/htmllint.result.txt
+api/build
+api/node_modules
+webclient/tests/bin
+webclient/tests/jasmine.result
+webclient/tests/jslint.result.xml
+webclient/tests/csslint.result.junit.xml
+webclient/tests/csslint.result.txt
+webclient/tests/htmllint.result.txt
 .grunt
 _SpecRunner.html
 

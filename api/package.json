@@ -1,0 +1,24 @@
+{
+  "name": "HTML5PodcatcherAPI",
+  "version": "0.0.0",
+  "description": "An API for a HTML5 based podcast player.",
+  "license": "GPL-3.0",
+  "main": "grunt.config.js",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-jasmine": "^1.0.3",
+    "grunt-jsdoc": "^2.1.0",
+    "grunt-jslint": "^1.1.14",
+    "karma": "^1.4.1"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sebastiansIT/HTML5Podcatcher.git"
+  },
+  "author": "SebastiansIT",
+  "bugs": {
+    "url": "https://github.com/sebastiansIT/HTML5Podcatcher/issues"
+  },
+  "homepage": "http://podcatcher.sebastiansit.de"
+}
