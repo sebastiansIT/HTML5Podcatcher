@@ -4,7 +4,8 @@ module.exports = function (grunt) {
     //Load Tasks
     grunt.loadNpmTasks('grunt-contrib-jasmine');
     grunt.loadNpmTasks('grunt-jslint');
-	grunt.loadNpmTasks('grunt-jsdoc');
+    grunt.loadNpmTasks('grunt-jsdoc');
+    grunt.loadNpmTasks('grunt-rollup');
     //Config Tasks
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -12,14 +13,11 @@ module.exports = function (grunt) {
         jslint: {
             client: { // lint your project's client code
                 src: [
-                    'gruntfile.js',
-                    'sources/webapp/scripts/*.js',
-                    'sources/webapp/scripts/storage/*.js',
-                    'sources/hostedapp/scripts/*.js'
+                    'grunt.config.js',
+                    'rollup.config.js',
+                    'sources/**/*.js'
                 ],
-                exclude: [
-                    'sources/webapp/scripts/*min.js'
-                ],
+                exclude: [],
                 directives: {
                     browser: true, //Assume a browser and his global namespaces and objects
                     plusplus: true, //allow usage of i++ and ++i operators
@@ -36,9 +34,7 @@ module.exports = function (grunt) {
         jasmine: {
             client: {
                 src: [
-                    'sources/webapp/scripts/*.js',
-                    'sources/webapp/scripts/storage/*.js',
-                    'http://code.jquery.com/jquery-2.1.1.min.js'
+                    'sources/*.js'
                 ],
                 options: {
                     specs: [
@@ -50,18 +46,33 @@ module.exports = function (grunt) {
                     }
                 }
             }
+        },
+        jsdoc : {
+            dist : {
+                src: ['sources/**/*.js'],
+                options: {
+                    destination: 'documentation',
+                    'private':   true,
+                    'package':   'package.json',
+                    'readme':    'README.md'
+                }
+            }
+        },
+        rollup: {
+            options: {
+                format:     'iife',
+                sourceMap:  'inline',
+                moduleName: 'html5podcatcher'
+            },
+            files: {
+                'dest': 'build/html5podcatcher.js',
+                'src' : 'sources/api.js'
+            }
         }
-		jsdoc : {
-			dist : {
-				src: ['sources/*.js'],
-				options: {
-					destination: 'documentation'
-				}
-			}
-		}
-	});
+    });
     //Register Tasks
     grunt.registerTask('test',               ['jslint', 'jasmine']);
-	grunt.registerTask('documentation'       ['jsdoc']);
-    grunt.registerTask('default',            ['test', 'documentation']);
+    grunt.registerTask('doc',                ['jsdoc']);
+    grunt.registerTask('build',              ['rollup']);
+    grunt.registerTask('default',            ['test', 'rollup', 'doc']);
 };

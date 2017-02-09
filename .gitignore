@@ -9,6 +9,7 @@ webclient/tests/jslint.result.xml
 webclient/tests/csslint.result.junit.xml
 webclient/tests/csslint.result.txt
 webclient/tests/htmllint.result.txt
+webclient/sources/webapp/libraries/html5podcatcher.js
 .grunt
 _SpecRunner.html
 

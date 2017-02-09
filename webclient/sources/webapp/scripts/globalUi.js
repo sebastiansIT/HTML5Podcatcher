@@ -314,7 +314,7 @@ var GlobalUserInterfaceHelper = {
             entryUI.find('.updated').attr('datetime', episode.updated.toISOString()).text("New");
         }
         entryUI.find('a.origin').attr('href', episode.uri);
-        if (POD.storage.isFileStorageAvailable() && episode.mediaUrl) {
+        if (html5podcatcher.storagemanagement.isFileStorageAvailable() && episode.mediaUrl) {
             if (episode.isFileSavedOffline) {
                 entryUI.find('.downloadFile').replaceWith('<button class="delete" href="' + episode.mediaUrl + '" data-icon="delete">Delete</button>');
             } else if (episode.mediaUrl) {

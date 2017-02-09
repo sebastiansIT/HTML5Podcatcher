@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+  <testsuite>
+<testcase classname="grunt.config" name="grunt.config:0:0"></testcase>
+<testcase classname="rollup.config" name="rollup.config:1:1">
+  <failure message="Unexpected 'export'." />
+</testcase>
+<testcase classname="rollup.config" name="rollup.config:1:8">
+  <failure message="Stopping. (14% scanned)." />
+</testcase>
+<testcase classname="sources.api" name="api:24:1">
+  <failure message="Unexpected 'import'." />
+</testcase>
+<testcase classname="sources.api" name="api:24:8">
+  <failure message="Stopping. (32% scanned)." />
+</testcase>
+<testcase classname="sources.model.episode" name="episode:22:1">
+  <failure message="Unexpected 'export'." />
+</testcase>
+<testcase classname="sources.model.episode" name="episode:22:8">
+  <failure message="Stopping. (31% scanned)." />
+</testcase>
+<testcase classname="sources.storage.DataStorageProvider" name="DataStorageProvider:83:88">
+  <failure message="Unexpected space between '(' and ')'." />
+</testcase>
+<testcase classname="sources.storage.DataStorageProvider" name="DataStorageProvider:90:78">
+  <failure message="Unexpected space between '(' and ')'." />
+</testcase>
+<testcase classname="sources.storage.DataStorageProvider" name="DataStorageProvider:98:87">
+  <failure message="Unexpected space between '(' and ')'." />
+</testcase>
+<testcase classname="sources.storage.DataStorageProvider" name="DataStorageProvider:106:89">
+  <failure message="Unexpected space between '(' and ')'." />
+</testcase>
+<testcase classname="sources.storage.DataStorageProvider" name="DataStorageProvider:114:89">
+  <failure message="Unexpected space between '(' and ')'." />
+</testcase>
+<testcase classname="sources.storage.DataStorageProvider" name="DataStorageProvider:125:90">
+  <failure message="Unexpected space between '(' and ')'." />
+</testcase>
+<testcase classname="sources.storage.DataStorageProvider" name="DataStorageProvider:133:88">
+  <failure message="Unexpected space between '(' and ')'." />
+</testcase>
+<testcase classname="sources.storage.DataStorageProvider" name="DataStorageProvider:141:95">
+  <failure message="Unexpected space between '(' and ')'." />
+</testcase>
+<testcase classname="sources.storage.DataStorageProvider" name="DataStorageProvider:149:89">
+  <failure message="Unexpected space between '(' and ')'." />
+</testcase>
+<testcase classname="sources.storage.DataStorageProvider" name="DataStorageProvider:157:91">
+  <failure message="Unexpected space between '(' and ')'." />
+</testcase>
+<testcase classname="sources.storage.DataStorageProvider" name="DataStorageProvider:167:82">
+  <failure message="Unexpected space between '(' and ')'." />
+</testcase>
+<testcase classname="sources.storage.FileStorageProvider" name="FileStorageProvider:38:84">
+  <failure message="Unexpected space between '(' and ')'." />
+</testcase>
+<testcase classname="sources.storage.FileStorageProvider" name="FileStorageProvider:41:114">
+  <failure message="Unexpected space between '(' and ')'." />
+</testcase>
+<testcase classname="sources.storage.FileStorageProvider" name="FileStorageProvider:49:88">
+  <failure message="Unexpected space between '(' and ')'." />
+</testcase>
+<testcase classname="sources.storage.FileStorageProvider" name="FileStorageProvider:53:76">
+  <failure message="Unexpected space between '(' and ')'." />
+</testcase>
+<testcase classname="sources.storage.FileStorageProvider" name="FileStorageProvider:57:65">
+  <failure message="Empty block." />
+</testcase>
+<testcase classname="sources.storage.FileStorageProvider" name="FileStorageProvider:57:53">
+  <failure message="Unused 'parameters'." />
+</testcase>
+<testcase classname="sources.storage.FileStorageProvider" name="FileStorageProvider:64:82">
+  <failure message="Unexpected space between '(' and ')'." />
+</testcase>
+<testcase classname="sources.storage.FileSystemProvider" name="FileSystemProvider:0:0"></testcase>
+<testcase classname="sources.storage.providerfacade" name="providerfacade:39:5">
+  <failure message="Missing 'use strict' statement." />
+</testcase>
+<testcase classname="sources.storage.providerfacade" name="providerfacade:46:5">
+  <failure message="Expected 'fileProviderList' at column 9, not column 5." />
+</testcase>
+<testcase classname="sources.storage.providerfacade" name="providerfacade:53:5">
+  <failure message="Expected 'settingsProviderList' at column 9, not column 5." />
+</testcase>
+<testcase classname="sources.storage.providerfacade" name="providerfacade:92:24">
+  <failure message="Empty block." />
+</testcase>
+<testcase classname="sources.storage.providerfacade" name="providerfacade:112:24">
+  <failure message="Empty block." />
+</testcase>
+<testcase classname="sources.storage.providerfacade" name="providerfacade:131:24">
+  <failure message="Empty block." />
+</testcase>
+<testcase classname="sources.storage.providerfacade" name="providerfacade:139:5">
+  <failure message="Missing 'use strict' statement." />
+</testcase>
+<testcase classname="sources.storage.providerfacade" name="providerfacade:148:1">
+  <failure message="Unexpected 'export'." />
+</testcase>
+<testcase classname="sources.storage.providerfacade" name="providerfacade:148:8">
+  <failure message="Stopping. (100% scanned)." />
+</testcase>
+  </testsuite>
+</testsuites>

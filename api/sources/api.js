@@ -20,17 +20,20 @@
   * Central module with the public functions of the HTML5 Podcatcher API.
   * @module html5podcatcher
   */
-  
-import Episode from './model/episode';
+
+import Episode, {STATE_UNLISTEND} from './model/episode';
+import StorageProviderFacade from './storage/providerfacade';
   
 /** 
   * Array of episodes in the playlist
   * @private
-  * @type {Episodes[]}
+  * @type {module:html5podcatcher/model/episodes~Episode[]}
   */
 var playlist = [];
-playlist.push(new Episode('http://www.podcast.local/episode1', {name: 'Episode 1', playback: {}, updated: new Date()}));
-//playlist.push({uri: 'http://www.podcast.local/episode2'});
+playlist.push(new Episode('http://www.podcast.local/episode1', {title: 'Episode 1', subTitle: 'Summary of Episode 1', source: 'Source 1', playback: {}, updated: new Date()}));
+playlist.push(new Episode('http://www.podcast.local/episode2', {title: 'Episode 2', source: 'Source 1', playback: {}, updated: new Date()}));
+
+var storageProvider = new StorageProviderFacade();
 
 export default {
 	/**
@@ -43,10 +46,28 @@ export default {
 		/** 
 		  * Get all episodes in the playlist.
 		  * @public
-		  * @returns {Episodes[]} All episodes in the playlist sorted by date of last modification.
+		  * @returns {module:html5podcatcher/model/episodes~Episode[]} All episodes in the playlist sorted by date of last modification.
 		  */
-		get: function () {
-			return playlist;
+		get: function (onComplete) {
+			// TODO async berücksichtigen
+            storageProvider.readEpisodesByStatus(STATE_UNLISTEND, onComplete);
 		}
-	}
+	},
+    
+    /**
+	  * This namespace contains all public functions for managing the storage subsystem.
+	  * @namespace
+	  * @memberOf module:html5podcatcher
+	  * @public
+	  */
+    storagemanagement: {
+        /** 
+		  * Returns true is any kind of offline storage for files is available.
+		  * @public
+		  * @returns {Boolean} True if a file storage is available, false otherwise.
+		  */
+        isFileStorageAvailable: function () {
+            return false;
+        }
+    }
 }
