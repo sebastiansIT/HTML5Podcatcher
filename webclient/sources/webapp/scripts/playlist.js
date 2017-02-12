@@ -19,11 +19,20 @@
 /*global console, localStorage, HTMLMediaElement, Notification */
 /*global $ */
 
-console.log(html5podcatcher.playlist.get()[0].toString());
 
 /** Central 'ready' event handler */
 $(document).ready(function () {
     "use strict";
 	
-	UI.renderEpisodeList(html5podcatcher.playlist.get(), 'desc');
+	html5podcatcher.playlist.get().then(function (value) {
+		UI.renderEpisodeList(value.data, 'desc');
+	}).catch(function (reason) {
+		if (reason instanceof Error) {
+			console.error(reason);
+		} else {
+			reason.messages.forEach(function (message/*, index, array*/) {
+				console.log(message.text);
+			});
+		}
+	});
 });

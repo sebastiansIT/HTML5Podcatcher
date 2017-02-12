@@ -20,6 +20,17 @@
     along with this program. If not, see http://www.gnu.org/licenses/.
 */
 
+/**
+ * @typedef EpisodesQueryResult
+ * @property {module:html5podcatcher/model/episodes~Episode[]} data - An array of episodes, if the result is empty, a empty array.
+ * @property {module:html5podcatcher/model/messages~Message[]} messages - An array of messages, if there are no messages, a empty array.
+ */
+ 
+ /**
+ * @typedef EpisodesQueryError
+ * @property {module:html5podcatcher/model/messages~Message[]} messages - An array of messages, if there are no messages, a empty array.
+ */
+
 // ========================================= //
 // ====== Class StorageProviderFacade ====== //
 // ========================================= //
@@ -84,13 +95,13 @@ var StorageProviderFacade = function () {
         var provider, priority = -1;
 
         dataProviderList.forEach(function (listedProvider) {
-            if (listedProvider.isSupportedByCurrentPlatform && listedProvider.priority > priority) {
+            if (listedProvider.isSupportedByCurrentPlatform() && listedProvider.priority > priority) {
                 provider = listedProvider;
                 priority = provider.priority;
             }
         });
         if (!provider) {
-            //TODO throw Exception();
+            provider = undefined;
         }
 
         return provider;
@@ -135,14 +146,20 @@ var StorageProviderFacade = function () {
     };
 };
 
-StorageProviderFacade.prototype.readEpisodesByStatus = function (listenState, onReadCallback) {
+/** Select a List of episodes with the given state.
+  * @param {module:html5podcatcher/model/episodes~STATE_LISTENED|module:html5podcatcher/model/episodes~STATE_UNLISTENED} listenState - Filter for unlistend or listend episodes. 
+  * @returns Promise<EpisodeQueryResult|EpisodesQueryError> A Promise to the playlist episodes.
+  */
+StorageProviderFacade.prototype.readEpisodesByStatus = function (listenState) {
     var dataStorage = this.getDataStorageProvider();
 
-    if (dataStorage) {
-        this.getDataStorageProvider().readEpisodesByStatus(listenState, onReadCallback);
-    } else {
-        throw "No storage provider registered for Episodes";
-    }
+	return new Promise(function (resolve, reject) {
+		if (dataStorage) {
+			resolve(dataStorage.readEpisodesByStatus(listenState));
+		} else {
+			reject({messages: [{text: "No storage provider registered for Episodes"}]});
+		}
+	});
 };
 
 export default StorageProviderFacade;

@@ -19,12 +19,23 @@
     along with this program. If not, see http://www.gnu.org/licenses/.
   */
 
-export const STATE_UNLISTEND = Symbol("Unslistend Episode");
-export const STATE_LISTEND = Symbol("Listend Episode");
+/** 
+  * A symbol representing an episodes state "Unlistened".
+  * @constant
+  * @type {Symbol}
+*/
+export const STATE_UNLISTENED = Symbol("Unlistened  Episode");
+
+/** 
+  * A symbol representing an episodes state "Listened".
+  * @constant
+  * @type {Symbol}
+*/
+export const STATE_LISTENED = Symbol("listened  Episode");
   
 /** 
   * Objects of this class representing single episodes of a podcast or a source feed.
-  * @class 
+  * @class
   * @constructs module:html5podcatcher/model/episodes~Episode
   * @param {URI} uri - The URI identifing this episode.
   * @param {Object} [properties={}] - Additional parameter to initialise the episode object.

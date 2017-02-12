@@ -1,4 +1,7 @@
-/*  Copyright 2013 - 2017 Sebastian Spautz
+/** 
+  * Central module with the public functions of the HTML5 Podcatcher API.
+  * @module html5podcatcher
+  * @license Copyright 2013 - 2017 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -13,25 +16,11 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see http://www.gnu.org/licenses/.
-*/
-
-/** 
-  * Central module with the public functions of the HTML5 Podcatcher API.
-  * @module html5podcatcher
+    along with this program. If not, see http://www.gnu.org/licenses/.
   */
 
-import Episode, {STATE_UNLISTEND} from './model/episode';
+import Episode, {STATE_UNLISTENED} from './model/episodes';
 import StorageProviderFacade from './storage/providerfacade';
-  
-/** 
-  * Array of episodes in the playlist
-  * @private
-  * @type {module:html5podcatcher/model/episodes~Episode[]}
-  */
-var playlist = [];
-playlist.push(new Episode('http://www.podcast.local/episode1', {title: 'Episode 1', subTitle: 'Summary of Episode 1', source: 'Source 1', playback: {}, updated: new Date()}));
-playlist.push(new Episode('http://www.podcast.local/episode2', {title: 'Episode 2', source: 'Source 1', playback: {}, updated: new Date()}));
 
 var storageProvider = new StorageProviderFacade();
 
@@ -49,8 +38,7 @@ export default {
 		  * @returns {module:html5podcatcher/model/episodes~Episode[]} All episodes in the playlist sorted by date of last modification.
 		  */
 		get: function (onComplete) {
-			// TODO async berücksichtigen
-            storageProvider.readEpisodesByStatus(STATE_UNLISTEND, onComplete);
+            return storageProvider.readEpisodesByStatus(STATE_UNLISTENED);
 		}
 	},
     
@@ -67,7 +55,11 @@ export default {
 		  * @returns {Boolean} True if a file storage is available, false otherwise.
 		  */
         isFileStorageAvailable: function () {
-            return false;
-        }
+            return !!storageProvider.fileStorageProvider;
+        },
+		
+		registerDataStorage(dataStorageProvider) {
+			storageProvider.registerDataProvider(dataStorageProvider);
+		}
     }
 }
