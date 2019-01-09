@@ -1,4 +1,4 @@
-﻿/*global module*/
+﻿/* global module */
 module.exports = function (grunt) {
     "use strict";
     //Load Tasks
@@ -14,9 +14,10 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-html');
     grunt.loadNpmTasks('grunt-jslint');
     grunt.loadNpmTasks('grunt-usemin');
-    grunt.loadNpmTasks('grunt-autoprefixer');
-    //Config Tasks
-    grunt.initConfig({
+  grunt.loadNpmTasks('grunt-autoprefixer')
+  grunt.loadNpmTasks('grunt-postcss')
+  // Config Tasks
+  grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         clean: {
             HostedWebApp: {
@@ -170,29 +171,44 @@ module.exports = function (grunt) {
             options: {
             }
         },
-        autoprefixer: {
-            HostedWebApp: {
-                options: {
-                    browsers: ['ff >= 28', 'ie >= 10', 'last 2 versions'] //Gecko[=Firefox] 28 is used in FirefoxOS 1.3
-                },
-                src: 'build/webapp/styles/main.css',
-                dest: 'build/webapp/styles/main.css'
-            },
-            FirefoxPackagedApp: {
-                options: {
-                    browsers: ['ff >= 28'] //Gecko[=Firefox] 28 is used in FirefoxOS 1.3
-                },
-                src: 'build/packagedapp/temp/styles/main.css',
-                dest: 'build/packagedapp/temp/styles/main.css'
-            },
-            ChromePackagedApp: {
-                options: {
-                    browsers: ['chrome >= 37']
-                },
-                src:  'build/chromeapp/temp/styles/main.css',
-                dest: 'build/chromeapp/temp/styles/main.css'
-            }
+    postcss: {
+      FirefoxPackagedApp: {
+        options: {
+          map: false,
+          processors: [
+            require('autoprefixer')({
+              browsers: ['ff >= 28'] // Gecko[=Firefox] 28 is used in FirefoxOS 1.3
+            })
+          ]
         },
+        src: 'build/webapp/styles/main.css',
+        dest: 'build/webapp/styles/main.css'
+      },
+      HostedWebApp: {
+        options: {
+          map: false,
+          processors: [
+            require('autoprefixer')({
+              browsers: ['ie >= 10', 'last 3 versions']
+            })
+          ]
+        },
+        src: 'build/webapp/styles/main.css',
+        dest: 'build/webapp/styles/main.css'
+      },
+      ChromePackagedApp: {
+        options: {
+          map: false,
+          processors: [
+            require('autoprefixer')({
+              browsers: ['chrome >= 37']
+            })
+          ]
+        },
+        src: 'build/chromeapp/temp/styles/main.css',
+        dest: 'build/chromeapp/temp/styles/main.css'
+      }
+    },
         //Test and Lint files
         jslint: {
             client: { // lint your project's client code
@@ -238,18 +254,19 @@ module.exports = function (grunt) {
                 ]
             }
         },
-        htmllint: {
-            client: {
-                options: {
-                    ignore: [ 'The “menu” element is not supported by browsers yet. It would probably be better to wait for implementations.'],
-                    reporter: 'checkstyle',
-                    reporterOutput: 'tests/htmllint.result.txt'
-                },
-                src: [
-                    'sources/webapp/*.html'
-                ]
-            }
+    htmllint: {
+      client: {
+        options: {
+          force: false,
+          ignore: [ 'The “menu” element is not supported by browsers yet. It would probably be better to wait for implementations.'],
+          reporter: 'checkstyle',
+          reporterOutput: 'tests/htmllint.result.txt'
         },
+        src: [
+          'sources/webapp/*.html'
+        ]
+      }
+    },
         jasmine: {
             client: {
                 src: [
@@ -268,11 +285,13 @@ module.exports = function (grunt) {
                 }
             }
         }
-    });
-    //Register Tasks
-    grunt.registerTask('HostedWebApp',       ['clean:HostedWebApp', 'string-replace:HostedWebApp', 'concat:HostedWebApp-css', 'autoprefixer:HostedWebApp', 'copy:HostedWebApp', 'curl:HostedWebApp', 'usemin:HostedWebApp']);
-    grunt.registerTask('FirefoxPackagedApp', ['string-replace:FirefoxPackagedApp', 'concat:FirefoxPackagedApp-css', 'autoprefixer:FirefoxPackagedApp', 'usemin:FirefoxPackagedApp', 'copy:FirefoxPackagedApp', 'curl:FirefoxPackagedApp', 'zip:FirefoxPackagedApp']); //, 'clean:FirefoxPackagedApp'
-    grunt.registerTask('ChromePackagedApp',  ['string-replace:ChromePackagedApp', 'concat:ChromePackagedApp-css', 'autoprefixer:ChromePackagedApp', 'usemin:ChromePackagedApp', 'copy:ChromePackagedApp', 'curl:ChromePackagedApp']); //, 'clean:ChromePackagedApp'
-    grunt.registerTask('test',               ['htmllint', 'csslint', 'jslint', 'jasmine']);
-    grunt.registerTask('default',            ['test', 'HostedWebApp', 'FirefoxPackagedApp']);
-};
+    })
+
+  // Register Tasks
+  grunt.registerTask('x', ['postcss'])
+  grunt.registerTask('HostedWebApp', ['clean:HostedWebApp', 'string-replace:HostedWebApp', 'concat:HostedWebApp-css', 'postcss:HostedWebApp', 'copy:HostedWebApp', 'curl:HostedWebApp', 'usemin:HostedWebApp'])
+  // grunt.registerTask('FirefoxPackagedApp', ['string-replace:FirefoxPackagedApp', 'concat:FirefoxPackagedApp-css', 'postcss:FirefoxPackagedApp', 'usemin:FirefoxPackagedApp', 'copy:FirefoxPackagedApp', 'curl:FirefoxPackagedApp', 'zip:FirefoxPackagedApp']) //, 'clean:FirefoxPackagedApp'
+  grunt.registerTask('ChromePackagedApp', ['string-replace:ChromePackagedApp', 'concat:ChromePackagedApp-css', 'postcss:ChromePackagedApp', 'usemin:ChromePackagedApp', 'copy:ChromePackagedApp', 'curl:ChromePackagedApp']) //, 'clean:ChromePackagedApp'
+  grunt.registerTask('test', ['htmllint', 'csslint', 'jslint', 'jasmine'])
+  grunt.registerTask('default', ['test', 'HostedWebApp', 'FirefoxPackagedApp'])
+}
