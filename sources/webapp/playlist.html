@@ -4,7 +4,7 @@
     Copyright 2013 - 2016 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
-    
+
     "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -25,11 +25,11 @@
 	<title>Playlist &mdash; HTML5 Podcatcher</title>
 	<meta name="description" content="A HTML5 podcast player!">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<!-- Chrome for Android: Configure as Web App --> 
+	<!-- Chrome for Android: Configure as Web App -->
 	<meta name="mobile-web-app-capable" content="yes">
 	<!-- iOS: Configure as Web App -->
 	<meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="referrer" content="no-referrer" />
+  <meta name="referrer" content="no-referrer" />
 	<!-- Application Logo in different resolutions -->
 	<link rel="shortcut icon"    type="image/x-icon"              href="favicon.ico"/>
 	<link rel="icon"             type="image/png" sizes="192x192" href="images/logo192.png">
@@ -52,10 +52,10 @@
 	<script src="scripts/storage/fileSystemProvider.js"></script>
 	<script src="scripts/storage/indexedDbProvider.js"></script>
 	<script src="scripts/storage/webStorageProvider.js"></script>
-    <script src="scripts/configuration/configuration.js"></script>
-    <script src="scripts/web/web.js"></script>
-    <script src="scripts/parser/parser.js"></script>
-    <script src="scripts/parser/rss_2-0.js"></script>
+  <script src="scripts/configuration/configuration.js"></script>
+  <script src="scripts/web/web.js"></script>
+  <script src="scripts/parser/parser.js"></script>
+  <script src="scripts/parser/rss_2-0.js"></script>
 	<script src="scripts/globalUi.js"></script>
 	<script src="scripts/playlist.js"></script>
 </head>
@@ -72,11 +72,11 @@
 		<div class="content">
 			<div class="loader"><div></div><div></div><div></div><div></div><div></div></div>
 			<div id="playlist">
-                <ul class="entries">
-                </ul>
-                <ul class="template" id="episodeTemplate">
-                    <li>
-                        <a class="link" href="episode.uri">
+        <ul class="entries">
+        </ul>
+        <ul class="template" id="episodeTemplate">
+          <li>
+            <a class="link" href="episode.uri">
 							<div>
 								<h4 class="title">episode.title</h4>
 								<p><span class="status"><time datetime="2014-01-01" class="updated">episode.updated</time></span> at <span class="source">episode.source</span></p>
@@ -85,9 +85,9 @@
 						<!--<button class="status">Status: played</button>-->
 						<a class="origin button external onlineOnly" href="episode.uri" data-icon="browsing">Internet</a>
 						<a class="button downloadFile onlineOnly" href="episode.mediaUrl" download="episode.mediaUrl.fileName" data-icon="download">Download</a>
-                    </li>
-                </ul>
-            </div>
+          </li>
+        </ul>
+      </div>
 		</div>
 		<footer>
 			<div role="toolbar">
@@ -102,7 +102,7 @@
 		</footer>
 		<div id="activeMessage"></div>
 	</section>
-	
+
 	<section id="logView" class="dialog" role="region">
 		<header role="banner">
 			<button title="Close" class="closeDialog"><span class="icon icon-close">Close</span></button>
