@@ -1,7 +1,7 @@
-/*  Copyright 2013 - 2015 Sebastian Spautz
+/*  Copyright 2013 - 2015, 2018 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
-    
+
     "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -23,7 +23,6 @@
 	list-style: none;
 	margin: 0;
 	padding: 0;
-	overflow: hidden;
 }
 /* List items */
 .content .entries li {
@@ -39,6 +38,16 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	/*background: linear-gradient(to right, #006400 0%,#006400 attr(data-progress %),#ffffff attr(data-progress %));*/
+}
+
+@media only all and (pointer: coarse) {
+	.content .entries li {
+		scroll-snap-align: start;
+	}
+
+	.content .entries li:first-child {
+		scroll-snap-align: end;
+	}
 }
 .content .entries li:last-child {
 	border: none;
@@ -134,6 +143,3 @@ h4 { /* = Title of list item */
 .content .entries li button[data-icon="browsing"]:before {
 	background: url("icons/browsing.svg") no-repeat scroll center center transparent;
 }
-
-
-

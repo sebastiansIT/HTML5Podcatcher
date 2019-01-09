@@ -1,7 +1,7 @@
-﻿/*  Copyright 2013 - 2015 Sebastian Spautz
+﻿/*  Copyright 2013 - 2015, 2018 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
-    
+
     "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -19,13 +19,13 @@
 /* App-Page Layout */
 html {
 	font-size: 62.5%; /*Set font size to 10px (if default is 16px) */
-	font-family: 'Fira Sans', sans-serif; 
+	font-family: 'Fira Sans', sans-serif;
 	line-height: 2.0rem;
 	height: 100%;
 }
 
 /* The Body defines the Stage */
-body { 
+body {
 	margin: 0;
 	padding: 0;
 	height: 100%;
@@ -37,7 +37,7 @@ body {
 /* Each Region is a Scene */
 section[role="region"] {
 	height:100%;
-	display:flex; 
+	display:flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
 	color: #333;
@@ -53,10 +53,19 @@ section[role="region"] .content {
 	flex-basis: 0;
 	flex-grow: 1;
 	flex-shrink: 1;
+	/* autoprefixer: ignore next */
+	scroll-snap-type: y proximity;
+	scroll-padding: 0.6rem;
 }
 section[role="region"] .content > div,
 section[role="region"] .content > section {
 	margin: 1.2rem;
+}
+
+@media only all and (pointer: coarse) {
+	section[role="region"] .content > section {
+		scroll-snap-align: start;
+	}
 }
 
 /* Special Layout for Dialogs */
@@ -71,7 +80,7 @@ section.fullscreen[role="region"] {
 	top: 0;
 }
 /* end of App-Page Layout */
-		
+
 /* Non-Layout for Template areas */
 template, .template {
 	display: none;
@@ -91,7 +100,7 @@ h3 { /* = Headline of a content section */
 	margin-bottom: 0.6em;
 }
 
-a { 
+a {
 	color: #006400;
 }
 a:visited {
@@ -185,23 +194,23 @@ h4 a { /*Links insite a Headline*/
 	border-radius: 0.2rem;
 	margin: 0.2rem;
 	animation-fill-mode: both;
-	display: inline-block;  
-    animation: lineScalePulseOutFrames 0.9s -0.6s infinite cubic-bezier(.85, .25, .37, .85); 
+	display: inline-block;
+    animation: lineScalePulseOutFrames 0.9s -0.6s infinite cubic-bezier(.85, .25, .37, .85);
 }
 .loader > div:nth-child(2), .loader > div:nth-child(4) {
-    animation-delay: -0.4s !important; 
+    animation-delay: -0.4s !important;
 }
 .loader > div:nth-child(1), .loader > div:nth-child(5) {
-    animation-delay: -0.2s !important; 
+    animation-delay: -0.2s !important;
 }
 @keyframes lineScalePulseOutFrames {
 	0% {
-        transform: scaley(1); 
+        transform: scaley(1);
 	}
 	50% {
-        transform: scaley(0.4); 
+        transform: scaley(0.4);
 	}
 	100% {
-		transform: scaley(1); 
-	} 
+		transform: scaley(1);
+	}
 }

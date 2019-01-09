@@ -1,9 +1,9 @@
 ﻿CACHE MANIFEST
 
-#  Copyright 2013-2016 Sebastian Spautz
+#  Copyright 2013-2016, 2018 Sebastian Spautz
 #
 #	This file is part of "HTML5 Podcatcher".
-#	
+#
 #	"HTML5 Podcatcher" is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
 #   the Free Software Foundation, either version 3 of the License, or
@@ -18,7 +18,7 @@
 #   along with this program.  If not, see http://www.gnu.org/licenses/.
 
 # Version {{ VERSION }}
-# Change Log: 
+# Change Log:
 ## Older entries see
 ### ChangeLog.md
 ##0.39.0
@@ -50,7 +50,10 @@
 ### Remove redundant function parameter "mime-Type"
 ##0.42.0
 ### Use language information from RSS 2.0 feeds and activate hyphens in UI
-    
+##0.43.0
+### Update index.html: Remove Referenz to FirefoxOS-Marketplace
+### Add CSS-Feature Scroll-Snap to Stylesheet (available on Chromium) 
+
 # VALIDATE this manifest on http://manifest-validator.com/
 
 CACHE:
