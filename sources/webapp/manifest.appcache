@@ -22,9 +22,10 @@
 ## Older entries see
 ### ChangeLog.md
 ##0.43.0
-### Update index.html: Remove Referenz to FirefoxOS-Marketplace
 ### Add CSS-Feature Scroll-Snap to Stylesheet (available on Chromium)
 ### Add theme-color for Chrome on Android to HTML-head
+### Update jQuery to 3.3.1
+### Remove all Files and Build-Targets for FirefoxOS
 
 # VALIDATE this manifest on http://manifest-validator.com/
 
