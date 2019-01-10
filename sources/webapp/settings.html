@@ -1,10 +1,10 @@
 ﻿<!DOCTYPE html>
 
 <!--
-    Copyright 2014 - 2016 Sebastian Spautz
+    Copyright 2014 - 2016, 2019 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
-    
+
     "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -25,11 +25,13 @@
 	<title>Settings &mdash; HTML5 Podcatcher</title>
 	<meta name="description" content="A HTML5 podcast player!">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<!-- Chrome for Android: Configure as Web App --> 
+	<!-- Chrome for Android: Configure as Web App -->
 	<meta name="mobile-web-app-capable" content="yes">
 	<!-- iOS: Configure as Web App -->
 	<meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="referrer" content="no-referrer" />
+  <meta name="referrer" content="no-referrer" />
+	<!-- Coloring of Chrome UI-Elements (on Android) -->
+	<meta name="theme-color" content="rgb(0, 100, 0)">
 	<!-- Application Logo in different resolutions -->
 	<link rel="shortcut icon"    type="image/x-icon"              href="favicon.ico"/>
 	<link rel="icon"             type="image/png" sizes="192x192" href="images/logo192.png">
@@ -116,7 +118,7 @@
 					<input type="submit" class="button" name="sendSyncData" id="sendSyncData" style="width:49%;" value="Send" />
 					<button name="receiveSyncData" id="receiveSyncData" style="width:49%;">Receive</button>
 				</form>
-			</section> 
+			</section>
 			<section id="ImportExport">
 				<header><h2>Import/Export</h2></header>
 				<form action="#" id="ExportImportForm">
