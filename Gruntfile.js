@@ -1,4 +1,7 @@
 ﻿/* global module */
+
+const JQUERY_URL = 'https://code.jquery.com/jquery-3.3.1.min.js'
+
 module.exports = function (grunt) {
     "use strict";
     //Load Tasks
@@ -183,7 +186,16 @@ module.exports = function (grunt) {
         },
         src: 'build/webapp/styles/main.css',
         dest: 'build/webapp/styles/main.css'
+    curl: {
+      HostedWebApp: {
+        src: JQUERY_URL,
+        dest: 'build/webapp/scripts/jquery.min.js'
       },
+      ChromePackagedApp: {
+        src: JQUERY_URL,
+        dest: 'build/chromeapp/temp/scripts/jquery.min.js'
+      }
+    },
       HostedWebApp: {
         options: {
           map: false,
