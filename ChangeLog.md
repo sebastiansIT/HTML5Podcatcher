@@ -1,6 +1,6 @@
 ﻿# HTML5 Podcatcher #
 
--  Change Log - 
+-  Change Log -
 
 - 0.12.11
 	* Fix a Bug on setting the last played episode after page load
@@ -96,7 +96,7 @@
 - 0.18.10
 	* Rebind Events to audio element when switching to another Episode
 - 0.18.11
-	* Fix a Bug in RSS-Parser: Link elements with Atom namespace are accepted now 
+	* Fix a Bug in RSS-Parser: Link elements with Atom namespace are accepted now
 - 0.18.12
 	* Fix Bugs in Parser and UI: empty description elements; missing encoded tags and changing feed uri and website url in some cases; Remove Download Button if no audio-file available
 - 0.18.12
@@ -130,7 +130,7 @@
 	*  Jump betwean chapters (based on Podlove Simple Chapters) when click on "Next/Previous Track"-Button instead of skip to next/previous Track
 - 0.32.2
 	*  Jumps now one second bevor the target when skip to previous section. This avoids endless Jump to same chapter when clicking multiple times on "previous Chapter"-Button;
-	*  Better handling of multimedia keys (can now also use Chapters) 
+	*  Better handling of multimedia keys (can now also use Chapters)
 - 0.33.0
     * Add a detail page for feeds
 - 0.33.1
@@ -187,7 +187,7 @@
 	* Add Settings and Episodes to sync data receiver
 - 0.37.4
 	* Fix a bug detecting the next (or previous) episode in the playlist
-- 0.38.0 
+- 0.38.0
 	* Button "Fast Forward" now changes playback to double speed when the button is pressed for more than 500 miliseconds
 - 0.38.1
 	* Replace jquery event registration to find a bug in Firefox for Android 41
@@ -195,3 +195,32 @@
 	* Try to solve strange error situation in Firefox 41
 - 0.38.3
 	* Fix a Bug: Initialisation of file storage provider isn't called
+- 0.39.0
+	* Extends Logger with Web Notification API for messages with level note
+- 0.39.1
+  * Fix a Bug in settings page (relevant on Chrome only)
+- 0.39.2
+  * Add a storage provider interface for settings
+- 0.40.0
+  * Add a user setting to configure the playback rate
+- 0.40.1
+  * Add a default value parameter to settings.get(key) and visualise playback rate as percent
+- 0.40.2
+  * Fix a critical Bug: A File is lost while publishing to Mozilla Webstore
+- 0.40.3
+  * Fix some UI bugs
+  * add a progress visualisation for "Update Playlilst" button
+- 0.40.4
+  * Add status information to finished callback functions
+- 0.41.0
+  * Add Subtitle of episodes to Detail-View of Sources
+- 0.40.1
+  * Fix a Bug: Visualisation of download status of episodes is't shown on podcast details page
+- 0.40.2
+  * Update jQuery to 3.1 (slim build)
+- 0.40.3
+  * Prevent multiple downloads of the same file
+- 0.40.4
+  * Remove redundant function parameter "mime-Type"
+- 0.42.0
+  * Use language information from RSS 2.0 feeds and activate hyphens in UI
