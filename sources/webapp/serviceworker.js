@@ -16,8 +16,12 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 /* global self, caches, fetch */
+/* Information about ServiceWorker see
+   https://developers.google.com/web/fundamentals/primers/service-workers/ or
+   https://developers.google.com/web/fundamentals/instant-and-offline/offline-cookbook/#stale-while-revalidate */
 
-const CACHE_NAME = 'HTMLPodcatcher_{{ VERSION }}'
+const CACHE_PREFIX = 'HTML5Podcatcher'
+const CACHE_NAME = CACHE_PREFIX + '_{{ VERSION }}'
 const CACHED_FILES = [
   // HTML
   'playlist.html',
@@ -93,7 +97,8 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (CACHE_NAME !== cacheName) {
+          // Other Caches then the actual but in general a HTML5Podcatcher-Cache
+          if (cacheName !== CACHE_NAME && cacheName.indexOf(CACHE_PREFIX) === 0) {
             return caches.delete(cacheName)
           }
         })
