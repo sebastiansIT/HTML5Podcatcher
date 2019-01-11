@@ -198,61 +198,17 @@ var GlobalUserInterfaceHelper = {
         proxyNeededCheck();
     },
     settings: HTML5Podcatcher.api.configuration.settings,
-    initApplicationCacheEvents: function () {
-      "use strict";
-      if (applicationCache) {
-        function statusName(statusNumber) {
-            switch (statusNumber) {
-            case applicationCache.UNCACHED: // UNCACHED == 0
-                return 'UNCACHED';
-            case applicationCache.IDLE: // IDLE == 1
-                return 'IDLE';
-            case applicationCache.CHECKING: // CHECKING == 2
-                return 'CHECKING';
-            case applicationCache.DOWNLOADING: // DOWNLOADING == 3
-                return 'DOWNLOADING';
-            case applicationCache.UPDATEREADY:  // UPDATEREADY == 4
-                return 'UPDATEREADY';
-            case applicationCache.OBSOLETE: // OBSOLETE == 5
-                return 'OBSOLETE';
-            default:
-                return 'UKNOWN CACHE STATUS';
-            }
-        }
-        applicationCache.addEventListener('checking', function () {
-            GlobalUserInterfaceHelper.logHandler('Application cache checks for updates (Cache status: ' + statusName(applicationCache.status) + ')', 'debug:AppCache');
-        }, false);
-        applicationCache.addEventListener('noupdate', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cache founds no update (Cache status: " + statusName(applicationCache.status) + ")", 'debug:AppCache');
-        }, false);
-        applicationCache.addEventListener('downloading', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cache download updated files (Cache status: " + statusName(applicationCache.status) + ")", 'debug:AppCache');
-        }, false);
-        applicationCache.addEventListener('progress', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cache downloading files (Cache status: " + statusName(applicationCache.status) + ")", 'debug:AppCache');
-        });
-        applicationCache.addEventListener('cached', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cached (Cache status: " + statusName(applicationCache.status) + ")", 'debug:AppCache');
-        }, false);
-        applicationCache.addEventListener('updateready', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cache is updated (Cache status: " + statusName(applicationCache.status) + ")", 'info');
-            applicationCache.swapCache();
-            if (confirm("An update of HTML5 Podcatcher is available. Do you want to reload now?")) {
-                window.location.reload();
-            }
-        }, false);
-        applicationCache.addEventListener('obsolete', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cache is corrupted and will be deletet (Cache status: " + statusName(applicationCache.status) + ")", 'error');
-        }, false);
-        applicationCache.addEventListener('error', function () {
-            if (applicationCache.status !== 1) {
-                GlobalUserInterfaceHelper.logHandler("Error downloading manifest or resources (Cache status: " + statusName(applicationCache.status) + ")", 'error');
-            } else {
-                GlobalUserInterfaceHelper.logHandler("Can't download manifest or resources because app is offline (Cache status: " + statusName(applicationCache.status) + ")", 'debug:AppCache');
-            }
-        }, false);
-      } else {
-        GlobalUserInterfaceHelper.logHandler('This Browser do not support AppCache. So, this app is not available offline', 'warn:AppCache')
+    initServiceWorker: function () {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('serviceworker.js').then(function (registration) {
+          // Registration was successful
+          GlobalUserInterfaceHelper.logHandler('ServiceWorker registration successful with scope: ' + registration.scope, 'debug')
+          console.log('ServiceWorker registration successful with scope: ', registration.scope)
+        }, function (err) {
+          // registration failed :(
+          GlobalUserInterfaceHelper.logHandler('ServiceWorker registration failed: ' + err, 'error')
+          console.log('ServiceWorker registration failed: ', err)
+        })
       }
     },
     initConnectionStateEvents: function () {

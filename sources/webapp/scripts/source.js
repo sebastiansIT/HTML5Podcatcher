@@ -1,4 +1,4 @@
-﻿/*  Copyright 2015 Sebastian Spautz
+﻿/*  Copyright 2015, 2019 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -44,7 +44,7 @@ $(document).ready(function () {
     var sourceUri;
     //Get source URI from query string
     sourceUri = window.location.search.split('uri=')[1];
-    //Get alternativly the URI from Local Storage Setting 
+    //Get alternativly the URI from Local Storage Setting
     if (!sourceUri) {
         sourceUri = UI.settings.get('ShowDetailsForSource');
     }
@@ -70,8 +70,8 @@ $(document).ready(function () {
     // --------------------------- //
     // -- Register Eventhandler -- //
     // --------------------------- //
-    //Application Cache Events
-    UI.initApplicationCacheEvents();
+    // Register ServiceWorker
+    UI.initServiceWorker()
     //Data manipulation events
     // * New or changed source
     document.addEventListener('writeSource', function (event) {
@@ -123,13 +123,13 @@ $(document).ready(function () {
     });
 
     $('#updateSource').on('click', function (event) {
-        var limitOfNewEpisodes = 5, 
-            button = event.target, 
+        var limitOfNewEpisodes = 5,
+            button = event.target,
             source = {uri: sourceUri};
-        
+
         event.preventDefault();
         event.stopPropagation();
-       
+
         button.setAttribute('disabled', 'disabled');
         button.classList.add('spinner');
         // start update of the source

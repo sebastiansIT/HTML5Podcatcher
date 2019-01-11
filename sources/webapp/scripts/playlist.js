@@ -1,4 +1,4 @@
-/*  Copyright 2013 - 2016 Sebastian Spautz
+/*  Copyright 2013 - 2016, 2019 Sebastian Spautz
 
      This file is part of "HTML5 Podcatcher".
 
@@ -81,7 +81,7 @@ GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
 GlobalUserInterfaceHelper.GenerateAudioElement = function () {
     "use strict";
     var playbackRate = POD.api.configuration.settings.get('playbackRate') || 1,
-        mediaElement, 
+        mediaElement,
         playbackRate;
 
     POD.logger('Audio element will be created', 'debug');
@@ -362,8 +362,8 @@ GlobalUserInterfaceHelper.togglePauseStatus = function () {
 $(document).ready(function () {
     "use strict";
     var k, multiMediaKeyDownTimestemp, stoppedPressMouse;
-    //Application Cache Events
-    UI.initApplicationCacheEvents();
+    // Register ServiceWorker
+    UI.initServiceWorker()
     //Configurate POD
     POD.logger("Open Playlist", "debug");
     HTML5Podcatcher.api.configuration.proxyUrlPattern = UI.settings.get("proxyUrl");
@@ -540,7 +540,7 @@ $(document).ready(function () {
         episode = event.detail.episode;
         episodeUI = UI.renderEpisode(episode);
         order = UI.settings.get("playlistSort");
-        
+
         //find episode in HTML markup
         for (i = 0; i < $('#playlist').find('.entries li').length; i += 1) {
             if ($($('#playlist').find('.entries li')[i]).data('episodeUri') === episode.uri) {

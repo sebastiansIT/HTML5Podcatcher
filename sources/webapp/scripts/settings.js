@@ -1,4 +1,4 @@
-﻿/*  Copyright 2014 - 2016 Sebastian Spautz
+﻿/*  Copyright 2014 - 2016, 2019 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -106,13 +106,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
     // -- Register Eventhandler -- //
-    //General UI Events
-    UI.initGeneralUIEvents();
-    //Application Cache Events
-    UI.initApplicationCacheEvents();
-    //Connection State Events
+    // General UI Events
+    UI.initGeneralUIEvents()
+    // Register ServiceWorker
+    UI.initServiceWorker()
+    // Connection State Events
     UI.initConnectionStateEvents();
-    //Configuration UI Events
+    // Configuration UI Events
     $('#memorySizeForm').on('submit', function (event) {
         event.preventDefault();
         event.stopPropagation();

@@ -32,21 +32,21 @@ module.exports = function (grunt) {
     },
     'string-replace': { // configure the string replacement task for the hostet app
       HostedWebApp: {
-            files: [
-                {cwd: 'sources/webapp/', src: '*.html',          dest: 'build/webapp/', expand: 'true'},
-                {cwd: 'sources/webapp/', src: 'scripts/**/*.js', dest: 'build/webapp/', expand: 'true'},
-                {src: 'sources/webapp/manifest.appcache',        dest: 'build/webapp/manifest.appcache'}
-            ],
-            options: {
-                replacements: [{
-                    pattern: /\{\{ VERSION \}\}/g,
-                    replacement: '<%= pkg.version %>'
-                }, {
-                    pattern: /\{\{ VARIANT \}\}/g,
-                    replacement: 'H'
-                }]
-            }
-        },
+        files: [
+          { cwd: 'sources/webapp/', src: '*.html',          dest: 'build/webapp/', expand: 'true' },
+          { cwd: 'sources/webapp/', src: 'scripts/**/*.js', dest: 'build/webapp/', expand: 'true' },
+          { src: 'sources/webapp/serviceworker.js',         dest: 'build/webapp/serviceworker.js' }
+        ],
+        options: {
+          replacements: [{
+            pattern: /\{\{ VERSION \}\}/g,
+            replacement: '<%= pkg.version %>'
+          }, {
+            pattern: /\{\{ VARIANT \}\}/g,
+            replacement: 'H'
+          }]
+        }
+      },
       ChromePackagedApp: { // configure the string replacement task for the chrome packaged app
         files: [
           { cwd: 'sources/webApp/',    src: ['*.html', '!diagnostic.html'],                dest: 'build/chromeapp/temp/', expand: 'true' },
@@ -75,17 +75,17 @@ module.exports = function (grunt) {
     },
     copy: {
       HostedWebApp: {
-            files: [
-                // includes files within path {expand: true,  cwd: 'sources/webapp/',    src: ['styles/*.css'],                    dest: 'build/webapp/',             filter: 'isFile'},
-                {expand: true,  cwd: 'sources/webapp/',    src: ['styles/icons/*.svg'],              dest: 'build/webapp/',             filter: 'isFile'},
-                {expand: true,  cwd: 'sources/webapp/',    src: ['images/*.png'],                    dest: 'build/webapp/',             filter: 'isFile'},
-                {expand: true,  cwd: 'sources/hostedapp/', src: ['images/*.png'],                    dest: 'build/webapp/',             filter: 'isFile'},
-                {expand: true,  cwd: 'sources/hostedapp/', src: ['scripts/*.js'],                    dest: 'build/webapp/',             filter: 'isFile'},
-                {expand: true,  cwd: 'sources/webapp/',    src: ['*.py'],                            dest: 'build/webapp/',             filter: 'isFile'},
-                {expand: false,                            src: 'sources/webapp/images/favicon.ico', dest: 'build/webapp/favicon.ico'},
-                {expand: false,                            src: 'sources/webapp/.htaccess',          dest: 'build/webapp/.htaccess'}
-            ]
-        },
+        files: [
+          // includes files within path {expand: true,  cwd: 'sources/webapp/',    src: ['styles/*.css'],                    dest: 'build/webapp/',             filter: 'isFile'},
+          { expand: true,  cwd: 'sources/webapp/',    src: ['styles/icons/*.svg'],              dest: 'build/webapp/',             filter: 'isFile' },
+          { expand: true,  cwd: 'sources/webapp/',    src: ['images/*.png'],                    dest: 'build/webapp/',             filter: 'isFile' },
+          { expand: true,  cwd: 'sources/hostedapp/', src: ['images/*.png'],                    dest: 'build/webapp/',             filter: 'isFile' },
+          { expand: true,  cwd: 'sources/hostedapp/', src: ['scripts/*.js'],                    dest: 'build/webapp/',             filter: 'isFile' },
+          { expand: true,  cwd: 'sources/webapp/',    src: ['*.py'],                            dest: 'build/webapp/',             filter: 'isFile' },
+          { expand: false,                            src: 'sources/webapp/images/favicon.ico', dest: 'build/webapp/favicon.ico' },
+          { expand: false,                            src: 'sources/webapp/.htaccess',          dest: 'build/webapp/.htaccess' }
+        ]
+      },
       ChromePackagedApp: {
             files: [
                 {expand: true,  cwd: 'sources/webapp/',      src: ['styles/icons/*.svg'],              dest: 'build/chromeapp/temp/',            filter: 'isFile'},
