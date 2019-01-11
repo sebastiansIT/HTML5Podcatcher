@@ -1,4 +1,4 @@
-/*  Copyright 2014 - 2016 Sebastian Spautz
+/*  Copyright 2014 - 2016, 2019 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -15,11 +15,11 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
-/*global window, navigator, document, console, confirm */
-/*global Worker */
-/*global applicationCache, localStorage, Notification */
-/*global $ */
-/*global HTML5Podcatcher, POD */
+/* global window, navigator, document, console, confirm */
+/* global Worker */
+/* global applicationCache, localStorage, Notification */
+/* global $ */
+/* global HTML5Podcatcher, POD */
 var GlobalUserInterfaceHelper = {
     formatTimeCode: function (timecode) {
         "use strict";
@@ -60,30 +60,30 @@ var GlobalUserInterfaceHelper = {
 
         // Print message to console
         switch (logLevelName) {
-        case "debug":
+        case 'debug':
             logLevel = 1;
             console.debug(message);
             break;
-        case "info":
+        case 'info':
             logLevel = 2;
             console.info(message);
             break;
-        case "note":
+        case 'note':
             logLevel = 2.5;
             console.info(message);
             break;
-        case "warn":
+        case 'warn':
             logLevel = 3;
             console.warn(message);
             break;
-        case "error":
+        case 'error':
             logLevel = 4;
             console.error(message);
             break;
-        case "fatal":
+        case 'fatal':
             logLevel = 5;
             console.error(message);
-            $('#logView').addClass("fullscreen");
+            $('#logView').addClass('fullscreen');
             break;
         default:
             console.log(logLevel + ': ' + message);
@@ -138,7 +138,7 @@ var GlobalUserInterfaceHelper = {
     progressHandler: function (progressEvent, episode) {
         "use strict";
         var percentComplete, episodeUI;
-        
+
         episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode);
         if (progressEvent.lengthComputable) {
             //Downloaded Bytes / (total Bytes + 3% for saving to local storage)
@@ -199,7 +199,8 @@ var GlobalUserInterfaceHelper = {
     },
     settings: HTML5Podcatcher.api.configuration.settings,
     initApplicationCacheEvents: function () {
-        "use strict";
+      "use strict";
+      if (applicationCache) {
         function statusName(statusNumber) {
             switch (statusNumber) {
             case applicationCache.UNCACHED: // UNCACHED == 0
@@ -219,7 +220,7 @@ var GlobalUserInterfaceHelper = {
             }
         }
         applicationCache.addEventListener('checking', function () {
-            GlobalUserInterfaceHelper.logHandler("Application cache checks for updates (Cache status: " + statusName(applicationCache.status) + ")", 'debug:AppCache');
+            GlobalUserInterfaceHelper.logHandler('Application cache checks for updates (Cache status: ' + statusName(applicationCache.status) + ')', 'debug:AppCache');
         }, false);
         applicationCache.addEventListener('noupdate', function () {
             GlobalUserInterfaceHelper.logHandler("Application cache founds no update (Cache status: " + statusName(applicationCache.status) + ")", 'debug:AppCache');
@@ -250,11 +251,14 @@ var GlobalUserInterfaceHelper = {
                 GlobalUserInterfaceHelper.logHandler("Can't download manifest or resources because app is offline (Cache status: " + statusName(applicationCache.status) + ")", 'debug:AppCache');
             }
         }, false);
+      } else {
+        GlobalUserInterfaceHelper.logHandler('This Browser do not support AppCache. So, this app is not available offline', 'warn:AppCache')
+      }
     },
     initConnectionStateEvents: function () {
         "use strict";
-        window.addEventListener('online',  function () {
-            GlobalUserInterfaceHelper.logHandler("Online now", 'info');
+        window.addEventListener('online', function () {
+            GlobalUserInterfaceHelper.logHandler('Online now', 'info');
             $('.onlineOnly').removeAttr('disabled');
             $('.onlineOnly, a.external').removeAttr('aria-disabled');
         }, false);
@@ -371,7 +375,7 @@ var GlobalUserInterfaceHelper = {
     renderSource: function (source) {
         "use strict";
         var entryUI;
-        
+
         entryUI = document.querySelector('#sourceTemplate > *').cloneNode(true);
         if (source.language) {
             entryUI.setAttribute('lang', source.language);
@@ -428,7 +432,7 @@ var GlobalUserInterfaceHelper = {
     findEpisodeUI: function (episode) {
         "use strict";
         var i, entries;
-        
+
         entries = document.querySelectorAll('#playlist .entries li, #episodes .entries li');
         for (i = 0; i < entries.length; i++) {
            if ($(entries[i]).data('episodeUri') === episode.uri) {
@@ -446,7 +450,7 @@ var GlobalUserInterfaceHelper = {
             if (event.target.getAttribute('aria-disabled') !== 'true') {
                 event.target.setAttribute('aria-disabled', 'true');
                 // TODO replace Download-Link with cancel-Button while download isn't finished
-                
+
                 // load data of episode from storage...
                 POD.storage.readEpisode(episodeUI.data('episodeUri'), function (episode) {
                     UI.logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info');
@@ -479,7 +483,7 @@ var GlobalUserInterfaceHelper = {
                 sources.forEach(function (source, index, array) {
                     POD.web.downloadSource(source, null, function (parameters) {
                         var percentCompleted;
-                        
+
                         numberOfSourcesToDownload--;
                         if (parameters.status === 'failure') {
                             statusOverall = false;
