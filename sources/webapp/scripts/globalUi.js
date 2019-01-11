@@ -17,7 +17,7 @@
 */
 /* global window, navigator, document, console, confirm */
 /* global Worker */
-/* global applicationCache, localStorage, Notification */
+/* global localStorage, Notification */
 /* global $ */
 /* global HTML5Podcatcher, POD */
 var GlobalUserInterfaceHelper = {
@@ -25,36 +25,36 @@ var GlobalUserInterfaceHelper = {
         "use strict";
         //Validate Parameter to be a number
         if (isNaN(+timecode)) {
-            throw new TypeError("Timecode needs to be a positiv integer");
+            throw new TypeError('Timecode needs to be a positiv integer');
         }
         //Validate Parameter to be a positiv number
         if (timecode < 0) {
-            throw new RangeError("Timecode needs to be a positiv integer");
+            throw new RangeError('Timecode needs to be a positiv integer');
         }
         var hours, minutes, seconds;
         hours = Math.floor(timecode / 3600);
         minutes = Math.floor((timecode % 3600) / 60);
         seconds = timecode % 60;
-        hours = (hours < 10) ? "0" + hours : hours;
-        minutes = (minutes < 10) ? "0" + minutes : minutes;
-        seconds = (seconds < 10) ? "0" + seconds : seconds;
+        hours = (hours < 10) ? '0' + hours : hours;
+        minutes = (minutes < 10) ? '0' + minutes : minutes;
+        seconds = (seconds < 10) ? '0' + seconds : seconds;
         return hours + ':' + minutes + ':' + seconds;
     },
     escapeHtml: function (text) {
         "use strict";
         return text
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     },
     logHandler: function (message, logLevelName, tag) {
         "use strict";
         var allowedLevel, messageNode, logEntryNode, logLevel = 0, notification;
-        if (logLevelName && logLevelName.indexOf(":") >= 0) {
-            logLevelName = logLevelName.substring(0, logLevelName.indexOf(":"));
-            tag = logLevelName.substring(logLevelName.indexOf(":") + 1);
+        if (logLevelName && logLevelName.indexOf(':') >= 0) {
+            logLevelName = logLevelName.substring(0, logLevelName.indexOf(':'));
+            tag = logLevelName.substring(logLevelName.indexOf(':') + 1);
         }
         tag = tag || '';
 
@@ -91,12 +91,12 @@ var GlobalUserInterfaceHelper = {
 
         // Show message as Web Notification
         if (logLevel === 2.5 && window.Notification) {
-            if (Notification.permission === "granted") { // If it's okay let's create a notification
-                notification = new Notification(message, {icon: 'images/logo32.png', tag: 'HTML5Podcatcher' + tag});
+            if (Notification.permission === 'granted') { // If it's okay let's create a notification
+                notification = new Notification(message, { icon: 'images/logo32.png', tag: 'HTML5Podcatcher' + tag });
             } else if (Notification.permission !== 'denied') { // Otherwise, we need to ask the user for permission
                 Notification.requestPermission(function (permission) {
                     // If the user accepts, let's create a notification
-                    if (permission === "granted") {
+                    if (permission === 'granted') {
                         notification = new Notification(message, {icon: 'images/logo32.png', tag: 'HTML5Podcatcher' + tag});
                     }
                 });
@@ -104,8 +104,8 @@ var GlobalUserInterfaceHelper = {
         }
 
         // Show message in the user interface
-        logEntryNode = document.createElement("p");
-        allowedLevel = GlobalUserInterfaceHelper.settings.get("logLevel") || 0;
+        logEntryNode = document.createElement('p');
+        allowedLevel = GlobalUserInterfaceHelper.settings.get('logLevel') || 0;
         if (logLevel >= allowedLevel) {
             logEntryNode.className = logLevelName;
             logEntryNode.appendChild(document.createTextNode(message));
@@ -166,20 +166,20 @@ var GlobalUserInterfaceHelper = {
                 appInfoRequest = window.navigator.mozApps.getSelf();
                 appInfoRequest.onsuccess = function () {
                     if (appInfoRequest.result) { //checks for installed app
-                        HTML5Podcatcher.logger(appInfoRequest.result.manifest.name + " is a " + appInfoRequest.result.manifest.type + " app.", 'debug');
+                        HTML5Podcatcher.logger(appInfoRequest.result.manifest.name + ' is a ' + appInfoRequest.result.manifest.type + ' app.', 'debug');
                         if (appInfoRequest.result.manifest.type === 'privileged' || appInfoRequest.result.manifest.type === 'certified') {
                             HTML5Podcatcher.logger('App is allowed to post System XHR requests.', 'debug');
                             feedExistingCheck();
                         } else {
-                            if (!GlobalUserInterfaceHelper.settings.get("proxyUrl") || GlobalUserInterfaceHelper.settings.get("proxyUrl").length < 11) {
+                            if (!GlobalUserInterfaceHelper.settings.get('proxyUrl') || GlobalUserInterfaceHelper.settings.get('proxyUrl').length < 11) {
                                 actionCallback('missing proxy');
                             } else {
                                 feedExistingCheck();
                             }
                         }
                     } else { //checks for app opend in browser
-                        HTML5Podcatcher.logger("This Webapp isn't installed as an Mozilla Open Web App but you can install it from Firefox Marketplace.", 'debug');
-                        if (!GlobalUserInterfaceHelper.settings.get("proxyUrl") || GlobalUserInterfaceHelper.settings.get("proxyUrl").length < 11) {
+                        HTML5Podcatcher.logger('This Webapp isn\'t installed as an Mozilla Open Web App but you can install it from Firefox Marketplace.', 'debug');
+                        if (!GlobalUserInterfaceHelper.settings.get('proxyUrl') || GlobalUserInterfaceHelper.settings.get('proxyUrl').length < 11) {
                             actionCallback('missing proxy');
                         } else {
                             feedExistingCheck();
@@ -187,9 +187,9 @@ var GlobalUserInterfaceHelper = {
                     }
                 };
             } else { //is a runtime without support for Open Web Apps
-                HTML5Podcatcher.logger("This Webapp isn't installed as an Open Web App.", 'debug');
-                if (!GlobalUserInterfaceHelper.settings.get("proxyUrl") || GlobalUserInterfaceHelper.settings.get("proxyUrl").length < 11) {
-                    actionCallback("missing proxy");
+                HTML5Podcatcher.logger('This Webapp isn\'t installed as an Open Web App.', 'debug');
+                if (!GlobalUserInterfaceHelper.settings.get('proxyUrl') || GlobalUserInterfaceHelper.settings.get('proxyUrl').length < 11) {
+                    actionCallback('missing proxy');
                 } else {
                     feedExistingCheck();
                 }
@@ -219,7 +219,7 @@ var GlobalUserInterfaceHelper = {
             $('.onlineOnly, a.external').removeAttr('aria-disabled');
         }, false);
         window.addEventListener('offline', function () {
-            GlobalUserInterfaceHelper.logHandler("Offline now", 'info');
+            GlobalUserInterfaceHelper.logHandler('Offline now', 'info');
             $('.onlineOnly').attr('disabled', 'disabled');
             $('.onlineOnly, a.external').attr('aria-disabled', 'true');
         }, false);
@@ -270,9 +270,9 @@ var GlobalUserInterfaceHelper = {
         }
         entryUI.find('.source').text(episode.source);
         if (episode.playback.played) {
-            entryUI.find('.updated').attr('datetime', episode.updated.toISOString()).text(episode.updated.toLocaleDateString() + " " + episode.updated.toLocaleTimeString());
+            entryUI.find('.updated').attr('datetime', episode.updated.toISOString()).text(episode.updated.toLocaleDateString() + ' ' + episode.updated.toLocaleTimeString());
         } else {
-            entryUI.find('.updated').attr('datetime', episode.updated.toISOString()).text("New");
+            entryUI.find('.updated').attr('datetime', episode.updated.toISOString()).text('New');
         }
         entryUI.find('a.origin').attr('href', episode.uri);
         if (POD.storage.isFileStorageAvailable() && episode.mediaUrl) {
@@ -356,7 +356,7 @@ var GlobalUserInterfaceHelper = {
         if (source.license) {
             entryUI.find('.license').text(source.license);
         } else {
-            entryUI.find('.license').text("All rights reserved or no information");
+            entryUI.find('.license').text('All rights reserved or no information');
         }
         //deactivate online-only-functions when offline
         if (!navigator.onLine) {
@@ -475,7 +475,7 @@ var GlobalUserInterfaceHelper = {
             $(button).attr('disabled', 'disabled');
             $(button).addClass('spinner');
 
-            POD.logger("Playlist will be refreshed", "debug");
+            POD.logger('Playlist will be refreshed', 'debug');
 
             POD.storage.readSources(function (sources) {
                 var worker = new Worker('scripts/worker/actualisePlaylist.js');
