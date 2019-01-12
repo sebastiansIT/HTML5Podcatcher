@@ -90,6 +90,7 @@ self.addEventListener('install', function (event) {
         console.error('Error caching Files', error)
       })
   )
+  console.log('ServiceWorker installed')
 })
 
 self.addEventListener('activate', event => {
@@ -105,9 +106,23 @@ self.addEventListener('activate', event => {
       )
     })
   )
+  console.log('ServiceWorker activated')
 })
 
 self.addEventListener('fetch', event => {
+  const BASE_URL = self.registration.scope
+  // Check if file is on the "Not Cache list"
+  if (NETWORK_FILES.find(element => {
+    const elementUrl = new URL(element, BASE_URL)
+    const fetchUrl = new URL(event.request.url)
+    return elementUrl.hostname === fetchUrl.hostname &&
+      elementUrl.port === fetchUrl.port &&
+      elementUrl.pathname === fetchUrl.pathname
+  })) {
+    return // without a explicit call of event.respondWidth the browser handles the request as normal
+  }
+
+  // Respond primarly from cache; fallback to Network
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -115,7 +130,21 @@ self.addEventListener('fetch', event => {
         if (response) {
           return response
         }
-        return fetch(event.request)
+
+        return fetch(event.request).then(response => {
+          // Check if we received a valid response
+          if (!response || response.status !== 200 || response.type !== 'basic') {
+            return response
+          }
+
+          let responseToCache = response.clone()
+          caches.open(CACHE_NAME).then(cache => {
+            console.log('ServiceWorker fetches URL')
+            cache.put(event.request, responseToCache)
+          })
+
+          return response
+        })
       })
   )
 })
