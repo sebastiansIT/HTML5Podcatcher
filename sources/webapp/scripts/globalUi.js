@@ -198,10 +198,16 @@ var GlobalUserInterfaceHelper = {
         proxyNeededCheck();
     },
     settings: HTML5Podcatcher.api.configuration.settings,
+
+  /** Register ServiceWorker and handle the update prozess
+    * @returns undefined
+  */
   initServiceWorker: function () {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('serviceworker.js')
         .then(registration => {
+          const CONFIRM_MESSAGE = 'An update of HTML5 Podcatcher is available. Do you want to reload now?'
+
           GlobalUserInterfaceHelper.logHandler('ServiceWorker registration successful with scope: ' + registration.scope, 'debug', 'ServiceWorker')
 
           if (registration.active) {
@@ -209,6 +215,10 @@ var GlobalUserInterfaceHelper = {
               GlobalUserInterfaceHelper.logHandler('ServiceWorker is active but a update is installing.', 'debug', 'ServiceWorker')
             } else if (registration.waiting) {
               GlobalUserInterfaceHelper.logHandler('ServiceWorker  is active but a update is waiting to become active.', 'debug', 'ServiceWorker')
+              if (confirm(CONFIRM_MESSAGE)) {
+                registration.waiting.postMessage({ command: 'skipWaiting', message: 'Activate waiting Update' })
+                window.location.reload()
+              }
             } else {
               GlobalUserInterfaceHelper.logHandler('ServiceWorker inital state is "active."', 'debug', 'ServiceWorker')
             }
@@ -226,8 +236,10 @@ var GlobalUserInterfaceHelper = {
               const STATE = statechangeevent.target.state
               GlobalUserInterfaceHelper.logHandler('ServiceWorker state changed to ' + STATE, 'debug')
 
-              if (STATE === 'installed' && confirm('An update of HTML5 Podcatcher is available. Do you want to reload now?')) {
-                // TODO send message to ServiceWorker to call skipWaiting()
+              if (registration.active &&
+                  STATE === 'installed' &&
+                  confirm(CONFIRM_MESSAGE)) {
+                navigator.ServiceWorker.waiting.postMessage({ command: 'skipWaiting', message: 'Activate Update' })
                 window.location.reload()
               }
             })
@@ -240,6 +252,7 @@ var GlobalUserInterfaceHelper = {
       GlobalUserInterfaceHelper.logHandler('ServiceWorker isn\'t supportet on this platform', 'debug', 'ServiceWorker')
       GlobalUserInterfaceHelper.logHandler('This app can\'t used offline!', 'warn', 'ServiceWorker')
     }
+    navigator.serviceWorker.controller.postMessage('lalala')
   },
     initConnectionStateEvents: function () {
         "use strict";

@@ -109,6 +109,15 @@ self.addEventListener('activate', event => {
   console.log('ServiceWorker activated')
 })
 
+self.addEventListener('message', event => {
+  if (event.data.command === 'skipWaiting') {
+    self.skipWaiting()
+    console.log(event.data.message)
+  } else {
+    console.log(event.data)
+  }
+})
+
 self.addEventListener('fetch', event => {
   const SERVICEWORKER_SCOPE = self.registration.scope
   const SCOPE_URL = new URL(SERVICEWORKER_SCOPE)
