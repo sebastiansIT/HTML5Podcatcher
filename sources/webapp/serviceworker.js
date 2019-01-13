@@ -110,14 +110,16 @@ self.addEventListener('activate', event => {
 })
 
 self.addEventListener('fetch', event => {
-  const BASE_URL = self.registration.scope
+  const SERVICEWORKER_SCOPE = self.registration.scope
+  const SCOPE_URL = new URL(SERVICEWORKER_SCOPE)
+  const FETCH_URL = new URL(event.request.url)
+
   // Check if file is on the "Not Cache list"
-  if (NETWORK_FILES.find(element => {
-    const elementUrl = new URL(element, BASE_URL)
-    const fetchUrl = new URL(event.request.url)
-    return elementUrl.hostname === fetchUrl.hostname &&
-      elementUrl.port === fetchUrl.port &&
-      elementUrl.pathname === fetchUrl.pathname
+  if (NETWORK_FILES.find(noCachePath => {
+    const NO_CACHE_URL = new URL(noCachePath, SERVICEWORKER_SCOPE)
+    return NO_CACHE_URL.hostname === FETCH_URL.hostname &&
+      NO_CACHE_URL.port === FETCH_URL.port &&
+      NO_CACHE_URL.pathname === FETCH_URL.pathname
   })) {
     return // without a explicit call of event.respondWidth the browser handles the request as normal
   }
@@ -137,11 +139,18 @@ self.addEventListener('fetch', event => {
             return response
           }
 
-          let responseToCache = response.clone()
-          caches.open(CACHE_NAME).then(cache => {
-            console.log('ServiceWorker fetches URL')
-            cache.put(event.request, responseToCache)
-          })
+          // If the requested file is in scope of the ServiceWorker cache the response
+          if (SCOPE_URL.protocol === FETCH_URL.protocol &&
+              SCOPE_URL.hostname === FETCH_URL.hostname &&
+              SCOPE_URL.port === FETCH_URL.port &&
+              FETCH_URL.pathname.indexOf(SCOPE_URL.pathname) === 0
+          ) {
+            let responseToCache = response.clone()
+            caches.open(CACHE_NAME).then(cache => {
+              console.log('ServiceWorker fetches URL')
+              cache.put(event.request, responseToCache)
+            })
+          }
 
           return response
         })
