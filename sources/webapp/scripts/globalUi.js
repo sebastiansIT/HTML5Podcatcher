@@ -198,19 +198,49 @@ var GlobalUserInterfaceHelper = {
         proxyNeededCheck();
     },
     settings: HTML5Podcatcher.api.configuration.settings,
-    initServiceWorker: function () {
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('serviceworker.js').then(function (registration) {
-          // Registration was successful
-          GlobalUserInterfaceHelper.logHandler('ServiceWorker registration successful with scope: ' + registration.scope, 'debug')
-          console.log('ServiceWorker registration successful with scope: ', registration.scope)
-        }, function (err) {
-          // registration failed :(
-          GlobalUserInterfaceHelper.logHandler('ServiceWorker registration failed: ' + err, 'error')
-          console.log('ServiceWorker registration failed: ', err)
+  initServiceWorker: function () {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('serviceworker.js')
+        .then(registration => {
+          GlobalUserInterfaceHelper.logHandler('ServiceWorker registration successful with scope: ' + registration.scope, 'debug', 'ServiceWorker')
+
+          if (registration.active) {
+            if (registration.installing) {
+              GlobalUserInterfaceHelper.logHandler('ServiceWorker is active but a update is installing.', 'debug', 'ServiceWorker')
+            } else if (registration.waiting) {
+              GlobalUserInterfaceHelper.logHandler('ServiceWorker  is active but a update is waiting to become active.', 'debug', 'ServiceWorker')
+            } else {
+              GlobalUserInterfaceHelper.logHandler('ServiceWorker inital state is "active."', 'debug', 'ServiceWorker')
+            }
+          } else {
+            if (registration.installing) {
+              GlobalUserInterfaceHelper.logHandler('ServiceWorker inital state is "installing."', 'debug', 'ServiceWorker')
+            } else if (registration.waiting) {
+              GlobalUserInterfaceHelper.logHandler('ServiceWorker inital state is "waiting".', 'debug', 'ServiceWorker')
+            }
+          }
+
+          registration.addEventListener('updatefound', () => {
+            const NEW_WORKER = registration.installing
+            NEW_WORKER.addEventListener('statechange', statechangeevent => {
+              const STATE = statechangeevent.target.state
+              GlobalUserInterfaceHelper.logHandler('ServiceWorker state changed to ' + STATE, 'debug')
+
+              if (STATE === 'installed' && confirm('An update of HTML5 Podcatcher is available. Do you want to reload now?')) {
+                // TODO send message to ServiceWorker to call skipWaiting()
+                window.location.reload()
+              }
+            })
+          })
         })
-      }
-    },
+        .catch(error => {
+          GlobalUserInterfaceHelper.logHandler('ServiceWorker registration failed: ' + error, 'error', 'ServiceWorker')
+        })
+    } else {
+      GlobalUserInterfaceHelper.logHandler('ServiceWorker isn\'t supportet on this platform', 'debug', 'ServiceWorker')
+      GlobalUserInterfaceHelper.logHandler('This app can\'t used offline!', 'warn', 'ServiceWorker')
+    }
+  },
     initConnectionStateEvents: function () {
         "use strict";
         window.addEventListener('online', function () {
