@@ -34,56 +34,88 @@
     <link rel="apple-touch-icon" type="image/png" sizes="76x76" href="logo76.png">
     <link rel="apple-touch-icon" type="image/png" sizes="120x120" href="logo120.png">
     <link rel="apple-touch-icon" type="image/png" sizes="152x152" href="logo152.png">
-    <link rel="stylesheet" href="css/main.css" />
+    <!-- build:css styles/main.css -->
+  	<link href="styles/headers.css" rel="stylesheet" type="text/css" />
+  	<link href="styles/footers.css" rel="stylesheet" type="text/css" />
+  	<link href="styles/buttons.css" rel="stylesheet" type="text/css" />
+  	<link href="styles/input_areas.css" rel="stylesheet" type="text/css" />
+  	<link href="styles/lists.css" rel="stylesheet" type="text/css" />
+  	<link href="styles/main.css" rel="stylesheet" type="text/css" />
+  	<!-- endbuild -->
     <script src="scripts/jquery.min.js"></script>
-    <script src="scripts/normalise.js"></script>
-    <script src="scripts/lowLevelApi.js"></script>
+  	<script src="scripts/normalise.js"></script>
+  	<script src="scripts/lowLevelApi.js"></script>
+  	<script src="scripts/storage/storage.js"></script>
+  	<script src="scripts/storage/fileSystemProvider.js"></script>
+  	<script src="scripts/storage/indexedDbProvider.js"></script>
+  	<script src="scripts/storage/webStorageProvider.js"></script>
     <script src="scripts/configuration/configuration.js"></script>
     <script src="scripts/web/web.js"></script>
-    <script src="scripts/globalUi.js"></script>
+  	<script src="scripts/globalUi.js"></script>
     <script src="scripts/diagnostic.js"></script>
 </head>
-    <body>
-        <header role="banner">
-			<h1>HTML5 Podcatcher</h1>
-			<h2>{{ VERSION }} {{ VARIANT }}</h2>
-		</header>
-		<div class="main">
-			<section>
-				<h2>Supported API's</h2>
-				<p id="SupportFilesystemAPI" class="message">?</p>
-			</section>
-			<section>
-				<h2>Key Settings</h2>
-				<form>
-					<label for="previousTrackKey1">Previous Track</label>
-					<input id="previousTrackKey1" placeholder="press key for previous track" /><br />
-					<label for="nextTrackKey1">Next Track</label>
-					<input id="nextTrackKey1" placeholder="press key for next track" /><br />
-					<label for="playTrackKey1">Play/Stop Track</label>
-					<input id="playTrackKey1" placeholder="press key for start/stop" /><br />
-				</form>
-			</section>
-			<section>
-				<h2>Test Ogg Opus</h2>
-            <audio title="TRO031 – Trojanischer Krieg 1 – Verbotene Liebe" preload="metadata" controls="controls">
-               <source src="http://trojaalert.bildungsangst.de/podlove/file/1809/s/feed/c/opus/tro031-trojanischer-krieg-1-verbotene-liebe.opus#t=0" type="audio/ogg; codecs=opus">
-            </audio>
-            <h2>Test MP3-Playback</h2>
-				<audio title="VorSpiel 2015" preload="metadata" controls="controls">
-               <source src="http://ausgespielt-podcast.de/podpress_trac/feed/7717/0/VorSpiel2015.mp3#t=0" type="audio/mpeg">
-            </audio>
-			</section>
-			<section>
-				<h2>Application Cache</h2>
-				<p>Config on Chrome: <a href="chrome://appcache-internals/">chrome://appcache-internals/</a></p>
-			</section>
-		</div>
-		<footer>
-			<!-- Impressum ec. -->
-			<nav role="navigation"><ul><li><a href="playlist.html" title="Playlist">Playlist</a></li></ul></nav>
-			<p id="statusbar"></p>
-			<div id="activeMessage"></div>
-		</footer>
-    </body>
+  <body>
+    <section role="region">
+      <header role="banner">
+        <menu type="toolbar">
+  				<a href="playlist.html" title="Playlist"><span class="icon icon-playlist">Playlist</span></a>
+  				<a href="sources.html" title="Sources/Feeds"><span class="icon icon-feed">Feeds</span></a>
+  			</menu>
+        <h1>HTML5 Podcatcher</h1>
+  		</header>
+  		<div class="content">
+        <section>
+          <h2>Informations</h2>
+          <p>Version {{ VERSION }} {{ VARIANT }}</p>
+        </section>
+        <section>
+  				<h2>Supported API's</h2>
+  				<p id="SupportFilesystemAPI" class="message">?</p>
+  			</section>
+  			<section>
+  				<h2>Key Settings</h2>
+  				<form>
+  					<label for="previousTrackKey1">Previous Track</label>
+  					<input id="previousTrackKey1" placeholder="press key for previous track" /><br />
+  					<label for="nextTrackKey1">Next Track</label>
+  					<input id="nextTrackKey1" placeholder="press key for next track" /><br />
+  					<label for="playTrackKey1">Play/Stop Track</label>
+  					<input id="playTrackKey1" placeholder="press key for start/stop" /><br />
+  				</form>
+  			</section>
+  			<section>
+  				<h2>Test Ogg Opus</h2>
+              <audio title="TRO031 – Trojanischer Krieg 1 – Verbotene Liebe" preload="metadata" controls="controls">
+                 <source src="http://trojaalert.bildungsangst.de/podlove/file/1809/s/feed/c/opus/tro031-trojanischer-krieg-1-verbotene-liebe.opus#t=0" type="audio/ogg; codecs=opus">
+              </audio>
+              <h2>Test MP3-Playback</h2>
+  				<audio title="VorSpiel 2015" preload="metadata" controls="controls">
+                 <source src="https://media.ausgespielt-podcast.de/2_Helden_Viele_Welten_Shadows_Demonlord_Teil2.mp3#t=0" type="audio/mpeg">
+              </audio>
+  			</section>
+  			<section>
+  				<h2>Application Cache</h2>
+  				<p>Config on Chrome: <a href="chrome://appcache-internals/">chrome://appcache-internals/</a></p>
+  			</section>
+  		</div>
+  		<footer>
+        <div role="toolbar">
+  			  <button id="showLogView" data-icon="show-log">Show Log</button>
+  			</div>
+  		</footer>
+      <div id="activeMessage"></div>
+    </section>
+    <section id="logView" class="dialog" role="region">
+  		<header role="banner">
+  			<button title="Close" class="closeDialog"><span class="icon icon-close">Close</span></button>
+  			<menu type="toolbar">
+  			</menu>
+  			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} Message Log">Message Log</h1>
+  		</header>
+  		<div class="content">
+  			<div id="log">
+  			</div>
+  		</div>
+  	</section>
+  </body>
 </html>
