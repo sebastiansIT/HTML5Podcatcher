@@ -1,4 +1,4 @@
-﻿/* Copyright 2014 Sebastian Spautz
+﻿/* Copyright 2014, 2019 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -218,4 +218,27 @@ $(document).ready(function () {
     $('#previousTrackKey1, #nextTrackKey1, #playTrackKey1').on('keydown', function (event) {
         $(this).val(event.keyCode || event.key);
     });
+
+    //see https://developers.google.com/web/updates/2017/08/estimating-available-storage-space
+    if ('storage' in navigator && 'estimate' in navigator.storage) {
+      navigator.storage.estimate().then(({usage, quota}) => {
+        document.getElementById('storageQuota').textContent = `Using ${usage} out of ${quota} bytes.`
+        console.log(`Using ${usage} out of ${quota} bytes.`)
+      });
+    }
+
+    if (navigator.persistentStorage) {
+      navigator.persistentStorage.queryUsageAndQuota(function (usage, quota) {
+        var availableSpace = quota - usage
+        document.getElementById('persistentStorage').textContent = `Using ${usage} out of ${quota} bytes.`
+        console.log(`File System API uses ${usage} out of ${quota} bytes.`)
+      })
+    }
+
+    if (navigator.storageQuota) {
+      navigator.storageQuota.queryInfo("temporary").then(function(info) {
+        document.getElementById('quotaManagementTemp').textContent = `Using ${info.usage} out of ${info.quota} bytes.`
+        console.log(`Storage Quota uses ${info.usage} out of ${info.quota} bytes.`)
+      });
+    }
 });
