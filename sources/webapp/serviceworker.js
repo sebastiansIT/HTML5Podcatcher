@@ -67,6 +67,7 @@ const CACHED_FILES = [
   'styles/icons/sources.svg',
   // IMAGES
   'favicon.ico',
+  'images/logo32.png',
   'images/logo60.png',
   'images/logo76.png',
   'images/logo120.png',

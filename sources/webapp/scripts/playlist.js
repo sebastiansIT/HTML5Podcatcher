@@ -15,11 +15,11 @@
      You should have received a copy of the GNU General Public License
      along with this program.  If not, see http://www.gnu.org/licenses/.
 */
-/*global navigator, window, document */
-/*global console, localStorage, HTMLMediaElement, Notification */
-/*global $ */
-/*global POD, HTML5Podcatcher */
-/*global GlobalUserInterfaceHelper, UI */
+/* global navigator, window, document */
+/* global console, localStorage, HTMLMediaElement */
+/* global $ */
+/* global POD, HTML5Podcatcher */
+/* global GlobalUserInterfaceHelper, UI */
 GlobalUserInterfaceHelper.actualiseEpisodeUI = function (episode) {
     "use strict";
     var episodeUI;
