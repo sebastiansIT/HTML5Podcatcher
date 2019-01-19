@@ -77,7 +77,7 @@ var chromeFileSystemStorageImplementation = (function () {
                 fileEntry.createWriter(function (writer) {
                     writer.onwrite = function (event) {
                         if (onProgressCallback && typeof onProgressCallback === 'function') {
-                            onProgressCallback(event, 'Write', episode);
+                            onProgressCallback(event, episode);
                         }
                     };
                     writer.onwriteend = function () { //success
