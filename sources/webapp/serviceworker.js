@@ -85,14 +85,14 @@ self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache')
+        logHandler(`Opened cache ${CACHE_NAME}`, 'debug')
         return cache.addAll(CACHED_FILES)
       })
       .catch(error => {
-        console.error('Error caching Files', error)
+        logHandler('Error caching Files ' + error, 'error')
       })
   )
-  console.log('ServiceWorker installed')
+  logHandler('ServiceWorker installed', 'info')
 })
 
 self.addEventListener('activate', event => {
@@ -108,15 +108,15 @@ self.addEventListener('activate', event => {
       )
     })
   )
-  console.log('ServiceWorker activated')
+  logHandler('ServiceWorker activated', 'debug')
 })
 
 self.addEventListener('message', event => {
   if (event.data.command === 'skipWaiting') {
+    logHandler(`Update Application imediatly`, 'debug')
     self.skipWaiting()
-    console.log(event.data.message)
   } else {
-    console.log(event.data)
+    logHandler(`Message "${event.data}" received by ServiceWorker`, 'note')
   }
 })
 
@@ -125,6 +125,8 @@ self.addEventListener('fetch', event => {
   const SCOPE_URL = new URL(SERVICEWORKER_SCOPE)
   const FETCH_URL = new URL(event.request.url)
 
+  logHandler(`Application fetch ${event.request.url}`, 'debug', 'ServiceWorker')
+
   // Check if file is on the "Not Cache list"
   if (NETWORK_FILES.find(noCachePath => {
     const NO_CACHE_URL = new URL(noCachePath, SERVICEWORKER_SCOPE)
@@ -132,6 +134,7 @@ self.addEventListener('fetch', event => {
       NO_CACHE_URL.port === FETCH_URL.port &&
       NO_CACHE_URL.pathname === FETCH_URL.pathname
   })) {
+    logHandler(`Application fetch a URL in No-Cache-List (${event.request.url})`, 'debug', 'ServiceWorker')
     return // without a explicit call of event.respondWidth the browser handles the request as normal
   }
 
@@ -141,12 +144,14 @@ self.addEventListener('fetch', event => {
       .then(response => {
         // Cache hit - return response
         if (response) {
+          logHandler(`Application fetch a URL that is in a cache (${event.request.url})`, 'debug', 'ServiceWorker')
           return response
         }
 
         return fetch(event.request).then(response => {
           // Check if we received a valid response
           if (!response || response.status !== 200 || response.type !== 'basic') {
+            logHandler(`Application fetch a URL whose response can't be cached (${event.request.url})`, 'debug', 'ServiceWorker')
             return response
           }
 
@@ -158,13 +163,38 @@ self.addEventListener('fetch', event => {
           ) {
             let responseToCache = response.clone()
             caches.open(CACHE_NAME).then(cache => {
-              console.log('ServiceWorker fetches URL')
+              logHandler(`Application fetch a URL that will now cached (${event.request.url})`, 'debug', 'ServiceWorker')
               cache.put(event.request, responseToCache)
             })
           }
-
+          logHandler(`Application fetch a URL which is loaded from Network (${event.request.url})`, 'debug', 'ServiceWorker')
           return response
         })
       })
   )
 })
+
+const logHandler = function (message, logLevelName, tag) {
+  switch (logLevelName) {
+    case 'debug':
+      console.debug(message)
+      break
+    case 'info':
+      console.info(message)
+      break
+    case 'note':
+      console.info(message)
+      break
+    case 'warn':
+      console.warn(message)
+      break
+    case 'error':
+      console.error(message)
+      break
+    case 'fatal':
+      console.error(message)
+      break
+    default:
+      console.log(logLevelName + ': ' + message)
+  }
+}
