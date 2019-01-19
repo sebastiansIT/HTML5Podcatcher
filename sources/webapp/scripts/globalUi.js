@@ -239,7 +239,7 @@ var GlobalUserInterfaceHelper = {
               if (registration.active &&
                   STATE === 'installed' &&
                   confirm(CONFIRM_MESSAGE)) {
-                navigator.ServiceWorker.waiting.postMessage({ command: 'skipWaiting', message: 'Activate Update' })
+                registration.waiting.postMessage({ command: 'skipWaiting', message: 'Activate Update' })
                 window.location.reload()
               }
             })
@@ -252,7 +252,6 @@ var GlobalUserInterfaceHelper = {
       GlobalUserInterfaceHelper.logHandler('ServiceWorker isn\'t supportet on this platform', 'debug', 'ServiceWorker')
       GlobalUserInterfaceHelper.logHandler('This app can\'t used offline!', 'warn', 'ServiceWorker')
     }
-    navigator.serviceWorker.controller.postMessage('lalala')
   },
   initConnectionStateEvents: function () {
       "use strict";
