@@ -15,12 +15,15 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
-/* global self, caches, fetch */
-/* Information about ServiceWorker see
+/* For information about ServiceWorker see
    https://developers.google.com/web/fundamentals/primers/service-workers/ or
    https://developers.google.com/web/fundamentals/instant-and-offline/offline-cookbook/#stale-while-revalidate */
 
-const CACHE_PREFIX = 'HTML5Podcatcher'
+/* global self, caches, fetch */
+
+self.importScripts('scripts/worker/utils/workerlogger.js')
+
+const CACHE_PREFIX = 'HTML5Podcatcher_Assets'
 const CACHE_NAME = CACHE_PREFIX + '_{{ VERSION }}'
 const CACHED_FILES = [
   // HTML
@@ -80,52 +83,86 @@ const NETWORK_FILES = [
   'serviceworker.js'
 ]
 
-self.addEventListener('install', function (event) {
+self.addEventListener('install', event => {
   // Perform install steps
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        logHandler(`Opened cache ${CACHE_NAME}`, 'debug')
-        return cache.addAll(CACHED_FILES)
-      })
-      .catch(error => {
-        logHandler('Error caching Files ' + error, 'error')
-      })
+    self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
+      .then(clients => {
+        const LOGGER = new self.WorkerLogger(clients)
+        return caches.open(CACHE_NAME)
+          .then(cache => {
+            LOGGER.log(`Opened cache ${CACHE_NAME}`, 'debug', 'ServiceWorker')
+            return cache.addAll(CACHED_FILES)
+          })
+          .then(() => {
+            LOGGER.log('ServiceWorker installed', 'info', 'ServiceWorker')
+          })
+          .catch(error => {
+            LOGGER.log(`Error caching Files, application can't used offline: ${error}`, 'error', 'ServiceWorker')
+          })
+      }) // Don't catch rejected Promise, this case is handled through the waitUntil() function
   )
-  logHandler('ServiceWorker installed', 'info')
 })
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          // Other Caches then the actual but in general a HTML5Podcatcher-Cache
-          if (cacheName !== CACHE_NAME && cacheName.indexOf(CACHE_PREFIX) === 0) {
-            return caches.delete(cacheName)
-          }
-        })
-      )
-    })
+    self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
+      .then(clients => {
+        const LOGGER = new self.WorkerLogger(clients)
+        return caches.keys()
+          .then(cacheNames => {
+            LOGGER.log(`Clean up old Caches`, 'debug', 'ServiceWorker')
+            return Promise.all(
+              cacheNames.map(cacheName => {
+                // Other Caches then the actual but in general a HTML5Podcatcher-Cache
+                if (cacheName !== CACHE_NAME && cacheName.indexOf(CACHE_PREFIX) === 0) {
+                  return caches.delete(cacheName)
+                    .then(() => LOGGER.log(`Deleted old Cache "${cacheName}"`), 'debug', 'ServiceWorker')
+                    .catch(error => {
+                      LOGGER.log(`Error while deleting cache "${cacheName}": ${error}`, 'error', 'ServiceWorker')
+                    })
+                }
+              })
+            ).then(() => {
+              LOGGER.log('ServiceWorker activated', 'debug', 'ServiceWorker')
+            })
+          })
+      })
   )
-  logHandler('ServiceWorker activated', 'debug')
 })
 
 self.addEventListener('message', event => {
+  const LOGGER = new self.WorkerLogger([event.ports[0]])
   if (event.data.command === 'skipWaiting') {
-    logHandler(`Update Application imediatly`, 'debug')
+    LOGGER.log(`Update application imediatly`, 'debug')
     self.skipWaiting()
+    event.ports[0].postMessage({ command: 'confirm' })
   } else {
-    logHandler(`Message "${event.data}" received by ServiceWorker`, 'note')
+    LOGGER.log(`Message "${event.data}" received by ServiceWorker`, 'note')
   }
 })
 
+/**
+  * @param {https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent} event
+  */
 self.addEventListener('fetch', event => {
   const SERVICEWORKER_SCOPE = self.registration.scope
   const SCOPE_URL = new URL(SERVICEWORKER_SCOPE)
   const FETCH_URL = new URL(event.request.url)
+  const LOGGER = {
+    'log': function (message, logLevelName, tag) {
+      self.clients.get(event.clientId)
+        .then(client => {
+          let clients = []
+          if (client) {
+            clients.push(client)
+          }
+          new self.WorkerLogger(clients).log(message, logLevelName, tag)
+        })
+    }
+  }
 
-  logHandler(`Application fetch ${event.request.url}`, 'debug', 'ServiceWorker')
+  LOGGER.log(`Application fetch ${event.request.url}`, 'debug', 'ServiceWorker')
 
   // Check if file is on the "Not Cache list"
   if (NETWORK_FILES.find(noCachePath => {
@@ -134,8 +171,8 @@ self.addEventListener('fetch', event => {
       NO_CACHE_URL.port === FETCH_URL.port &&
       NO_CACHE_URL.pathname === FETCH_URL.pathname
   })) {
-    logHandler(`Application fetch a URL in No-Cache-List (${event.request.url})`, 'debug', 'ServiceWorker')
-    return // without a explicit call of event.respondWidth the browser handles the request as normal
+    LOGGER.log(`Application fetch a URL in No-Cache-List (${event.request.url})`, 'debug', 'ServiceWorker')
+    return true // without a explicit call of event.respondWidth the browser handles the request as normal
   }
 
   // Respond primarly from cache; fallback to Network
@@ -144,14 +181,14 @@ self.addEventListener('fetch', event => {
       .then(response => {
         // Cache hit - return response
         if (response) {
-          logHandler(`Application fetch a URL that is in a cache (${event.request.url})`, 'debug', 'ServiceWorker')
+          LOGGER.log(`Application fetch a URL that is in a cache (${event.request.url})`, 'debug', 'ServiceWorker')
           return response
         }
 
         return fetch(event.request).then(response => {
           // Check if we received a valid response
           if (!response || response.status !== 200 || response.type !== 'basic') {
-            logHandler(`Application fetch a URL whose response can't be cached (${event.request.url})`, 'debug', 'ServiceWorker')
+            LOGGER.log(`Application fetch a URL whose response can't be cached (${event.request.url})`, 'debug', 'ServiceWorker')
             return response
           }
 
@@ -163,38 +200,13 @@ self.addEventListener('fetch', event => {
           ) {
             let responseToCache = response.clone()
             caches.open(CACHE_NAME).then(cache => {
-              logHandler(`Application fetch a URL that will now cached (${event.request.url})`, 'debug', 'ServiceWorker')
+              LOGGER.log(`Application fetch a URL that will now cached (${event.request.url})`, 'debug', 'ServiceWorker')
               cache.put(event.request, responseToCache)
             })
           }
-          logHandler(`Application fetch a URL which is loaded from Network (${event.request.url})`, 'debug', 'ServiceWorker')
+          LOGGER.log(`Application fetch a URL which is loaded from Network (${event.request.url})`, 'debug', 'ServiceWorker')
           return response
         })
       })
   )
 })
-
-const logHandler = function (message, logLevelName, tag) {
-  switch (logLevelName) {
-    case 'debug':
-      console.debug(message)
-      break
-    case 'info':
-      console.info(message)
-      break
-    case 'note':
-      console.info(message)
-      break
-    case 'warn':
-      console.warn(message)
-      break
-    case 'error':
-      console.error(message)
-      break
-    case 'fatal':
-      console.error(message)
-      break
-    default:
-      console.log(logLevelName + ': ' + message)
-  }
-}

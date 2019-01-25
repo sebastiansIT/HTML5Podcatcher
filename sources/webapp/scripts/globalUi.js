@@ -16,8 +16,7 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 /* global window, navigator, document, console, confirm */
-/* global Worker */
-/* global Notification */
+/* global Worker, MessageChannel, Notification */
 /* global $ */
 /* global HTML5Podcatcher, POD */
 var GlobalUserInterfaceHelper = {
@@ -240,8 +239,14 @@ var GlobalUserInterfaceHelper = {
               if (registration.active &&
                   STATE === 'installed' &&
                   confirm(CONFIRM_MESSAGE)) {
-                registration.waiting.postMessage({ command: 'skipWaiting', message: 'Activate Update' })
-                window.location.reload()
+                var messageChannel = new MessageChannel()
+                messageChannel.port1.addEventListener('message', window.location.reload)
+                registration.waiting.postMessage(
+                  {
+                    command: 'skipWaiting',
+                    message: 'Activate update now'
+                  },
+                  [messageChannel.port2])
               }
             })
           })
@@ -249,6 +254,15 @@ var GlobalUserInterfaceHelper = {
         .catch(error => {
           GlobalUserInterfaceHelper.logHandler('ServiceWorker registration failed: ' + error, 'error', 'ServiceWorker')
         })
+
+      // Handler for messages coming from the service worker
+      navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data.command && event.data.command === 'messageLog') {
+          GlobalUserInterfaceHelper.logHandler(...event.data.message)
+        } else {
+          console.log('Received message from ServiceWorker: ', event.data)
+        }
+      })
     } else {
       GlobalUserInterfaceHelper.logHandler('ServiceWorker isn\'t supportet on this platform', 'debug', 'ServiceWorker')
       GlobalUserInterfaceHelper.logHandler('This app can\'t used offline!', 'warn', 'ServiceWorker')
