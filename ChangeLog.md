@@ -224,3 +224,10 @@
   * Remove redundant function parameter "mime-Type"
 - 0.42.0
   * Use language information from RSS 2.0 feeds and activate hyphens in UI
+- 0.43.0
+	* Add CSS-Feature Scroll-Snap to Stylesheet (available on Chromium)
+	* Add theme-color for Chrome on Android to HTML-head
+	* Update jQuery to 3.3.1
+	* Remove all Files and Build-Targets for FirefoxOS
+- 0.44.0
+  * Switch from ApplicationCache to ServiceWorker

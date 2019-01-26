@@ -1,4 +1,4 @@
-﻿/*  Copyright 2015 Sebastian Spautz
+﻿/*  Copyright 2015, 2019 Sebastian Spautz
 
      This file is part of "HTML5 Podcatcher".
 
@@ -50,10 +50,10 @@ $(document).ready(function () {
     // --------------------------- //
     // -- Register Eventhandler -- //
     // --------------------------- //
-    //Application Cache Events
-    UI.initApplicationCacheEvents();
+    // Register ServiceWorker
+    UI.initServiceWorker()
     //Connection State Events
-    UI.initConnectionStateEvents();
+    UI.initConnectionStateEvents()
     $('#sourceslist').on('click', '.details', function (event) {
         event.preventDefault();
         event.stopPropagation();
@@ -63,13 +63,13 @@ $(document).ready(function () {
 
     //Update one Source
     $('#sourceslist').on('click', '.update', function (event) {
-        var limitOfNewEpisodes = 5, 
-            button = event.target, 
+        var limitOfNewEpisodes = 5,
+            button = event.target,
             source = {uri: button.getAttribute('href')};
-        
+
         event.preventDefault();
         event.stopPropagation();
-       
+
         button.setAttribute('disabled', 'disabled');
         button.classList.add('spinner');
         // start update of the source
