@@ -138,7 +138,7 @@ $(document).ready(function () {
     let opmlHead = opmlDocument.createElement('head')
     let opmlBody = opmlDocument.createElement('body')
     let opmlElement
-    opmlDocument.documentElement.setAttribute('version', '1.0')
+    opmlDocument.documentElement.setAttribute('version', '2.0')
     opmlDocument.documentElement.appendChild(opmlHead)
     opmlDocument.documentElement.appendChild(opmlBody)
     // Title of the OPML document
