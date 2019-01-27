@@ -185,7 +185,7 @@ self.addEventListener('fetch', event => {
           return response
         }
 
-        return fetch(event.request).then(response => {
+        return fetch(event.request, { redirect: 'follow' }).then(response => {
           // Check if we received a valid response
           if (!response || response.status !== 200 || response.type !== 'basic') {
             LOGGER.log(`Application fetch a URL whose response can't be cached (${event.request.url})`, 'debug', 'ServiceWorker')
