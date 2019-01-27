@@ -117,7 +117,7 @@ self.addEventListener('activate', event => {
                 // Other Caches then the actual but in general a HTML5Podcatcher-Cache
                 if (cacheName !== CACHE_NAME && cacheName.indexOf(CACHE_PREFIX) === 0) {
                   return caches.delete(cacheName)
-                    .then(() => LOGGER.log(`Deleted old Cache "${cacheName}"`), 'debug', 'ServiceWorker')
+                    .then(() => LOGGER.log(`Deleted old Cache "${cacheName}"`, 'debug', 'ServiceWorker'))
                     .catch(error => {
                       LOGGER.log(`Error while deleting cache "${cacheName}": ${error}`, 'error', 'ServiceWorker')
                     })
@@ -134,9 +134,9 @@ self.addEventListener('activate', event => {
 self.addEventListener('message', event => {
   const LOGGER = new self.WorkerLogger([event.ports[0]])
   if (event.data.command === 'skipWaiting') {
-    LOGGER.log(`Update application imediatly`, 'debug')
-    self.skipWaiting()
+    LOGGER.log(`Update application imediatly`, 'debug', 'ServiceWorker')
     event.ports[0].postMessage({ command: 'confirm' })
+    self.skipWaiting()
   } else {
     LOGGER.log(`Message "${event.data}" received by ServiceWorker`, 'note')
   }
