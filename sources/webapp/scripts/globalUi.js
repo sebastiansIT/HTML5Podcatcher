@@ -222,6 +222,8 @@ var GlobalUserInterfaceHelper = {
                   if (event.data.command && event.data.command === 'confirm') {
                     POD.logger('ServiceWorker skips waiting phase, reload page now', 'info')
                     window.location.reload()
+                  } else if (event.data.command && event.data.command === 'messageLog') {
+                    POD.logger(...event.data.message)
                   }
                 }
                 registration.waiting.postMessage({
@@ -255,6 +257,8 @@ var GlobalUserInterfaceHelper = {
                   if (event.data.command && event.data.command === 'confirm') {
                     POD.logger('ServiceWorker skips waiting phase, reload page now', 'info')
                     window.location.reload()
+                  } else if (event.data.command && event.data.command === 'messageLog') {
+                    POD.logger(...event.data.message)
                   }
                 }
                 registration.waiting.postMessage(
