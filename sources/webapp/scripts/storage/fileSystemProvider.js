@@ -1,6 +1,6 @@
 /** @module  HTML5Podcatcher/Storage/ChromeFileSystem
     @author  SebastiansIT [sebastian@human-injection.de]
-    @license Copyright 2013-2015 Sebastian Spautz
+    @license Copyright 2013-2015, 2019 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -144,9 +144,28 @@ var chromeFileSystemStorageImplementation = (function () {
     }
   }
   ChromeFileSystemFileProvider.prototype.cleanStorage = function (onDeleteCallback) {
-    // TODO implementieren
-    HTML5Podcatcher.logger('Not implemented', 'warn')
-    onDeleteCallback()
+    window.requestFileSystem(window.PERSISTENT, 1024 * 1024, function (fs) {
+      let dirReader = fs.root.createReader()
+      let readEntries = function () {
+        dirReader.readEntries(function (results) {
+          if (!results.length) {
+            onDeleteCallback()
+          } else {
+            let index = 0
+            let removeEntry = function () {
+              results[index].remove(function () {
+                index++
+                if (index < results.length) {
+                  removeEntry()
+                } else {
+                  readEntries()
+                }
+              }, HTML5Podcatcher.errorLogger)
+            }
+          }
+        }, HTML5Podcatcher.errorLogger)
+      }
+    }, HTML5Podcatcher.errorLogger)
   }
   // ====================================== //
   // === Export public Elements         === //
