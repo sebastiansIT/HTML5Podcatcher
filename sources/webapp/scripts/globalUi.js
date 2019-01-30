@@ -210,19 +210,32 @@ var GlobalUserInterfaceHelper = {
 
           GlobalUserInterfaceHelper.logHandler('ServiceWorker registration successful with scope: ' + registration.scope, 'debug', 'ServiceWorker')
 
-          if (registration.active) {
+          if (registration.active) { // Allway a ServiceWorker is active
             if (registration.installing) {
               GlobalUserInterfaceHelper.logHandler('ServiceWorker is active but a update is installing.', 'debug', 'ServiceWorker')
             } else if (registration.waiting) {
               GlobalUserInterfaceHelper.logHandler('ServiceWorker  is active but a update is waiting to become active.', 'debug', 'ServiceWorker')
               if (confirm(CONFIRM_MESSAGE)) {
-                registration.waiting.postMessage({ command: 'skipWaiting', message: 'Activate waiting Update' })
-                window.location.reload()
+                var messageChannel = new MessageChannel()
+                // addEventListener('message') doesn't work in Chrome
+                messageChannel.port1.onmessage = function (event) {
+                  if (event.data.command && event.data.command === 'confirm') {
+                    POD.logger('ServiceWorker skips waiting phase, reload page now', 'info')
+                    window.location.reload()
+                  } else if (event.data.command && event.data.command === 'messageLog') {
+                    POD.logger(...event.data.message)
+                  }
+                }
+                registration.waiting.postMessage({
+                  command: 'skipWaiting',
+                  message: 'Activate waiting update now'
+                },
+                [messageChannel.port2])
               }
             } else {
               GlobalUserInterfaceHelper.logHandler('ServiceWorker inital state is "active."', 'debug', 'ServiceWorker')
             }
-          } else {
+          } else { // The ServiceWorker is installed the first time
             if (registration.installing) {
               GlobalUserInterfaceHelper.logHandler('ServiceWorker inital state is "installing."', 'debug', 'ServiceWorker')
             } else if (registration.waiting) {
@@ -240,7 +253,14 @@ var GlobalUserInterfaceHelper = {
                   STATE === 'installed' &&
                   confirm(CONFIRM_MESSAGE)) {
                 var messageChannel = new MessageChannel()
-                messageChannel.port1.addEventListener('message', window.location.reload)
+                messageChannel.port1.onmessage = function (event) {
+                  if (event.data.command && event.data.command === 'confirm') {
+                    POD.logger('ServiceWorker skips waiting phase, reload page now', 'info')
+                    window.location.reload()
+                  } else if (event.data.command && event.data.command === 'messageLog') {
+                    POD.logger(...event.data.message)
+                  }
+                }
                 registration.waiting.postMessage(
                   {
                     command: 'skipWaiting',
@@ -373,7 +393,7 @@ var GlobalUserInterfaceHelper = {
     if (episodes && episodes.length > 0) {
       for (i = 0; i < episodes.length; i += 1) {
         entryUI = GlobalUserInterfaceHelper.renderEpisode(episodes[i])
-        if (order && order === 'asc') {
+        if (!order && order === 'asc') {
           listUI.append(entryUI)
         } else {
           listUI.prepend(entryUI)
