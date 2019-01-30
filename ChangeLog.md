@@ -231,3 +231,5 @@
 	* Remove all Files and Build-Targets for FirefoxOS
 - 0.44.0
   * Switch from ApplicationCache to ServiceWorker
+- 0.45.0
+  * Add a function to export the source list as OPML
