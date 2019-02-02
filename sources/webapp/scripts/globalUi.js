@@ -393,7 +393,7 @@ var GlobalUserInterfaceHelper = {
     if (episodes && episodes.length > 0) {
       for (i = 0; i < episodes.length; i += 1) {
         entryUI = GlobalUserInterfaceHelper.renderEpisode(episodes[i])
-        if (!order && order === 'asc') {
+        if (!order || order === 'asc') {
           listUI.append(entryUI)
         } else {
           listUI.prepend(entryUI)

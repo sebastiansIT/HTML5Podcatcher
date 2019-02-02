@@ -549,7 +549,7 @@ $(document).ready(function () {
     if (!episode.playback.played) {
       $('.emptyPlaceholder').remove()
       episodeUI.hide()
-      if (order && order === 'asc') {
+      if (!order || order === 'asc') {
         $('#playlist').find('.entries').append(episodeUI)
       } else {
         $('#playlist').find('.entries').prepend(episodeUI)
