@@ -1,7 +1,7 @@
 /*  Copyright 2013 - 2015 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
-    
+
     "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -96,7 +96,7 @@ div[role="toolbar"] a[data-icon]:before {
 [role="toolbar"] button[data-icon="show-log"]:before {
     background: url(icons/notifications.svg) no-repeat center center;
 }
-[role="toolbar"] button[data-icon="add-source"]:before { 
+[role="toolbar"] button[data-icon="add-source"]:before {
     background: url(icons/addSource.svg) no-repeat center center;
 }
 [role="toolbar"] button[data-icon="browsing"]:before,
@@ -106,6 +106,9 @@ div[role="toolbar"] a[data-icon]:before {
 [role="toolbar"] button[data-icon="delete"]:before {
     background: url(icons/delete.svg) no-repeat center center;
 }
+[role="toolbar"] button[data-icon="export-opml"]:before {
+    background: url(icons/exportOpml.svg) no-repeat center center;
+}
 
 #activeMessage p {
 	padding: 0.3rem 0.6rem;
@@ -113,7 +116,7 @@ div[role="toolbar"] a[data-icon]:before {
 	margin:0;
 	border-top: 1px solid #EEE;
 	max-height: 2rem;
-	overflow: hidden; 
+	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
