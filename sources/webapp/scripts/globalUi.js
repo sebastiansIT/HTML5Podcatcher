@@ -331,8 +331,9 @@ var GlobalUserInterfaceHelper = {
     */
   renderEpisode: function (episode) {
     'use strict'
-    var entryUI/*, jumppointUI */
-    entryUI = document.querySelector('#episodeTemplate li').cloneNode(true)
+    /* let jumppointUI */
+    let fragment = document.importNode(document.getElementById('episodeTemplate').content, true)
+    let entryUI = fragment.firstElementChild
     if (episode.language) {
       entryUI.setAttribute('lang', episode.language)
     }
@@ -382,7 +383,7 @@ var GlobalUserInterfaceHelper = {
       entryUI.find('.onlineOnly, a.external').attr('aria-disabled', 'true')
     }
     entryUI.find('.external').attr('target', '_blank')
-    return entryUI
+    return fragment
   },
 
   renderEpisodeList: function (episodes, order) {
@@ -407,9 +408,8 @@ var GlobalUserInterfaceHelper = {
   },
   renderSource: function (source) {
     'use strict'
-    var entryUI
-
-    entryUI = document.querySelector('#sourceTemplate > *').cloneNode(true)
+    let fragment = document.importNode(document.getElementById('sourceTemplate').content, true)
+    let entryUI = fragment.firstElementChild
     if (source.language) {
       entryUI.setAttribute('lang', source.language)
     }
@@ -444,7 +444,7 @@ var GlobalUserInterfaceHelper = {
       this.setAttribute('id', this.getAttribute('nodeid'))
       this.removeAttribute('nodeid')
     })
-    return entryUI
+    return fragment
   },
   renderSourceList: function (sourcelist) {
     'use strict'

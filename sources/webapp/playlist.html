@@ -76,19 +76,6 @@
 			<div id="playlist">
         <ul class="entries">
         </ul>
-        <ul class="template" id="episodeTemplate">
-          <li>
-            <a class="link" href="episode.uri">
-							<div>
-								<h4 class="title">episode.title</h4>
-								<p><span class="status"><time datetime="2014-01-01" class="updated">episode.updated</time></span> at <span class="source">episode.source</span></p>
-							</div>
-						</a>
-						<!--<button class="status">Status: played</button>-->
-						<a class="origin button external onlineOnly" href="episode.uri" data-icon="browsing">Internet</a>
-						<a class="button downloadFile onlineOnly" href="episode.mediaUrl" download="episode.mediaUrl.fileName" data-icon="download">Download</a>
-          </li>
-        </ul>
       </div>
 		</div>
 		<footer>
@@ -130,5 +117,19 @@
 			</div>
 		</div>
 	</section>
+
+	<template id="episodeTemplate">
+		<li>
+			<a class="link" href="episode.uri">
+				<div>
+					<h4 class="title">episode.title</h4>
+					<p><span class="status"><time datetime="2014-01-01" class="updated">episode.updated</time></span> at <span class="source">episode.source</span></p>
+				</div>
+			</a>
+			<!--<button class="status">Status: played</button>-->
+			<a class="origin button external onlineOnly" href="episode.uri" data-icon="browsing">Internet</a>
+			<a class="button downloadFile onlineOnly" href="episode.mediaUrl" download="episode.mediaUrl.fileName" data-icon="download">Download</a>
+		</li>
+	</template>
 </body>
 </html>

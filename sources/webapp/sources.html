@@ -54,10 +54,10 @@
 	<script src="scripts/storage/fileSystemProvider.js"></script>
 	<script src="scripts/storage/indexedDbProvider.js"></script>
 	<script src="scripts/storage/webStorageProvider.js"></script>
-    <script src="scripts/configuration/configuration.js"></script>
-    <script src="scripts/web/web.js"></script>
-    <script src="scripts/parser/parser.js"></script>
-    <script src="scripts/parser/rss_2-0.js"></script>
+  <script src="scripts/configuration/configuration.js"></script>
+  <script src="scripts/web/web.js"></script>
+  <script src="scripts/parser/parser.js"></script>
+  <script src="scripts/parser/rss_2-0.js"></script>
 	<script src="scripts/globalUi.js"></script>
 	<script src="scripts/sources.js"></script>
 </head>
@@ -74,21 +74,8 @@
 		<div class="content">
 			<div class="loader"><div></div><div></div><div></div><div></div><div></div></div>
 			<div id="sourceslist">
-                <ul class="entries">
-                </ul>
-                <ul class="template" id="sourceTemplate">
-                    <li>
-						<a class="details" href="source.html?uri=source.uri" title="Details">
-							<div>
-								<h4 class="title">source.title</h4>
-								<p class="description">source.description</p>
-							</div>
-						</a>
-						<button class="delete" data-icon="delete">Delete</button>
-						<a class="button update onlineOnly" href="source.uri" data-icon="reload">Update</a>
-                    </li>
-                </ul>
-            </div>
+        <ul class="entries"></ul>
+  		</div>
 		</div>
 		<footer>
 			<div role="toolbar">
@@ -129,5 +116,17 @@
 			</div>
 		</div>
 	</section>
+	<template id="sourceTemplate">
+		<li>
+			<a class="details" href="source.html?uri=source.uri" title="Details">
+				<div>
+					<h4 class="title">source.title</h4>
+					<p class="description">source.description</p>
+				</div>
+			</a>
+			<button class="delete" data-icon="delete">Delete</button>
+			<a class="button update onlineOnly" href="source.uri" data-icon="reload">Update</a>
+		</li>
+	</template>
 </body>
 </html>
