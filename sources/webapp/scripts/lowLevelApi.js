@@ -94,6 +94,43 @@ var HTML5Podcatcher = {
       )
     },
 
+    /** Updates all Sources from there feeds.
+      * @param {number} [limitOfNewEpisodes=5] Maximal amount of episodes per source imported as 'new'.
+      * @param {function} [onFinishedCallback] Function called when download of all Sources are completed.
+      * @param {function} [onProgressCallback] Function called after each download of a single Source.
+      */
+    downloadAllSources: function (limitOfNewEpisodes, onFinishedCallback, onProgressCallback) {
+      let statusOverall = true
+
+      POD.logger('Playlist will be refreshed', 'debug')
+      POD.storage.readSources(function (sources) {
+        var numberOfSourcesToDownload = sources.length
+
+        sources.forEach(function (source, index, array) {
+          POD.web.downloadSource(source, limitOfNewEpisodes, function (parameters) {
+            numberOfSourcesToDownload--
+            if (parameters.status === 'failure') {
+              statusOverall = false
+            }
+            if (numberOfSourcesToDownload === 0) {
+              if (statusOverall) {
+                POD.logger('All Podcasts are up to date now.', 'note')
+              } else {
+                POD.logger('At least on Source can\'t be updated', 'error')
+              }
+              if (onFinishedCallback && typeof onFinishedCallback === 'function') {
+                onFinishedCallback()
+              }
+            } else {
+              if (onProgressCallback && typeof onProgressCallback === 'function') {
+                onProgressCallback(array.length, numberOfSourcesToDownload)
+              }
+            }
+          })
+        })
+      })
+    },
+
     downloadFile: function (episode, onDownloadCallback, onProgressCallback) {
       'use strict'
 

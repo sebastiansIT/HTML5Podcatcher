@@ -501,44 +501,24 @@ var GlobalUserInterfaceHelper = {
     refreshAllSources: function (event) {
       'use strict'
       var button = event.target
-      var statusOverall = true
+      let onProgressCallback = function (total, progress) {
+        // actualise the progress in the button
+        let percentCompleted = (100 / total * (total - progress)).toFixed(2) + '%'
+        button.style.background = 'linear-gradient(to right, rgba(0, 100, 0, 0.2) 0%, rgba(0, 100, 0, 0.2) ' + percentCompleted + ', #ffffff ' + percentCompleted + ')'
+      }
+      let onFinishedCallback = function () {
+        button.removeAttribute('disabled')
+        button.classList.remove('spinner')
+        button.style.removeProperty('background')
+      }
 
       event.preventDefault()
       event.stopPropagation()
 
       button.setAttribute('disabled', 'disabled')
       button.classList.add('spinner')
-      POD.logger('Playlist will be refreshed', 'debug')
-      POD.storage.readSources(function (sources) {
-        var numberOfSourcesToDownload = sources.length
 
-        // for (i = 0; i < sources.length; i += 1) {
-        sources.forEach(function (source, index, array) {
-          POD.web.downloadSource(source, null, function (parameters) {
-            var percentCompleted
-
-            numberOfSourcesToDownload--
-            if (parameters.status === 'failure') {
-              statusOverall = false
-            }
-            if (numberOfSourcesToDownload === 0) {
-              POD.logger('All Feeds have been refreshed', 'info')
-              button.removeAttribute('disabled')
-              button.classList.remove('spinner')
-              button.style.removeProperty('background')
-              if (statusOverall) {
-                POD.logger('All Podcasts are up to date now.', 'note')
-              } else {
-                POD.logger('At least on Source can\'t be updated', 'error')
-              }
-            } else {
-              // actualise the progress in the button
-              percentCompleted = (100 / sources.length * (sources.length - numberOfSourcesToDownload)).toFixed(2) + '%'
-              button.style.background = 'linear-gradient(to right, rgba(0, 100, 0, 0.2) 0%, rgba(0, 100, 0, 0.2) ' + percentCompleted + ', #ffffff ' + percentCompleted + ')'
-            }
-          })
-        })
-      })
+      POD.web.downloadAllSources(null, onFinishedCallback, onProgressCallback)
     },
 
     refreshAllSources_widthWorker: function (event) {

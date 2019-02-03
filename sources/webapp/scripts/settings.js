@@ -201,7 +201,12 @@ document.addEventListener('DOMContentLoaded', function () {
         POD.logger('Loaded syncronisation value successfully.', 'info')
         syncValue = JSON.parse(xhr.responseText)
         POD.api.configuration.mergeConfigurations(syncValue.entries[0].value, function () {
-          POD.logger('Merged syncronisation value into local configuration successfully.', 'note')
+          // update Sources width 0 as max new episodes
+          POD.web.downloadAllSources(0, function (status) {
+            POD.logger('Merged syncronisation value into local configuration successfully.', 'note')
+          }, function (total, progress) {
+            UI.logHandler(`Updated ${progress} of ${total} sources`, 'info', 'Import')
+          })
         })
       }
       xhr.addEventListener('error', function (xhrError) {
@@ -239,7 +244,12 @@ document.addEventListener('DOMContentLoaded', function () {
     button.setAttribute('disabled', 'disabled')
     config = JSON.parse(document.getElementById('SerialisedConfigurationInput').value)
     UI.importConfiguration(config, function () {
-      button.removeAttribute('disabled')
+      // update Sources width 0 as max new episodes
+      POD.web.downloadAllSources(0, function (status) {
+        button.removeAttribute('disabled')
+      }, function (total, progress) {
+        UI.logHandler(`Updated ${progress} of ${total} sources`, 'info', 'Import')
+      })
     })
   })
 

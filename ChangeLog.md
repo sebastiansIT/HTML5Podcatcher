@@ -233,3 +233,5 @@
   * Switch from ApplicationCache to ServiceWorker
 - 0.45.0
   * Add a function to export the source list as OPML
+- 0.45.1
+  * Update all Sources after import or syncronisation of configuration
