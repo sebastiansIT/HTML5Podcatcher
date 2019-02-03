@@ -122,11 +122,12 @@ $(document).ready(function () {
   document.getElementById('loadSourceButton').addEventListener('click', event => {
     event.preventDefault()
     event.stopPropagation()
-    if ($('#addSourceUrlInput')[0].checkValidity()) {
-      POD.storage.readSource($('#addSourceUrlInput').val(), function (source) {
+    let urlInput = document.getElementById('addSourceUrlInput')
+    if (urlInput.checkValidity()) {
+      POD.storage.readSource(urlInput.value.trim(), function (source) {
         POD.web.downloadSource(source)
-        $('#addSourceView').toggleClass('fullscreen')
-        $('#addSourceUrlInput').val('')
+        document.getElementById('addSourceView').classList.toggle('fullscreen')
+        urlInput.value = ''
       })
     }
   })
