@@ -2,7 +2,7 @@
     Copyright 2013 - 2015 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
-    
+
     "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -50,6 +50,11 @@ section[role="region"] > header:first-child menu {
   margin: 0;
 }
 
+section[role="region"] > header:first-child menu li {
+  display: block;
+  float: left;
+}
+
 /* ----------------------------------
   Buttons (In Header)
 ---------------------------------- */
@@ -86,7 +91,7 @@ section[role="region"] > header:first-child a:active,
 section[role="region"] > header:first-child button:active,
 section[role="region"] > header:first-child a:hover,
 section[role="region"] > header:first-child button:hover
-{ 
+{
   background-color: rgba(0,0,0,0.17);
 }
 

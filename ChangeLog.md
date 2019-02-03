@@ -235,3 +235,5 @@
   * Add a function to export the source list as OPML
 - 0.45.1
   * Update all Sources after import or syncronisation of configuration
+- 0.45.3
+  * Fix some non standard conform HTML structures

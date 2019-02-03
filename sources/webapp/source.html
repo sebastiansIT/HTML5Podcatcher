@@ -65,9 +65,9 @@
 	<section role="region">
 		<header role="banner">
 			<a href="sources.html" title="Back to list of sources/feeds"><span class="icon icon-back">Feeds</span></a>
-			<menu type="toolbar">
-				<a href="playlist.html" title="Playlist"><span class="icon icon-playlist">Playlist</span></a>
-				<a href="settings.html" title="Settings"><span class="icon icon-settings">Settings</span></a>
+			<menu>
+				<li><a href="playlist.html" title="Playlist"><span class="icon icon-playlist">Playlist</span></a></li>
+				<li><a href="settings.html" title="Settings"><span class="icon icon-settings">Settings</span></a></li>
 			</menu>
 			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} Source/Feed Details">Feed Details</h1>
 		</header>
@@ -75,7 +75,7 @@
 			<div class="loader"><div></div><div></div><div></div><div></div><div></div></div>
 			<section id="information">
 			</section>
-            <div class="template" id="sourceTemplate">
+      	<div class="template" id="sourceTemplate">
 				<div>
 					<h2><a class="link title external" href="source.link">source.title</a></h2>
 					<p class="description">source.description</p>
@@ -118,8 +118,7 @@
 	<section id="logView" class="dialog" role="region">
 		<header>
 			<button title="Close" class="closeDialog"><span class="icon icon-close">Close</span></button>
-			<menu type="toolbar">
-			</menu>
+			<menu></menu>
 			<h1 title="HTML5 Podcatcher Message Log">Message Log</h1>
 		</header>
 		<div class="content">

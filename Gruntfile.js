@@ -88,10 +88,10 @@ module.exports = function (grunt) {
       },
       ChromePackagedApp: {
         files: [
-                {expand: true, cwd: 'sources/webapp/', src: ['styles/icons/*.svg'], dest: 'build/chromeapp/temp/', filter: 'isFile'},
-                {expand: true, cwd: 'sources/webapp/', src: ['images/*.png'], dest: 'build/chromeapp/temp/', filter: 'isFile'},
-                {expand: true, cwd: 'sources/chromeapp/', src: ['images/*.png'], dest: 'build/chromeapp/temp/', filter: 'isFile'},
-                {expand: false, cwd: 'sources/webapp/', src: 'sources/webapp/images/favicon.ico', dest: 'build/chromeapp/temp/favicon.ico', filter: 'isFile'}
+          { expand: true, cwd: 'sources/webapp/', src: ['styles/icons/*.svg'], dest: 'build/chromeapp/temp/', filter: 'isFile' },
+          { expand: true, cwd: 'sources/webapp/', src: ['images/*.png'], dest: 'build/chromeapp/temp/', filter: 'isFile' },
+          { expand: true, cwd: 'sources/chromeapp/', src: ['images/*.png'], dest: 'build/chromeapp/temp/', filter: 'isFile' },
+          { expand: false, cwd: 'sources/webapp/', src: 'sources/webapp/images/favicon.ico', dest: 'build/chromeapp/temp/favicon.ico', filter: 'isFile' }
         ]
       }
     },
@@ -188,8 +188,8 @@ module.exports = function (grunt) {
         'overqualified-elements': true,
         'ids': false,
         formatters: [
-                {id: 'junit-xml', dest: 'tests/csslint.result.junit.xml'},
-                {id: 'text', dest: 'tests/csslint.result.txt'}
+          { id: 'junit-xml', dest: 'tests/csslint.result.junit.xml' },
+          { id: 'text', dest: 'tests/csslint.result.txt' }
         ]
       },
       client: {
@@ -203,7 +203,11 @@ module.exports = function (grunt) {
       client: {
         options: {
           force: false,
-          ignore: ['The “menu” element is not supported by browsers yet. It would probably be better to wait for implementations.'],
+          ignore: [
+            'The “menu” element is not supported by browsers yet. It would probably be better to wait for implementations.',
+            'The “region” role is unnecessary for element “section”.',
+            'The “banner” role is unnecessary for element “header”.'
+          ],
           reporter: 'checkstyle',
           reporterOutput: 'tests/htmllint.result.txt'
         },
