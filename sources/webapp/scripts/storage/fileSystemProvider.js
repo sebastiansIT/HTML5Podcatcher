@@ -145,8 +145,8 @@ var chromeFileSystemStorageImplementation = (function () {
   }
   ChromeFileSystemFileProvider.prototype.cleanStorage = function (onDeleteCallback) {
     window.requestFileSystem(window.PERSISTENT, 1024 * 1024, function (fs) {
-      let dirReader = fs.root.createReader()
-      let readEntries = function () {
+      const dirReader = fs.root.createReader()
+      const readEntries = function () {
         dirReader.readEntries(function (results) {
           if (!results.length) {
             onDeleteCallback()
@@ -165,6 +165,7 @@ var chromeFileSystemStorageImplementation = (function () {
           }
         }, HTML5Podcatcher.errorLogger)
       }
+      readEntries()
     }, HTML5Podcatcher.errorLogger)
   }
   // ====================================== //
