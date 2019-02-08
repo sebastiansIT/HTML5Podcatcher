@@ -17,7 +17,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-html')
   grunt.loadNpmTasks('grunt-jslint')
   grunt.loadNpmTasks('grunt-usemin')
-  grunt.loadNpmTasks('grunt-autoprefixer')
+  // grunt.loadNpmTasks('grunt-autoprefixer')
   grunt.loadNpmTasks('grunt-postcss')
   // Config Tasks
   grunt.initConfig({
@@ -83,7 +83,8 @@ module.exports = function (grunt) {
           { expand: true, cwd: 'sources/hostedapp/', src: ['scripts/*.js'], dest: 'build/webapp/', filter: 'isFile' },
           { expand: true, cwd: 'sources/webapp/', src: ['*.py'], dest: 'build/webapp/', filter: 'isFile' },
           { expand: false, src: 'sources/webapp/images/favicon.ico', dest: 'build/webapp/favicon.ico' },
-          { expand: false, src: 'sources/webapp/.htaccess', dest: 'build/webapp/.htaccess' }
+          { expand: false, src: 'sources/webapp/.htaccess', dest: 'build/webapp/.htaccess' },
+          { expand: false, src: 'sources/webapp/manifest.webmanifest', dest: 'build/webapp/manifest.webmanifest' }
         ]
       },
       ChromePackagedApp: {

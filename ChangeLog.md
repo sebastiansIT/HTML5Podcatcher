@@ -233,3 +233,7 @@
   * Switch from ApplicationCache to ServiceWorker
 - 0.45.0
   * Add a function to export the source list as OPML
+- 0.45.1
+  * Fix a Bug in fileSystemProvider that avoid the callback function to be called.
+- 0.46.0
+  * Add a Webmanifest to the hosted app
