@@ -222,7 +222,7 @@ $(document).ready(function () {
     //see https://developers.google.com/web/updates/2017/08/estimating-available-storage-space
     if ('storage' in navigator && 'estimate' in navigator.storage) {
       navigator.storage.estimate().then(({usage, quota}) => {
-        document.getElementById('storageQuota').textContent = `Using ${usage} out of ${quota} bytes.`
+        document.getElementById('storageQuota').textContent = `Using ${usage} out of ${quota} (${(usage / quota).toFixed(5)}%).`
         console.log(`Using ${usage} out of ${quota} bytes.`)
       });
     }
@@ -241,4 +241,4 @@ $(document).ready(function () {
         console.log(`Storage Quota uses ${info.usage} out of ${info.quota} bytes.`)
       });
     }
-});
+})
