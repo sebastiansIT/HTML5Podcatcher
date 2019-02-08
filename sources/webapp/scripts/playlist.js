@@ -22,8 +22,7 @@
 /* global GlobalUserInterfaceHelper, UI */
 GlobalUserInterfaceHelper.actualiseEpisodeUI = function (episode) {
   'use strict'
-  var episodeUI
-  episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode)
+  const episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode)
   // Status
   if (episode.playback.played) {
     episodeUI.querySelector('.status').textContent = 'Status: played'
@@ -38,26 +37,26 @@ GlobalUserInterfaceHelper.actualiseEpisodeUI = function (episode) {
       $(episodeUI.querySelector('.delete')).replaceWith('<a class="download button" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/') + 1) + '">Download</a>')
     }
   } else {
-    let downloadButton = episodeUI.querySelector('.functions .downloadFile')
+    const downloadButton = episodeUI.querySelector('.functions .downloadFile')
     downloadButton.parentNode.removeChild(downloadButton)
   }
-  let progressView = episodeUI.querySelector('progress')
+  const progressView = episodeUI.querySelector('progress')
   progressView.parentNode.removeChild(progressView)
   return false
 }
 GlobalUserInterfaceHelper.activeEpisode = function (onReadCallback) {
   'use strict'
-  var activeEpisode = document.getElementById('playlist').querySelector('.active')
+  const activeEpisode = $(document.getElementById('playlist').querySelector('.active'))
   POD.storage.readEpisode(activeEpisode.data('episodeUri'), onReadCallback)
 }
 GlobalUserInterfaceHelper.previousEpisode = function (onReadCallback) {
   'use strict'
-  var activeEpisode = $('#playlist').find('.active')
+  const activeEpisode = $(document.getElementById('playlist').querySelector('.active'))
   POD.storage.readEpisode(activeEpisode.prevAll(':not([aria-disabled="true"])').not('.news').first().data('episodeUri'), onReadCallback)
 }
 GlobalUserInterfaceHelper.nextEpisode = function (onReadCallback) {
   'use strict'
-  var activeEpisode = $('#playlist').find('.active')
+  const activeEpisode = $(document.getElementById('playlist').querySelector('.active'))
   POD.storage.readEpisode(activeEpisode.nextAll(':not([aria-disabled="true"])').not('.news').first().data('episodeUri'), onReadCallback)
 }
 GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
@@ -366,6 +365,8 @@ GlobalUserInterfaceHelper.togglePauseStatus = function () {
 $(document).ready(function () {
   'use strict'
   var k, multiMediaKeyDownTimestemp, stoppedPressMouse
+  // Init Events from PWA installing process
+  UI.initWebManifest()
   // Register ServiceWorker
   UI.initServiceWorker()
   // Configurate POD

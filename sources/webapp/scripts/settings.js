@@ -107,6 +107,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // -- Register Eventhandler -- //
   // General UI Events
   UI.initGeneralUIEvents()
+  // Init Events from PWA installing process
+  UI.initWebManifest()
   // Register ServiceWorker
   UI.initServiceWorker()
   // Connection State Events

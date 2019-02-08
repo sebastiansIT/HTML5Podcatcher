@@ -46,6 +46,8 @@ $(document).ready(function () {
   // --------------------------- //
   // -- Register Eventhandler -- //
   // --------------------------- //
+  // Init Events from PWA installing process
+  UI.initWebManifest()
   // Register ServiceWorker
   UI.initServiceWorker()
   // Connection State Events
