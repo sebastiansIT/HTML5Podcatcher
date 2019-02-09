@@ -22,40 +22,41 @@
 /* global GlobalUserInterfaceHelper, UI */
 GlobalUserInterfaceHelper.actualiseEpisodeUI = function (episode) {
   'use strict'
-  var episodeUI
-  episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode)
+  const episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode)
   // Status
   if (episode.playback.played) {
-    $(episodeUI).find('.status').text('Status: played')
+    episodeUI.querySelector('.status').textContent = 'Status: played'
   } else {
-    $(episodeUI).find('.status').text('Status: new')
+    episodeUI.querySelector('.status').textContent = 'Status: new'
   }
   // Download/Delete link
   if (POD.storage.isFileStorageAvailable() && episode.mediaUrl) {
     if (episode.offlineMediaUrl) {
-      $(episodeUI).find('.downloadFile').replaceWith('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>')
+      $(episodeUI.querySelector('.downloadFile')).replaceWith('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>')
     } else {
-      $(episodeUI).find('.delete').replaceWith('<a class="download button" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/') + 1) + '">Download</a>')
+      $(episodeUI.querySelector('.delete')).replaceWith('<a class="download button" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/') + 1) + '">Download</a>')
     }
   } else {
-    $(episodeUI).find('.functions .downloadFile').remove()
+    const downloadButton = episodeUI.querySelector('.functions .downloadFile')
+    downloadButton.parentNode.removeChild(downloadButton)
   }
-  $(episodeUI).find('progress').remove()
+  const progressView = episodeUI.querySelector('progress')
+  progressView.parentNode.removeChild(progressView)
   return false
 }
 GlobalUserInterfaceHelper.activeEpisode = function (onReadCallback) {
   'use strict'
-  var activeEpisode = $('#playlist').find('.active')
+  const activeEpisode = $(document.getElementById('playlist').querySelector('.active'))
   POD.storage.readEpisode(activeEpisode.data('episodeUri'), onReadCallback)
 }
 GlobalUserInterfaceHelper.previousEpisode = function (onReadCallback) {
   'use strict'
-  var activeEpisode = $('#playlist').find('.active')
+  const activeEpisode = $(document.getElementById('playlist').querySelector('.active'))
   POD.storage.readEpisode(activeEpisode.prevAll(':not([aria-disabled="true"])').not('.news').first().data('episodeUri'), onReadCallback)
 }
 GlobalUserInterfaceHelper.nextEpisode = function (onReadCallback) {
   'use strict'
-  var activeEpisode = $('#playlist').find('.active')
+  const activeEpisode = $(document.getElementById('playlist').querySelector('.active'))
   POD.storage.readEpisode(activeEpisode.nextAll(':not([aria-disabled="true"])').not('.news').first().data('episodeUri'), onReadCallback)
 }
 GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
@@ -364,6 +365,8 @@ GlobalUserInterfaceHelper.togglePauseStatus = function () {
 $(document).ready(function () {
   'use strict'
   var k, multiMediaKeyDownTimestemp, stoppedPressMouse
+  // Init Events from PWA installing process
+  UI.initWebManifest()
   // Register ServiceWorker
   UI.initServiceWorker()
   // Configurate POD

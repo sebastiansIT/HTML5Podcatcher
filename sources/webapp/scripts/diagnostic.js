@@ -205,6 +205,7 @@ function deleteZwerg () {
 
 /** Central 'ready' event handler */
 $(document).ready(function () {
+<<<<<<< HEAD
   'use strict'
   // General UI Events
   UI.initGeneralUIEvents()
@@ -243,4 +244,41 @@ $(document).ready(function () {
       console.log(`Storage Quota uses ${info.usage} out of ${info.quota} bytes.`)
     })
   }
+=======
+    "use strict";
+    //test file system api
+    var infoFileSystemAPI = document.getElementById("SupportFilesystemAPI");
+    if (window.requestFileSystem && window.URL) {
+        infoFileSystemAPI.innerHTML = "Your browser does support the HTML5 filesystem API.";
+    } else {
+        infoFileSystemAPI.innerHTML = "Your browser <strong>does not</strong> support the HTML5 filesystem API.";
+    }
+    //event handler for key settings
+    $('#previousTrackKey1, #nextTrackKey1, #playTrackKey1').on('keydown', function (event) {
+        $(this).val(event.keyCode || event.key);
+    });
+
+    //see https://developers.google.com/web/updates/2017/08/estimating-available-storage-space
+    if ('storage' in navigator && 'estimate' in navigator.storage) {
+      navigator.storage.estimate().then(({usage, quota}) => {
+        document.getElementById('storageQuota').textContent = `Using ${usage} out of ${quota} (${(usage / quota).toFixed(5)}%).`
+        console.log(`Using ${usage} out of ${quota} bytes.`)
+      });
+    }
+
+    if (navigator.persistentStorage) {
+      navigator.persistentStorage.queryUsageAndQuota(function (usage, quota) {
+        var availableSpace = quota - usage
+        document.getElementById('persistentStorage').textContent = `Using ${usage} out of ${quota} bytes.`
+        console.log(`File System API uses ${usage} out of ${quota} bytes.`)
+      })
+    }
+
+    if (navigator.storageQuota) {
+      navigator.storageQuota.queryInfo("temporary").then(function(info) {
+        document.getElementById('quotaManagementTemp').textContent = `Using ${info.usage} out of ${info.quota} bytes.`
+        console.log(`Storage Quota uses ${info.usage} out of ${info.quota} bytes.`)
+      });
+    }
+>>>>>>> 35f64b1b87d071659537f341fbf5e06119345d84
 })

@@ -199,6 +199,29 @@ var GlobalUserInterfaceHelper = {
   },
   settings: HTML5Podcatcher.api.configuration.settings,
 
+  /** Handle Events from Web-Manifest-API */
+  initWebManifest: () => {
+    window.addEventListener('beforeinstallprompt', async (event) => {
+    /* TODO motivate the user to click "install" in the browsers promt */
+    //   event.preventDefault()
+    //   GlobalUserInterfaceHelper.logHandler('You will ask to install this app on your local device. Trust me, say YES!', 'note', 'WebManifest');
+    //   try {
+    //     await event.prompt()
+    //     const { outcome } = await event.userChoice
+    //     if (outcome === 'dismissed') { // alternativ "installed"
+    //       GlobalUserInterfaceHelper.logHandler('Why not installing it localy?', 'info', 'WebManifest')
+    //     } else {
+    //       GlobalUserInterfaceHelper.logHandler('Welcome to my app - enjoy your podcasts.', 'note', 'WebManifest')
+    //     }
+    //   } catch(exception) {
+    //     GlobalUserInterfaceHelper.logHandler('Somthing whent wrong installing the PWA', 'error', 'WebManifest')
+    //   }
+    // })
+
+    window.addEventListener('appinstalled', (event) => {
+      GlobalUserInterfaceHelper.logHandler('Thank you for installing H5P on your device', 'note', 'WebManifest')
+    })
+  },
   /** Register ServiceWorker and handle the update prozess
     * @returns undefined
   */

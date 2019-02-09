@@ -237,3 +237,6 @@
   * Update all Sources after import or syncronisation of configuration
 - 0.45.3
   * Fix some non standard conform HTML structures
+  * Fix a Bug in fileSystemProvider that avoid the callback function to be called.
+- 0.46.0
+  * Add a Webmanifest to the hosted app
