@@ -308,7 +308,13 @@ var GlobalUserInterfaceHelper = {
     openLogViewClickListener = function (event) {
       event.preventDefault()
       event.stopPropagation()
-      $('#logView').toggleClass('fullscreen')
+      let logView = document.getElementById('logView')
+      logView.classList.toggle('fullscreen')
+      if (logView.hasAttribute('open')) {
+        logView.removeAttribute('open')
+      } else {
+        logView.setAttribute('open', 'open')
+      }
     }
     for (i = 0; i < logViewOpenCloseButtons.length; i += 1) {
       logViewOpenCloseButtons[i].addEventListener('click', openLogViewClickListener, false)
