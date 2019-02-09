@@ -39,7 +39,7 @@ var canPlayMP3 = !!audio.canPlayType && audio.canPlayType('audio/mpeg; codecs="m
  **/
 var writeBlob = function (dir, blob, fileName, opt_callback) {
   'use strict'
-  dir.getFile(fileName, {create: true, exclusive: true}, function (fileEntry) {
+  dir.getFile(fileName, { create: true, exclusive: true }, function (fileEntry) {
     fileEntry.createWriter(function (writer) {
       if (opt_callback) {
         writer.onwrite = opt_callback
@@ -64,14 +64,14 @@ var downloadImage = function (url, mimeType) {
   xhr.onload = function () {
     if (this.status === 200) {
       var blob, parts, fileName
-      blob = new Blob([xhr.response], {type: mimeType})
+      blob = new Blob([xhr.response], { type: mimeType })
       parts = url.split('/')
       fileName = parts[parts.length - 1]
       window.requestFileSystem(TEMPORARY, 1024 * 1024 * 50, function (fs) {
         var onWrite = function () {
           UI.logHandler('Write completed.', 'info')
         }
-                // Write file to the root directory.
+        // Write file to the root directory.
         writeBlob(fs.root, blob, fileName, onWrite)
       }, UI.logHandler('Error writing Blop', 'error'))
     }
@@ -86,8 +86,8 @@ function toArray (list) {
 
 function listResults (entries) {
   'use strict'
-    // Document fragments can improve performance since they're only appended
-    // to the DOM once. Only one browser reflow occurs.
+  // Document fragments can improve performance since they're only appended
+  // to the DOM once. Only one browser reflow occurs.
   var fragment = document.createDocumentFragment()
   entries.forEach(function (entry) {
     var li
@@ -109,7 +109,7 @@ function onInitFs (fs) {
   var dirReader, entries, readEntries
   dirReader = fs.root.createReader()
   entries = []
-    // Call the reader.readEntries() until no more results are returned.
+  // Call the reader.readEntries() until no more results are returned.
   readEntries = function () {
     dirReader.readEntries(function (results) {
       if (!results.length) {
@@ -127,7 +127,7 @@ function onDeleteFs (fs) {
   var dirReader, entries, readEntries
   dirReader = fs.root.createReader()
   entries = []
-    // Call the reader.readEntries() until no more results are returned.
+  // Call the reader.readEntries() until no more results are returned.
   readEntries = function () {
     dirReader.readEntries(function (results) {
       if (!results.length) {
@@ -147,7 +147,7 @@ function onDeleteFs (fs) {
 
 function showFileSystemEntries () {
   'use strict'
-    // onInitFS(getFileSystem());
+  // onInitFS(getFileSystem());
   window.requestFileSystem(window.TEMPORARY, 1024 * 1024 * 50, onInitFs, UI.errorHandler)
   window.requestFileSystem(window.PERSISTENT, 1024 * 1024 * 50, onInitFs, UI.errorHandler)
 }
@@ -190,12 +190,12 @@ function saveZwerg () {
 function deleteZwerg () {
   'use strict'
   window.requestFileSystem(window.TEMPORARY, 1024 * 1024 * 50, function (fs) {
-    fs.root.getFile('zwerg.png', {create: false}, function (fileEntry) {
+    fs.root.getFile('zwerg.png', { create: false }, function (fileEntry) {
       fileEntry.remove(function () {
         console.log('File removed.')
       }, UI.errorHandler)
     }, UI.errorHandler)
-    fs.root.getFile('Revision1.mp3', {create: false}, function (fileEntry) {
+    fs.root.getFile('Revision1.mp3', { create: false }, function (fileEntry) {
       fileEntry.remove(function () {
         console.log('File removed.')
       }, UI.errorHandler)
@@ -205,11 +205,7 @@ function deleteZwerg () {
 
 /** Central 'ready' event handler */
 $(document).ready(function () {
-<<<<<<< HEAD
   'use strict'
-  // General UI Events
-  UI.initGeneralUIEvents()
-
   // test file system api
   var infoFileSystemAPI = document.getElementById('SupportFilesystemAPI')
   if (window.requestFileSystem && window.URL) {
@@ -224,8 +220,8 @@ $(document).ready(function () {
 
   // see https://developers.google.com/web/updates/2017/08/estimating-available-storage-space
   if ('storage' in navigator && 'estimate' in navigator.storage) {
-    navigator.storage.estimate().then(({usage, quota}) => {
-      document.getElementById('storageQuota').textContent = `Using ${usage} out of ${quota} bytes.`
+    navigator.storage.estimate().then(({ usage, quota }) => {
+      document.getElementById('storageQuota').textContent = `Using ${usage} out of ${quota} (${(usage / quota).toFixed(5)}%).`
       console.log(`Using ${usage} out of ${quota} bytes.`)
     })
   }
@@ -234,7 +230,7 @@ $(document).ready(function () {
     navigator.persistentStorage.queryUsageAndQuota(function (usage, quota) {
       var availableSpace = quota - usage
       document.getElementById('persistentStorage').textContent = `Using ${usage} out of ${quota} bytes.`
-      console.log(`File System API uses ${usage} out of ${quota} bytes.`)
+      console.log(`File System API uses ${usage} out of ${quota} bytes. ${availableSpace} bytes are available.`)
     })
   }
 
@@ -244,41 +240,6 @@ $(document).ready(function () {
       console.log(`Storage Quota uses ${info.usage} out of ${info.quota} bytes.`)
     })
   }
-=======
-    "use strict";
-    //test file system api
-    var infoFileSystemAPI = document.getElementById("SupportFilesystemAPI");
-    if (window.requestFileSystem && window.URL) {
-        infoFileSystemAPI.innerHTML = "Your browser does support the HTML5 filesystem API.";
-    } else {
-        infoFileSystemAPI.innerHTML = "Your browser <strong>does not</strong> support the HTML5 filesystem API.";
-    }
-    //event handler for key settings
-    $('#previousTrackKey1, #nextTrackKey1, #playTrackKey1').on('keydown', function (event) {
-        $(this).val(event.keyCode || event.key);
-    });
 
-    //see https://developers.google.com/web/updates/2017/08/estimating-available-storage-space
-    if ('storage' in navigator && 'estimate' in navigator.storage) {
-      navigator.storage.estimate().then(({usage, quota}) => {
-        document.getElementById('storageQuota').textContent = `Using ${usage} out of ${quota} (${(usage / quota).toFixed(5)}%).`
-        console.log(`Using ${usage} out of ${quota} bytes.`)
-      });
-    }
-
-    if (navigator.persistentStorage) {
-      navigator.persistentStorage.queryUsageAndQuota(function (usage, quota) {
-        var availableSpace = quota - usage
-        document.getElementById('persistentStorage').textContent = `Using ${usage} out of ${quota} bytes.`
-        console.log(`File System API uses ${usage} out of ${quota} bytes.`)
-      })
-    }
-
-    if (navigator.storageQuota) {
-      navigator.storageQuota.queryInfo("temporary").then(function(info) {
-        document.getElementById('quotaManagementTemp').textContent = `Using ${info.usage} out of ${info.quota} bytes.`
-        console.log(`Storage Quota uses ${info.usage} out of ${info.quota} bytes.`)
-      });
-    }
->>>>>>> 35f64b1b87d071659537f341fbf5e06119345d84
+  UI.initGeneralUIEvents()
 })

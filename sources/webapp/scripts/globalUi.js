@@ -201,8 +201,8 @@ var GlobalUserInterfaceHelper = {
 
   /** Handle Events from Web-Manifest-API */
   initWebManifest: () => {
-    window.addEventListener('beforeinstallprompt', async (event) => {
     /* TODO motivate the user to click "install" in the browsers promt */
+    // window.addEventListener('beforeinstallprompt', async (event) => {
     //   event.preventDefault()
     //   GlobalUserInterfaceHelper.logHandler('You will ask to install this app on your local device. Trust me, say YES!', 'note', 'WebManifest');
     //   try {
