@@ -536,7 +536,7 @@ $(document).ready(function () {
 
   document.addEventListener('writeEpisode', function (event) {
     const episode = event.detail.episode
-    const episodeUI = UI.renderEpisode(episode)
+    let episodeUI = UI.renderEpisode(episode)
     const order = UI.settings.get('playlistSort')
     const playlistEntries = document.getElementById('playlist').querySelectorAll('.entries li')
 
@@ -550,7 +550,11 @@ $(document).ready(function () {
 
     // show unlisend episode if not listed before
     if (!episode.playback.played) {
-      $('.emptyPlaceholder').remove()
+      const emptyPlaceholder = document.querySelector('.emptyPlaceholder')
+      if (emptyPlaceholder) {
+        emptyPlaceholder.parentNode.removeChild(emptyPlaceholder)
+      }
+      episodeUI = $(episodeUI)
       episodeUI.hide()
       if (!order || order === 'asc') {
         $('#playlist').find('.entries').append(episodeUI)
