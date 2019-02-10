@@ -1,5 +1,6 @@
 AddType text/cache-manifest .appcache
 AddType application/x-web-app-manifest+json .webapp
+AddType application/manifest+json .webmanifest
 
 Header always set X-Frame-Options "SAMEORIGIN"
 Header always set X-Xss-Protection "1; mode=block"
