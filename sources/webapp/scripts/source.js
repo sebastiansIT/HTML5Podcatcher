@@ -82,14 +82,14 @@ $(document).ready(function () {
   }, false)
   // * New or changes episode
   document.addEventListener('writeEpisode', function (event) {
-    var i, episode, episodeUI
-    episode = event.detail.episode
-    episodeUI = UI.renderEpisode(episode)
+    const episode = event.detail.episode
+    const episodeUI = UI.renderEpisode(episode)
+    const playlistEntries = document.getElementById('episodes').querySelectorAll('.entries li')
+
     // find episode in HTML markup
-    for (i = 0; i < $('#episodes').find('.entries li').length; i++) {
-      if ($($('#episodes').find('.entries li')[i]).data('episodeUri') === episode.uri) {
-        // Actualise episodes markup
-        $($('#episodes').find('.entries li')[i]).html(episodeUI.html())
+    for (let i = 0; i < playlistEntries.length; i++) {
+      if (playlistEntries[i].dataset.episodeUri === episode.uri) {
+        playlistEntries[i].replaceWith(episodeUI)
         return
       }
     }

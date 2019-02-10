@@ -240,3 +240,5 @@
   * Fix a Bug in fileSystemProvider that avoid the callback function to be called.
 - 0.46.0
   * Add a Webmanifest to the hosted app
+- 0.46.1
+  * Fix a Bug that prevent UI to update changed episodes

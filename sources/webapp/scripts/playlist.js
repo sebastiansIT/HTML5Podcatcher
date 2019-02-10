@@ -535,19 +535,19 @@ $(document).ready(function () {
   })
 
   document.addEventListener('writeEpisode', function (event) {
-    var i, episode, episodeUI, order
-    episode = event.detail.episode
-    episodeUI = UI.renderEpisode(episode)
-    order = UI.settings.get('playlistSort')
+    const episode = event.detail.episode
+    const episodeUI = UI.renderEpisode(episode)
+    const order = UI.settings.get('playlistSort')
+    const playlistEntries = document.getElementById('playlist').querySelectorAll('.entries li')
 
     // find episode in HTML markup
-    for (i = 0; i < $('#playlist').find('.entries li').length; i += 1) {
-      if ($($('#playlist').find('.entries li')[i]).data('episodeUri') === episode.uri) {
-        // Actualise episodes markup
-        $($('#playlist').find('.entries li')[i]).html(episodeUI.html())
+    for (let i = 0; i < playlistEntries.length; i++) {
+      if (playlistEntries[i].dataset.episodeUri === episode.uri) {
+        playlistEntries[i].replaceWith(episodeUI)
         return
       }
     }
+
     // show unlisend episode if not listed before
     if (!episode.playback.played) {
       $('.emptyPlaceholder').remove()

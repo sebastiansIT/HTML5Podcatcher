@@ -366,8 +366,8 @@ var GlobalUserInterfaceHelper = {
     if (episode.language) {
       entryUI.setAttribute('lang', episode.language)
     }
+    entryUI.dataset.episodeUri = episode.uri
     entryUI = $(entryUI)
-    entryUI.data('episodeUri', episode.uri)
     entryUI.find('a.link').attr('href', episode.uri)
     entryUI.find('.title').text(episode.title)
     if (episode.subTitle) {
