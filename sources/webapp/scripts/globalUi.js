@@ -435,6 +435,7 @@ var GlobalUserInterfaceHelper = {
     }
     $('.loader').remove()
   },
+
   renderSource: function (source) {
     'use strict'
     let fragment = document.importNode(document.getElementById('sourceTemplate').content, true)
@@ -446,8 +447,8 @@ var GlobalUserInterfaceHelper = {
       entryUI.querySelector('a.details').setAttribute('href', 'source.html?uri=' + source.uri)
       entryUI.querySelector('a.details').setAttribute('title', 'Details for ' + source.title)
     }
+    entryUI.dataset.sourceUri = source.uri
     entryUI = $(entryUI)
-    entryUI.data('sourceUri', source.uri)
     entryUI.find('.title').text(source.title)
     entryUI.find('a.uri').attr('href', source.uri)
     entryUI.find('span.uri').text(source.uri)

@@ -98,20 +98,22 @@ $(document).ready(function () {
   })
   // New or Changed Source
   document.addEventListener('writeSource', function (event) {
-    var i, source, sourceUI
-    source = event.detail.source
-    sourceUI = UI.renderSource(source)
-    for (i = 0; i < $('#sourceslist').find('.entries li').length; i++) {
-      if ($($('#sourceslist').find('.entries li')[i]).data('sourceUri') === source.uri) {
-        $($('#sourceslist').find('.entries li')[i]).slideUp().html(sourceUI.html()).slideDown()
+    const source = event.detail.source
+    const sourcelist = document.getElementById('sourceslist')
+    const sourcelistEntries = sourcelist.querySelector('.entries li')
+    const sourceUI = UI.renderSource(source)
+
+    for (let i = 0; i < sourcelistEntries.length; i++) {
+      if (sourcelistEntries[i].dataset.sourceUri === source.uri) {
+        // TODO fade in and out
+        sourcelistEntries[i].replaceWith(sourceUI)
         return
       }
     }
     // show source if not listed before
-    sourceUI.hide()
-    $('#sourceslist').find('.entries').append(sourceUI)
-    sourceUI.fadeIn()
+    sourcelist.querySelector('.entries').appendChild(sourceUI)
   }, false)
+
   // Reload all Podcasts
   document.getElementById('refreshPlaylist').addEventListener('click', UI.eventHandler.refreshAllSources)
   // Open and close the dialog to insert new Feeds/Sources
