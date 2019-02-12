@@ -145,6 +145,6 @@ section[role="region"] > header:first-child .icon-back {
 ---------------------------------- */
 dialog[open] > header:first-child,
 section[role="region"] > header:first-child {
-	background-color: #006400;
+	background-color: var(--primary-color, #006400);
 	color: #fff;
 }

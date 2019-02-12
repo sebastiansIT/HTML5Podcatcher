@@ -54,7 +54,7 @@
 }
 .content .entries .active,
 .content .entries li:last-child.active {
-	border-bottom: solid 0.3rem #006400;
+	border-bottom: solid 0.3rem --var(primary-color, #006400);
 }
 /* Entry content */
 .content .entries li > :first-child {
