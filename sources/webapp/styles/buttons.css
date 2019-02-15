@@ -2,7 +2,7 @@
     Copyright 2013 - 2015 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
-    
+
     "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -41,7 +41,7 @@ button,
   line-height: 4rem;
   text-align: center;
   text-decoration: none;
-  background-color: #006400;
+  background-color: var(--primary-color, #006400);
   background-image: none;
   color: #fff;
   cursor:pointer;
@@ -51,7 +51,7 @@ button,
 /* Pressed */
 button:active,
 .button:active {
-  background-color: rgba(0, 100, 0, 0.8);
+  background-color: var(--primary-color-active, rgba(0, 100, 0, 0.8));
 }
 
 /* Focused */
@@ -62,7 +62,7 @@ button:focus,
 }
 
 .button:hover {
-  background-color: rgba(0, 100, 0, 0.95);
+  background-color: var(--primary-color-hover, rgba(0, 100, 0, 0.95));
 }
 
 .button:visited {

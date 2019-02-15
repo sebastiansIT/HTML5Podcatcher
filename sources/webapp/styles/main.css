@@ -18,6 +18,10 @@
 
 /* App-Page Layout */
 html {
+	--primary-color: rgb(100, 100, 0);
+	--primary-color-active: rgba(100, 100, 0, 0.8);
+	--primary-color-hover: rgba(100, 100, 0, 0.95);
+
 	font-size: 62.5%; /*Set font size to 10px (if default is 16px) */
 	font-family: 'Fira Sans', sans-serif;
 	line-height: 2.0rem;
@@ -48,7 +52,7 @@ section[role="region"] {
 
 dialog[open] > footer:last-child,
 section[role="region"] > footer:last-child {
-	background-color: #006400;
+	background-color: var(--primary-color, #006400);
 	color: #fff;
 }
 dialog[open] .content,
@@ -111,11 +115,11 @@ h3 { /* = Headline of a content section */
 }
 
 a {
-	color: #006400;
+	color: var(--primary-color, #006400);
 }
 a:visited {
-	color:#006400;
-	text-decoration:none;
+	color: var(--primary-color, #006400);
+	text-decoration: none;
 }
 a:hover,
 a:active,
@@ -169,9 +173,9 @@ h4 a { /*Links insite a Headline*/
 		max-width:64rem;
 		height:calc(100% - 0.9rem);
 		margin: 0.3rem auto;
-		border-left: 0.3rem solid #006400;
-		border-right:0.3rem solid #006400;
-		border-bottom:0.3rem solid #006400;
+		border-left: 0.3rem solid var(--primary-color, #006400);
+		border-right:0.3rem solid var(--primary-color, #006400);
+		border-bottom:0.3rem solid var(--primary-color, #006400);
 	}
 }
 
@@ -198,7 +202,7 @@ h4 a { /*Links insite a Headline*/
     align-items: center;
 }
 .loader > div {
-	background-color: #006400;
+	background-color: var(--primary-color, #006400);
 	width: 0.4rem;
 	height: 3.5rem;
 	border-radius: 0.2rem;
