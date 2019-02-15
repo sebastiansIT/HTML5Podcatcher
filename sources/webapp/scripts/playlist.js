@@ -323,7 +323,7 @@ GlobalUserInterfaceHelper.playPrevious = function () {
 }
 GlobalUserInterfaceHelper.playNext = function () {
   'use strict'
-  var audioTag = $('#player audio')[0]
+  const audioTag = document.querySelector('#player audio')
   audioTag.pause()
   UI.activeEpisode(function (episode) {
     var jumppoint = {}
@@ -543,7 +543,11 @@ $(document).ready(function () {
     // find episode in HTML markup
     for (let i = 0; i < playlistEntries.length; i++) {
       if (playlistEntries[i].dataset.episodeUri === episode.uri) {
+        const isActive = playlistEntries[i].classList.contains('active')
         playlistEntries[i].replaceWith(episodeUI)
+        if (isActive) {
+          playlistEntries[i].classList.add('active')
+        }
         return
       }
     }
