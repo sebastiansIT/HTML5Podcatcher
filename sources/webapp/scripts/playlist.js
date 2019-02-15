@@ -544,10 +544,11 @@ $(document).ready(function () {
     for (let i = 0; i < playlistEntries.length; i++) {
       if (playlistEntries[i].dataset.episodeUri === episode.uri) {
         const isActive = playlistEntries[i].classList.contains('active')
-        playlistEntries[i].replaceWith(episodeUI)
+        episodeUI.querySelector('li').setAttribute(playlistEntries[i].getAttribute('style'))
         if (isActive) {
-          playlistEntries[i].classList.add('active')
+          episodeUI.querySelector('li').classList.add('active')
         }
+        playlistEntries[i].replaceWith(episodeUI)
         return
       }
     }
