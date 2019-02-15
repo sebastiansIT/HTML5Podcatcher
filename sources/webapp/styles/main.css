@@ -18,9 +18,9 @@
 
 /* App-Page Layout */
 html {
-	--primary-color: rgb(100, 100, 0);
-	--primary-color-active: rgba(100, 100, 0, 0.8);
-	--primary-color-hover: rgba(100, 100, 0, 0.95);
+	--primary-color: rgb(0, 100, 0);
+	--primary-color-active: rgba(0, 100, 0, 0.8);
+	--primary-color-hover: rgba(0, 100, 0, 0.95);
 
 	font-size: 62.5%; /*Set font size to 10px (if default is 16px) */
 	font-family: 'Fira Sans', sans-serif;
