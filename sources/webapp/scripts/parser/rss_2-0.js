@@ -51,7 +51,7 @@ var RssParser = (function () {
     parserResult.source.uri = source.uri
 
     if (!xmlDocument) {
-      HTML5Podcatcher.logger('No XML Document to parse found.', 'error:parser')
+      HTML5Podcatcher.logger(`No XML document found at ${source.uri}.`, 'error', 'parser')
       return undefined
     } else {
       var rootElement, currentElementList, currentElement, contentElement, itemArray, enclosureArray, i, j, item, episode
@@ -187,7 +187,7 @@ var RssParser = (function () {
         }
         parserResult.episodes.sort(HTML5Podcatcher.sortEpisodes)
       } else {
-        HTML5Podcatcher.logger('No root element (&lt;rss&gt;) found in parsed RSS document: ' + xmlDocument, 'error')
+        HTML5Podcatcher.logger(`No root element (&lt;rss&gt;) found in parsed document: ${xmlDocument}`, 'error', 'parser')
         return undefined
       }
 
