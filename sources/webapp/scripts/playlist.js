@@ -263,7 +263,7 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
                   episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode)
                   percentPlayed = ((event.target.currentTime / audioElement.duration) * 100)
                   percentPlayed = percentPlayed.toFixed(2)
-                  $(episodeUI).attr('style', 'background: linear-gradient(to right, rgba(0, 100, 0, 0.2) 0%,rgba(0, 100, 0, 0.2) ' + percentPlayed + '%, #ffffff ' + percentPlayed + '%);')
+                  $(episodeUI).attr('style', 'background: linear-gradient(to right, var(--primary-color-background) 0%, var(--primary-color-background) ' + percentPlayed + '%, #ffffff ' + percentPlayed + '%);')
                 }
               })
               HTML5Podcatcher.logger('Timeupdate on', 'debug')
