@@ -52,7 +52,7 @@ div[role="toolbar"] button:focus,
 div[role="toolbar"] a:active,
 div[role="toolbar"] a:focus {
   color: #fff;
-  background-color: rgba(0, 100, 0, 0.2);
+  background-color: var(--primary-color-background, rgba(0, 100, 0, 0.2));
 }
 div[role="toolbar"] button[data-icon],
 div[role="toolbar"] a[data-icon] {

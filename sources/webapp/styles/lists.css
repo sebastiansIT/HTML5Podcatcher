@@ -54,7 +54,7 @@
 }
 .content .entries .active,
 .content .entries li:last-child.active {
-	border-bottom: solid 0.3rem --var(primary-color, #006400);
+	border-bottom: solid 0.3rem var(--primary-color, #006400);
 }
 /* Entry content */
 .content .entries li > :first-child {
@@ -70,7 +70,7 @@
 .content .entries li > a:active,
 .content .entries li > a:focus {
 	outline:none;
-	background-color:rgba(0, 100, 0, 0.2);
+	background-color: var(--primary-color-background, rgba(0, 100, 0, 0.2));
 }
 h4 { /* = Title of list item */
 	font-size: 1.8rem;
@@ -117,7 +117,7 @@ h4 { /* = Title of list item */
 .content .entries li button[data-icon]:active,
 .content .entries li button[data-icon]:focus,
 .content .entries li button[data-icon]:hover {
-	background-color:rgba(0, 100, 0, 0.2);
+	background-color: var(--primary-color-background, rgba(0, 100, 0, 0.2));
 	padding:0;
 }
 .content .entries li a[data-icon]:before,

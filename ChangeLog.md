@@ -244,3 +244,8 @@
   * Fix a Bug that prevent UI to update changed episodes
 - 0.46.2
   * Fix a Bug that prevent UI showing new episodes
+- 0.46.3
+	* Use CSS-Variables to theme the ui
+	* Fix some minor bugs in function to update episodes UI
+- 0.64.4
+	* Fix a bug in the bugfix before

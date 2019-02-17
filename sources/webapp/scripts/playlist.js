@@ -544,7 +544,7 @@ $(document).ready(function () {
     for (let i = 0; i < playlistEntries.length; i++) {
       if (playlistEntries[i].dataset.episodeUri === episode.uri) {
         const isActive = playlistEntries[i].classList.contains('active')
-        episodeUI.querySelector('li').setAttribute(playlistEntries[i].getAttribute('style'))
+        episodeUI.querySelector('li').setAttribute('style', playlistEntries[i].getAttribute('style'))
         if (isActive) {
           episodeUI.querySelector('li').classList.add('active')
         }

@@ -21,6 +21,7 @@ html {
 	--primary-color: rgb(0, 100, 0);
 	--primary-color-active: rgba(0, 100, 0, 0.8);
 	--primary-color-hover: rgba(0, 100, 0, 0.95);
+	--primary-color-background: rgba(0, 100, 0, 0.2);
 
 	font-size: 62.5%; /*Set font size to 10px (if default is 16px) */
 	font-family: 'Fira Sans', sans-serif;
@@ -125,9 +126,9 @@ a:hover,
 a:active,
 a:focus {
 	color: #333;
-	background-color: rgba(0, 100, 0, 0.2);
+	background-color: var(--primary-color-background, rgba(0, 100, 0, 0.2));
 	padding: 1px 2px;
-	outline: 1px solid rgba(0, 100, 0, 0.2);
+	outline: 1px solid var(--primary-color-background, rgba(0, 100, 0, 0.2));
 }
 h2 a,
 h3 a,
@@ -209,7 +210,7 @@ h4 a { /*Links insite a Headline*/
 	margin: 0.2rem;
 	animation-fill-mode: both;
 	display: inline-block;
-    animation: lineScalePulseOutFrames 0.9s -0.6s infinite cubic-bezier(.85, .25, .37, .85);
+  animation: lineScalePulseOutFrames 0.9s -0.6s infinite cubic-bezier(.85, .25, .37, .85);
 }
 .loader > div:nth-child(2), .loader > div:nth-child(4) {
     animation-delay: -0.4s !important;
