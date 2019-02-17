@@ -107,16 +107,16 @@ var webAPI = (function () {
           onLoadCallback(xmlData)
         }
       } else {
-        HTML5Podcatcher.logger('No XML Document found instead found [' + ajaxCall.response + ']', 'error:Web')
+        HTML5Podcatcher.logger(`No XML Document found at ${url} instead found [' ${ajaxCall.response} ]`, 'error', 'Web')
       }
     }
     errorfunction = function (xhrError) {
       if (proxyUrlPattern) {
-        HTML5Podcatcher.logger('Direct download failed. Try proxy: ' + proxyUrlPattern.replace('$url$', url), 'info', 'Web')
+        HTML5Podcatcher.logger(`Direct download failed. Try proxy: &{proxyUrlPattern.replace('$url$', url)}`, 'info', 'Web')
         createXMLHttpRequest(function (proxyXhr) {
           proxyXhr.open('GET', proxyUrlPattern.replace('$url$', url), true)
           proxyXhr.addEventListener('error', function (xhrError) {
-            HTML5Podcatcher.logger('Can\'t download Source ' + proxyUrlPattern.replace('$url$', url) + ': ' + xhrError.error, 'error', 'Web')
+            HTML5Podcatcher.logger(`Can't download Source ${proxyUrlPattern.replace('$url$', url)}: ${xhrError.error}`, 'error', 'Web')
             if (onFailureCallback && typeof onFailureCallback === 'function') {
               onFailureCallback()
             }
