@@ -11,7 +11,7 @@ cgitb.enable()
 
 def DoGet():
 	httpGetParameter = cgi.FieldStorage()
-	if not ("secret" in httpGetParameter and httpGetParameter["secret"].value.decode('utf-8') == "yyse4rfvv"):
+	if not ("secret" in httpGetParameter and httpGetParameter["secret"].value.decode('utf-8') == "mysecret"):
 		print("Status:401 Unauthorized")
 		print
 		print("401 Unauthorized")
@@ -30,16 +30,16 @@ def DoGet():
 		for header in filehandle.info().headers:
 			if not header.startswith("Server") and not header.startswith("Set-Cookie"):
 				sys.stdout.write(header.replace("\n", "").replace("\r", "")+"\n")
-		#print "Content-Type:" + filehandle.info().gettype()		
+		#print "Content-Type:" + filehandle.info().gettype()
 		sys.stdout.write("Access-Control-Allow-Origin: http://podcatcher.sebastiansit.de, \n")
 		sys.stdout.write("\n")
-		
+
 		CHUNK = 16 * 1024
 		while True:
 			chunk = filehandle.read(CHUNK)
 			if not chunk: break
 			sys.stdout.write(chunk)
-		
+
 		#file = filehandle.read()
 		#sys.stdout.write(file)
 	else:
