@@ -249,3 +249,5 @@
 	* Fix some minor bugs in function to update episodes UI
 - 0.64.4
 	* Fix a bug in the bugfix before
+- 0.64.5
+  * Visualisation of download and update status uses CSS variables
