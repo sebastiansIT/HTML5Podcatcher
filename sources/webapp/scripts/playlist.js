@@ -81,10 +81,10 @@ GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
   */
 GlobalUserInterfaceHelper.GenerateAudioElement = function () {
   'use strict'
-  var playbackRate = POD.api.configuration.settings.get('playbackRate') || 1
+  const playbackRate = POD.api.configuration.settings.get('playbackRate') || 1
   var mediaElement
 
-  POD.logger('Audio element will be created', 'debug')
+  POD.logger('Audio element will be created', 'debug', 'playback')
 
   mediaElement = document.createElement('audio')
   mediaElement.setAttribute('controls', 'controls')
@@ -95,13 +95,13 @@ GlobalUserInterfaceHelper.GenerateAudioElement = function () {
   if (window.navigator.mozApps) {
     // if app started in Firefox OS Runtime...
     mediaElement.setAttribute('mozaudiochannel', 'content')
-    POD.logger('Activate content audio channel', 'debug')
+    POD.logger('Activate content audio channel', 'debug', 'playback')
     // Handling interruptions by heigher audio channels
     mediaElement.addEventListener('mozinterruptbegin', function () {
-      POD.logger('Playback is interrupted', 'info')
+      POD.logger('Playback is interrupted', 'info', 'playback')
     })
     mediaElement.addEventListener('mozinterruptend', function () {
-      POD.logger('Playback is resumed', 'info')
+      POD.logger('Playback is resumed', 'info', 'playback')
     })
     if (navigator.mozAudioChannelManager) {
       // Set Volumn Control of device to "content" audio channel
@@ -109,19 +109,19 @@ GlobalUserInterfaceHelper.GenerateAudioElement = function () {
       // Handling connection/disconnection of headphones
       navigator.mozAudioChannelManager.onheadphoneschange = function () {
         if (navigator.mozAudioChannelManager.headphones === true) {
-          POD.logger('Headphones plugged in!', 'debug')
+          POD.logger('Headphones plugged in!', 'debug', 'playback')
           if (mediaElement.autoplay === true) {
             mediaElement.play()
           }
         } else {
-          POD.logger('Headphones unplugged!', 'debug')
+          POD.logger('Headphones unplugged!', 'debug', 'playback')
           mediaElement.pause()
         }
       }
     }
   }
 
-  POD.logger('Audio element is created', 'debug')
+  POD.logger('Audio element is created', 'debug', 'playback')
 
   return mediaElement
 }
@@ -142,6 +142,7 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
       if (mediaUrl) {
         if (episode.mediaType) {
           mediaType = episode.mediaType
+          mediaType = mediaType.replace('/x-mpeg', '/mpeg').replace('/mp3', '/mpeg')
         } else {
           // the most audio files in the internet I have ever seen are MP3-Files, so I expect the media type of 'audio/mpeg' when nothing else is set.
           mediaType = 'audio/mpeg'
