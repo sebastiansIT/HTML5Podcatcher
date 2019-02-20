@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   if (UI.settings.get('proxyUrl')) {
     document.getElementById('httpProxyInput').value = UI.settings.get('proxyUrl')
+    POD.api.configuration.proxyUrlPattern = UI.settings.get('proxyUrl')
   }
 
   // Init quota and filesystem
@@ -203,6 +204,7 @@ document.addEventListener('DOMContentLoaded', function () {
         POD.logger('Loaded syncronisation value successfully.', 'info')
         syncValue = JSON.parse(xhr.responseText)
         POD.api.configuration.mergeConfigurations(syncValue.entries[0].value, function () {
+          POD.api.configuration.proxyUrlPattern = POD.api.configuration.settings.get('proxyUrl')
           // update Sources width 0 as max new episodes
           POD.web.downloadAllSources(0, function (status) {
             POD.logger('Merged syncronisation value into local configuration successfully.', 'note')
