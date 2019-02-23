@@ -251,3 +251,6 @@
 	* Fix a bug in the bugfix before
 - 0.64.5
   * Visualisation of download and update status uses CSS variables
+- 0.64.7
+	* Init ProxyUrl from local storage in settings page
+	* replace mime type from RSS feed with "audio/mpeg" if it is audio/x-mpeg
