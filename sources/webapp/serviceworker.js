@@ -68,6 +68,7 @@ const CACHED_FILES = [
   'styles/icons/skipback.svg',
   'styles/icons/skipforward.svg',
   'styles/icons/sources.svg',
+  'styles/icons/exportOpml.svg',
   // IMAGES
   'favicon.ico',
   'images/logo32.png',
