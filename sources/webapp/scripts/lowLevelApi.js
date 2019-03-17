@@ -17,6 +17,7 @@
 */
 
 /* global navigator, window, document, console */
+/* global podcatcher */
 
 var HTML5Podcatcher = {
   version: 'Alpha {{ VERSION }}',
@@ -28,70 +29,77 @@ var HTML5Podcatcher = {
     },
 
     /** Updates a source from its feed.
-      * @param {Source} source  Source to update.
+      * @param {Source} source Source to update.
       * @param {number} [limitOfNewEpisodes=5] Maximal amount of episodes imported as 'new'.
       * @param {function} [onFinishedCallback] Function called when download of Source is completed.
       */
     downloadSource: function (source, limitOfNewEpisodes, onFinishedCallback) {
       'use strict'
 
-      limitOfNewEpisodes = limitOfNewEpisodes || 5
+      if (typeof limitOfNewEpisodes !== 'number') {
+        limitOfNewEpisodes = 5
+      }
+      if (limitOfNewEpisodes < 0) {
+        throw new Error(`Parameter "limitOfNewEpisodes" must be a positiv number or 0. Actual it is set as ${limitOfNewEpisodes}.`)
+      }
 
-      // start update of the source
-      HTML5Podcatcher.api.web.downloadXML(
-        source.uri,
-        function (xmlDocument) {
-          var parserResult, mergeNewEpisodeDataWithOldPlaybackStatus
+      const readDocument = function (xmlDocument) {
+        var parserResult, mergeNewEpisodeDataWithOldPlaybackStatus
 
-          mergeNewEpisodeDataWithOldPlaybackStatus = function (mergeEpisode, forcePlayed) {
-            HTML5Podcatcher.api.storage.StorageProvider.readEpisode(mergeEpisode.uri, function (existingEpisode) {
-              existingEpisode.link = mergeEpisode.link
-              existingEpisode.title = mergeEpisode.title
-              existingEpisode.subTitle = mergeEpisode.subTitle
-              existingEpisode.updated = mergeEpisode.updated
-              existingEpisode.language = mergeEpisode.language
-              existingEpisode.mediaUrl = mergeEpisode.mediaUrl
-              existingEpisode.mediaType = mergeEpisode.mediaType
-              existingEpisode.duration = mergeEpisode.duration
-              existingEpisode.source = mergeEpisode.source
-              existingEpisode.jumppoints = mergeEpisode.jumppoints
-              // ATTENTION! never change playback information if episode updated from internet
-              // Only Exception: If the forcedPlayed parameter is set - then the actual playback state is overriden
-              if (forcePlayed && existingEpisode.playback.played === undefined) {
-                existingEpisode.playback.played = true
-              }
-              HTML5Podcatcher.api.storage.StorageProvider.writeEpisode(existingEpisode)
-            })
-          }
-
-          HTML5Podcatcher.logger('Downloaded source feed from ' + source.uri, 'debug')
-          try {
-            parserResult = HTML5Podcatcher.api.parser.SourceParser.parse(source, xmlDocument)
-            HTML5Podcatcher.logger('Parsed source feed from ' + source.uri, 'debug')
-
-            // compute parser result:
-            // merge existing data with actual one and save episodes with actualised data
-            parserResult.episodes.forEach(function (episode, index, episodes) {
-              mergeNewEpisodeDataWithOldPlaybackStatus(episode, index < episodes.length - limitOfNewEpisodes)
-            })
-            // Save Source
-            HTML5Podcatcher.api.storage.StorageProvider.writeSource(parserResult.source, function () {
-              if (onFinishedCallback && typeof onFinishedCallback === 'function') {
-                onFinishedCallback({ status: 'success' })
-              }
-            })
-          } catch (exception) {
-            HTML5Podcatcher.logger('An excpeption ocurred while parsing source ' + source.uri, 'fatal')
-            console.error(exception)
-            if (onFinishedCallback && typeof onFinishedCallback === 'function') {
-              onFinishedCallback({ status: 'failure' })
+        mergeNewEpisodeDataWithOldPlaybackStatus = function (mergeEpisode, forcePlayed) {
+          HTML5Podcatcher.api.storage.StorageProvider.readEpisode(mergeEpisode.uri, function (existingEpisode) {
+            existingEpisode.link = mergeEpisode.link
+            existingEpisode.title = mergeEpisode.title
+            existingEpisode.subTitle = mergeEpisode.subTitle
+            existingEpisode.updated = mergeEpisode.updated
+            existingEpisode.language = mergeEpisode.language
+            existingEpisode.mediaUrl = mergeEpisode.mediaUrl
+            existingEpisode.mediaType = mergeEpisode.mediaType
+            existingEpisode.duration = mergeEpisode.duration
+            existingEpisode.source = mergeEpisode.source
+            existingEpisode.jumppoints = mergeEpisode.jumppoints
+            // ATTENTION! never change playback information if episode updated from internet
+            // Only Exception: If the forcedPlayed parameter is set - then the actual playback state is overriden
+            if (forcePlayed && existingEpisode.playback.played === undefined) {
+              existingEpisode.playback.played = true
             }
-          }
-        },
-        function () {
-          onFinishedCallback({ status: 'failure' })
+            HTML5Podcatcher.api.storage.StorageProvider.writeEpisode(existingEpisode)
+          })
         }
-      )
+
+        HTML5Podcatcher.logger('Downloaded source feed from ' + source.uri, 'debug')
+        try {
+          parserResult = HTML5Podcatcher.api.parser.SourceParser.parse(source, xmlDocument)
+          HTML5Podcatcher.logger('Parsed source feed from ' + source.uri, 'debug')
+
+          // compute parser result:
+          // merge existing data with actual one and save episodes with actualised data
+          parserResult.episodes.forEach(function (episode, index, episodes) {
+            mergeNewEpisodeDataWithOldPlaybackStatus(episode, index < episodes.length - limitOfNewEpisodes)
+          })
+          // Save Source
+          HTML5Podcatcher.api.storage.StorageProvider.writeSource(parserResult.source, function () {
+            if (onFinishedCallback && typeof onFinishedCallback === 'function') {
+              onFinishedCallback({ status: 'success' })
+            }
+          })
+        } catch (exception) {
+          HTML5Podcatcher.logger('An excpeption ocurred while parsing source ' + source.uri, 'fatal')
+          console.error(exception)
+          if (onFinishedCallback && typeof onFinishedCallback === 'function') {
+            onFinishedCallback({ status: 'failure' })
+          }
+        }
+      }
+
+      // TODO set proxyPattern outside
+      podcatcher.web.sopProxyPattern = HTML5Podcatcher.api.configuration.proxyUrlPattern
+      podcatcher.web.downloadXML(source.uri)
+        .then(doc => readDocument(doc))
+        .catch((error) => {
+          HTML5Podcatcher.logger(error, 'error')
+          onFinishedCallback({ status: 'failure' })
+        })
     },
 
     /** Updates all Sources from there feeds.
@@ -134,18 +142,15 @@ var HTML5Podcatcher = {
     downloadFile: function (episode, onDownloadCallback, onProgressCallback) {
       'use strict'
 
-      // Download File
-      HTML5Podcatcher.api.web.downloadArrayBuffer(
-        episode.mediaUrl,
-        function (arrayBuffer) {
-          HTML5Podcatcher.storage.saveFile(episode, arrayBuffer, onDownloadCallback, onProgressCallback)
-        },
-        function (event/*, url */) {
-          if (onProgressCallback && typeof onProgressCallback === 'function') {
-            onProgressCallback(event, episode)
-          }
+      // TODO set proxyPattern outside
+      podcatcher.web.sopProxyPattern = HTML5Podcatcher.api.configuration.proxyUrlPattern
+      podcatcher.web.downloadArrayBuffer(episode.mediaUrl, function (event/*, url */) {
+        if (onProgressCallback && typeof onProgressCallback === 'function') {
+          onProgressCallback(event, episode)
         }
-      )
+      })
+        .then((arrayBuffer) => HTML5Podcatcher.storage.saveFile(episode, arrayBuffer, onDownloadCallback, onProgressCallback))
+        .catch((error) => HTML5Podcatcher.logger(error, 'error'))
     }
   },
 

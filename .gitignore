@@ -2,6 +2,9 @@
 #########
 node_modules
 build
+dist
+distributions
+out
 tests/bin
 tests/jasmine.result
 tests/jslint.result.xml

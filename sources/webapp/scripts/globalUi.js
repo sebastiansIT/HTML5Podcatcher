@@ -140,7 +140,7 @@ var GlobalUserInterfaceHelper = {
     var percentComplete, episodeUI
 
     episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode)
-    if (progressEvent.lengthComputable) {
+    if (progressEvent.loaded && progressEvent.total) {
       // Downloaded Bytes / (total Bytes + 3% for saving to local storage)
       percentComplete = progressEvent.loaded / (progressEvent.total + (progressEvent.total / 33))
       episodeUI.style.background = 'linear-gradient(to right, var(--primary-color-background) 0%, var(--primary-color-background) ' + (percentComplete * 100).toFixed(2) + '%, #ffffff ' + (percentComplete * 100).toFixed(2) + '%)'
@@ -594,4 +594,65 @@ var GlobalUserInterfaceHelper = {
 }
 var UI = GlobalUserInterfaceHelper
 POD.api.configuration.logger = UI.logHandler
+
+class UiLogAppender {
+  logMessage (message, logLevelName, module) {
+    let logLevel = 0
+    switch (logLevelName) {
+      case 'debug':
+        logLevel = 1
+        break
+      case 'info':
+        logLevel = 2
+        break
+      case 'note':
+        logLevel = 2.5
+        break
+      case 'warn':
+        logLevel = 3
+        break
+      case 'error':
+        logLevel = 4
+        break
+      case 'fatal':
+        logLevel = 5
+        $('#logView').addClass('fullscreen')
+        break
+    }
+
+    // Show message as Web Notification
+    if (logLevel === 2.5 && window.Notification) {
+      if (Notification.permission === 'granted') { // If it's okay let's create a notification
+        let notification = new Notification(message, { icon: 'images/logo32.png', tag: 'HTML5Podcatcher' + module })
+      } else if (Notification.permission !== 'denied') { // Otherwise, we need to ask the user for permission
+        Notification.requestPermission(function (permission) {
+          // If the user accepts, let's create a notification
+          if (permission === 'granted') {
+            let notification = new Notification(message, { icon: 'images/logo32.png', tag: 'HTML5Podcatcher' + module })
+          }
+        })
+      }
+    }
+
+    // Show message in the user interface
+    let logEntryNode = document.createElement('p')
+    let allowedLevel = GlobalUserInterfaceHelper.settings.get('logLevel') || 0
+    if (logLevel >= allowedLevel) {
+      logEntryNode.className = logLevelName
+      logEntryNode.appendChild(document.createTextNode(message))
+      if (document.getElementById('log')) {
+        document.getElementById('log').insertBefore(logEntryNode, document.getElementById('log').firstChild)
+      }
+      if (document.getElementById('activeMessage') && logLevel > 2) {
+        const messageNode = document.getElementById('activeMessage')
+        while (messageNode.hasChildNodes()) {
+          messageNode.removeChild(messageNode.lastChild)
+        }
+        messageNode.appendChild(logEntryNode.cloneNode(true))
+      }
+    }
+  }
+}
+window.podcatcher.configuration.logging.addLogAppender(new UiLogAppender())
+
 POD.storage = POD.api.storage.StorageProvider

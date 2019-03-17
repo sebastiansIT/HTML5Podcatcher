@@ -24,18 +24,18 @@ module.exports = function (grunt) {
     pkg: grunt.file.readJSON('package.json'),
     clean: {
       HostedWebApp: {
-        src: ['build/webapp']
+        src: ['distributions/webapp']
       },
       ChromePackagedApp: {
-        src: ['build/chromeapp/temp']
+        src: ['distributions/chromeapp/temp']
       }
     },
     'string-replace': { // configure the string replacement task for the hostet app
       HostedWebApp: {
         files: [
-          { cwd: 'sources/webapp/', src: '*.html', dest: 'build/webapp/', expand: 'true' },
-          { cwd: 'sources/webapp/', src: 'scripts/**/*.js', dest: 'build/webapp/', expand: 'true' },
-          { src: 'sources/webapp/serviceworker.js', dest: 'build/webapp/serviceworker.js' }
+          { cwd: 'sources/webapp/', src: '*.html', dest: 'distributions/webapp/', expand: 'true' },
+          { cwd: 'sources/webapp/', src: ['scripts/**/*.js', 'scripts/**/*.mjs'], dest: 'distributions/webapp/', expand: 'true' },
+          { src: 'sources/webapp/serviceworker.js', dest: 'distributions/webapp/serviceworker.js' }
         ],
         options: {
           replacements: [{
@@ -49,11 +49,11 @@ module.exports = function (grunt) {
       },
       ChromePackagedApp: { // configure the string replacement task for the chrome packaged app
         files: [
-          { cwd: 'sources/webApp/', src: ['*.html', '!diagnostic.html'], dest: 'build/chromeapp/temp/', expand: 'true' },
-          { cwd: 'sources/webApp/', src: ['scripts/**/*.js', '!scripts/diagnostic.js', '!scripts/storage/webStorageProvider.js'], dest: 'build/chromeapp/temp/', expand: 'true' },
-          { cwd: 'sources/chromeapp/', src: ['scripts/**/*.js'], dest: 'build/chromeapp/temp/', expand: 'true' },
-          { src: 'sources/chromeapp/background.js', dest: 'build/chromeapp/temp/background.js' },
-          { src: 'sources/chromeapp/manifest.json', dest: 'build/chromeapp/temp/manifest.json' }
+          { cwd: 'sources/webApp/', src: ['*.html', '!diagnostic.html'], dest: 'distributions/chromeapp/temp/', expand: 'true' },
+          { cwd: 'sources/webApp/', src: ['scripts/**/*.js', '!scripts/diagnostic.js', '!scripts/storage/webStorageProvider.js'], dest: 'distributions/chromeapp/temp/', expand: 'true' },
+          { cwd: 'sources/chromeapp/', src: ['scripts/**/*.js'], dest: 'distributions/chromeapp/temp/', expand: 'true' },
+          { src: 'sources/chromeapp/background.js', dest: 'distributions/chromeapp/temp/background.js' },
+          { src: 'sources/chromeapp/manifest.json', dest: 'distributions/chromeapp/temp/manifest.json' }
         ],
         options: {
           replacements: [
@@ -76,56 +76,56 @@ module.exports = function (grunt) {
     copy: {
       HostedWebApp: {
         files: [
-          // includes files within path {expand: true,  cwd: 'sources/webapp/',    src: ['styles/*.css'],                    dest: 'build/webapp/',             filter: 'isFile'},
-          { expand: true, cwd: 'sources/webapp/', src: ['styles/icons/*.svg'], dest: 'build/webapp/', filter: 'isFile' },
-          { expand: true, cwd: 'sources/webapp/', src: ['images/*.png'], dest: 'build/webapp/', filter: 'isFile' },
-          { expand: true, cwd: 'sources/hostedapp/', src: ['images/*.png'], dest: 'build/webapp/', filter: 'isFile' },
-          { expand: true, cwd: 'sources/hostedapp/', src: ['scripts/*.js'], dest: 'build/webapp/', filter: 'isFile' },
-          { expand: true, cwd: 'sources/webapp/', src: ['*.py'], dest: 'build/webapp/', filter: 'isFile' },
-          { expand: false, src: 'sources/webapp/images/favicon.ico', dest: 'build/webapp/favicon.ico' },
-          { expand: false, src: 'sources/webapp/.htaccess', dest: 'build/webapp/.htaccess' },
-          { expand: false, src: 'sources/webapp/manifest.webmanifest', dest: 'build/webapp/manifest.webmanifest' }
+          // includes files within path {expand: true,  cwd: 'sources/webapp/',    src: ['styles/*.css'],                    dest: 'distributions/webapp/',             filter: 'isFile'},
+          { expand: true, cwd: 'sources/webapp/', src: ['styles/icons/*.svg'], dest: 'distributions/webapp/', filter: 'isFile' },
+          { expand: true, cwd: 'sources/webapp/', src: ['images/*.png'], dest: 'distributions/webapp/', filter: 'isFile' },
+          { expand: true, cwd: 'sources/hostedapp/', src: ['images/*.png'], dest: 'distributions/webapp/', filter: 'isFile' },
+          { expand: true, cwd: 'sources/hostedapp/', src: ['scripts/*.js'], dest: 'distributions/webapp/', filter: 'isFile' },
+          { expand: true, cwd: 'sources/webapp/', src: ['*.py'], dest: 'distributions/webapp/', filter: 'isFile' },
+          { expand: false, src: 'sources/webapp/images/favicon.ico', dest: 'distributions/webapp/favicon.ico' },
+          { expand: false, src: 'sources/webapp/.htaccess', dest: 'distributions/webapp/.htaccess' },
+          { expand: false, src: 'sources/webapp/manifest.webmanifest', dest: 'distributions/webapp/manifest.webmanifest' }
         ]
       },
       ChromePackagedApp: {
         files: [
-          { expand: true, cwd: 'sources/webapp/', src: ['styles/icons/*.svg'], dest: 'build/chromeapp/temp/', filter: 'isFile' },
-          { expand: true, cwd: 'sources/webapp/', src: ['images/*.png'], dest: 'build/chromeapp/temp/', filter: 'isFile' },
-          { expand: true, cwd: 'sources/chromeapp/', src: ['images/*.png'], dest: 'build/chromeapp/temp/', filter: 'isFile' },
-          { expand: false, cwd: 'sources/webapp/', src: 'sources/webapp/images/favicon.ico', dest: 'build/chromeapp/temp/favicon.ico', filter: 'isFile' }
+          { expand: true, cwd: 'sources/webapp/', src: ['styles/icons/*.svg'], dest: 'distributions/chromeapp/temp/', filter: 'isFile' },
+          { expand: true, cwd: 'sources/webapp/', src: ['images/*.png'], dest: 'distributions/chromeapp/temp/', filter: 'isFile' },
+          { expand: true, cwd: 'sources/chromeapp/', src: ['images/*.png'], dest: 'distributions/chromeapp/temp/', filter: 'isFile' },
+          { expand: false, cwd: 'sources/webapp/', src: 'sources/webapp/images/favicon.ico', dest: 'distributions/chromeapp/temp/favicon.ico', filter: 'isFile' }
         ]
       }
     },
     curl: {
       HostedWebApp: {
         src: JQUERY_URL,
-        dest: 'build/webapp/scripts/jquery.min.js'
+        dest: 'distributions/webapp/scripts/jquery.min.js'
       },
       ChromePackagedApp: {
         src: JQUERY_URL,
-        dest: 'build/chromeapp/temp/scripts/jquery.min.js'
+        dest: 'distributions/chromeapp/temp/scripts/jquery.min.js'
       }
     },
     zip: {
       FirefoxPackagedApp: {
-        cwd: 'build/packagedapp/temp/',
-        src: ['build/packagedapp/temp/**'],
-        dest: 'build/packagedapp/html5podcatcher.zip'
+        cwd: 'distributions/packagedapp/temp/',
+        src: ['distributions/packagedapp/temp/**'],
+        dest: 'distributions/packagedapp/html5podcatcher.zip'
       }
     },
     concat: {
       'HostedWebApp-css': {
         'src': ['sources/webapp/styles/*.css'],
-        'dest': 'build/webapp/styles/main.css'
+        'dest': 'distributions/webapp/styles/main.css'
       },
       'ChromePackagedApp-css': {
         'src': ['sources/webapp/styles/*.css'],
-        'dest': 'build/chromeapp/temp/styles/main.css'
+        'dest': 'distributions/chromeapp/temp/styles/main.css'
       }
     },
     usemin: {
-      HostedWebApp: ['build/webapp/*.html'],
-      ChromePackagedApp: ['build/chromeapp/temp/*.html'],
+      HostedWebApp: ['distributions/webapp/*.html'],
+      ChromePackagedApp: ['distributions/chromeapp/temp/*.html'],
       options: {
       }
     },
@@ -139,8 +139,8 @@ module.exports = function (grunt) {
             })
           ]
         },
-        src: 'build/webapp/styles/main.css',
-        dest: 'build/webapp/styles/main.css'
+        src: 'distributions/webapp/styles/main.css',
+        dest: 'distributions/webapp/styles/main.css'
       },
       ChromePackagedApp: {
         options: {
@@ -151,8 +151,8 @@ module.exports = function (grunt) {
             })
           ]
         },
-        src: 'build/chromeapp/temp/styles/main.css',
-        dest: 'build/chromeapp/temp/styles/main.css'
+        src: 'distributions/chromeapp/temp/styles/main.css',
+        dest: 'distributions/chromeapp/temp/styles/main.css'
       }
     },
     // Test and Lint files

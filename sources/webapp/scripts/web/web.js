@@ -87,7 +87,7 @@ var webAPI = (function () {
   }
 
   /** Load an XML document from the given URL.
-    *
+    * @deprecated
     * @param {URL} url - The URL to load.
     * @param {module:HTML5Podcatcher/Web~XMLLoadedCallback} [onLoadCallback] - Function that is called when the XML resource is successfuly loaded.
     * @param {function} [onFailureCallback] - Function that is called when a failure occured.
@@ -160,7 +160,7 @@ var webAPI = (function () {
   }
 
   /** Load a file as an array buffer from the given URL.
-    *
+    * @deprecated
     * @param {URL} url - The URL to load.
     * @param {module:HTML5Podcatcher/Web~ArryBufferLoadedCallback} [onLoadCallback] - Function that is called when the file (as an array buffer) is successfuly loaded.
     * @param {module:HTML5Podcatcher/Web~XHRProgressCallback} [onProgressCallback] - The callback funktion to notify the program about progress information.

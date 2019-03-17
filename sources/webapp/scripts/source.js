@@ -38,7 +38,7 @@ GlobalUserInterfaceHelper.renderSourceDetails = function (source) {
 }
 
 /** Central 'ready' event handler */
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function (/* event */) {
   'use strict'
   var sourceUri
   // Get source URI from query string

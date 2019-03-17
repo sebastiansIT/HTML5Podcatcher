@@ -1,6 +1,6 @@
 {
   "name": "HTML5Podcatcher",
-  "version": "0.46.6",
+  "version": "0.47.0",
   "description": "A HTML5 based podcast player.",
   "license": "GPL-3.0",
   "main": "Gruntfile.js",
@@ -22,7 +22,9 @@
     "grunt-zip": "^0.18.1",
     "jsdoc": "^3.5.5",
     "karma": "^3.1.4",
-    "rollup": "^0.66.6"
+    "rollup": "^0.66.6",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3"
   },
   "dependencies": {},
   "repository": {
@@ -33,5 +35,9 @@
   "bugs": {
     "url": "https://github.com/sebastiansIT/HTML5Podcatcher/issues"
   },
-  "homepage": "http://podcatcher.sebastiansit.de"
+  "homepage": "http://podcatcher.sebastiansit.de",
+  "scripts": {
+    "jsdoc": "jsdoc -r -a all -d distributions/jsdoc sources/webapp/scripts/api",
+    "build": "grunt HostedWebApp && \"./node_modules/.bin/webpack\" -p"
+  }
 }

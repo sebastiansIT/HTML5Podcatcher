@@ -203,6 +203,10 @@ document.addEventListener('DOMContentLoaded', function () {
       xhr.onload = function () {
         POD.logger('Loaded syncronisation value successfully.', 'info')
         syncValue = JSON.parse(xhr.responseText)
+        // set playback status of all episodes explicit to unlisend
+        syncValue.entries[0].value.episodes.forEach((episode) => {
+          episode.playback.played = false
+        })
         POD.api.configuration.mergeConfigurations(syncValue.entries[0].value, function () {
           POD.api.configuration.proxyUrlPattern = POD.api.configuration.settings.get('proxyUrl')
           // update Sources width 0 as max new episodes
@@ -251,6 +255,7 @@ document.addEventListener('DOMContentLoaded', function () {
       // update Sources width 0 as max new episodes
       POD.web.downloadAllSources(0, function (status) {
         button.removeAttribute('disabled')
+        UI.logHandler('Finished import of configuration', 'note', 'configuration')
       }, function (total, progress) {
         UI.logHandler(`Updated ${progress} of ${total} sources`, 'info', 'Import')
       })
