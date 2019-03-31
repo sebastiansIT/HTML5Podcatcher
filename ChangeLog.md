@@ -247,10 +247,12 @@
 - 0.46.3
 	* Use CSS-Variables to theme the ui
 	* Fix some minor bugs in function to update episodes UI
-- 0.64.4
+- 0.46.4
 	* Fix a bug in the bugfix before
-- 0.64.5
+- 0.46.5
   * Visualisation of download and update status uses CSS variables
-- 0.64.7
+- 0.46.7
 	* Init ProxyUrl from local storage in settings page
 	* replace mime type from RSS feed with "audio/mpeg" if it is audio/x-mpeg
+- 0.48.0
+  * Implement voice synthesis to speak out the titles of the played episodes.

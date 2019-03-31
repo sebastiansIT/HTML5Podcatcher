@@ -27,6 +27,75 @@ UI.importConfiguration = function (config, onImportCallback) {
   'use strict'
   POD.api.configuration.overrideConfiguration(config, onImportCallback)
 }
+
+/** Transfer the list of voices as option elements to the given
+  * select element.
+  * @private
+  * @param {external:HTMLSelectElement} selectElement The element to insert the available voices in.
+  * @returns {undefined}
+  */
+function populateVoiceList (selectElement) {
+  const voices = window.h5p.speech.voices()
+
+  for (let i = 0; i < voices.length; i++) {
+    const option = document.createElement('option')
+    option.textContent = voices[i].name + ' (' + voices[i].lang + ')'
+
+    option.setAttribute('data-lang', voices[i].lang)
+    option.setAttribute('data-name', voices[i].name)
+    selectElement.appendChild(option)
+  }
+}
+
+function initSpeechSynthesisSettings () {
+  const settingsElement = document.getElementById('speechSynthesisSettings')
+  const rateElement = document.getElementById('speechSynthesisRateSelect')
+  const pitchElement = document.getElementById('speechSynthesisPitchSelect')
+
+  rateElement.value = UI.settings.get('speechSynthesisRate', 1)
+  pitchElement.value = UI.settings.get('speechSynthesisPitch', 1)
+  document.getElementById('speechSynthesisRateValue').textContent = rateElement.value * 100 + '%'
+  document.getElementById('speechSynthesisPitchValue').textContent = pitchElement.value
+
+  if (window.h5p.speech) {
+    populateVoiceList(document.getElementById('speechSynthesisVoiceSelect'))
+
+    settingsElement.addEventListener('change', function (event) {
+      event.preventDefault()
+      event.stopPropagation()
+      document.getElementById('speechSynthesisRateValue').textContent = Math.floor(rateElement.value * 100) + '%'
+      document.getElementById('speechSynthesisPitchValue').textContent = pitchElement.value
+    }, false)
+
+    const testButton = document.getElementById('testSpeechSynthesisSettingsButton')
+    testButton.addEventListener('click', (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+
+      window.h5p.speech.synthesiser.rate = rateElement.value
+      window.h5p.speech.synthesiser.pitch = pitchElement.value
+      window.h5p.speech.synthesiser.speak('Dies ist eine Ansage zum Testen der Sprachsynthese', 'de-DE')
+    })
+
+    const saveButton = document.getElementById('saveSpeechSynthesisSettingsButton')
+    saveButton.addEventListener('click', (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+
+      if (document.getElementById('speechSynthesisForm').checkValidity()) {
+        window.h5p.speech.synthesiser.rate = rateElement.value
+        UI.settings.set('speechSynthesisRate', rateElement.value)
+        window.h5p.speech.synthesiser.pitch = pitchElement.value
+        UI.settings.set('speechSynthesisPitch', pitchElement.value)
+      } else {
+        UI.logHandler('Please insert a URL!', 'error')
+      }
+    })
+  } else {
+    settingsElement.classList.addClass('nonedisplay')
+  }
+}
+
 /** Central 'ready' event handler */
 document.addEventListener('DOMContentLoaded', function () {
   'use strict'
@@ -268,4 +337,6 @@ document.addEventListener('DOMContentLoaded', function () {
     UI.settings.set('logLevel', $('#logLevelSelect').val())
     UI.logHandler('Save loging configuration.', 'debug')
   })
+
+  initSpeechSynthesisSettings()
 }, false)
