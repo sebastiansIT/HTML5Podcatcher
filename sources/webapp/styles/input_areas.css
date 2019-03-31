@@ -44,6 +44,13 @@ select {
   background: #fff;
   margin: 0 0 1rem 0;
 }
+
+select[size] {
+  height: auto;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
 input[type="number"] {
 	-moz-appearance: textfield;
 	-webkit-appearance: textfield;
@@ -80,12 +87,15 @@ textarea:invalid:focus {
 
 .inputWidget {
     box-sizing: border-box;
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     height: 4rem;
-    padding: 0 1.5rem;
+    padding: 0 1rem;
     border: 0.1rem solid #c7c7c7;
     color: #333;
     margin: 0 0 1rem 0;
+    box-sizing: border-box;
 }
 
 input[type="range"] {
