@@ -40,14 +40,14 @@ export function getVoices () {
 
 /** A Speech synthesiser.
   * @class
-  * @param {external:SpeechSynthesisVoice} voice Voice to speak a text.
+  * @param {external:String[]} [favoriteVoiceNames=[]] Name of voices to favorize speaking a text.
   * @param {number} [rate=1] Rate to speak a text width.
   * @param {number} [pitch=1] Pitch to speak a text width.
   */
 export class Synthesiser {
-  constructor (voice, rate, pitch) {
+  constructor (favoriteVoiceNames, rate, pitch) {
     if (isSupported) {
-      this.voice = voice
+      this.favoriteVoices = favoriteVoiceNames || []
       this.rate = rate || 1
       this.pitch = pitch || 1
     } else {
@@ -73,6 +73,15 @@ export class Synthesiser {
     return this._rate
   }
 
+  set favoriteVoices (favoriteVoiceNames) {
+    // TODO check Array
+    // TODO check String-Items
+    this._favoriteVoices = favoriteVoiceNames
+  }
+  get favoriteVoices () {
+    return this._favoriteVoices
+  }
+
   /** Speak a text in the given language.
     * @param {external:String} text Text to speak
     * @param {external:String} [lang=en] Language to speak in.
@@ -84,15 +93,18 @@ export class Synthesiser {
 
     lang = lang || 'en'
 
-    // TODO Add Favorit voice filter
     // Select Voice for the given language
-    getVoices().forEach((voice) => {
+    for (let i = 0; i < getVoices().length; i++) {
+      const voice = getVoices()[i]
       if (voice.localService) {
         if (voice.lang.indexOf(lang) === 0) {
           utterance.voice = voice
+          if (this.favoriteVoices.includes(voice.name)) {
+            break
+          }
         }
       }
-    })
+    }
     utterance.pitch = this.pitch
     utterance.rate = this.rate
     synthesiser.speak(utterance)

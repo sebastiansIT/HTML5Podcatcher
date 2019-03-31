@@ -28,7 +28,7 @@ let api = {
 }
 
 if (isSupported()) {
-  const synthesiser = new SpeechSynthesiser(getVoices()[0])
+  const synthesiser = new SpeechSynthesiser()
   api.speech = {
     'synthesiser': synthesiser,
     'voices': getVoices

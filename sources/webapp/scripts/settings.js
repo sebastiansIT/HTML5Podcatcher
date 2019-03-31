@@ -41,8 +41,8 @@ function populateVoiceList (selectElement) {
     const option = document.createElement('option')
     option.textContent = voices[i].name + ' (' + voices[i].lang + ')'
 
-    option.setAttribute('data-lang', voices[i].lang)
-    option.setAttribute('data-name', voices[i].name)
+    option.dataset['lang'] = voices[i].lang
+    option.setAttribute('value', voices[i].name)
     selectElement.appendChild(option)
   }
 }
@@ -51,6 +51,7 @@ function initSpeechSynthesisSettings () {
   const settingsElement = document.getElementById('speechSynthesisSettings')
   const rateElement = document.getElementById('speechSynthesisRateSelect')
   const pitchElement = document.getElementById('speechSynthesisPitchSelect')
+  const voicesElement = document.getElementById('speechSynthesisVoiceSelect')
 
   rateElement.value = UI.settings.get('speechSynthesisRate', 1)
   pitchElement.value = UI.settings.get('speechSynthesisPitch', 1)
@@ -59,6 +60,13 @@ function initSpeechSynthesisSettings () {
 
   if (window.h5p.speech) {
     populateVoiceList(document.getElementById('speechSynthesisVoiceSelect'))
+    const favorites = UI.settings.get('speechSynthesisFavoriteVoices', '').split(',')
+    for (let i = 0; i < voicesElement.options.length; i++) {
+      const option = voicesElement.options.item(i)
+      if (favorites.includes(option.value)) {
+        option.selected = true
+      }
+    }
 
     settingsElement.addEventListener('change', function (event) {
       event.preventDefault()
@@ -72,9 +80,14 @@ function initSpeechSynthesisSettings () {
       event.preventDefault()
       event.stopPropagation()
 
+      let favorites = []
+      for (let i = 0; i < voicesElement.selectedOptions.length; i++) {
+        favorites.push(voicesElement.selectedOptions.item(i).value)
+      }
+      window.h5p.speech.synthesiser.favoriteVoices = favorites
       window.h5p.speech.synthesiser.rate = rateElement.value
       window.h5p.speech.synthesiser.pitch = pitchElement.value
-      window.h5p.speech.synthesiser.speak('Dies ist eine Ansage zum Testen der Sprachsynthese', 'de-DE')
+      window.h5p.speech.synthesiser.speak('This is a test of the speech syntesis.', 'en')
     })
 
     const saveButton = document.getElementById('saveSpeechSynthesisSettingsButton')
@@ -83,6 +96,12 @@ function initSpeechSynthesisSettings () {
       event.stopPropagation()
 
       if (document.getElementById('speechSynthesisForm').checkValidity()) {
+        let favorites = []
+        for (let i = 0; i < voicesElement.selectedOptions.length; i++) {
+          favorites.push(voicesElement.selectedOptions.item(i).value)
+        }
+        window.h5p.speech.synthesiser.favoriteVoices = favorites
+        UI.settings.set('speechSynthesisFavoriteVoices', favorites)
         window.h5p.speech.synthesiser.rate = rateElement.value
         UI.settings.set('speechSynthesisRate', rateElement.value)
         window.h5p.speech.synthesiser.pitch = pitchElement.value
