@@ -68,9 +68,10 @@ section[role="region"] .content {
 	scroll-padding: 0.6rem;
 }
 dialog[open] .content > div,
-dialog[open] .contetn > section,
+dialog[open] .content > section,
 section[role="region"] .content > div,
-section[role="region"] .content > section {
+section[role="region"] .content > section,
+section[role="region"] .content > details {
 	margin: 1.2rem;
 }
 
@@ -228,4 +229,16 @@ h4 a { /*Links insite a Headline*/
 	100% {
 		transform: scaley(1);
 	}
+}
+
+.nonedisplay {
+	display:none
+}
+
+details summary {
+	font-size: 2.2rem;
+	font-weight: bold;
+	line-height: 1.2em;
+	margin-top: 1em;
+	margin-bottom: 0.6em;
 }
