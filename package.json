@@ -1,6 +1,6 @@
 {
   "name": "HTML5Podcatcher",
-  "version": "0.48.0",
+  "version": "0.48.1",
   "description": "A HTML5 based podcast player.",
   "license": "GPL-3.0",
   "main": "Gruntfile.js",
@@ -37,7 +37,9 @@
   },
   "homepage": "http://podcatcher.sebastiansit.de",
   "scripts": {
-    "jsdoc": "jsdoc -r -a all -d distributions/jsdoc sources/webapp/scripts/api",
+    "jsdoc-api": "jsdoc -r -a all -d distributions/jsdoc/api sources/webapp/scripts/api",
+    "jsdoc-ui": "jsdoc -r -a all -d distributions/jsdoc/ui sources/webapp/scripts/ui",
+    "jsdoc": "npm run jsdoc-api && npm run jsdoc-ui",
     "build": "grunt HostedWebApp && \"./node_modules/.bin/webpack\" -p"
   }
 }

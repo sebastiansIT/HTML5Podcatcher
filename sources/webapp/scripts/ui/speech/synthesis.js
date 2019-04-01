@@ -26,13 +26,31 @@
  */
 /* global SpeechSynthesisUtterance */
 
+/**
+  * Returns true if the {@link https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API|Web Speech API} ist supported by this platform.
+  * @static
+  * @returns {boolean} True if the Web Speech API is supported by this platform.
+  */
 export function isSupported () {
   return !!window.speechSynthesis
 }
 
+/**
+  * Returns a list of voices for the Web Speech API that are offline available.
+  * @static
+  * @returns {SpeechSynthesisVoice[]} Voices that are offline available.
+  */
 export function getVoices () {
   if (isSupported) {
-    return window.speechSynthesis.getVoices()
+    const allVoices = window.speechSynthesis.getVoices()
+    let offlineVoices = []
+    for (let i = 0; i < allVoices.length; i++) {
+      const voice = allVoices[i]
+      if (voice.localService) {
+        offlineVoices.push(voice)
+      }
+    }
+    return offlineVoices
   } else {
     throw new Error('Speech Synthesis isn\'t supported by this platform.')
   }
@@ -45,6 +63,9 @@ export function getVoices () {
   * @param {number} [pitch=1] Pitch to speak a text width.
   */
 export class Synthesiser {
+  /**
+    * @constructs
+    */
   constructor (favoriteVoiceNames, rate, pitch) {
     if (isSupported) {
       this.favoriteVoices = favoriteVoiceNames || []
@@ -93,15 +114,13 @@ export class Synthesiser {
 
     lang = lang || 'en'
 
-    // Select Voice for the given language
+    // Select a voice for the given language
     for (let i = 0; i < getVoices().length; i++) {
       const voice = getVoices()[i]
-      if (voice.localService) {
-        if (voice.lang.indexOf(lang) === 0) {
-          utterance.voice = voice
-          if (this.favoriteVoices.includes(voice.name)) {
-            break
-          }
+      if (voice.lang.indexOf(lang) === 0) {
+        utterance.voice = voice
+        if (this.favoriteVoices.includes(voice.name)) {
+          break
         }
       }
     }
