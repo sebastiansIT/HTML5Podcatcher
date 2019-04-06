@@ -258,3 +258,4 @@
   * Implement voice synthesis to speak out the titles of the played episodes.
 - 0.48.1
   * Filter the list of voices, only show voices that are offline available.
+	* Sort the list of Sources

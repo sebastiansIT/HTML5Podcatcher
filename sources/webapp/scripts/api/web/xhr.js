@@ -41,7 +41,8 @@ const LOGGER = new Logger('Web/XHR')
   */
 export default class XhrWebAccessProvider extends WebAccessProvider {
   /**
-    * @constructs XhrWebAccessProvider
+    * @constructs module:podcatcher/web/xhr~XhrWebAccessProvider
+    * @param {external:String} [sopProxyPattern] A URL pattern used for access via a proxy.
     * @param {Object} [options] A Object with options used by this implementation of the WebAccessProvider.
     * @param {number} [options.downloadTimeout=600000] The  time in milliseconds to wait for finishing a network requests Default is 10 Minutes.
     */

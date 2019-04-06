@@ -371,7 +371,10 @@ var storageAPI = (function () {
     this.dataStorageProvider().readSource(sourceUri, onReadCallback)
   }
   StorageProviderFacade.prototype.readSources = function (onReadCallback) {
-    this.dataStorageProvider().readSources(onReadCallback)
+    this.dataStorageProvider().readSources((sources) => {
+      let sourcesOrdered = (new window.podcatcher.model.Sources(sources)).sources
+      onReadCallback(sourcesOrdered)
+    })
   }
 
   /** Saves a single source with the active storage provider.

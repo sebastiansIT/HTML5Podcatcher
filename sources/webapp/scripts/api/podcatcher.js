@@ -4,6 +4,7 @@
     @author  Sebastian Spautz [sebastian@human-injection.de]
     @requires module:podcatcher/utils/logging
     @requires module:podcatcher/web/fetch
+    @requires module:podcatcher/model/sourcelist
     @license Copyright 2019 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
@@ -24,8 +25,12 @@
 
 import { logManager } from './utils/logging.js'
 import WebAccessProvider from './web/fetch.js'
+import Sourcelist from './model/sourcelist'
 
 const api = {
+  model: {
+    Sources: Sourcelist
+  },
   configuration: {
     logging: {
       addLogAppender: (appender) => logManager.addLogAppender(appender)
