@@ -51,12 +51,15 @@ function initSpeechSynthesisSettings () {
   const settingsElement = document.getElementById('speechSynthesisSettings')
   const rateElement = document.getElementById('speechSynthesisRateSelect')
   const pitchElement = document.getElementById('speechSynthesisPitchSelect')
+  const volumeElement = document.getElementById('speechSynthesisVolumeSelect')
   const voicesElement = document.getElementById('speechSynthesisVoiceSelect')
 
   rateElement.value = UI.settings.get('speechSynthesisRate', 1)
   pitchElement.value = UI.settings.get('speechSynthesisPitch', 1)
-  document.getElementById('speechSynthesisRateValue').textContent = rateElement.value * 100 + '%'
+  volumeElement.value = UI.settings.get('speechSynthesisVolume', 1)
+  document.getElementById('speechSynthesisRateValue').textContent = Math.floor(rateElement.value * 100) + '%'
   document.getElementById('speechSynthesisPitchValue').textContent = pitchElement.value
+  document.getElementById('speechSynthesisVolumeValue').textContent = Math.floor(volumeElement.value * 100) + '%'
 
   if (window.h5p.speech) {
     populateVoiceList(document.getElementById('speechSynthesisVoiceSelect'))
@@ -73,6 +76,7 @@ function initSpeechSynthesisSettings () {
       event.stopPropagation()
       document.getElementById('speechSynthesisRateValue').textContent = Math.floor(rateElement.value * 100) + '%'
       document.getElementById('speechSynthesisPitchValue').textContent = pitchElement.value
+      document.getElementById('speechSynthesisVolumeValue').textContent = Math.floor(volumeElement.value * 100) + '%'
     }, false)
 
     const testButton = document.getElementById('testSpeechSynthesisSettingsButton')
@@ -87,7 +91,12 @@ function initSpeechSynthesisSettings () {
       window.h5p.speech.synthesiser.favoriteVoices = favorites
       window.h5p.speech.synthesiser.rate = rateElement.value
       window.h5p.speech.synthesiser.pitch = pitchElement.value
+      window.h5p.speech.synthesiser.volume = volumeElement.value
+
       window.h5p.speech.synthesiser.speak('This is a test of the speech syntesis.', 'en')
+        .catch((errorCodeOrError) => {
+          POD.logger(errorCodeOrError.message || errorCodeOrError, 'error')
+        })
     })
 
     const saveButton = document.getElementById('saveSpeechSynthesisSettingsButton')
@@ -106,8 +115,10 @@ function initSpeechSynthesisSettings () {
         UI.settings.set('speechSynthesisRate', rateElement.value)
         window.h5p.speech.synthesiser.pitch = pitchElement.value
         UI.settings.set('speechSynthesisPitch', pitchElement.value)
+        window.h5p.speech.synthesiser.volume = volumeElement.value
+        UI.settings.set('speechSynthesisVolume', volumeElement.value)
       } else {
-        UI.logHandler('Please insert a URL!', 'error')
+        UI.logHandler('Please check your configuration for the Web Speech API.', 'error')
       }
     })
   } else {

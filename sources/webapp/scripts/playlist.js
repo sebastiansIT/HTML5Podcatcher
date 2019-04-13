@@ -280,9 +280,21 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
         window.h5p.speech.synthesiser.rate = UI.settings.get('speechSynthesisRate', 1)
         window.h5p.speech.synthesiser.pitch = UI.settings.get('speechSynthesisPitch', 1)
         window.h5p.speech.synthesiser.speak(`${episode.title} by ${episode.source}`, episode.language)
-        if (onActivatedCallback && typeof onActivatedCallback === 'function') {
-          onActivatedCallback(episode)
-        }
+          .then(() => {
+            if (onActivatedCallback && typeof onActivatedCallback === 'function') {
+              onActivatedCallback(episode)
+            }
+          })
+          .catch((errorCodeOrError) => {
+            if (errorCodeOrError.message) { // rejected with an Error
+              POD.logger(errorCodeOrError.message, 'warn')
+            } else { // rejected with an errorCode from the Web Speech API
+              POD.logger(`Speech synthesis has thrown an error: ${errorCodeOrError}.`, 'warn')
+            }
+            if (onActivatedCallback && typeof onActivatedCallback === 'function') {
+              onActivatedCallback(episode)
+            }
+          })
       }
     })
   }

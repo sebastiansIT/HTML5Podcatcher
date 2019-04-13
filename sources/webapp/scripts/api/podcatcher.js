@@ -23,7 +23,7 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 
-import { logManager } from './utils/logging.js'
+import { logManager, Logger } from './utils/logging.js'
 import WebAccessProvider from './web/fetch.js'
 import Sourcelist from './model/sourcelist'
 
@@ -33,7 +33,8 @@ const api = {
   },
   configuration: {
     logging: {
-      addLogAppender: (appender) => logManager.addLogAppender(appender)
+      addLogAppender: (appender) => logManager.addLogAppender(appender),
+      createLogger: (module) => new Logger(module)
     }
   },
   web: new WebAccessProvider(null) // Temporär für umgestalltung auf Module

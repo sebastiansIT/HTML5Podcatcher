@@ -259,3 +259,8 @@
 - 0.48.1
   * Filter the list of voices, only show voices that are offline available.
 	* Sort the list of Sources
+- 0.48.2
+  * Sort List of voices
+	* Only speak if voice for the relevant language is offline isFileStorage
+	* Wrap the speach API in a promise
+	* Add volume configuration to settings page
