@@ -287,28 +287,11 @@ GlobalUserInterfaceHelper.playEpisode = function (episode, onPlaybackStartedCall
   'use strict'
   if (episode) {
     GlobalUserInterfaceHelper.activateEpisode(episode, function (episode) {
-      $('#player audio')[0].pause()
-      window.h5p.speech.synthesiser.favoriteVoices = UI.settings.get('speechSynthesisFavoriteVoices', '').split(',')
-      window.h5p.speech.synthesiser.rate = UI.settings.get('speechSynthesisRate', 1)
-      window.h5p.speech.synthesiser.pitch = UI.settings.get('speechSynthesisPitch', 1)
-      window.h5p.speech.synthesiser.speak(`${episode.title} by ${episode.source}`, episode.language)
-        .then(() => {
-          UI.settings.set('lastPlayed', episode.uri)
-          $('#player audio')[0].load()
-          if (onPlaybackStartedCallback && typeof onPlaybackStartedCallback === 'function') {
-            onPlaybackStartedCallback(episode)
-          }
-        })
-        .catch((errorCodeOrError) => {
-          if (errorCodeOrError.message) { // rejected with an Error
-            POD.logger(errorCodeOrError.message, 'warn')
-          } else { // rejected with an errorCode from the Web Speech API
-            POD.logger(`Speech synthesis has thrown an error: ${errorCodeOrError}.`, 'warn')
-          }
-          if (onPlaybackStartedCallback && typeof onPlaybackStartedCallback === 'function') {
-            onPlaybackStartedCallback(episode)
-          }
-        })
+      UI.settings.set('lastPlayed', episode.uri)
+      $('#player audio')[0].load()
+      if (onPlaybackStartedCallback && typeof onPlaybackStartedCallback === 'function') {
+        onPlaybackStartedCallback(episode)
+      }
     })
   }
 }
@@ -335,7 +318,15 @@ GlobalUserInterfaceHelper.playPrevious = function () {
       audioTag.currentTime = 0
       audioTag.play()
     } else {
-      UI.previousEpisode(UI.playEpisode)
+      UI.previousEpisode((prevEpisode) => {
+        GlobalUserInterfaceHelper.announceEpisode(prevEpisode)
+          .then(() => {
+            UI.playEpisode(prevEpisode)
+          })
+          .catch((errorCodeOrError) => {
+            UI.playEpisode(prevEpisode)
+          })
+      })
     }
   })
 }
@@ -359,7 +350,15 @@ GlobalUserInterfaceHelper.playNext = function () {
       audioTag.currentTime = jumppoint.time
       audioTag.play()
     } else {
-      UI.nextEpisode(UI.playEpisode)
+      UI.nextEpisode((nextEpisode) => {
+        GlobalUserInterfaceHelper.announceEpisode(nextEpisode)
+          .then(() => {
+            UI.playEpisode(nextEpisode)
+          })
+          .catch((errorCodeOrError) => {
+            UI.playEpisode(nextEpisode)
+          })
+      })
     }
   })
 }
@@ -377,6 +376,25 @@ GlobalUserInterfaceHelper.togglePauseStatus = function () {
       $('#playPause').attr('data-icon', 'play')
     }
   }
+}
+
+/** Announce a Episode via speach synthesis.
+  * @param {Episode} episode The podcast episode that should be announced.
+  * @returns {external:Promise} A promise
+  */
+GlobalUserInterfaceHelper.announceEpisode = function (episode) {
+  window.h5p.speech.synthesiser.favoriteVoices = UI.settings.get('speechSynthesisFavoriteVoices', '').split(',')
+  window.h5p.speech.synthesiser.rate = UI.settings.get('speechSynthesisRate', 1)
+  window.h5p.speech.synthesiser.pitch = UI.settings.get('speechSynthesisPitch', 1)
+  return window.h5p.speech.synthesiser.speak(`${episode.title} by ${episode.source}`, episode.language)
+    .catch((errorCodeOrError) => {
+      if (errorCodeOrError.message) { // rejected with an Error
+        POD.logger(errorCodeOrError.message, 'warn')
+      } else { // rejected with an errorCode from the Web Speech API
+        POD.logger(`Speech synthesis has thrown an error: ${errorCodeOrError}.`, 'warn')
+      }
+      throw errorCodeOrError
+    })
 }
 
 /** Central 'ready' event handler */

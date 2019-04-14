@@ -264,3 +264,5 @@
 	* Only speak if voice for the relevant language is offline isFileStorage
 	* Wrap the speach API in a promise
 	* Add volume configuration to settings page
+- 0.48.3
+  * Only announce episode with speech synthesis when next or previous track is played 
