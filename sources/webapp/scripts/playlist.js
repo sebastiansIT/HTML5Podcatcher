@@ -276,25 +276,9 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
         $('#playlist li').filter(function () {
           return $(this).data('episodeUri') === episode.uri
         }).addClass('active')
-        window.h5p.speech.synthesiser.favoriteVoices = UI.settings.get('speechSynthesisFavoriteVoices', '').split(',')
-        window.h5p.speech.synthesiser.rate = UI.settings.get('speechSynthesisRate', 1)
-        window.h5p.speech.synthesiser.pitch = UI.settings.get('speechSynthesisPitch', 1)
-        window.h5p.speech.synthesiser.speak(`${episode.title} by ${episode.source}`, episode.language)
-          .then(() => {
-            if (onActivatedCallback && typeof onActivatedCallback === 'function') {
-              onActivatedCallback(episode)
-            }
-          })
-          .catch((errorCodeOrError) => {
-            if (errorCodeOrError.message) { // rejected with an Error
-              POD.logger(errorCodeOrError.message, 'warn')
-            } else { // rejected with an errorCode from the Web Speech API
-              POD.logger(`Speech synthesis has thrown an error: ${errorCodeOrError}.`, 'warn')
-            }
-            if (onActivatedCallback && typeof onActivatedCallback === 'function') {
-              onActivatedCallback(episode)
-            }
-          })
+        if (onActivatedCallback && typeof onActivatedCallback === 'function') {
+          onActivatedCallback(episode)
+        }
       }
     })
   }
@@ -303,11 +287,28 @@ GlobalUserInterfaceHelper.playEpisode = function (episode, onPlaybackStartedCall
   'use strict'
   if (episode) {
     GlobalUserInterfaceHelper.activateEpisode(episode, function (episode) {
-      UI.settings.set('lastPlayed', episode.uri)
-      $('#player audio')[0].load()
-      if (onPlaybackStartedCallback && typeof onPlaybackStartedCallback === 'function') {
-        onPlaybackStartedCallback(episode)
-      }
+      $('#player audio')[0].pause()
+      window.h5p.speech.synthesiser.favoriteVoices = UI.settings.get('speechSynthesisFavoriteVoices', '').split(',')
+      window.h5p.speech.synthesiser.rate = UI.settings.get('speechSynthesisRate', 1)
+      window.h5p.speech.synthesiser.pitch = UI.settings.get('speechSynthesisPitch', 1)
+      window.h5p.speech.synthesiser.speak(`${episode.title} by ${episode.source}`, episode.language)
+        .then(() => {
+          UI.settings.set('lastPlayed', episode.uri)
+          $('#player audio')[0].load()
+          if (onPlaybackStartedCallback && typeof onPlaybackStartedCallback === 'function') {
+            onPlaybackStartedCallback(episode)
+          }
+        })
+        .catch((errorCodeOrError) => {
+          if (errorCodeOrError.message) { // rejected with an Error
+            POD.logger(errorCodeOrError.message, 'warn')
+          } else { // rejected with an errorCode from the Web Speech API
+            POD.logger(`Speech synthesis has thrown an error: ${errorCodeOrError}.`, 'warn')
+          }
+          if (onPlaybackStartedCallback && typeof onPlaybackStartedCallback === 'function') {
+            onPlaybackStartedCallback(episode)
+          }
+        })
     })
   }
 }
