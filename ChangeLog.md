@@ -265,4 +265,6 @@
 	* Wrap the speach API in a promise
 	* Add volume configuration to settings page
 - 0.48.3
-  * Only announce episode with speech synthesis when next or previous track is played 
+  * Only announce episode with speech synthesis when next or previous track is played
+- 0.48.4
+  * Announce next episode with speech synthesis befor automaticaly play it.

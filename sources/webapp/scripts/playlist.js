@@ -201,8 +201,15 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
           GlobalUserInterfaceHelper.activeEpisode(function (episode) {
             HTML5Podcatcher.logger(episode.title + ' is ended', 'debug', 'playback')
             POD.toggleEpisodeStatus(episode)
-            // Plays next Episode in Playlist
-            GlobalUserInterfaceHelper.nextEpisode(GlobalUserInterfaceHelper.playEpisode)
+            // Announce next Episode in Playlist and start playback
+            GlobalUserInterfaceHelper.nextEpisode((nextEpisode) => {
+              GlobalUserInterfaceHelper.announceEpisode(nextEpisode)
+                .then(() => {
+                  GlobalUserInterfaceHelper.playEpisode(nextEpisode)
+                })
+                .catch((errorCodeOrError) => {
+                  GlobalUserInterfaceHelper.playEpisode(nextEpisode)
+                })
           })
         })
         $('#player audio, #player audio source').on('error', function (event) {
