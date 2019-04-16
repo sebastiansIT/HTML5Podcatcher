@@ -268,3 +268,5 @@
   * Only announce episode with speech synthesis when next or previous track is played
 - 0.48.4
   * Announce next episode with speech synthesis befor automaticaly play it.
+- 0.48.5
+  * Fix syntax error

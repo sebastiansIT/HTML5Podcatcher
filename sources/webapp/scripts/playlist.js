@@ -210,6 +210,7 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
                 .catch((errorCodeOrError) => {
                   GlobalUserInterfaceHelper.playEpisode(nextEpisode)
                 })
+            })
           })
         })
         $('#player audio, #player audio source').on('error', function (event) {
