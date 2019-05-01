@@ -327,13 +327,7 @@ GlobalUserInterfaceHelper.playPrevious = function () {
       audioTag.play()
     } else {
       UI.previousEpisode((prevEpisode) => {
-        GlobalUserInterfaceHelper.announceEpisode(prevEpisode)
-          .then(() => {
-            UI.playEpisode(prevEpisode)
-          })
-          .catch((errorCodeOrError) => {
-            UI.playEpisode(prevEpisode)
-          })
+        UI.playEpisode(prevEpisode)
       })
     }
   })
@@ -359,13 +353,7 @@ GlobalUserInterfaceHelper.playNext = function () {
       audioTag.play()
     } else {
       UI.nextEpisode((nextEpisode) => {
-        GlobalUserInterfaceHelper.announceEpisode(nextEpisode)
-          .then(() => {
-            UI.playEpisode(nextEpisode)
-          })
-          .catch((errorCodeOrError) => {
-            UI.playEpisode(nextEpisode)
-          })
+        UI.playEpisode(nextEpisode)
       })
     }
   })
