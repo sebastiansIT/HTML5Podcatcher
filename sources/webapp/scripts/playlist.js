@@ -110,7 +110,7 @@ GlobalUserInterfaceHelper.GenerateAudioElement = function () {
       navigator.mozAudioChannelManager.onheadphoneschange = function () {
         if (navigator.mozAudioChannelManager.headphones === true) {
           POD.logger('Headphones plugged in!', 'debug', 'playback')
-          if (mediaElement.autoplay === true) {
+          if (mediaElement.autoplay === true || mediaElement.dataset.autoplay === 'enabled') {
             mediaElement.play()
           }
         } else {
@@ -191,6 +191,7 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
           GlobalUserInterfaceHelper.activeEpisode(function (episode) {
             HTML5Podcatcher.logger(episode.title + ' is playing', 'note', 'playback')
             audioElement.autoplay = true
+            audioElement.dataset.autoplay = 'enabled'
           })
         })
         $('#player audio').on('pause', function () {

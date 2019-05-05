@@ -20,22 +20,22 @@
 -->
 
 <html xml:lang="en" lang="en">
-<head>
+  <head>
     <meta charset="utf-8">
     <title>Diagnostics &mdash; HTML5 Podcatcher</title>
-    <meta name="description" content="A HTML5 podcast player!">
+    <meta name="description" content="A HTML5 podcast player!" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- PWA Manifest -->
-  	<link rel="manifest" href="manifest.webmanifest">
+  	<link rel="manifest" href="manifest.webmanifest" />
     <meta name="referrer" content="no-referrer" />
     <!-- Coloring of Chrome UI-Elements (on Android) -->
-  	<meta name="theme-color" content="rgb(0, 100, 0)">
+  	<meta name="theme-color" content="rgb(0, 100, 0)" />
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
-    <link rel="apple-touch-icon" type="image/png" href="logo60.png">
-    <link rel="apple-touch-icon" type="image/png" sizes="76x76" href="logo76.png">
-    <link rel="apple-touch-icon" type="image/png" sizes="120x120" href="logo120.png">
-    <link rel="apple-touch-icon" type="image/png" sizes="152x152" href="logo152.png">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" type="image/png" href="logo60.png" />
+    <link rel="apple-touch-icon" type="image/png" sizes="76x76" href="logo76.png" />
+    <link rel="apple-touch-icon" type="image/png" sizes="120x120" href="logo120.png" />
+    <link rel="apple-touch-icon" type="image/png" sizes="152x152" href="logo152.png" />
     <!-- build:css styles/main.css -->
   	<link href="styles/headers.css" rel="stylesheet" type="text/css" />
   	<link href="styles/footers.css" rel="stylesheet" type="text/css" />
@@ -46,6 +46,7 @@
   	<!-- endbuild -->
     <script src="scripts/jquery.min.js"></script>
   	<script src="scripts/normalise.js"></script>
+    <script src="scripts/api/podcatcher.js"></script>
   	<script src="scripts/lowLevelApi.js"></script>
   	<script src="scripts/storage/storage.js"></script>
   	<script src="scripts/storage/fileSystemProvider.js"></script>
@@ -55,7 +56,7 @@
     <script src="scripts/web/web.js"></script>
   	<script src="scripts/globalUi.js"></script>
     <script src="scripts/diagnostic.js"></script>
-</head>
+  </head>
   <body>
     <section role="region">
       <header role="banner">
@@ -74,6 +75,7 @@
   				<h2>Supported API's</h2>
   				<p id="SupportFilesystemAPI" class="message">?</p>
   			</section>
+
   			<section>
   				<h2>Key Settings</h2>
   				<form>
@@ -95,8 +97,8 @@
                  <source src="https://media.ausgespielt-podcast.de/2_Helden_Viele_Welten_Shadows_Demonlord_Teil2.mp3#t=0" type="audio/mpeg">
               </audio>
   			</section>
-        <section>
-          <h2>Storage</h2>
+        <details id="storageApiInformations">
+    			<summary>Storage</summary>
           <dl>
               <dt>whatwg storage api</dt>
               <dd id="storageQuota">not supported</dd>
@@ -105,19 +107,23 @@
               <dt>Quota Management API</dt>
               <dd id="quotaManagement">not supported</dd>
           </dl>
-        </section>
-  			<section>
-  				<h2>Application Cache</h2>
+        </details>
+  			<details>
+  				<summary>Application Cache</summary>
   				<p>Config on Chrome: <a href="chrome://appcache-internals/">chrome://appcache-internals/</a></p>
-  			</section>
-        <section>
-  				<h2>Service Worker</h2>
+  			</details>
+        <details>
+  				<summary>Service Worker</summary>
   				<p>Debug in Firefox: <a href="about:debugging">about:debugging</a></p>
-  			</section>
-        <section>
-          <h2>Web Speech API</h2>
+  			</details>
+        <details>
+          <summary>Web Speech API</summary>
           <p>List available offline voices: <a href="https://jsfiddle.net/sebastiansIT/9jz3ophs/">JSFiddle</a>.</p>
-        </section>
+        </details>
+        <details>
+          <summary>Audio Autoplay</summary>
+          <p>Browser allows autoplay? <span id="autoplayallowed">unkonwn</span>.</p>
+        </details>
   		</div>
   		<footer>
         <div role="toolbar">

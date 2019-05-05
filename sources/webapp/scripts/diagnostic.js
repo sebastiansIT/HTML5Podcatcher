@@ -241,5 +241,10 @@ $(document).ready(function () {
     })
   }
 
+  /* Check if autoplay on audio elements is allowed */
+  const audioElement = document.createElement('audio')
+  audioElement.autoplay = true
+  document.getElementById('autoplayallowed').textContent = audioElement.autoplay
+
   UI.initGeneralUIEvents()
 })
