@@ -311,7 +311,7 @@ var indexedDbStorageImplementation = (function () {
             episode = { uri: episodeUri }
           }
           // checks episode.updated to be a Date object
-          if (!(episode.updated instanceof Date)) {
+          if (episode.updated && !(episode.updated instanceof Date)) {
             episode.updated = new Date(episode.updated)
           }
           // generate playback object if not exists
@@ -358,7 +358,7 @@ var indexedDbStorageImplementation = (function () {
         // checks episode.updated to be a Date object
         if (result) {
           // checks episode.updated to be a Date object
-          if (!(result.value.updated instanceof Date)) {
+          if (result.value.updated && !(result.value.updated instanceof Date)) {
             result.value.updated = new Date(result.value.updated)
           }
           // checks episode.playback exists
@@ -405,7 +405,7 @@ var indexedDbStorageImplementation = (function () {
         var result = event.target.result
         if (result) {
           // checks episode.updated to be a Date object
-          if (!(result.value.updated instanceof Date)) {
+          if (result.value.updated && !(result.value.updated instanceof Date)) {
             result.value.updated = new Date(result.value.updated)
           }
           episodes.push(result.value)

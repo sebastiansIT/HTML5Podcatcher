@@ -270,3 +270,5 @@
   * Announce next episode with speech synthesis befor automaticaly play it.
 - 0.48.5
   * Fix syntax error
+- 0.48.7
+  * Fix an Error that is thrown while parsing a RSS file: Can't parse items without a publication date

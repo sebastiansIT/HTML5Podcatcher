@@ -377,9 +377,17 @@ var GlobalUserInterfaceHelper = {
     }
     entryUI.find('.source').text(episode.source)
     if (episode.playback.played) {
-      entryUI.find('.updated').attr('datetime', episode.updated.toISOString()).text(episode.updated.toLocaleDateString() + ' ' + episode.updated.toLocaleTimeString())
+      if (episode.updated && !isNaN(episode.updated.getTime())) {
+        entryUI.find('.updated').attr('datetime', episode.updated.toISOString())
+          .text(episode.updated.toLocaleDateString() + ' ' + episode.updated.toLocaleTimeString())
+      } else {
+        entryUI.find('.updated').text('At a mysterious time')
+      }
     } else {
-      entryUI.find('.updated').attr('datetime', episode.updated.toISOString()).text('New')
+      if (episode.updated && !isNaN(episode.updated.getTime())) {
+        entryUI.find('.updated').attr('datetime', episode.updated.toISOString())
+      }
+      entryUI.find('.updated').text('New')
     }
     entryUI.find('a.origin').attr('href', episode.uri)
     if (POD.storage.isFileStorageAvailable() && episode.mediaUrl) {

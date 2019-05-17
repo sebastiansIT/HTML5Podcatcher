@@ -140,11 +140,17 @@ var RssParser = (function () {
             episode.duration = this.parseNormalPlayTime(currentElement[0].childNodes[0].nodeValue)
           }
           // * pubDate of episode
-          if (/^\d/.test(item.querySelector('pubDate').childNodes[0].nodeValue)) {
-            episode.updated = new Date('Sun ' + item.querySelector('pubDate').childNodes[0].nodeValue)
+          const pubDateElement = item.querySelector('pubDate')
+          if (pubDateElement && pubDateElement.childNodes.length >= 1) {
+            if (/^\d/.test(pubDateElement.childNodes[0].nodeValue)) {
+              episode.updated = new Date('Sun ' + pubDateElement.childNodes[0].nodeValue)
+            } else {
+              episode.updated = new Date(pubDateElement.childNodes[0].nodeValue)
+            }
           } else {
-            episode.updated = new Date(item.querySelector('pubDate').childNodes[0].nodeValue)
+            episode.updated = undefined
           }
+          // * Source of this episode
           episode.source = parserResult.source.title
           // * Audio-File (Atachement | Enclosure)
           // use files linked with enclosure elements or ...

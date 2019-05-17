@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<channel>
+    <title>HTML5 Podcatcher Test</title>
+    <link>https://podcatcher.sebastiansit.de/</link>
+    <description>HTML5 Podcatcher Test File</description>
+    <lastBuildDate>Wed, 15 May 2019 07:36:36 +0200</lastBuildDate>
+    <language>de</language>
+    <image>
+        <url>logo.png</url>
+        <title>Logo</title>
+        <link>https://podcatcher.sebastiansit.de</link>
+    </image>
+
+    <item>
+        <title>Entry with a empty PubDate</title>
+        <description><![CDATA[Description]]></description>
+        <enclosure url="file.mp3" length="64381952" type="audio/mpeg" />
+        <guid isPermaLink="false">3dad026e-46a5-5849-b5de-7ad43e4e5e4e</guid>
+        <pubDate></pubDate>
+        <content:encoded><![CDATA[Some content.]]></content:encoded>
+    </item>
+</channel>
+</rss>
