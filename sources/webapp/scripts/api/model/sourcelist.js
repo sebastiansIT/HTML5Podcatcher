@@ -52,7 +52,7 @@ export default class Sourcelist {
   }
 }
 
-/** Comparator sources based on the title.
+/** Comparator sources based on the title (case insensitive).
   * @private
   * @param {module:podcatcher/model/sources.Source} first The first source to compare.
   * @param {module:podcatcher/model/sources.Source} second The second source to compare.
@@ -60,11 +60,5 @@ export default class Sourcelist {
   *   the second. Zero if both titles are identical. 0 otherwise.
   */
 function sourceComparator (first, second) {
-  if (first.title < second.title) {
-    return -1
-  } else if (first.title === second.title) {
-    return 0
-  } else {
-    return 1
-  }
+  return first.title.toLowerCase().localeCompare(second.title.toLowerCase())
 }
