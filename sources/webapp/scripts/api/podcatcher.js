@@ -33,7 +33,7 @@ const api = {
   },
   configuration: {
     logging: {
-      addLogAppender: (appender) => logManager.addLogAppender(appender),
+      addLogRule: (appender, minLevel, maxLevel) => logManager.addLogRule(appender, minLevel, maxLevel),
       createLogger: (module) => new Logger(module)
     }
   },

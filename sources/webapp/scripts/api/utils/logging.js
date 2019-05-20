@@ -19,11 +19,39 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
-/**
- * The built in string object.
- * @external String
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String|String}
- */
+
+/** Transfers the named LogLevel to a number.
+  * @static
+  * @private
+  * @param {external:String} level the named log level.
+  * @returns {number} A code number corresponding to the log level.
+  */
+function transferLevelToCode (level) {
+  let code = 0
+  switch (level) {
+    case 'debug':
+      code = 10
+      break
+    case 'info':
+      code = 20
+      break
+    case 'note':
+      code = 30
+      break
+    case 'warn':
+      code = 40
+      break
+    case 'error':
+      code = 50
+      break
+    case 'fatal':
+      code = 60
+      break
+    default:
+      code = 0
+  }
+  return code
+}
 
 /** Abstract appender - implementations of this class appends log messages
   * to an output chanel
@@ -83,13 +111,11 @@ class ConsoleLogAppender extends AbstractLogAppender {
   * @private
   */
 class LogManager {
-  /** Creates a new LogManager. A console log appender for all messages is
-    * preconfigured.
+  /** Creates a new LogManager.
     * @constructs
     */
   constructor () {
-    this.logAppender = []
-    this.logAppender.push(new ConsoleLogAppender())
+    this.logRules = []
   }
 
   /** log a given message to all configured appenders.
@@ -99,15 +125,29 @@ class LogManager {
     * @returns {undefined}
     */
   logMessage (message, logLevelName, module) {
-    this.logAppender.forEach((appender) => appender.logMessage(message, logLevelName, module))
+    this.logRules.forEach((rule) => {
+      const messageLevelCode = transferLevelToCode(logLevelName)
+
+      if (rule.minLevel <= messageLevelCode) {
+        if (rule.maxLevel >= messageLevelCode) {
+          rule.appender.logMessage(message, logLevelName, module)
+        }
+      }
+    })
   }
 
-  /**
-    * @param {module:podcatcher/utils/logging.AbstractLogAppender} logAppender A log Appender used by this log manager.
-    * @return {undefined}
+  /** Adds a new Rule to the Log Manager.
+    * @param {module:podcatcher/utils/logging.AbstractLogAppender} logAppender A log appender used in this rule.
+    * @param {external:String} minLevel The minimal level of messages to log with the given appender.
+    * @param {external:String} maxLevel The maximal level of messages to log with the given appender.
+    * @returns {undefined}
     */
-  addLogAppender (logAppender) {
-    this.logAppender.push(logAppender)
+  addLogRule (logAppender, minLevel, maxLevel) {
+    this.logRules.push({
+      minLevel: transferLevelToCode(minLevel || 'debug'),
+      maxLevel: transferLevelToCode(maxLevel || 'fatal'),
+      appender: logAppender
+    })
   }
 }
 
@@ -115,8 +155,9 @@ class LogManager {
   * @constant {module:podcatcher/utils/logging~LogManager}
   */
 export const logManager = new LogManager()
+logManager.addLogRule(new ConsoleLogAppender(), 'debug', 'fatal')
 
-/** This class generates a logger by instantiate with a module name.
+/** This class allows to log messages scoped with a module name.
   * @class
   */
 export class Logger {
