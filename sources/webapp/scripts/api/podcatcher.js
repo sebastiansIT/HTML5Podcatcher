@@ -4,6 +4,7 @@
     @author  Sebastian Spautz [sebastian@human-injection.de]
     @requires module:podcatcher/utils/logging
     @requires module:podcatcher/web/fetch
+    @requires module:podcatcher/storage/settings/localstorage
     @requires module:podcatcher/model/sourcelist
     @license Copyright 2019 Sebastian Spautz
 
@@ -25,7 +26,10 @@
 
 import { logManager, Logger } from './utils/logging.js'
 import WebAccessProvider from './web/fetch.js'
+import WebStorageSettingsProvider from './storage/settings/webstorage.js'
 import Sourcelist from './model/sourcelist'
+
+const settingsStorageProvider = new WebStorageSettingsProvider()
 
 const api = {
   model: {
@@ -35,6 +39,28 @@ const api = {
     logging: {
       addLogRule: (appender, minLevel, maxLevel) => logManager.addLogRule(appender, minLevel, maxLevel),
       createLogger: (module) => new Logger(module)
+    },
+    settings: {
+      /** Set a value for the given key of a user setting.
+        * @param {string} key - The key of the user setting you want to set.
+        * @param {(string|number)} value - The value for the user setting you want to set.
+        * @returns {Promise} A Promise resolves to undefined.
+        */
+      set: function (key, value) {
+        return settingsStorageProvider.writeSettingsValue(key, value)
+      },
+
+      /** Get the value for the given user setting.
+        * @param {string} key - The key of the application setting you ask for.
+        * @param {(string|number)} defaultValue - The default.
+        * @return {Promise} A Promise resolves to the value or, if not set, the default.
+        */
+      get: function (key, defaultValue) {
+        return settingsStorageProvider.readSettingsValue(key)
+          .then((value) => {
+            return value || defaultValue
+          })
+      }
     }
   },
   web: new WebAccessProvider(null) // Temporär für umgestalltung auf Module

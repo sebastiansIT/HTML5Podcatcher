@@ -273,3 +273,5 @@
 - 0.48.7
   * Fix an Error that is thrown while parsing a RSS file: Can't parse items without a publication date
 	* Sort Source now case insensitive
+- 0.48.8
+  * Rewrite Settings Storage Provider

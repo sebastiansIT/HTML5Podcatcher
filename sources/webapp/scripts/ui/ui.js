@@ -39,29 +39,30 @@ if (isSupported()) {
 
 window.h5p = api
 
-// TODO transfer access to settings to an ES6 module
-let allowedLevel = 2 // GlobalUserInterfaceHelper.settings.get('logLevel') || 1
-switch (allowedLevel) {
-  case 1:
-    allowedLevel = 'debug'
-    break
-  case 2:
-    allowedLevel = 'info'
-    break
-  case 2.5:
-    allowedLevel = 'note'
-    break
-  case 3:
-    allowedLevel = 'warn'
-    break
-  case 4:
-    allowedLevel = 'error'
-    break
-  case 5:
-    allowedLevel = 'fatal'
-    break
-}
-window.podcatcher.configuration.logging.addLogRule(new UiLogAppender(), allowedLevel)
-window.podcatcher.configuration.logging.addLogRule(new NotificationLogAppender(), 'note', 'note')
+window.podcatcher.configuration.settings.get('logLevel', 1)
+  .then((allowedLevel) => {
+    switch (allowedLevel) {
+      case 1:
+        allowedLevel = 'debug'
+        break
+      case 2:
+        allowedLevel = 'info'
+        break
+      case 2.5:
+        allowedLevel = 'note'
+        break
+      case 3:
+        allowedLevel = 'warn'
+        break
+      case 4:
+        allowedLevel = 'error'
+        break
+      case 5:
+        allowedLevel = 'fatal'
+        break
+    }
+    window.podcatcher.configuration.logging.addLogRule(new UiLogAppender(), allowedLevel)
+    window.podcatcher.configuration.logging.addLogRule(new NotificationLogAppender(), 'note', 'note')
+  })
 
 export default api
