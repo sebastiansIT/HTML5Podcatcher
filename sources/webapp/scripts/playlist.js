@@ -296,10 +296,23 @@ GlobalUserInterfaceHelper.playEpisode = function (episode, onPlaybackStartedCall
   'use strict'
   if (episode) {
     GlobalUserInterfaceHelper.activateEpisode(episode, function (episode) {
-      UI.settings.set('lastPlayed', episode.uri)
-      $('#player audio')[0].load()
-      if (onPlaybackStartedCallback && typeof onPlaybackStartedCallback === 'function') {
-        onPlaybackStartedCallback(episode)
+      window.podcatcher.configuration.settings.set('lastPlayed', episode.uri)
+        .catch((error) => LOGGER.error(error))
+      let audioElement = document.querySelector('#player audio')
+      audioElement.load()
+      if (audioElement.dataset.autoplay === 'enabled') {
+        audioElement.play()
+          .then(() => {
+            if (onPlaybackStartedCallback && typeof onPlaybackStartedCallback === 'function') {
+              onPlaybackStartedCallback(episode)
+            }
+          })
+          .catch((error) => HTML5Podcatcher.logger(error, 'error'))
+      } else {
+        HTML5Podcatcher.logger('AudioElement isn\'t configurated for autoplay yet.', 'debug')
+        if (onPlaybackStartedCallback && typeof onPlaybackStartedCallback === 'function') {
+          onPlaybackStartedCallback(episode)
+        }
       }
     })
   }
@@ -394,10 +407,15 @@ GlobalUserInterfaceHelper.announceEpisode = function (episode) {
     })
 }
 
+let LOGGER = null
+
 /** Central 'ready' event handler */
 $(document).ready(function () {
   'use strict'
   var k, multiMediaKeyDownTimestemp, stoppedPressMouse
+
+  LOGGER = window.podcatcher.utils.createLogger('hp5/view/playlist')
+
   // Init Events from PWA installing process
   UI.initWebManifest()
   // Register ServiceWorker

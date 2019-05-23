@@ -52,14 +52,6 @@ var configurationAPI = (function () {
     * @namespace
     */
   settings = {
-    /** Set a value for the given key of a user setting.
-      * @param {string} key - The key of the user setting you want to set.
-      * @param {(string|number)} value - The value for the user setting you want to set.
-        */
-    set: function (key, value) {
-      storage.writeSettingsValue(key, value)
-    },
-
     /** Get the value for the given user setting.
       * @param {string} key - The key of the application setting you ask for.
       * @param {(string|number)} defaultValue - The default.
@@ -125,27 +117,23 @@ var configurationAPI = (function () {
     var episodes = config.episodes
     var sources = config.sources
     // ... (1) copy all new settings and...
+    const settingPromise = []
     Object.keys(config.settings).forEach(function (property) {
       if (!settings.get(property)) {
-        settings.set(property, config.settings[property])
+        settingPromise.push(window.podcatcher.configuration.settings.set(property, config.settings[property]))
       }
     })
-    /* for (property in config.settings) {
-        if (config.settings.hasOwnProperty(property)) {
-            if (!settings.get(property)) {
-                settings.set(property, config.settings[property]);
-            }
-        }
-    } */
-    // ... (2) write all sources/feeds to the storage. Afterwards...
-    storage.writeSources(sources, function () {
-      // TODO ... (3) update all sources and...
-      // ... (4) write all given episodes to the storage.
-      // TODO don't override complete episodes - only override the attributes.
-      storage.writeEpisodes(episodes, function () {
-        if (onMergedCallback && typeof onMergedCallback === 'function') {
-          onMergedCallback(config)
-        }
+    Promise.all(settingPromise).then(() => {
+      // ... (2) write all sources/feeds to the storage. Afterwards...
+      storage.writeSources(sources, function () {
+        // TODO ... (3) update all sources and...
+        // ... (4) write all given episodes to the storage.
+        // TODO don't override complete episodes - only override the attributes.
+        storage.writeEpisodes(episodes, function () {
+          if (onMergedCallback && typeof onMergedCallback === 'function') {
+            onMergedCallback(config)
+          }
+        })
       })
     })
   }

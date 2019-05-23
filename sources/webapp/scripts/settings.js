@@ -104,19 +104,27 @@ function initSpeechSynthesisSettings () {
       event.preventDefault()
       event.stopPropagation()
 
+      const setSetting = window.podcatcher.configuration.settings.set
       if (document.getElementById('speechSynthesisForm').checkValidity()) {
         let favorites = []
         for (let i = 0; i < voicesElement.selectedOptions.length; i++) {
           favorites.push(voicesElement.selectedOptions.item(i).value)
         }
         window.h5p.speech.synthesiser.favoriteVoices = favorites
-        UI.settings.set('speechSynthesisFavoriteVoices', favorites)
-        window.h5p.speech.synthesiser.rate = rateElement.value
-        UI.settings.set('speechSynthesisRate', rateElement.value)
-        window.h5p.speech.synthesiser.pitch = pitchElement.value
-        UI.settings.set('speechSynthesisPitch', pitchElement.value)
-        window.h5p.speech.synthesiser.volume = volumeElement.value
-        UI.settings.set('speechSynthesisVolume', volumeElement.value)
+        setSetting('speechSynthesisFavoriteVoices', favorites)
+          .then(() => {
+            window.h5p.speech.synthesiser.rate = rateElement.value
+            return setSetting('speechSynthesisRate', rateElement.value)
+          })
+          .then(() => {
+            window.h5p.speech.synthesiser.pitch = pitchElement.value
+            return setSetting('speechSynthesisPitch', pitchElement.value)
+          })
+          .then(() => {
+            window.h5p.speech.synthesiser.volume = volumeElement.value
+            return setSetting('speechSynthesisVolume', volumeElement.value)
+          })
+          .catch((error) => LOGGER.error(error))
       } else {
         UI.logHandler('Please check your configuration for the Web Speech API.', 'error')
       }
@@ -126,10 +134,14 @@ function initSpeechSynthesisSettings () {
   }
 }
 
+let LOGGER = null
+
 /** Central 'ready' event handler */
 document.addEventListener('DOMContentLoaded', function () {
   'use strict'
   var quota, appInfoRequest
+
+  LOGGER = window.podcatcher.utils.createLogger('hp5/view/settings')
   POD.logger('Opens Settings View', 'debug')
 
   // -- Initialise UI -- //
@@ -159,7 +171,8 @@ document.addEventListener('DOMContentLoaded', function () {
       quota = 1024 * 1024 * 200
     }
     POD.api.storage.StorageProvider.fileStorageProvider().requestFileSystemQuota(quota, function (usage, quota) {
-      UI.settings.set('quota', quota)
+      window.podcatcher.configuration.settings.set('quota', quota)
+        .catch((error) => LOGGER.error(error))
       var quotaConfigurationMarkup
       quotaConfigurationMarkup = document.getElementById('memorySizeInput')
       if (quotaConfigurationMarkup) {
@@ -230,7 +243,8 @@ document.addEventListener('DOMContentLoaded', function () {
     event.preventDefault()
     event.stopPropagation()
     if ($('#httpProxyInput')[0].checkValidity()) {
-      UI.settings.set('proxyUrl', $('#httpProxyInput').val())
+      window.podcatcher.configuration.settings.set('proxyUrl', document.getElementById('httpProxyInput').value)
+        .catch((error) => LOGGER.error(error))
     } else {
       UI.logHandler('Please insert a URL!', 'error')
     }
@@ -238,14 +252,16 @@ document.addEventListener('DOMContentLoaded', function () {
   $('#saveSortConfigurationButton').on('click', function (event) {
     event.preventDefault()
     event.stopPropagation()
-    UI.settings.set('playlistSort', $('#episodeSortSelect').val())
+    window.podcatcher.configuration.settings.set('playlistSort', document.getElementById('episodeSortSelect').value)
+      .catch((error) => LOGGER.error(error))
   })
 
   // Save Playback Settings
   document.getElementById('savePlaybackSettingsButton').addEventListener('click', function (event) {
     event.preventDefault()
     event.stopPropagation()
-    UI.settings.set('playbackRate', document.getElementById('playbackRateSelect').value)
+    window.podcatcher.configuration.settings.set('playbackRate', document.getElementById('playbackRateSelect').value)
+      .catch((error) => LOGGER.error(error))
   }, false)
 
   document.getElementById('playbackRateSelect').addEventListener('change', function (event) {
@@ -265,24 +281,27 @@ document.addEventListener('DOMContentLoaded', function () {
     syncKey = document.getElementById('syncKey').value
 
     if (form.checkValidity()) {
-      UI.settings.set('syncronisationEndpoint', syncEndpoint)
-      UI.settings.set('syncronisationKey', syncKey)
-      POD.api.configuration.readConfiguration(function (config) {
-        POD.api.web.createXMLHttpRequest(function (xhr) {
-          xhr.open('POST', syncEndpoint, true)
-          xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8')
-          xhr.onload = function () {
-            POD.logger('Sended syncronisation value successfully.', 'note')
-          }
-          xhr.addEventListener('error', function (xhrError) {
-            POD.logger('Can\'t upload configuration to syncronisation endpoint (' + xhrError.error + ')', 'error')
+      window.podcatcher.configuration.settings.set('syncronisationEndpoint', syncEndpoint)
+        .then(() => window.podcatcher.configuration.settings.set('syncronisationKey', syncKey))
+        .then(() => {
+          POD.api.configuration.readConfiguration(function (config) {
+            POD.api.web.createXMLHttpRequest(function (xhr) {
+              xhr.open('POST', syncEndpoint, true)
+              xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8')
+              xhr.onload = function () {
+                POD.logger('Sended syncronisation value successfully.', 'note')
+              }
+              xhr.addEventListener('error', function (xhrError) {
+                POD.logger('Can\'t upload configuration to syncronisation endpoint (' + xhrError.error + ')', 'error')
+              })
+              xhr.ontimeout = function () {
+                POD.logger('Timeout after ' + (xhr.timeout / 60000) + ' minutes.', 'error')
+              }
+              xhr.send(JSON.stringify({ key: syncKey, value: config }))
+            })
           })
-          xhr.ontimeout = function () {
-            POD.logger('Timeout after ' + (xhr.timeout / 60000) + ' minutes.', 'error')
-          }
-          xhr.send(JSON.stringify({ key: syncKey, value: config }))
         })
-      })
+        .catch((error) => LOGGER.error(error))
     } else {
       POD.logger('Please insert a URL and a name!', 'error')
     }
@@ -364,8 +383,9 @@ document.addEventListener('DOMContentLoaded', function () {
   $('#saveLogingConfiguration').on('click', function (event) {
     event.preventDefault()
     event.stopPropagation()
-    UI.settings.set('logLevel', $('#logLevelSelect').val())
-    UI.logHandler('Save loging configuration.', 'debug')
+    window.podcatcher.configuration.settings.set('logLevel', document.getElementById('logLevelSelect').value)
+      .then(() => LOGGER.debug('Save loging configuration.'))
+      .catch((error) => LOGGER.error(error))
   })
 
   initSpeechSynthesisSettings()

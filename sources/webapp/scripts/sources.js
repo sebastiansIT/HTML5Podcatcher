@@ -22,6 +22,8 @@
 /** Central 'ready' event handler */
 $(document).ready(function () {
   'use strict'
+
+  const LOGGER = window.podcatcher.utils.createLogger('hp5/view/souces')
   POD.logger('Opens Source View', 'debug')
   HTML5Podcatcher.api.configuration.proxyUrlPattern = HTML5Podcatcher.api.configuration.settings.get('proxyUrl')
   // -------------------------- //
@@ -55,7 +57,8 @@ $(document).ready(function () {
   $('#sourceslist').on('click', '.details', function (event) {
     event.preventDefault()
     event.stopPropagation()
-    UI.settings.set('ShowDetailsForSource', $(this).closest('li').data('sourceUri'))
+    window.podcatcher.configuration.settings.set('ShowDetailsForSource', $(this).closest('li').data('sourceUri'))
+      .catch((error) => LOGGER.error(error))
     window.location.href = 'source.html'
   })
 
