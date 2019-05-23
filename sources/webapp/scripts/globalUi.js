@@ -60,7 +60,7 @@ var GlobalUserInterfaceHelper = {
     }
     tag = tag || ''
 
-    const logger = window.podcatcher.configuration.logging.createLogger(tag)
+    const logger = window.podcatcher.utils.createLogger(tag)
     switch (logLevelName) {
       case 'debug':
         logLevel = 1

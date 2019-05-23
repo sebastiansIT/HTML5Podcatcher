@@ -35,7 +35,7 @@
   * @reject {external:Error} A Error if no offline avaliable voice is installed.
   */
 
-const LOGGER = window.podcatcher.configuration.logging.createLogger('h5p/speech/synthesis')
+const LOGGER = window.podcatcher.utils.createLogger('h5p/speech/synthesis')
 
 /**
   * Returns true if the {@link https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API|Web Speech API} ist supported by this platform.
