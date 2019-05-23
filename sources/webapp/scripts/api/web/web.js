@@ -19,26 +19,6 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
-/**
-  * The built in promise class.
-  * @external Promise
-  * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise|Promise}
-  */
-/**
-  * The built in XmlDocument class.
-  * @external XMLDocument
-  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/XMLDocument|XmlDocument}
-  */
-/**
-  * The built in array buffer class.
-  * @external ArrayBuffer
-  * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer|ArrayBuffer}
-  */
-/**
-  * The built in error object.
-  * @external Error
-  * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error|Error}
-  */
 
 /** More an Interface than a abstract class defines it all necessary methods to
   * access the internet.
