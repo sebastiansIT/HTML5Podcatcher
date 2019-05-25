@@ -64,15 +64,22 @@ GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
   var lastPlayedEpisode, i
   lastPlayedEpisode = $('#playlist li:first-child').data('episodeUri')
   POD.storage.readPlaylist(false, function (playlist) {
-    if (playlist && playlist.length > 0) {
-      for (i = 0; i < playlist.length; i += 1) {
-        if (playlist[i].uri === UI.settings.get('lastPlayed')) {
-          lastPlayedEpisode = playlist[i].uri
-          break
+    window.podcatcher.configuration.settings.get('lastPlayed')
+      .then((lastPlayedUri) => {
+        if (playlist && playlist.length > 0) {
+          for (i = 0; i < playlist.length; i += 1) {
+            if (playlist[i].uri === lastPlayedUri) {
+              lastPlayedEpisode = playlist[i].uri
+              break
+            }
+          }
         }
-      }
-    }
-    POD.storage.readEpisode(lastPlayedEpisode, onReadCallback)
+        POD.storage.readEpisode(lastPlayedEpisode, onReadCallback)
+      })
+      .catch((error) => {
+        LOGGER.error(`Can't find last played episode due to an error: ${error}.`)
+        POD.storage.readEpisode(lastPlayedEpisode, onReadCallback)
+      })
   })
 }
 
@@ -81,15 +88,18 @@ GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
   */
 GlobalUserInterfaceHelper.GenerateAudioElement = function () {
   'use strict'
-  const playbackRate = POD.api.configuration.settings.get('playbackRate') || 1
   var mediaElement
 
-  POD.logger('Audio element will be created', 'debug', 'playback')
+  LOGGER.debug('Audio element will be created')
 
   mediaElement = document.createElement('audio')
   mediaElement.setAttribute('controls', 'controls')
   mediaElement.setAttribute('preload', 'metadata')
-  mediaElement.defaultPlaybackRate = playbackRate
+  // The following promise is only a quick and dirty solution. The hole function should be async.
+  window.podcatcher.configuration.settings.get('playbackRate', 1)
+    .then((playbackRate) => {
+      mediaElement.defaultPlaybackRate = playbackRate
+    })
   mediaElement.appendChild(document.createElement('source'))
 
   if (window.navigator.mozApps) {
@@ -121,7 +131,7 @@ GlobalUserInterfaceHelper.GenerateAudioElement = function () {
     }
   }
 
-  POD.logger('Audio element is created', 'debug', 'playback')
+  LOGGER.debug('Audio element is created')
 
   return mediaElement
 }
@@ -393,15 +403,26 @@ GlobalUserInterfaceHelper.togglePauseStatus = function () {
   * @returns {external:Promise} A promise
   */
 GlobalUserInterfaceHelper.announceEpisode = function (episode) {
-  window.h5p.speech.synthesiser.favoriteVoices = UI.settings.get('speechSynthesisFavoriteVoices', '').split(',')
-  window.h5p.speech.synthesiser.rate = UI.settings.get('speechSynthesisRate', 1)
-  window.h5p.speech.synthesiser.pitch = UI.settings.get('speechSynthesisPitch', 1)
-  return window.h5p.speech.synthesiser.speak(`${episode.title} by ${episode.source}`, episode.language)
+  return Promise.all(
+    window.podcatcher.configuration.settings.get('speechSynthesisFavoriteVoices', '')
+      .then((favorites) => {
+        window.h5p.speech.synthesiser.favoriteVoices = favorites.split(',')
+      }),
+    window.podcatcher.configuration.settings.get('speechSynthesisRate', 1)
+      .then((rate) => {
+        window.h5p.speech.synthesiser.rate = rate
+      }),
+    window.podcatcher.configuration.settings.get('speechSynthesisPitch', 1)
+      .then((pitch) => {
+        window.h5p.speech.synthesiser.pitch = pitch
+      })
+  )
+    .then(() => window.h5p.speech.synthesiser.speak(`${episode.title} by ${episode.source}`, episode.language))
     .catch((errorCodeOrError) => {
       if (errorCodeOrError.message) { // rejected with an Error
-        POD.logger(errorCodeOrError.message, 'warn')
+        LOGGER.warn(errorCodeOrError.message)
       } else { // rejected with an errorCode from the Web Speech API
-        POD.logger(`Speech synthesis has thrown an error: ${errorCodeOrError}.`, 'warn')
+        LOGGER.warn(`Speech synthesis has thrown an error: ${errorCodeOrError}.`)
       }
       throw errorCodeOrError
     })
@@ -421,8 +442,12 @@ $(document).ready(function () {
   // Register ServiceWorker
   UI.initServiceWorker()
   // Configurate POD
-  POD.logger('Open Playlist', 'debug')
-  HTML5Podcatcher.api.configuration.proxyUrlPattern = UI.settings.get('proxyUrl')
+  LOGGER.debug('Open Playlist')
+  window.podcatcher.configuration.settings.get('proxyUrl')
+    .then((value) => {
+      HTML5Podcatcher.api.configuration.proxyUrlPattern = value
+    })
+    .catch((error) => LOGGER.error(error))
   // --------------------- //
   // -- Database Update -- //
   // --------------------- //
@@ -450,10 +475,16 @@ $(document).ready(function () {
   // -- Initialise UI -- //
   // ------------------- //
   // Quota and Filesystem initialisation
-  HTML5Podcatcher.api.storage.StorageProvider.init({ quota: UI.settings.get('quota') })
+  window.podcatcher.configuration.settings.get('quota')
+    .then((value) => {
+      HTML5Podcatcher.api.storage.StorageProvider.init({ quota: value })
+    })
+    .catch((error) => LOGGER.error(error))
   // Render playlist
   POD.storage.readPlaylist(false, function (episodes) {
-    UI.renderEpisodeList(episodes, UI.settings.get('playlistSort'))
+    window.podcatcher.configuration.settings.get('playlistSort')
+      .then((sort) => UI.renderEpisodeList(episodes, sort))
+      .catch((error) => LOGGER.error(error))
   })
   // Initialise player
   UI.getLastPlayedEpisode(UI.playEpisode)
@@ -588,7 +619,6 @@ $(document).ready(function () {
   document.addEventListener('writeEpisode', function (event) {
     const episode = event.detail.episode
     let episodeUI = UI.renderEpisode(episode)
-    const order = UI.settings.get('playlistSort')
     const playlistEntries = document.getElementById('playlist').querySelectorAll('.entries li')
 
     // find episode in HTML markup
@@ -612,12 +642,16 @@ $(document).ready(function () {
       }
       episodeUI = $(episodeUI)
       episodeUI.hide()
-      if (!order || order === 'asc') {
-        $('#playlist').find('.entries').append(episodeUI)
-      } else {
-        $('#playlist').find('.entries').prepend(episodeUI)
-      }
-      episodeUI.fadeIn()
+      window.podcatcher.configuration.settings.get('playlistSort', 'asc')
+        .then((order) => {
+          if (order === 'asc') {
+            $('#playlist').find('.entries').append(episodeUI)
+          } else {
+            $('#playlist').find('.entries').prepend(episodeUI)
+          }
+          episodeUI.fadeIn()
+        })
+        .catch((error) => LOGGER.error(error))
     }
   }, false)
   UI.initGeneralUIEvents()

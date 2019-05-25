@@ -131,42 +131,44 @@ var GlobalUserInterfaceHelper = {
     }
     proxyNeededCheck = function () {
       // Checks if Proxy is needed (Permission for System XHR is not set and proxy url is not set in configuration)
-      if (window.navigator.mozApps) { // is an Open Web App runtime
-        appInfoRequest = window.navigator.mozApps.getSelf()
-        appInfoRequest.onsuccess = function () {
-          if (appInfoRequest.result) { // checks for installed app
-            HTML5Podcatcher.logger(appInfoRequest.result.manifest.name + ' is a ' + appInfoRequest.result.manifest.type + ' app.', 'debug')
-            if (appInfoRequest.result.manifest.type === 'privileged' || appInfoRequest.result.manifest.type === 'certified') {
-              HTML5Podcatcher.logger('App is allowed to post System XHR requests.', 'debug')
-              feedExistingCheck()
-            } else {
-              if (!GlobalUserInterfaceHelper.settings.get('proxyUrl') || GlobalUserInterfaceHelper.settings.get('proxyUrl').length < 11) {
-                actionCallback('missing proxy')
-              } else {
-                feedExistingCheck()
+      window.podcatcher.configuration.settings.get('proxyUrl')
+        .then((proxyUrl) => {
+          if (window.navigator.mozApps) { // is an Open Web App runtime like FirefoxOS
+            appInfoRequest = window.navigator.mozApps.getSelf()
+            appInfoRequest.onsuccess = function () {
+              if (appInfoRequest.result) { // checks for installed app
+                HTML5Podcatcher.logger(appInfoRequest.result.manifest.name + ' is a ' + appInfoRequest.result.manifest.type + ' app.', 'debug')
+                if (appInfoRequest.result.manifest.type === 'privileged' || appInfoRequest.result.manifest.type === 'certified') {
+                  HTML5Podcatcher.logger('App is allowed to post System XHR requests.', 'debug')
+                  feedExistingCheck()
+                } else {
+                  if (!proxyUrl || proxyUrl.length < 11) {
+                    actionCallback('missing proxy')
+                  } else {
+                    feedExistingCheck()
+                  }
+                }
+              } else { // checks for app opend in browser
+                HTML5Podcatcher.logger('This Webapp isn\'t installed as an Mozilla Open Web App but you can install it from Firefox Marketplace.', 'debug')
+                if (!proxyUrl || proxyUrl.length < 11) {
+                  actionCallback('missing proxy')
+                } else {
+                  feedExistingCheck()
+                }
               }
             }
-          } else { // checks for app opend in browser
-            HTML5Podcatcher.logger('This Webapp isn\'t installed as an Mozilla Open Web App but you can install it from Firefox Marketplace.', 'debug')
-            if (!GlobalUserInterfaceHelper.settings.get('proxyUrl') || GlobalUserInterfaceHelper.settings.get('proxyUrl').length < 11) {
+          } else { // is a runtime without support for Open Web Apps
+            HTML5Podcatcher.logger('This Webapp isn\'t installed as an Open Web App.', 'debug')
+            if (!proxyUrl || proxyUrl.length < 11) {
               actionCallback('missing proxy')
             } else {
               feedExistingCheck()
             }
           }
-        }
-      } else { // is a runtime without support for Open Web Apps
-        HTML5Podcatcher.logger('This Webapp isn\'t installed as an Open Web App.', 'debug')
-        if (!GlobalUserInterfaceHelper.settings.get('proxyUrl') || GlobalUserInterfaceHelper.settings.get('proxyUrl').length < 11) {
-          actionCallback('missing proxy')
-        } else {
-          feedExistingCheck()
-        }
-      }
+        })
     }
     proxyNeededCheck()
   },
-  settings: HTML5Podcatcher.api.configuration.settings,
 
   /** Handle Events from Web-Manifest-API */
   initWebManifest: () => {

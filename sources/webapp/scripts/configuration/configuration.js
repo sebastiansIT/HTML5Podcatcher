@@ -47,22 +47,6 @@ var configurationAPI = (function () {
     * @param {module:HTML5Podcatcher/Configuration~Configuration} config - The complete configuration (Application settings + sources + new episodes).
     */
 
-  /** @summary Access to the user settings.
-    * @desc Access to the user settings as part of the entire Configuration. User settings are a key/value-store. In this store you can save all kind of user defined information for your application.
-    * @namespace
-    */
-  settings = {
-    /** Get the value for the given user setting.
-      * @param {string} key - The key of the application setting you ask for.
-      * @param {(string|number)} defaultValue - The default.
-      * @return The value or, if not set, the default.
-      */
-    get: function (key, defaultValue) {
-      var value = storage.readSettingsValue(key) || defaultValue
-      return value
-    }
-  }
-
   /** Collect all configuration values (User settings + sources + new episodes) into one object.
     * @param {module:HTML5Podcatcher/Configuration~ConfigurationReadedCallback} [onReadCallback] - The function that is called when the export is finished.
     */
@@ -119,9 +103,12 @@ var configurationAPI = (function () {
     // ... (1) copy all new settings and...
     const settingPromise = []
     Object.keys(config.settings).forEach(function (property) {
-      if (!settings.get(property)) {
-        settingPromise.push(window.podcatcher.configuration.settings.set(property, config.settings[property]))
-      }
+      settingPromise.push(window.podcatcher.configuration.settings.get(property)
+        .then((value) => {
+          if (!value) {
+            return window.podcatcher.configuration.settings.set(property, config.settings[property])
+          }
+        }))
     })
     Promise.all(settingPromise).then(() => {
       // ... (2) write all sources/feeds to the storage. Afterwards...

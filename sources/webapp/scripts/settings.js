@@ -54,84 +54,95 @@ function initSpeechSynthesisSettings () {
   const volumeElement = document.getElementById('speechSynthesisVolumeSelect')
   const voicesElement = document.getElementById('speechSynthesisVoiceSelect')
 
-  rateElement.value = UI.settings.get('speechSynthesisRate', 1)
-  pitchElement.value = UI.settings.get('speechSynthesisPitch', 1)
-  volumeElement.value = UI.settings.get('speechSynthesisVolume', 1)
-  document.getElementById('speechSynthesisRateValue').textContent = Math.floor(rateElement.value * 100) + '%'
-  document.getElementById('speechSynthesisPitchValue').textContent = pitchElement.value
-  document.getElementById('speechSynthesisVolumeValue').textContent = Math.floor(volumeElement.value * 100) + '%'
-
-  if (window.h5p.speech) {
-    populateVoiceList(document.getElementById('speechSynthesisVoiceSelect'))
-    const favorites = UI.settings.get('speechSynthesisFavoriteVoices', '').split(',')
-    for (let i = 0; i < voicesElement.options.length; i++) {
-      const option = voicesElement.options.item(i)
-      if (favorites.includes(option.value)) {
-        option.selected = true
-      }
-    }
-
-    settingsElement.addEventListener('change', function (event) {
-      event.preventDefault()
-      event.stopPropagation()
+  return Promise.all([
+    window.podcatcher.configuration.settings.get('speechSynthesisRate', 1),
+    window.podcatcher.configuration.settings.get('speechSynthesisPitch', 1),
+    window.podcatcher.configuration.settings.get('speechSynthesisVolume', 1)
+  ])
+    .then(([rate, pitch, volume]) => {
+      rateElement.value = rate
       document.getElementById('speechSynthesisRateValue').textContent = Math.floor(rateElement.value * 100) + '%'
+      pitchElement.value = pitch
       document.getElementById('speechSynthesisPitchValue').textContent = pitchElement.value
+      volumeElement.value = volume
       document.getElementById('speechSynthesisVolumeValue').textContent = Math.floor(volumeElement.value * 100) + '%'
-    }, false)
+    })
+    .then(() => {
+      if (window.h5p.speech) {
+        populateVoiceList(document.getElementById('speechSynthesisVoiceSelect'))
+        window.podcatcher.configuration.settings.get('speechSynthesisFavoriteVoices', '')
+          .then((favorites) => {
+            favorites = favorites.split(',')
+            for (let i = 0; i < voicesElement.options.length; i++) {
+              const option = voicesElement.options.item(i)
+              if (favorites.includes(option.value)) {
+                option.selected = true
+              }
+            }
+          })
 
-    const testButton = document.getElementById('testSpeechSynthesisSettingsButton')
-    testButton.addEventListener('click', (event) => {
-      event.preventDefault()
-      event.stopPropagation()
+        settingsElement.addEventListener('change', function (event) {
+          event.preventDefault()
+          event.stopPropagation()
+          document.getElementById('speechSynthesisRateValue').textContent = Math.floor(rateElement.value * 100) + '%'
+          document.getElementById('speechSynthesisPitchValue').textContent = pitchElement.value
+          document.getElementById('speechSynthesisVolumeValue').textContent = Math.floor(volumeElement.value * 100) + '%'
+        }, false)
 
-      let favorites = []
-      for (let i = 0; i < voicesElement.selectedOptions.length; i++) {
-        favorites.push(voicesElement.selectedOptions.item(i).value)
-      }
-      window.h5p.speech.synthesiser.favoriteVoices = favorites
-      window.h5p.speech.synthesiser.rate = rateElement.value
-      window.h5p.speech.synthesiser.pitch = pitchElement.value
-      window.h5p.speech.synthesiser.volume = volumeElement.value
+        const testButton = document.getElementById('testSpeechSynthesisSettingsButton')
+        testButton.addEventListener('click', (event) => {
+          event.preventDefault()
+          event.stopPropagation()
 
-      window.h5p.speech.synthesiser.speak('This is a test of the speech syntesis.', 'en')
-        .catch((errorCodeOrError) => {
-          POD.logger(errorCodeOrError.message || errorCodeOrError, 'error')
+          let favorites = []
+          for (let i = 0; i < voicesElement.selectedOptions.length; i++) {
+            favorites.push(voicesElement.selectedOptions.item(i).value)
+          }
+          window.h5p.speech.synthesiser.favoriteVoices = favorites
+          window.h5p.speech.synthesiser.rate = rateElement.value
+          window.h5p.speech.synthesiser.pitch = pitchElement.value
+          window.h5p.speech.synthesiser.volume = volumeElement.value
+
+          window.h5p.speech.synthesiser.speak('This is a test of the speech syntesis.', 'en')
+            .catch((errorCodeOrError) => {
+              POD.logger(errorCodeOrError.message || errorCodeOrError, 'error')
+            })
         })
-    })
 
-    const saveButton = document.getElementById('saveSpeechSynthesisSettingsButton')
-    saveButton.addEventListener('click', (event) => {
-      event.preventDefault()
-      event.stopPropagation()
+        const saveButton = document.getElementById('saveSpeechSynthesisSettingsButton')
+        saveButton.addEventListener('click', (event) => {
+          event.preventDefault()
+          event.stopPropagation()
 
-      const setSetting = window.podcatcher.configuration.settings.set
-      if (document.getElementById('speechSynthesisForm').checkValidity()) {
-        let favorites = []
-        for (let i = 0; i < voicesElement.selectedOptions.length; i++) {
-          favorites.push(voicesElement.selectedOptions.item(i).value)
-        }
-        window.h5p.speech.synthesiser.favoriteVoices = favorites
-        setSetting('speechSynthesisFavoriteVoices', favorites)
-          .then(() => {
-            window.h5p.speech.synthesiser.rate = rateElement.value
-            return setSetting('speechSynthesisRate', rateElement.value)
-          })
-          .then(() => {
-            window.h5p.speech.synthesiser.pitch = pitchElement.value
-            return setSetting('speechSynthesisPitch', pitchElement.value)
-          })
-          .then(() => {
-            window.h5p.speech.synthesiser.volume = volumeElement.value
-            return setSetting('speechSynthesisVolume', volumeElement.value)
-          })
-          .catch((error) => LOGGER.error(error))
+          const setSetting = window.podcatcher.configuration.settings.set
+          if (document.getElementById('speechSynthesisForm').checkValidity()) {
+            let favorites = []
+            for (let i = 0; i < voicesElement.selectedOptions.length; i++) {
+              favorites.push(voicesElement.selectedOptions.item(i).value)
+            }
+            window.h5p.speech.synthesiser.favoriteVoices = favorites
+            setSetting('speechSynthesisFavoriteVoices', favorites)
+              .then(() => {
+                window.h5p.speech.synthesiser.rate = rateElement.value
+                return setSetting('speechSynthesisRate', rateElement.value)
+              })
+              .then(() => {
+                window.h5p.speech.synthesiser.pitch = pitchElement.value
+                return setSetting('speechSynthesisPitch', pitchElement.value)
+              })
+              .then(() => {
+                window.h5p.speech.synthesiser.volume = volumeElement.value
+                return setSetting('speechSynthesisVolume', volumeElement.value)
+              })
+              .catch((error) => LOGGER.error(error))
+          } else {
+            UI.logHandler('Please check your configuration for the Web Speech API.', 'error')
+          }
+        })
       } else {
-        UI.logHandler('Please check your configuration for the Web Speech API.', 'error')
+        settingsElement.classList.add('nonedisplay')
       }
     })
-  } else {
-    settingsElement.classList.addClass('nonedisplay')
-  }
 }
 
 let LOGGER = null
@@ -139,7 +150,7 @@ let LOGGER = null
 /** Central 'ready' event handler */
 document.addEventListener('DOMContentLoaded', function () {
   'use strict'
-  var quota, appInfoRequest
+  var appInfoRequest
 
   LOGGER = window.podcatcher.utils.createLogger('hp5/view/settings')
   POD.logger('Opens Settings View', 'debug')
@@ -157,57 +168,79 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
   }
-  if (UI.settings.get('proxyUrl')) {
-    document.getElementById('httpProxyInput').value = UI.settings.get('proxyUrl')
-    POD.api.configuration.proxyUrlPattern = UI.settings.get('proxyUrl')
-  }
+
+  window.podcatcher.configuration.settings.get('proxyUrl')
+    .then((value) => {
+      if (value) {
+        document.getElementById('httpProxyInput').value = value
+      }
+      POD.api.configuration.proxyUrlPattern = value
+    })
+    .catch((error) => LOGGER.error(error))
 
   // Init quota and filesystem
-  if (POD.api.storage.chromeFileSystem !== undefined && POD.api.storage.StorageProvider.fileStorageProvider() instanceof POD.api.storage.chromeFileSystem.ChromeFileSystemFileProvider) {
-    // TODO replace inline style
-    document.getElementById('FileSystemAPI').style.display = 'block'
-    quota = UI.settings.get('quota')
-    if (!quota) {
-      quota = 1024 * 1024 * 200
-    }
-    POD.api.storage.StorageProvider.fileStorageProvider().requestFileSystemQuota(quota, function (usage, quota) {
-      window.podcatcher.configuration.settings.set('quota', quota)
-        .catch((error) => LOGGER.error(error))
-      var quotaConfigurationMarkup
-      quotaConfigurationMarkup = document.getElementById('memorySizeInput')
-      if (quotaConfigurationMarkup) {
-        quotaConfigurationMarkup.value = (quota / 1024 / 1024)
-        quotaConfigurationMarkup.setAttribute('min', Math.ceil(usage / 1024 / 1024))
-        // TODO replace inline style
-        quotaConfigurationMarkup.style.background = 'linear-gradient( 90deg, rgba(0,100,0,0.45) ' + Math.ceil((usage / quota) * 100) + '%, transparent ' + Math.ceil((usage / quota) * 100) + '%, transparent )'
-      }
-    })
+  if (POD.api.storage.chromeFileSystem !== undefined &&
+      POD.api.storage.StorageProvider.fileStorageProvider() instanceof POD.api.storage.chromeFileSystem.ChromeFileSystemFileProvider) {
+    document.getElementById('FileSystemAPI').classList.remove('nonedisplay')
+    window.podcatcher.configuration.settings.get('quota')
+      .then((quota) => {
+        if (!quota) {
+          quota = 1024 * 1024 * 200
+        }
+        POD.api.storage.StorageProvider.fileStorageProvider().requestFileSystemQuota(quota, function (usage, quota) {
+          window.podcatcher.configuration.settings.set('quota', quota)
+            .catch((error) => LOGGER.error(error))
+          var quotaConfigurationMarkup
+          quotaConfigurationMarkup = document.getElementById('memorySizeInput')
+          if (quotaConfigurationMarkup) {
+            quotaConfigurationMarkup.value = (quota / 1024 / 1024)
+            quotaConfigurationMarkup.setAttribute('min', Math.ceil(usage / 1024 / 1024))
+            // TODO replace inline style
+            quotaConfigurationMarkup.style.background = 'linear-gradient( 90deg, rgba(0,100,0,0.45) ' + Math.ceil((usage / quota) * 100) + '%, transparent ' + Math.ceil((usage / quota) * 100) + '%, transparent )'
+          }
+        })
+      })
+      .catch((error) => LOGGER.error(error))
   } else {
-  // TODO replace inline style
-    document.getElementById('FileSystemAPI').style.display = 'none'
+    document.getElementById('FileSystemAPI').classList.add('nonedisplay')
   }
 
   // Init settings for logging
-  if (UI.settings.get('logLevel')) {
-    document.getElementById('logLevelSelect').value = UI.settings.get('logLevel')
-  }
+  window.podcatcher.configuration.settings.get('logLevel')
+    .then((logLevel) => {
+      if (logLevel) {
+        document.getElementById('logLevelSelect').value = logLevel
+      }
+    })
+    .catch((error) => LOGGER.error(error))
 
   // Init settings for syncronisation
-  if (UI.settings.get('syncronisationEndpoint')) {
-    document.getElementById('syncEndpoint').value = UI.settings.get('syncronisationEndpoint')
-  }
-  if (UI.settings.get('syncronisationKey')) {
-    document.getElementById('syncKey').value = UI.settings.get('syncronisationKey')
-  }
+  Promise.all([
+    window.podcatcher.configuration.settings.get('syncronisationEndpoint', ''),
+    window.podcatcher.configuration.settings.get('syncronisationKey', '')
+  ])
+    .then(([endpoint, key]) => {
+      document.getElementById('syncEndpoint').value = endpoint
+      document.getElementById('syncKey').value = key
+    })
+    .catch((error) => LOGGER.error(error))
 
   // Init configuration for sortint of playlist
-  if (UI.settings.get('playlistSort')) {
-    document.getElementById('episodeSortSelect').value = UI.settings.get('playlistSort')
-  }
+  window.podcatcher.configuration.settings.get('playlistSort')
+    .then((order) => {
+      if (order) {
+        document.getElementById('episodeSortSelect').value = order
+      }
+    })
+    .catch((error) => LOGGER.error(error))
 
   // Init settings for playback
-  document.getElementById('playbackRateSelect').value = UI.settings.get('playbackRate', 1)
-  document.getElementById('playbackRateValue').textContent = UI.settings.get('playbackRate', 1) * 100 + '%'
+  window.podcatcher.configuration.settings.get('playbackRate', 1)
+    .then((rate) => {
+      document.getElementById('playbackRateSelect').value = rate
+      document.getElementById('playbackRateValue').textContent = rate * 100 + '%'
+    })
+    .catch((error) => LOGGER.error(error))
 
   // -------------------------- //
   // -- Check Pre Conditions -- //
@@ -326,13 +359,17 @@ document.addEventListener('DOMContentLoaded', function () {
           episode.playback.played = false
         })
         POD.api.configuration.mergeConfigurations(syncValue.entries[0].value, function () {
-          POD.api.configuration.proxyUrlPattern = POD.api.configuration.settings.get('proxyUrl')
-          // update Sources width 0 as max new episodes
-          POD.web.downloadAllSources(0, function (status) {
-            POD.logger('Merged syncronisation value into local configuration successfully.', 'note')
-          }, function (total, progress) {
-            UI.logHandler(`Updated ${progress} of ${total} sources`, 'info', 'Import')
-          })
+          window.podcatcher.configuration.settings.get('proxyUrl')
+            .then((value) => {
+              POD.api.configuration.proxyUrlPattern = value
+              // update Sources width 0 as max new episodes
+              POD.web.downloadAllSources(0, function (status) {
+                LOGGER.note('Merged syncronisation value into local configuration successfully.')
+              }, function (total, progress) {
+                UI.logHandler(`Updated ${progress} of ${total} sources`, 'info', 'Import')
+              })
+            })
+            .catch((error) => LOGGER.error(error))
         })
       }
       xhr.addEventListener('error', function (xhrError) {

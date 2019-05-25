@@ -23,9 +23,14 @@
 $(document).ready(function () {
   'use strict'
 
-  const LOGGER = window.podcatcher.utils.createLogger('hp5/view/souces')
-  POD.logger('Opens Source View', 'debug')
-  HTML5Podcatcher.api.configuration.proxyUrlPattern = HTML5Podcatcher.api.configuration.settings.get('proxyUrl')
+  const LOGGER = window.podcatcher.utils.createLogger('hp5/view/sources')
+  LOGGER.debug('Opens Source View')
+  window.podcatcher.configuration.settings.get('proxyUrl')
+    .then((value) => {
+      HTML5Podcatcher.api.configuration.proxyUrlPattern = value
+    })
+    .catch((error) => LOGGER.error(error))
+
   // -------------------------- //
   // -- Check Pre Conditions -- //
   // -------------------------- //
@@ -158,33 +163,41 @@ $(document).ready(function () {
     opmlElement.appendChild(opmlDocument.createTextNode(new Date().toISOString()))
     opmlHead.appendChild(opmlElement)
     // Owner
-    if (UI.settings.get('syncronisationKey')) {
-      opmlElement = opmlDocument.createElement('ownerName')
-      opmlElement.appendChild(opmlDocument.createTextNode(UI.settings.get('syncronisationKey')))
-      opmlHead.appendChild(opmlElement)
-    }
-    // Single Outline representing a Podcast
-    POD.storage.readSources(sources => {
-      sources.forEach(source => {
-        opmlElement = opmlDocument.createElement('outline')
-        opmlElement.setAttribute('type', 'rss')
-        opmlElement.setAttribute('text', source.title)
-        opmlElement.setAttribute('description', source.description)
-        opmlElement.setAttribute('language', source.language)
-        opmlElement.setAttribute('xmlUrl', source.uri)
-        opmlElement.setAttribute('htmlUrl', source.link)
-        opmlBody.appendChild(opmlElement)
+    window.podcatcher.configuration.settings.get('syncronisationKey')
+      .then((value) => {
+        if (value) {
+          opmlElement = opmlDocument.createElement('ownerName')
+          opmlElement.appendChild(opmlDocument.createTextNode(value))
+          opmlHead.appendChild(opmlElement)
+        }
       })
+      .then(() => {
+        // Single Outline representing a Podcast
+        POD.storage.readSources(sources => {
+          sources.forEach(source => {
+            opmlElement = opmlDocument.createElement('outline')
+            opmlElement.setAttribute('type', 'rss')
+            opmlElement.setAttribute('text', source.title)
+            opmlElement.setAttribute('description', source.description)
+            opmlElement.setAttribute('language', source.language)
+            opmlElement.setAttribute('xmlUrl', source.uri)
+            opmlElement.setAttribute('htmlUrl', source.link)
+            opmlBody.appendChild(opmlElement)
+          })
 
-      POD.logger('Start download of OPML file now', 'debug', 'OPML export')
-      var element = document.createElement('a')
-      element.setAttribute('href', 'data:text/xml;charset=utf-8,' + encodeURIComponent('<?xml version="1.0" encoding="utf-8"?>' + new XMLSerializer().serializeToString(opmlDocument)))
-      element.setAttribute('download', 'html5podcatcher.opml')
-      element.style.display = 'none'
-      document.body.appendChild(element)
-      element.click()
-      document.body.removeChild(element)
-    })
+          POD.logger('Start download of OPML file now', 'debug', 'OPML export')
+          var element = document.createElement('a')
+          element.setAttribute('href', 'data:text/xml;charset=utf-8,' + encodeURIComponent('<?xml version="1.0" encoding="utf-8"?>' + new XMLSerializer().serializeToString(opmlDocument)))
+          element.setAttribute('download', 'html5podcatcher.opml')
+          element.style.display = 'none'
+          document.body.appendChild(element)
+          element.click()
+          document.body.removeChild(element)
+        })
+      })
+      .catch((error) => {
+        LOGGER.error(error)
+      })
   }, true)
   UI.initGeneralUIEvents()
   UI.initConnectionStateEvents()
