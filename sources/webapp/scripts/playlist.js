@@ -84,56 +84,54 @@ GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
 }
 
 /** Creates a HTML-Audio-Element.
-  * @return {HTMLAudioElement} The created HTML-Audio-Element.
+  * @return {Promise} A promise fullfiled with the created HTML-Audio-Element.
   */
 GlobalUserInterfaceHelper.GenerateAudioElement = function () {
   'use strict'
-  var mediaElement
 
   LOGGER.debug('Audio element will be created')
-
-  mediaElement = document.createElement('audio')
-  mediaElement.setAttribute('controls', 'controls')
-  mediaElement.setAttribute('preload', 'metadata')
   // The following promise is only a quick and dirty solution. The hole function should be async.
-  window.podcatcher.configuration.settings.get('playbackRate', 1)
+  return window.podcatcher.configuration.settings.get('playbackRate', 1)
     .then((playbackRate) => {
+      const mediaElement = document.createElement('audio')
+      mediaElement.setAttribute('controls', 'controls')
+      mediaElement.setAttribute('preload', 'metadata')
       mediaElement.defaultPlaybackRate = playbackRate
-    })
-  mediaElement.appendChild(document.createElement('source'))
+      mediaElement.appendChild(document.createElement('source'))
 
-  if (window.navigator.mozApps) {
-    // if app started in Firefox OS Runtime...
-    mediaElement.setAttribute('mozaudiochannel', 'content')
-    POD.logger('Activate content audio channel', 'debug', 'playback')
-    // Handling interruptions by heigher audio channels
-    mediaElement.addEventListener('mozinterruptbegin', function () {
-      POD.logger('Playback is interrupted', 'info', 'playback')
-    })
-    mediaElement.addEventListener('mozinterruptend', function () {
-      POD.logger('Playback is resumed', 'info', 'playback')
-    })
-    if (navigator.mozAudioChannelManager) {
-      // Set Volumn Control of device to "content" audio channel
-      navigator.mozAudioChannelManager.volumeControlChannel = 'content'
-      // Handling connection/disconnection of headphones
-      navigator.mozAudioChannelManager.onheadphoneschange = function () {
-        if (navigator.mozAudioChannelManager.headphones === true) {
-          POD.logger('Headphones plugged in!', 'debug', 'playback')
-          if (mediaElement.autoplay === true || mediaElement.dataset.autoplay === 'enabled') {
-            mediaElement.play()
+      if (window.navigator.mozApps) {
+        // if app started in Firefox OS Runtime...
+        mediaElement.setAttribute('mozaudiochannel', 'content')
+        POD.logger('Activate content audio channel', 'debug', 'playback')
+        // Handling interruptions by heigher audio channels
+        mediaElement.addEventListener('mozinterruptbegin', function () {
+          POD.logger('Playback is interrupted', 'info', 'playback')
+        })
+        mediaElement.addEventListener('mozinterruptend', function () {
+          POD.logger('Playback is resumed', 'info', 'playback')
+        })
+        if (navigator.mozAudioChannelManager) {
+          // Set Volumn Control of device to "content" audio channel
+          navigator.mozAudioChannelManager.volumeControlChannel = 'content'
+          // Handling connection/disconnection of headphones
+          navigator.mozAudioChannelManager.onheadphoneschange = function () {
+            if (navigator.mozAudioChannelManager.headphones === true) {
+              POD.logger('Headphones plugged in!', 'debug', 'playback')
+              if (mediaElement.autoplay === true || mediaElement.dataset.autoplay === 'enabled') {
+                mediaElement.play()
+              }
+            } else {
+              POD.logger('Headphones unplugged!', 'debug', 'playback')
+              mediaElement.pause()
+            }
           }
-        } else {
-          POD.logger('Headphones unplugged!', 'debug', 'playback')
-          mediaElement.pause()
         }
       }
-    }
-  }
 
-  LOGGER.debug('Audio element is created')
+      LOGGER.debug('Audio element is created')
 
-  return mediaElement
+      return mediaElement
+    })
 }
 
 /** Functions for playback */
@@ -150,6 +148,135 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
         mediaUrl = episode.mediaUrl
       }
       if (mediaUrl) {
+        const init = function () {
+          // Bind or rebind event handler for the audio element
+          $('#player audio').on('loadstart', function () {
+            HTML5Podcatcher.logger('==============================================', 'debug')
+            GlobalUserInterfaceHelper.activeEpisode(function (episode) {
+              HTML5Podcatcher.logger('Start loading ' + episode.title, 'debug', 'playback')
+            })
+          })
+          $('#player audio').on('loadedmetadata', function () {
+            GlobalUserInterfaceHelper.activeEpisode(function (episode) {
+              HTML5Podcatcher.logger('Load metadata of ' + episode.title, 'debug', 'playback')
+            })
+          })
+          $('#player audio').on('canplay', function () {
+            GlobalUserInterfaceHelper.activeEpisode(function (episode) {
+              HTML5Podcatcher.logger(episode.title + ' is ready to play', 'debug', 'playback')
+            })
+          })
+          $('#player audio').on('canplaythrough', function () {
+            GlobalUserInterfaceHelper.activeEpisode(function (episode) {
+              HTML5Podcatcher.logger(episode.title + ' is realy ready to play ("canplaythrough")', 'debug', 'playback')
+            })
+          })
+          $('#player audio').on('playing', function (event) {
+            var audioElement = event.target
+            $('#playPause').data('icon', 'pause')
+            $('#playPause').attr('data-icon', 'pause')
+            GlobalUserInterfaceHelper.activeEpisode(function (episode) {
+              LOGGER.note(episode.title + ' is playing')
+              audioElement.autoplay = true
+              audioElement.dataset.autoplay = 'enabled'
+            })
+          })
+          $('#player audio').on('pause', function () {
+            $('#playPause').data('icon', 'play')
+            $('#playPause').attr('data-icon', 'play')
+          })
+          $('#player audio').on('ended', function () {
+            GlobalUserInterfaceHelper.activeEpisode(function (episode) {
+              LOGGER.debug(episode.title + ' is ended')
+              POD.toggleEpisodeStatus(episode)
+              // Announce next Episode in Playlist and start playback
+              GlobalUserInterfaceHelper.nextEpisode((nextEpisode) => {
+                GlobalUserInterfaceHelper.announceEpisode(nextEpisode)
+                  .then(() => {
+                    GlobalUserInterfaceHelper.playEpisode(nextEpisode)
+                  })
+                  .catch((errorCodeOrError) => {
+                    GlobalUserInterfaceHelper.playEpisode(nextEpisode)
+                  })
+              })
+            })
+          })
+          $('#player audio, #player audio source').on('error', function (event) {
+            var errormessage, readystate, networkstate
+            if (!event || !event.target || !$(event.target).parent()[0] || !$(event.target).parent()[0].readyState) {
+              // no valid state - Firefox 41 throws this error after page navigation. Why?
+              return
+            }
+            readystate = $(event.target).parent()[0].readyState
+            networkstate = $(event.target).parent()[0].networkState
+            errormessage = 'Error on playback of audio file. Networkstate: ' + networkstate + '; ReadyState: ' + readystate
+            if (networkstate === HTMLMediaElement.NETWORK_NO_SOURCE) {
+              errormessage = 'There is no valid source for ' + episode.title + '. See ' + episode.mediaUrl + ' of type ' + episode.mediaType
+            } else if (readystate === HTMLMediaElement.HAVE_NOTHING) {
+              errormessage = "Can't load file " + $(event.target).parent()[0].currentSrc
+            } else if ($(event.target).parent()[0].error) {
+              switch (event.target.error.code) {
+                case event.target.error.MEDIA_ERR_ABORTED:
+                  errormessage = 'You aborted the media playback.'
+                  break
+                case event.target.error.MEDIA_ERR_NETWORK:
+                  errormessage = 'A network error caused the audio download to fail.'
+                  break
+                case event.target.error.MEDIA_ERR_DECODE:
+                  errormessage = 'The audio playback was aborted due to a corruption problem or because the video used features your browser did not support.'
+                  break
+                case event.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                  errormessage = 'The video audio not be loaded, either because the server or network failed or because the format is not supported.'
+                  break
+                default:
+                  errormessage = 'An unknown error occurred.'
+                  break
+              }
+            }
+            $('#playPause').data('icon', 'play')
+            $('#playPause').attr('data-icon', 'play')
+            LOGGER.error(errormessage)
+            GlobalUserInterfaceHelper.nextEpisode(GlobalUserInterfaceHelper.playEpisode)
+          })
+          $('#player audio').on('durationchange', function (event) {
+            var audioElement = event.target
+            var percentPlayed, episodeUI
+            GlobalUserInterfaceHelper.activeEpisode(function (episode) {
+              HTML5Podcatcher.logger('Duration of ' + episode.title + ' is changed to ' + UI.formatTimeCode(event.currentTarget.duration) + '.', 'debug', 'playback')
+              if (episode && audioElement.duration > episode.playback.currentTime) {
+                $(audioElement).off('durationchange')
+                if (audioElement.currentTime <= episode.playback.currentTime) {
+                  HTML5Podcatcher.logger('CurrentTime will set to ' + UI.formatTimeCode(episode.playback.currentTime) + ' seconds', 'debug')
+                  audioElement.currentTime = episode.playback.currentTime
+                }
+                $(audioElement).on('timeupdate', function (event) {
+                  if (episode && (event.target.currentTime > (episode.playback.currentTime + 10) || event.target.currentTime < (episode.playback.currentTime - 10))) {
+                    episode.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10
+                    POD.storage.writeEpisode(episode)
+                    HTML5Podcatcher.logger('Current timecode is ' + UI.formatTimeCode(episode.playback.currentTime) + '.', 'debug')
+                  }
+                  if (episode && (event.target.currentTime > (episode.playback.currentTime + 2) || event.target.currentTime < (episode.playback.currentTime - 2))) {
+                    // Show Progress as background Gradient of Episode-UI
+                    episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode)
+                    percentPlayed = ((event.target.currentTime / audioElement.duration) * 100)
+                    percentPlayed = percentPlayed.toFixed(2)
+                    $(episodeUI).attr('style', 'background: linear-gradient(to right, var(--primary-color-background) 0%, var(--primary-color-background) ' + percentPlayed + '%, #ffffff ' + percentPlayed + '%);')
+                  }
+                })
+                HTML5Podcatcher.logger('Timeupdate on', 'debug')
+              }
+            })
+          })
+          // Styling
+          $('#playlist').find('.active').removeClass('active')
+          $('#playlist li').filter(function () {
+            return $(this).data('episodeUri') === episode.uri
+          }).addClass('active')
+          if (onActivatedCallback && typeof onActivatedCallback === 'function') {
+            onActivatedCallback(episode)
+          }
+        }
+
         if (episode.mediaType) {
           mediaType = episode.mediaType
           mediaType = mediaType.replace('/x-mpeg', '/mpeg').replace('/mp3', '/mpeg')
@@ -165,138 +292,18 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
           $(audioTag).find('source').off()
           $(audioTag).find('source').attr('type', mediaType).attr('src', mediaUrl)
           $(audioTag).attr('title', episode.title)
+          init()
         } else {
           $('#mediacontrol > p').remove()
-          audioTag = $(UI.GenerateAudioElement())
-          audioTag.find('source').attr('type', mediaType).attr('src', mediaUrl)
-          audioTag.attr('title', episode.title)
-          $('#mediacontrol').prepend(audioTag)
-        }
-        // Bind or rebind event handler for the audio element
-        $('#player audio').on('loadstart', function () {
-          HTML5Podcatcher.logger('==============================================', 'debug')
-          GlobalUserInterfaceHelper.activeEpisode(function (episode) {
-            HTML5Podcatcher.logger('Start loading ' + episode.title, 'debug', 'playback')
-          })
-        })
-        $('#player audio').on('loadedmetadata', function () {
-          GlobalUserInterfaceHelper.activeEpisode(function (episode) {
-            HTML5Podcatcher.logger('Load metadata of ' + episode.title, 'debug', 'playback')
-          })
-        })
-        $('#player audio').on('canplay', function () {
-          GlobalUserInterfaceHelper.activeEpisode(function (episode) {
-            HTML5Podcatcher.logger(episode.title + ' is ready to play', 'debug', 'playback')
-          })
-        })
-        $('#player audio').on('canplaythrough', function () {
-          GlobalUserInterfaceHelper.activeEpisode(function (episode) {
-            HTML5Podcatcher.logger(episode.title + ' is realy ready to play ("canplaythrough")', 'debug', 'playback')
-          })
-        })
-        $('#player audio').on('playing', function (event) {
-          var audioElement = event.target
-          $('#playPause').data('icon', 'pause')
-          $('#playPause').attr('data-icon', 'pause')
-          GlobalUserInterfaceHelper.activeEpisode(function (episode) {
-            HTML5Podcatcher.logger(episode.title + ' is playing', 'note', 'playback')
-            audioElement.autoplay = true
-            audioElement.dataset.autoplay = 'enabled'
-          })
-        })
-        $('#player audio').on('pause', function () {
-          $('#playPause').data('icon', 'play')
-          $('#playPause').attr('data-icon', 'play')
-        })
-        $('#player audio').on('ended', function () {
-          GlobalUserInterfaceHelper.activeEpisode(function (episode) {
-            HTML5Podcatcher.logger(episode.title + ' is ended', 'debug', 'playback')
-            POD.toggleEpisodeStatus(episode)
-            // Announce next Episode in Playlist and start playback
-            GlobalUserInterfaceHelper.nextEpisode((nextEpisode) => {
-              GlobalUserInterfaceHelper.announceEpisode(nextEpisode)
-                .then(() => {
-                  GlobalUserInterfaceHelper.playEpisode(nextEpisode)
-                })
-                .catch((errorCodeOrError) => {
-                  GlobalUserInterfaceHelper.playEpisode(nextEpisode)
-                })
+          UI.GenerateAudioElement()
+            .then((audioElement) => {
+              audioTag = $(audioElement)
+              audioTag.find('source').attr('type', mediaType).attr('src', mediaUrl)
+              audioTag.attr('title', episode.title)
+              $('#mediacontrol').prepend(audioTag)
+              init()
             })
-          })
-        })
-        $('#player audio, #player audio source').on('error', function (event) {
-          var errormessage, readystate, networkstate
-          if (!event || !event.target || !$(event.target).parent()[0] || !$(event.target).parent()[0].readyState) {
-            // no valid state - Firefox 41 throws this error after page navigation. Why?
-            return
-          }
-          readystate = $(event.target).parent()[0].readyState
-          networkstate = $(event.target).parent()[0].networkState
-          errormessage = 'Error on playback of audio file. Networkstate: ' + networkstate + '; ReadyState: ' + readystate
-          if (networkstate === HTMLMediaElement.NETWORK_NO_SOURCE) {
-            errormessage = 'There is no valid source for ' + episode.title + '. See ' + episode.mediaUrl + ' of type ' + episode.mediaType
-          } else if (readystate === HTMLMediaElement.HAVE_NOTHING) {
-            errormessage = "Can't load file " + $(event.target).parent()[0].currentSrc
-          } else if ($(event.target).parent()[0].error) {
-            switch (event.target.error.code) {
-              case event.target.error.MEDIA_ERR_ABORTED:
-                errormessage = 'You aborted the media playback.'
-                break
-              case event.target.error.MEDIA_ERR_NETWORK:
-                errormessage = 'A network error caused the audio download to fail.'
-                break
-              case event.target.error.MEDIA_ERR_DECODE:
-                errormessage = 'The audio playback was aborted due to a corruption problem or because the video used features your browser did not support.'
-                break
-              case event.target.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
-                errormessage = 'The video audio not be loaded, either because the server or network failed or because the format is not supported.'
-                break
-              default:
-                errormessage = 'An unknown error occurred.'
-                break
-            }
-          }
-          $('#playPause').data('icon', 'play')
-          $('#playPause').attr('data-icon', 'play')
-          HTML5Podcatcher.logger(errormessage, 'error', 'playback')
-          GlobalUserInterfaceHelper.nextEpisode(GlobalUserInterfaceHelper.playEpisode)
-        })
-        $('#player audio').on('durationchange', function (event) {
-          var audioElement = event.target
-          var percentPlayed, episodeUI
-          GlobalUserInterfaceHelper.activeEpisode(function (episode) {
-            HTML5Podcatcher.logger('Duration of ' + episode.title + ' is changed to ' + UI.formatTimeCode(event.currentTarget.duration) + '.', 'debug', 'playback')
-            if (episode && audioElement.duration > episode.playback.currentTime) {
-              $(audioElement).off('durationchange')
-              if (audioElement.currentTime <= episode.playback.currentTime) {
-                HTML5Podcatcher.logger('CurrentTime will set to ' + UI.formatTimeCode(episode.playback.currentTime) + ' seconds', 'debug')
-                audioElement.currentTime = episode.playback.currentTime
-              }
-              $(audioElement).on('timeupdate', function (event) {
-                if (episode && (event.target.currentTime > (episode.playback.currentTime + 10) || event.target.currentTime < (episode.playback.currentTime - 10))) {
-                  episode.playback.currentTime = Math.floor(event.target.currentTime / 10) * 10
-                  POD.storage.writeEpisode(episode)
-                  HTML5Podcatcher.logger('Current timecode is ' + UI.formatTimeCode(episode.playback.currentTime) + '.', 'debug')
-                }
-                if (episode && (event.target.currentTime > (episode.playback.currentTime + 2) || event.target.currentTime < (episode.playback.currentTime - 2))) {
-                  // Show Progress as background Gradient of Episode-UI
-                  episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode)
-                  percentPlayed = ((event.target.currentTime / audioElement.duration) * 100)
-                  percentPlayed = percentPlayed.toFixed(2)
-                  $(episodeUI).attr('style', 'background: linear-gradient(to right, var(--primary-color-background) 0%, var(--primary-color-background) ' + percentPlayed + '%, #ffffff ' + percentPlayed + '%);')
-                }
-              })
-              HTML5Podcatcher.logger('Timeupdate on', 'debug')
-            }
-          })
-        })
-        // Styling
-        $('#playlist').find('.active').removeClass('active')
-        $('#playlist li').filter(function () {
-          return $(this).data('episodeUri') === episode.uri
-        }).addClass('active')
-        if (onActivatedCallback && typeof onActivatedCallback === 'function') {
-          onActivatedCallback(episode)
+            .catch((error) => LOGGER.error(error))
         }
       }
     })
@@ -403,20 +410,16 @@ GlobalUserInterfaceHelper.togglePauseStatus = function () {
   * @returns {external:Promise} A promise
   */
 GlobalUserInterfaceHelper.announceEpisode = function (episode) {
-  return Promise.all(
-    window.podcatcher.configuration.settings.get('speechSynthesisFavoriteVoices', '')
-      .then((favorites) => {
-        window.h5p.speech.synthesiser.favoriteVoices = favorites.split(',')
-      }),
-    window.podcatcher.configuration.settings.get('speechSynthesisRate', 1)
-      .then((rate) => {
-        window.h5p.speech.synthesiser.rate = rate
-      }),
+  return Promise.all([
+    window.podcatcher.configuration.settings.get('speechSynthesisFavoriteVoices', ''),
+    window.podcatcher.configuration.settings.get('speechSynthesisRate', 1),
     window.podcatcher.configuration.settings.get('speechSynthesisPitch', 1)
-      .then((pitch) => {
-        window.h5p.speech.synthesiser.pitch = pitch
-      })
-  )
+  ])
+    .then(([favorites, rate, pitch]) => {
+      window.h5p.speech.synthesiser.favoriteVoices = favorites.split(',')
+      window.h5p.speech.synthesiser.rate = rate
+      window.h5p.speech.synthesiser.pitch = pitch
+    })
     .then(() => window.h5p.speech.synthesiser.speak(`${episode.title} by ${episode.source}`, episode.language))
     .catch((errorCodeOrError) => {
       if (errorCodeOrError.message) { // rejected with an Error

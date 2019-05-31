@@ -39,9 +39,9 @@ if (isSupported()) {
 
 window.h5p = api
 
-window.podcatcher.configuration.settings.get('logLevel', 1)
+window.podcatcher.configuration.settings.get('logLevel', '1')
   .then((allowedLevel) => {
-    switch (allowedLevel) {
+    switch (parseFloat(allowedLevel)) {
       case 1:
         allowedLevel = 'debug'
         break

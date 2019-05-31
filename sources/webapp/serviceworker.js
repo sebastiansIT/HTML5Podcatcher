@@ -209,5 +209,12 @@ self.addEventListener('fetch', event => {
           return response
         })
       })
+      .catch((error) => {
+        if (event.request.destination === 'audio' || event.request.destination === 'video') {
+          LOGGER.log(`Application can't fetch ${event.request.url} from Network: ${error}`, 'error', 'ServiceWorker')
+        } else {
+          LOGGER.log(`Application can't fetch ${event.request.url} from Network: ${error}. The caller should handle this.`, 'debug', 'ServiceWorker')
+        }
+      })
   )
 })

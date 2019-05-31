@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var appInfoRequest
 
   LOGGER = window.podcatcher.utils.createLogger('hp5/view/settings')
-  POD.logger('Opens Settings View', 'debug')
+  LOGGER.debug('Opens Settings View')
 
   // -- Initialise UI -- //
   // Init Proxy-Settings
@@ -304,7 +304,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }, false)
 
   // Transfer a JSON-Object with the whole configuration to a HTTP endpoint
-  $('#SyncronisationForm').on('submit', function (event) {
+  $('#SyncronisationForm').on('submit', (event) => {
     event.preventDefault()
     event.stopPropagation()
 
@@ -314,21 +314,23 @@ document.addEventListener('DOMContentLoaded', function () {
     syncKey = document.getElementById('syncKey').value
 
     if (form.checkValidity()) {
-      window.podcatcher.configuration.settings.set('syncronisationEndpoint', syncEndpoint)
-        .then(() => window.podcatcher.configuration.settings.set('syncronisationKey', syncKey))
+      Promise.all([
+        window.podcatcher.configuration.settings.set('syncronisationEndpoint', syncEndpoint),
+        window.podcatcher.configuration.settings.set('syncronisationKey', syncKey)
+      ])
         .then(() => {
           POD.api.configuration.readConfiguration(function (config) {
             POD.api.web.createXMLHttpRequest(function (xhr) {
               xhr.open('POST', syncEndpoint, true)
               xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8')
               xhr.onload = function () {
-                POD.logger('Sended syncronisation value successfully.', 'note')
+                LOGGER.note('Sended syncronisation value successfully.')
               }
               xhr.addEventListener('error', function (xhrError) {
-                POD.logger('Can\'t upload configuration to syncronisation endpoint (' + xhrError.error + ')', 'error')
+                LOGGER.error('Can\'t upload configuration to syncronisation endpoint (' + xhrError.error + ')')
               })
               xhr.ontimeout = function () {
-                POD.logger('Timeout after ' + (xhr.timeout / 60000) + ' minutes.', 'error')
+                LOGGER.error('Timeout after ' + (xhr.timeout / 60000) + ' minutes.')
               }
               xhr.send(JSON.stringify({ key: syncKey, value: config }))
             })
@@ -336,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch((error) => LOGGER.error(error))
     } else {
-      POD.logger('Please insert a URL and a name!', 'error')
+      LOGGER.error('Please insert a URL and a name!')
     }
   })
 
