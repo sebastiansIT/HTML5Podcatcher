@@ -1,6 +1,6 @@
 /** @module  HTML5Podcatcher/Parser/RSS_2-0
     @author  SebastiansIT [sebastian@human-injection.de]
-    @license Copyright 2016 Sebastian Spautz
+    @license Copyright 2016, 2019 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -109,12 +109,18 @@ var RssParser = (function () {
         } else {
           parserResult.source.language = undefined
         }
+        // * Image (<image><url></image>)
+        currentElement = rootElement.querySelector('channel > image > url')
+        if (currentElement && currentElement.childNodes.length > 0) {
+          parserResult.source.image = currentElement.childNodes[0].nodeValue
+        }
         // RSS-Entries
         itemArray = rootElement.querySelectorAll('channel > item')
         for (i = 0; i < itemArray.length; i += 1) {
           item = itemArray[i]
           episode = {
-            'language': parserResult.source.language
+            'language': parserResult.source.language,
+            'image': parserResult.source.image
           }
           // * URI of episode
           if (item.querySelector('link')) {

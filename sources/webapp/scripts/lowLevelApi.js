@@ -58,6 +58,7 @@ var HTML5Podcatcher = {
             existingEpisode.duration = mergeEpisode.duration
             existingEpisode.source = mergeEpisode.source
             existingEpisode.jumppoints = mergeEpisode.jumppoints
+            existingEpisode.image = mergeEpisode.image
             // ATTENTION! never change playback information if episode updated from internet
             // Only Exception: If the forcedPlayed parameter is set - then the actual playback state is overriden
             if (forcePlayed && existingEpisode.playback.played === undefined) {
