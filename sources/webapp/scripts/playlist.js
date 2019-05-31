@@ -16,7 +16,7 @@
      along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 /* global navigator, window, document */
-/* global console, localStorage, HTMLMediaElement */
+/* global console, localStorage, HTMLMediaElement, MediaMetadata */
 /* global $ */
 /* global POD, HTML5Podcatcher */
 /* global GlobalUserInterfaceHelper, UI */
@@ -149,6 +149,21 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
       }
       if (mediaUrl) {
         const init = function () {
+          if ('mediaSession' in navigator) {
+            const metadata = {}
+            if (episode.title) {
+              metadata.title = episode.title
+            }
+            if (episode.source) {
+              metadata.artist = episode.source
+            }
+            if (episode.image) {
+              metadata.artwork = [
+                { src: episode.image }
+              ]
+            }
+            navigator.mediaSession.metadata = new MediaMetadata(metadata)
+          }
           // Bind or rebind event handler for the audio element
           $('#player audio').on('loadstart', function () {
             HTML5Podcatcher.logger('==============================================', 'debug')
@@ -176,7 +191,12 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
             $('#playPause').data('icon', 'pause')
             $('#playPause').attr('data-icon', 'pause')
             GlobalUserInterfaceHelper.activeEpisode(function (episode) {
-              LOGGER.note(episode.title + ' is playing')
+              if ('mediaSession' in navigator) {
+                LOGGER.info(`${episode.title} is playing.`)
+              } else {
+                LOGGER.note(`${episode.title} is playing.`)
+              }
+
               audioElement.autoplay = true
               audioElement.dataset.autoplay = 'enabled'
             })
