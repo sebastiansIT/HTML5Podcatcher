@@ -131,14 +131,18 @@ export class Synthesiser {
     * @returns {SpeakPromise} A Promise that fulfill when the given text is spoken.
     */
   speak (text, lang) {
+    lang = lang || 'en'
+
     // Select a voice for the given language
     let selectedVoice = null
     for (let i = 0; i < getVoices().length; i++) {
       const voice = getVoices()[i]
-      if (voice.lang.indexOf(lang) === 0) {
-        selectedVoice = voice
-        if (this.favoriteVoices.includes(voice.name)) {
-          break
+      if (voice.localService) {
+        if (voice.lang.indexOf(lang) === 0) {
+          selectedVoice = voice
+          if (this.favoriteVoices.includes(voice.name)) {
+            break
+          }
         }
       }
     }
@@ -146,8 +150,6 @@ export class Synthesiser {
     if (selectedVoice) {
       const synthesiser = window.speechSynthesis
       const utterance = new SpeechSynthesisUtterance(text)
-
-      lang = lang || 'en'
 
       utterance.voice = selectedVoice
       utterance.pitch = this.pitch
