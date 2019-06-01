@@ -275,3 +275,6 @@
 	* Sort Source now case insensitive
 - 0.48.8
   * Rewrite Settings Storage Provider
+- 0.49.0
+  * Use Media Session API to pimp Media Notifications and lock screen on Android using Chrome
+	* Only announce episodes with Speech API when voices are offline available 
