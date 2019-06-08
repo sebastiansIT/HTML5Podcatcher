@@ -35,6 +35,10 @@
   * @reject {external:Error} A Error if no offline avaliable voice is installed.
   */
 
+/** Logger
+  * @constant {module:podcatcher/utils/logging.Logger}
+  * @private
+  */
 const LOGGER = window.podcatcher.utils.createLogger('h5p/speech/synthesis')
 
 /**
@@ -47,24 +51,63 @@ export function isSupported () {
 }
 
 /**
-  * Returns a list of voices for the Web Speech API that are offline available.
+  * Returns a list of voices for the Web Speech API.
+  * If the usage policy is Offline only offline available voices are returned.
+  * If the policy is set to Disabled no voice is returned.
   * @static
-  * @returns {external:SpeechSynthesisVoice[]} Voices that are offline available.
+  * @returns {external:SpeechSynthesisVoice[]} Voices that are available.
   */
 export function getVoices () {
   if (isSupported) {
+    if (usagePolicy === USAGE_POLICIES.NONE) {
+      LOGGER.info('Speech synthesis is disabled.')
+      return []
+    }
     const allVoices = window.speechSynthesis.getVoices()
-    let offlineVoices = []
+    let voices = []
     for (let i = 0; i < allVoices.length; i++) {
       const voice = allVoices[i]
-      if (voice.localService) {
-        offlineVoices.push(voice)
+      if (usagePolicy === USAGE_POLICIES.LOCAL && !voice.localService) {
+        continue
       }
+      voices.push(voice)
     }
-    return offlineVoices.sort(voiceComparator)
+    return voices.sort(voiceComparator)
   } else {
     throw new Error('Speech Synthesis isn\'t supported by this platform.')
   }
+}
+
+/** Possible policies for usage of the speech synthesis API.
+  * @readonly
+  * @enum {external:String}
+  */
+export const USAGE_POLICIES = {
+  /** Speech synthesis disabled. */
+  NONE: 'none',
+  /** Speech synthesis is only used when local voices are available. */
+  LOCAL: 'local only',
+  /** Speech synsthesis is used with online voices. */
+  REMOTE: 'remote allowed'
+}
+/** Actual policy for usage of the speech synthesis API.
+  * @private
+  * @type {USAGE_POLICIES}
+  */
+let usagePolicy = USAGE_POLICIES.LOCAL
+/** Set a new usage policy.
+  * @param {USAGE_POLICIES} [policy=USAGE.POLICIES.LOCAL] The new policy.
+  * @returns {undefined}
+  */
+export function setUsagePolicy (policy) {
+  if (policy) {
+    usagePolicy = policy
+  } else {
+    usagePolicy = USAGE_POLICIES.LOCAL
+  }
+}
+export function getUsagePolicy () {
+  return usagePolicy
 }
 
 /** A Speech synthesiser.
@@ -89,6 +132,11 @@ export class Synthesiser {
     }
   }
 
+  /** Pitch for the speech synthesis.
+    * A floating number in the range from 0 to 2.
+    * @property pitch
+    * @type {number}
+    */
   set pitch (value) {
     // TODO check number
     // TODO check range 0 to 2
@@ -98,6 +146,11 @@ export class Synthesiser {
     return this._pitch
   }
 
+  /** Rate for the speech synthesis.
+    * A floating number in the range from 0.1 to 10.
+    * @property rate
+    * @type {number}
+    */
   set rate (value) {
     // TODO check number
     // TODO check range 0.1 to 10
@@ -107,6 +160,11 @@ export class Synthesiser {
     return this._rate
   }
 
+  /** Volume for the speech synthesis.
+    * A floating number in the range from 0 to 1.
+    * @property volume
+    * @type {number}
+    */
   set volume (value) {
     // TODO check number
     // TODO check range 0 to 1
@@ -116,6 +174,10 @@ export class Synthesiser {
     return this._volume
   }
 
+  /** Favorite voices for the speech synthesis.
+    * @property favoriteVoices
+    * @type {string[]}
+    */
   set favoriteVoices (favoriteVoiceNames) {
     // TODO check Array
     // TODO check String-Items
@@ -128,21 +190,20 @@ export class Synthesiser {
   /** Speak a text in the given language.
     * @param {external:String} text Text to speak
     * @param {external:String} [lang=en] Language to speak in.
-    * @returns {SpeakPromise} A Promise that fulfill when the given text is spoken.
+    * @returns {SpeakPromise} A Promise that fulfill empty when the given text is spoken.
     */
   speak (text, lang) {
     lang = lang || 'en'
 
     // Select a voice for the given language
+    const voices = getVoices()
     let selectedVoice = null
-    for (let i = 0; i < getVoices().length; i++) {
-      const voice = getVoices()[i]
-      if (voice.localService) {
-        if (voice.lang.indexOf(lang) === 0) {
-          selectedVoice = voice
-          if (this.favoriteVoices.includes(voice.name)) {
-            break
-          }
+    for (let i = 0; i < voices.length; i++) {
+      const voice = voices[i]
+      if (voice.lang.indexOf(lang) === 0) {
+        selectedVoice = voice
+        if (this.favoriteVoices.includes(voice.name)) {
+          break
         }
       }
     }
@@ -168,14 +229,18 @@ export class Synthesiser {
         LOGGER.debug(`Speech text with voice ${utterance.voice.name}, pith ${utterance.pitch}, volume ${Math.floor(utterance.volume * 100)}% and rate ${Math.floor(utterance.rate * 100)}%.`)
       })
     } else {
-      const error = new Error(`No offline available voices installed for language ${lang}.`)
-      LOGGER.warn(error.message)
-      return Promise.reject(error)
+      if (usagePolicy !== USAGE_POLICIES.NONE) {
+        const error = new Error(`No usable voices installed for language ${lang}.`)
+        LOGGER.warn(error.message)
+        return Promise.reject(error)
+      } else {
+        return Promise.resolve()
+      }
     }
   }
 }
 
-/** Comparator voices based on the names.
+/** Comperate voices based on there names.
   * @private
   * @param {external:SpeechSynthesisVoice} first The first voice to compare.
   * @param {external:SpeechSynthesisVoice} second The second voice to compare.

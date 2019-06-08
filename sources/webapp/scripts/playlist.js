@@ -466,9 +466,13 @@ $(document).ready(function () {
   UI.initServiceWorker()
   // Configurate POD
   LOGGER.debug('Open Playlist')
-  window.podcatcher.configuration.settings.get('proxyUrl')
-    .then((value) => {
-      HTML5Podcatcher.api.configuration.proxyUrlPattern = value
+  Promise.all([
+    window.podcatcher.configuration.settings.get('speechSynthesisPolicy'),
+    window.podcatcher.configuration.settings.get('proxyUrl')
+  ])
+    .then(([synthesiserPolicy, proxyUrlPattern]) => {
+      window.h5p.speech.policy(synthesiserPolicy)
+      HTML5Podcatcher.api.configuration.proxyUrlPattern = proxyUrlPattern
     })
     .catch((error) => LOGGER.error(error))
   // --------------------- //

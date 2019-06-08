@@ -21,7 +21,7 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 
-import { Synthesiser as SpeechSynthesiser, getVoices, isSupported } from './speech/synthesis.js'
+import { Synthesiser as SpeechSynthesiser, getVoices, isSupported, setUsagePolicy } from './speech/synthesis.js'
 import { UiLogAppender } from './utils/logging/uilogger.js'
 import { NotificationLogAppender } from './utils/logging/notificationlogger.js'
 
@@ -33,7 +33,8 @@ if (isSupported()) {
   const synthesiser = new SpeechSynthesiser()
   api.speech = {
     'synthesiser': synthesiser,
-    'voices': getVoices
+    'voices': getVoices,
+    'policy': setUsagePolicy
   }
 }
 

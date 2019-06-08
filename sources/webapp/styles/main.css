@@ -76,7 +76,8 @@ section[role="region"] .content > details {
 }
 
 @media only all and (pointer: coarse) {
-	section[role="region"] .content > section {
+	section[role="region"] .content > section,
+	section[role="region"] .content > details {
 		scroll-snap-align: start;
 	}
 }

@@ -150,6 +150,15 @@
 			<details id="speechSynthesisSettings" open="open">
 			  <summary>Speech Synthesis</summary>
 			  <form action="#" id="speechSynthesisForm">
+					<fieldset>
+						<legend>Usage Policy</legend>
+						<input type="radio" name="speechSynthesisPolicy" id="speechSynthesisPolicyDisabled" value="none" />
+						<label for="speechSynthesisPolicyDisabled">Disabled</label>
+						<input type="radio" name="speechSynthesisPolicy" id="speechSynthesisPolicyOffline" value="local only" checked="checked" />
+						<label for="speechSynthesisPolicyOffline">Local services only</label>
+						<input type="radio" name="speechSynthesisPolicy" id="speechSynthesisPolicyOnline" value="remote allowed" />
+						<label for="speechSynthesisPolicyOnline">Remote services allowed</label>
+					</fieldset>
 					<label for="speechSynthesisVoiceSelect">Favorite voices per language:</label>
 					<select name="speechSynthesisVoiceSelect" id="speechSynthesisVoiceSelect"
 						multiple="multipe" size="5">

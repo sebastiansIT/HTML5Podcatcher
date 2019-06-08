@@ -37,6 +37,10 @@ UI.importConfiguration = function (config, onImportCallback) {
 function populateVoiceList (selectElement) {
   const voices = window.h5p.speech.voices()
 
+  while (selectElement.firstChild) {
+    selectElement.removeChild(selectElement.firstChild)
+  }
+
   for (let i = 0; i < voices.length; i++) {
     const option = document.createElement('option')
     option.textContent = voices[i].name + ' (' + voices[i].lang + ')'
@@ -49,17 +53,21 @@ function populateVoiceList (selectElement) {
 
 function initSpeechSynthesisSettings () {
   const settingsElement = document.getElementById('speechSynthesisSettings')
+  const formElement = document.getElementById('speechSynthesisForm')
+  const policyElement = formElement.elements['speechSynthesisPolicy']
   const rateElement = document.getElementById('speechSynthesisRateSelect')
   const pitchElement = document.getElementById('speechSynthesisPitchSelect')
   const volumeElement = document.getElementById('speechSynthesisVolumeSelect')
   const voicesElement = document.getElementById('speechSynthesisVoiceSelect')
 
   return Promise.all([
+    window.podcatcher.configuration.settings.get('speechSynthesisPolicy', 'local only'),
     window.podcatcher.configuration.settings.get('speechSynthesisRate', 1),
     window.podcatcher.configuration.settings.get('speechSynthesisPitch', 1),
     window.podcatcher.configuration.settings.get('speechSynthesisVolume', 1)
   ])
-    .then(([rate, pitch, volume]) => {
+    .then(([policy, rate, pitch, volume]) => {
+      policyElement.value = policy
       rateElement.value = rate
       document.getElementById('speechSynthesisRateValue').textContent = Math.floor(rateElement.value * 100) + '%'
       pitchElement.value = pitch
@@ -69,7 +77,8 @@ function initSpeechSynthesisSettings () {
     })
     .then(() => {
       if (window.h5p.speech) {
-        populateVoiceList(document.getElementById('speechSynthesisVoiceSelect'))
+        window.h5p.speech.policy(policyElement.value)
+        populateVoiceList(voicesElement)
         window.podcatcher.configuration.settings.get('speechSynthesisFavoriteVoices', '')
           .then((favorites) => {
             favorites = favorites.split(',')
@@ -81,12 +90,39 @@ function initSpeechSynthesisSettings () {
             }
           })
 
-        settingsElement.addEventListener('change', function (event) {
+        settingsElement.addEventListener('change', (event) => {
           event.preventDefault()
           event.stopPropagation()
-          document.getElementById('speechSynthesisRateValue').textContent = Math.floor(rateElement.value * 100) + '%'
-          document.getElementById('speechSynthesisPitchValue').textContent = pitchElement.value
-          document.getElementById('speechSynthesisVolumeValue').textContent = Math.floor(volumeElement.value * 100) + '%'
+          if (event.target.matches('input[type=radio]')) {
+            if (policyElement.value === document.getElementById('speechSynthesisPolicyDisabled').value) {
+              voicesElement.disabled = true
+              rateElement.disabled = true
+              pitchElement.disabled = true
+              volumeElement.disabled = true
+            } else {
+              voicesElement.disabled = false
+              rateElement.disabled = false
+              pitchElement.disabled = false
+              volumeElement.disabled = false
+
+              let favorites = []
+              for (let i = 0; i < voicesElement.selectedOptions.length; i++) {
+                favorites.push(voicesElement.selectedOptions.item(i).value)
+              }
+              window.h5p.speech.policy(policyElement.value)
+              populateVoiceList(voicesElement)
+              for (let i = 0; i < voicesElement.options.length; i++) {
+                const option = voicesElement.options.item(i)
+                if (favorites.includes(option.value)) {
+                  option.selected = true
+                }
+              }
+            }
+          } else {
+            document.getElementById('speechSynthesisRateValue').textContent = Math.floor(rateElement.value * 100) + '%'
+            document.getElementById('speechSynthesisPitchValue').textContent = pitchElement.value
+            document.getElementById('speechSynthesisVolumeValue').textContent = Math.floor(volumeElement.value * 100) + '%'
+          }
         }, false)
 
         const testButton = document.getElementById('testSpeechSynthesisSettingsButton')
@@ -98,6 +134,7 @@ function initSpeechSynthesisSettings () {
           for (let i = 0; i < voicesElement.selectedOptions.length; i++) {
             favorites.push(voicesElement.selectedOptions.item(i).value)
           }
+          window.h5p.speech.policy(policyElement.value)
           window.h5p.speech.synthesiser.favoriteVoices = favorites
           window.h5p.speech.synthesiser.rate = rateElement.value
           window.h5p.speech.synthesiser.pitch = pitchElement.value
@@ -115,13 +152,17 @@ function initSpeechSynthesisSettings () {
           event.stopPropagation()
 
           const setSetting = window.podcatcher.configuration.settings.set
-          if (document.getElementById('speechSynthesisForm').checkValidity()) {
+          if (formElement.checkValidity()) {
             let favorites = []
             for (let i = 0; i < voicesElement.selectedOptions.length; i++) {
               favorites.push(voicesElement.selectedOptions.item(i).value)
             }
             window.h5p.speech.synthesiser.favoriteVoices = favorites
             setSetting('speechSynthesisFavoriteVoices', favorites)
+              .then(() => {
+                window.h5p.speech.policy(policyElement.value)
+                return setSetting('speechSynthesisPolicy', policyElement.value)
+              })
               .then(() => {
                 window.h5p.speech.synthesiser.rate = rateElement.value
                 return setSetting('speechSynthesisRate', rateElement.value)
@@ -148,7 +189,7 @@ function initSpeechSynthesisSettings () {
 let LOGGER = null
 
 /** Central 'ready' event handler */
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
   'use strict'
   var appInfoRequest
 
