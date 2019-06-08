@@ -59,6 +59,7 @@ GlobalUserInterfaceHelper.nextEpisode = function (onReadCallback) {
   const activeEpisode = $(document.getElementById('playlist').querySelector('.active'))
   POD.storage.readEpisode(activeEpisode.nextAll(':not([aria-disabled="true"])').not('.news').first().data('episodeUri'), onReadCallback)
 }
+
 GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
   'use strict'
   var lastPlayedEpisode, i
@@ -256,7 +257,16 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
             $('#playPause').data('icon', 'play')
             $('#playPause').attr('data-icon', 'play')
             LOGGER.error(errormessage)
-            GlobalUserInterfaceHelper.nextEpisode(GlobalUserInterfaceHelper.playEpisode)
+            // Announce next Episode in Playlist and start playback
+            GlobalUserInterfaceHelper.nextEpisode((nextEpisode) => {
+              GlobalUserInterfaceHelper.announceEpisode(nextEpisode)
+                .then(() => {
+                  GlobalUserInterfaceHelper.playEpisode(nextEpisode)
+                })
+                .catch((errorCodeOrError) => {
+                  GlobalUserInterfaceHelper.playEpisode(nextEpisode)
+                })
+            })
           })
           $('#player audio').on('durationchange', function (event) {
             var audioElement = event.target
