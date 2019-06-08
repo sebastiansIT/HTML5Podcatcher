@@ -1,4 +1,4 @@
-/*  Copyright 2015, 2016 Sebastian Spautz
+/*  Copyright 2015, 2016, 2019 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -112,4 +112,14 @@ input[type="range"] + .rangeInputValue {
     display: inline-block;
     width: calc(4rem - 5px);
     text-align: right;
+}
+
+input[type="radio"] + label {
+
+}
+
+fieldset {
+  margin: 0 0 1rem 0;
+  border: 0.1rem solid #c7c7c7;
+  padding: 1rem 1.5rem 1rem 1.5rem;
 }
