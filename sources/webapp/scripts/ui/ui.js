@@ -24,9 +24,11 @@
 import { Synthesiser as SpeechSynthesiser, getVoices, isSupported, setUsagePolicy } from './speech/synthesis.js'
 import { UiLogAppender } from './utils/logging/uilogger.js'
 import { NotificationLogAppender } from './utils/logging/notificationlogger.js'
+import { Player } from './playback/player.js'
 
 let api = {
-  'speech': null
+  'speech': null,
+  'player': new Player()
 }
 
 if (isSupported()) {

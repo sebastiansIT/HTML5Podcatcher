@@ -15,22 +15,22 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
-/*global self */
-"use strict";
+/* global self */
+'use strict'
 
 self.HTML5Podcatcher = {
-    api: {
-        configuration: {
-            proxyUrlPattern: undefined
-        }
-    },
-    logger: function (message, level) {
-        self.postMessage({
-            cmd: 'log',
-            parameter: {
-                level: level,
-                message: 'From WebWorker: ' + message
-            }
-        });
+  api: {
+    configuration: {
+      proxyUrlPattern: undefined
     }
-};
+  },
+  logger: function (message, level) {
+    self.postMessage({
+      cmd: 'log',
+      parameter: {
+        level: level,
+        message: 'From WebWorker: ' + message
+      }
+    })
+  }
+}

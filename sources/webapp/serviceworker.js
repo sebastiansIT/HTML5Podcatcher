@@ -128,7 +128,7 @@ self.addEventListener('activate', event => {
               LOGGER.log('ServiceWorker activated', 'debug', 'ServiceWorker')
             })
           })
-      })
+      })// Don't catch rejected Promise, this case is handled through the waitUntil() function
   )
 })
 

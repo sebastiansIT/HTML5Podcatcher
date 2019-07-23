@@ -469,4 +469,8 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 
   initSpeechSynthesisSettings()
+  // This is needed for Chrome on Android (at DOMContentLoaded the list of voices isn't availlable in this browser)
+  window.speechSynthesis.addEventListener('voiceschanged', function () {
+    initSpeechSynthesisSettings()
+  }, false)
 }, false)

@@ -277,4 +277,9 @@
   * Rewrite Settings Storage Provider
 - 0.49.0
   * Use Media Session API to pimp Media Notifications and lock screen on Android using Chrome
-	* Only announce episodes with Speech API when voices are offline available 
+	* Only announce episodes with Speech API when voices are offline available
+- 0.50.0
+  * Use Media Session API to handle multimedia Keys
+	* Refactor some Parts of the page "Playlist"
+	* Change default Value for Sync endpoint to relative URL
+	* Update list of voices in settings page when it has changed by the os
