@@ -194,13 +194,14 @@ export class Synthesiser {
     */
   speak (text, lang) {
     lang = lang || 'en'
+    lang = lang.toLowerCase()
 
     // Select a voice for the given language
     const voices = getVoices()
     let selectedVoice = null
     for (let i = 0; i < voices.length; i++) {
       const voice = voices[i]
-      if (voice.lang.indexOf(lang) === 0) {
+      if (voice.lang.toLowerCase().indexOf(lang) === 0) {
         selectedVoice = voice
         if (this.favoriteVoices.includes(voice.name)) {
           break

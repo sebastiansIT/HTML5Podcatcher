@@ -283,3 +283,5 @@
 	* Refactor some Parts of the page "Playlist"
 	* Change default Value for Sync endpoint to relative URL
 	* Update list of voices in settings page when it has changed by the os
+- 0.50.1
+  * Selection of Voice for given language is now case insensitive
