@@ -19,12 +19,12 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
-/**
- * Voice object for the Speech API
- * @external SpeechSynthesisVoice
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisVoice|SpeechSynthesisVoice}
- */
+
 /* global SpeechSynthesisUtterance */
+
+// Calling this to initialise seech synthesis in Chrome. Without this the first
+// call of getVoices() returns an empty list.
+window.speechSynthesis.getVoices()
 
 /**
   * A promise fulfilled when a text is spoken.

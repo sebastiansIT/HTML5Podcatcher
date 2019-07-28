@@ -27,3 +27,9 @@
  * @external Event
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Event|Event}
  */
+
+/**
+  * Voice object for the Speech API
+  * @external SpeechSynthesisVoice
+  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesisVoice|SpeechSynthesisVoice}
+  */

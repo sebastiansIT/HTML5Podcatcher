@@ -285,3 +285,5 @@
 	* Update list of voices in settings page when it has changed by the os
 - 0.50.1
   * Selection of Voice for given language is now case insensitive
+- 0.50.3
+  * Fix a bug preventing preventing Media Session API to call "Previous Track" correctly
