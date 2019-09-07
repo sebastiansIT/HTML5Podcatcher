@@ -112,7 +112,7 @@ var GlobalUserInterfaceHelper = {
     if (progressEvent.loaded && progressEvent.total) {
       // Downloaded Bytes / (total Bytes + 3% for saving to local storage)
       percentComplete = progressEvent.loaded / (progressEvent.total + (progressEvent.total / 33))
-      episodeUI.style.background = 'linear-gradient(to right, var(--primary-color-background) 0%, var(--primary-color-background) ' + (percentComplete * 100).toFixed(2) + '%, #ffffff ' + (percentComplete * 100).toFixed(2) + '%)'
+      episodeUI.style.background = 'linear-gradient(to right, var(--primary-color-background) 0%, var(--primary-color-background) ' + (percentComplete * 100).toFixed(2) + '%, transparent ' + (percentComplete * 100).toFixed(2) + '%)'
     }
   },
 
@@ -513,7 +513,7 @@ var GlobalUserInterfaceHelper = {
       let onProgressCallback = function (total, progress) {
         // actualise the progress in the button
         let percentCompleted = (100 / total * (total - progress)).toFixed(2) + '%'
-        button.style.background = 'linear-gradient(to right, var(--primary-color-background) 0%, var(--primary-color-background) ' + percentCompleted + ', #ffffff ' + percentCompleted + ')'
+        button.style.background = 'linear-gradient(to right, var(--primary-color-background) 0%, var(--primary-color-background) ' + percentCompleted + ', transparent ' + percentCompleted + ')'
       }
       let onFinishedCallback = function () {
         button.removeAttribute('disabled')

@@ -198,7 +198,7 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
               const episodeUI = GlobalUserInterfaceHelper.findEpisodeUI(episode)
               let percentPlayed = ((event.target.currentTime / event.target.duration) * 100)
               percentPlayed = percentPlayed.toFixed(2)
-              episodeUI.setAttribute('style', 'background: linear-gradient(to right, var(--primary-color-background) 0%, var(--primary-color-background) ' + percentPlayed + '%, #ffffff ' + percentPlayed + '%);')
+              episodeUI.setAttribute('style', 'background: linear-gradient(to right, var(--primary-color-background) 0%, var(--primary-color-background) ' + percentPlayed + '%, transparent ' + percentPlayed + '%);')
             }
           })
         }, false)

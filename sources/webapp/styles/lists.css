@@ -29,8 +29,7 @@
 	width: 100%;
 	min-height: 6rem;
 	box-sizing: border-box;
-	border-bottom: solid 0.1rem #e7e7e7;
-	color: #333;
+	border-bottom: solid 0.1rem var(--separator-color);
 	margin: 0;
 	padding: 0 0.3rem;
 	display: flex;
@@ -75,7 +74,6 @@
 h4 { /* = Title of list item */
 	font-size: 1.8rem;
 	line-height: 2.2rem;
-	color: #333;
 	margin: 0;
 	padding: 1rem 0 0 0;
 }

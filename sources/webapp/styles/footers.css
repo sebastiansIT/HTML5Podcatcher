@@ -24,15 +24,15 @@ div[role="toolbar"] {
   box-sizing: border-box;
   height: 45px;
   width: 100%;
-  background: #fff;
-  border-top: 1px solid #eee;
+  background: var(--page-background);
+  border-top: 1px solid var(--separator-color);
 }
 div[role="toolbar"] button,
 div[role="toolbar"] a {
   position: relative;
   flex: 1;
   border: none;
-  border-left: 1px solid #e5e5e5;
+  border-left: 1px solid var(--separator-color);
   background-color: transparent;
   background-repeat: no-repeat;
   margin: 0;
