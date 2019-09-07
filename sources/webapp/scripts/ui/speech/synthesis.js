@@ -64,7 +64,7 @@ export function getVoices () {
       return []
     }
     const allVoices = window.speechSynthesis.getVoices()
-    let voices = []
+    const voices = []
     for (let i = 0; i < allVoices.length; i++) {
       const voice = allVoices[i]
       if (usagePolicy === USAGE_POLICIES.LOCAL && !voice.localService) {
@@ -142,6 +142,7 @@ export class Synthesiser {
     // TODO check range 0 to 2
     this._pitch = value
   }
+
   get pitch () {
     return this._pitch
   }
@@ -156,6 +157,7 @@ export class Synthesiser {
     // TODO check range 0.1 to 10
     this._rate = value
   }
+
   get rate () {
     return this._rate
   }
@@ -170,6 +172,7 @@ export class Synthesiser {
     // TODO check range 0 to 1
     this._volume = value
   }
+
   get volume () {
     return this._volume
   }
@@ -183,6 +186,7 @@ export class Synthesiser {
     // TODO check String-Items
     this._favoriteVoices = favoriteVoiceNames
   }
+
   get favoriteVoices () {
     return this._favoriteVoices
   }
@@ -193,15 +197,14 @@ export class Synthesiser {
     * @returns {SpeakPromise} A Promise that fulfill empty when the given text is spoken.
     */
   speak (text, lang) {
-    lang = lang || 'en'
-    lang = lang.toLowerCase()
+    lang = languageNormaliser(lang) || 'en'
 
     // Select a voice for the given language
     const voices = getVoices()
     let selectedVoice = null
     for (let i = 0; i < voices.length; i++) {
       const voice = voices[i]
-      if (voice.lang.toLowerCase().indexOf(lang) === 0) {
+      if (voice.lang.indexOf(lang) === 0) {
         selectedVoice = voice
         if (this.favoriteVoices.includes(voice.name)) {
           break
@@ -227,7 +230,7 @@ export class Synthesiser {
           resolve()
         })
         synthesiser.speak(utterance)
-        LOGGER.debug(`Speech text with voice ${utterance.voice.name}, pith ${utterance.pitch}, volume ${Math.floor(utterance.volume * 100)}% and rate ${Math.floor(utterance.rate * 100)}%.`)
+        LOGGER.debug(`Speech text with voice ${utterance.voice.name}, pith ${utterance.pitch}, volume ${Math.floor(utterance.volume * 100)}% and rate ${Math.floor(utterance.rate * 100)}% in langauge ${utterance.voice.lang}.`)
       })
     } else {
       if (usagePolicy !== USAGE_POLICIES.NONE) {
@@ -256,4 +259,22 @@ function voiceComparator (first, second) {
   } else {
     return 1
   }
+}
+
+/** Normalise a string with an ISO langauge code.
+  * @private
+  * @param {external:String} lang A ISO-Langauge-Code
+  */
+function languageNormaliser (lang) {
+  const index = lang.indexOf('-')
+  let normlang = ''
+  if (index < 0) {
+    normlang = lang.toLowerCase()
+  } else {
+    normlang = lang.substring(0, index).toLowerCase()
+    normlang = normlang + '-'
+    normlang = normlang + lang.substring(index + 1).toUpperCase()
+  }
+
+  return normlang
 }
