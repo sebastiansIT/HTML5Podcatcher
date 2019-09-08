@@ -78,7 +78,7 @@ module.exports = function (grunt) {
         files: [
           // includes files within path {expand: true,  cwd: 'sources/webapp/',    src: ['styles/*.css'],                    dest: 'distributions/webapp/',             filter: 'isFile'},
           { expand: true, cwd: 'sources/webapp/', src: ['styles/icons/*.svg'], dest: 'distributions/webapp/', filter: 'isFile' },
-          { expand: true, cwd: 'sources/webapp/', src: ['images/*.png'], dest: 'distributions/webapp/', filter: 'isFile' },
+          { expand: true, cwd: 'sources/webapp/', src: ['images/*.png', 'images/*.svg'], dest: 'distributions/webapp/', filter: 'isFile' },
           { expand: true, cwd: 'sources/hostedapp/', src: ['images/*.png'], dest: 'distributions/webapp/', filter: 'isFile' },
           { expand: true, cwd: 'sources/hostedapp/', src: ['scripts/*.js'], dest: 'distributions/webapp/', filter: 'isFile' },
           { expand: true, cwd: 'sources/webapp/', src: ['*.py'], dest: 'distributions/webapp/', filter: 'isFile' },
