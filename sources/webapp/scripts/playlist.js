@@ -119,9 +119,19 @@ GlobalUserInterfaceHelper.actualiseEpisodeUI = function (episode) {
   // Download/Delete link
   if (POD.storage.isFileStorageAvailable() && episode.mediaUrl) {
     if (episode.offlineMediaUrl) {
-      $(episodeUI.querySelector('.downloadFile')).replaceWith('<button type="button" class="delete" href="' + episode.mediaUrl + '">Delete</button>')
+      const iconButton = episodeUI.querySelector('.downloadFile')
+      iconButton.querySelector('svg use')
+        .setAttribute('href', 'styles/icons/delete.svg#icon_delete')
+      const icon = iconButton.querySelector('svg')
+      $(iconButton).replaceWith(`<button class="delete iconButton" href="${episode.mediaUrl}" aria-label="Delete"></button>`)
+      episodeUI.querySelector('.delete').appendChild(icon)
     } else {
-      $(episodeUI.querySelector('.delete')).replaceWith('<a class="download button" href="' + episode.mediaUrl + '" download="' + episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/') + 1) + '">Download</a>')
+      const iconButton = episodeUI.querySelector('.delete')
+      iconButton.querySelector('svg use')
+        .setAttribute('href', 'styles/icons/download.svg#icon_download')
+      const icon = iconButton.querySelector('svg')
+      $(iconButton).replaceWith(`<a class="downloadFile iconButton" href="${episode.mediaUrl}" download="${episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/') + 1)}" title="Download"></a>`)
+      episodeUI.querySelector('.download').appendChild(icon)
     }
   } else {
     const downloadButton = episodeUI.querySelector('.functions .downloadFile')
@@ -203,8 +213,8 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
           })
         }, false)
         const errorEventListener = (event) => {
-          $('#playPause').data('icon', 'play')
-          $('#playPause').attr('data-icon', 'play')
+          document.getElementById('playPause').querySelector('svg use')
+            .setAttribute('href', 'styles/icons/play.svg#icon_play')
         }
         audioElement.addEventListener('error', errorEventListener, false)
         audioElement.querySelector('source').addEventListener('error', errorEventListener, false)

@@ -332,7 +332,7 @@ var GlobalUserInterfaceHelper = {
   renderEpisode: function (episode) {
     'use strict'
     /* let jumppointUI */
-    let fragment = document.importNode(document.getElementById('episodeTemplate').content, true)
+    const fragment = document.importNode(document.getElementById('episodeTemplate').content, true)
     let entryUI = fragment.firstElementChild
     if (episode.language) {
       entryUI.setAttribute('lang', episode.language)
@@ -363,7 +363,12 @@ var GlobalUserInterfaceHelper = {
     entryUI.find('a.origin').attr('href', episode.uri)
     if (POD.storage.isFileStorageAvailable() && episode.mediaUrl) {
       if (episode.isFileSavedOffline) {
-        entryUI.find('.downloadFile').replaceWith('<button class="delete" href="' + episode.mediaUrl + '" data-icon="delete">Delete</button>')
+        const iconButton = entryUI[0].querySelector('.downloadFile')
+        iconButton.querySelector('svg use')
+          .setAttribute('href', 'styles/icons/delete.svg#icon_delete')
+        const icon = iconButton.querySelector('svg')
+        $(iconButton).replaceWith(`<button class="delete iconButton" href="${episode.mediaUrl}" aria-label="Delete"></button>`)
+        entryUI[0].querySelector('.delete').appendChild(icon)
       } else if (episode.mediaUrl) {
         entryUI.addClass('onlineOnly')
         entryUI.find('.downloadFile').attr('href', episode.mediaUrl).attr('download', episode.mediaUrl.slice(episode.mediaUrl.lastIndexOf('/') + 1))

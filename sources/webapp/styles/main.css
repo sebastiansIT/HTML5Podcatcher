@@ -45,13 +45,6 @@
 		--separator-color: rgb(100, 100, 100);
 		--dialog-background: rgba(0, 0, 0, 0.9);
 	}
-
-	div[role="toolbar"] button[data-icon]::before,
-	div[role="toolbar"] a[data-icon]::before {
-		background-color: var(--text-color);
-		border-radius: 20%;
-		padding: 0 0.2rem;
-	}
 }
 
 html {
