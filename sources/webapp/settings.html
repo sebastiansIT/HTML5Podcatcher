@@ -67,10 +67,28 @@
 <body>
 	<section role="region">
 		<header role="banner">
-			<a href="playlist.html" title="Back to Playlist"><span class="icon icon-back">Back</span></a>
+			<a href="playlist.html" title="Back to Playlist" class="iconButton">
+				<svg xmlns="http://www.w3.org/2000/svg"
+					 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+					 <use href="styles/icons/back.svg#icon_back" />
+				</svg>
+			</a>
 			<menu>
-				<li><a href="playlist.html" title="Playlist"><span class="icon icon-playlist">Playlist</span></a></li>
-				<li><a href="sources.html" title="Sources/Feeds"><span class="icon icon-feed">Feeds</span></a></li>
+				<li><a href="playlist.html" title="Playlist" class="iconButton">
+					<svg xmlns="http://www.w3.org/2000/svg"
+						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/playlist.svg#icon_playlist" />
+					</svg>
+				</a></li>
+				<li><a href="sources.html" title="Sources/Feeds" class="iconButton">
+					<svg xmlns="http://www.w3.org/2000/svg"
+					   version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/sources.svg#icon_sources" />
+					</svg>
+				</a></li>
 			</menu>
 			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} Settings">Settings</h1>
 		</header>
@@ -185,14 +203,26 @@
 		</div>
 		<footer>
 			<div role="toolbar">
-			  <button id="showLogView" data-icon="show-log">Show Log</button>
+			  <button id="showLogView" aria-label="Show Log" class="iconButton">
+					<svg xmlns="http://www.w3.org/2000/svg"
+						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/notifications.svg#icon_notifications" />
+					</svg>
+				</button>
 			</div>
 		</footer>
 		<div id="activeMessage"></div>
 	</section>
 	<section id="logView" class="dialog" role="region">
 		<header role="banner">
-			<button title="Close" class="closeDialog"><span class="icon icon-close">Close</span></button>
+			<button title="Close" class="closeDialog iconButton">
+				<svg xmlns="http://www.w3.org/2000/svg"
+					 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+					 <use href="styles/icons/close.svg#icon_close" />
+				</svg>
+			</button>
 			<menu></menu>
 			<h1 title="HTML5 Podcatcher Message Log">Message Log</h1>
 		</header>

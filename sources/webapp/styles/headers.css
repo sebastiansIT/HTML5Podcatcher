@@ -86,8 +86,11 @@ section[role="region"] > header:first-child button {
   text-align: center;
   text-shadow: none;
   font-style: italic;
+
+  display: flex;
+  align-items: center;
 }
-/* Pressed  state */
+/* Focused  state */
 dialog[open] > header:first-child a:focus,
 dialog[open] > header:first-child button:focus,
 section[role="region"] > header:first-child a:focus,

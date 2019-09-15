@@ -94,50 +94,8 @@ h4 { /* = Title of list item */
 }
 
 /* Buttons */
-.content .entries li .button,
-.content .entries li button {
-	width:4rem;
-	height:4rem;
-	margin:1rem 0 1rem 1rem;
-	border-radius:50%;
-	display:block;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-.content .entries li a[data-icon],
-.content .entries li button[data-icon] {
-    font-size: 0;
-	background-color:transparent;
-}
-.content .entries li a[data-icon]:active,
-.content .entries li a[data-icon]:focus,
-.content .entries li a[data-icon]:hover,
-.content .entries li button[data-icon]:active,
-.content .entries li button[data-icon]:focus,
-.content .entries li button[data-icon]:hover {
+.content .entries li .iconButton:active,
+.content .entries li .iconButton:focus,
+.content .entries li .iconButton:hover {
 	background-color: var(--primary-color-background, rgba(0, 100, 0, 0.2));
-	padding:0;
-}
-.content .entries li a[data-icon]:before,
-.content .entries li button[data-icon]:before {
-    /*background-size: 4rem 4rem;*/
-    content: "";
-    height: 4rem;
-    margin-left: -2rem;
-    position: absolute;
-    width: 4rem;
-}
-.content .entries li a[data-icon="reload"]:before {
-	background: url("icons/refresh.svg") no-repeat scroll center center transparent;
-}
-.content .entries li button[data-icon="delete"]:before {
-	background: url("icons/delete.svg") no-repeat scroll center center transparent;
-}
-.content .entries li a[data-icon="download"]:before,
-.content .entries li button[data-icon="download"]:before {
-	background: url("icons/download.svg") no-repeat scroll center center transparent;
-}
-.content .entries li a[data-icon="browsing"]:before,
-.content .entries li button[data-icon="browsing"]:before {
-	background: url("icons/browsing.svg") no-repeat scroll center center transparent;
 }

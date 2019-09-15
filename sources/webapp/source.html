@@ -67,10 +67,28 @@
 <body>
 	<section role="region">
 		<header role="banner">
-			<a href="sources.html" title="Back to list of sources/feeds"><span class="icon icon-back">Feeds</span></a>
+			<a href="sources.html" title="Back to list of sources/feeds" class="iconButton">
+				<svg xmlns="http://www.w3.org/2000/svg"
+					 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+					 <use href="styles/icons/back.svg#icon_back" />
+				</svg>
+			</a>
 			<menu>
-				<li><a href="playlist.html" title="Playlist"><span class="icon icon-playlist">Playlist</span></a></li>
-				<li><a href="settings.html" title="Settings"><span class="icon icon-settings">Settings</span></a></li>
+				<li><a href="playlist.html" title="Playlist" class="iconButton">
+					<svg xmlns="http://www.w3.org/2000/svg"
+						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/playlist.svg#icon_playlist" />
+					</svg>
+				</a></li>
+				<li><a href="settings.html" title="Settings" class="iconButton">
+					<svg xmlns="http://www.w3.org/2000/svg"
+					   version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/settings.svg#icon_settings" />
+					</svg>
+				</a></li>
 			</menu>
 			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} Source/Feed Details">Feed Details</h1>
 		</header>
@@ -81,17 +99,47 @@
 		</div>
 		<footer>
 			<div role="toolbar">
-			  <button id="showLogView" data-icon="show-log">Show Log</button>
-			  <button id="deleteSource" data-icon="delete">Delete Feed</button>
-			  <a      id="openSourceWebsite" data-icon="browsing" class="onlineOnly external">Website</a>
-			  <button id="updateSource" data-icon="reload" class="onlineOnly">Update Feed</button>
+				<button id="showLogView" aria-label="Show Log" class="iconButton">
+					<svg xmlns="http://www.w3.org/2000/svg"
+						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/notifications.svg#icon_notifications" />
+					</svg>
+				</button>
+			  <button id="deleteSource" class="iconButton" aria-label:"Delete Feed">
+					<svg xmlns="http://www.w3.org/2000/svg"
+						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/delete.svg#icon_delete" />
+					</svg>
+				</button>
+			  <a      id="openSourceWebsite" class="onlineOnly external iconButton" title="Website">
+					<svg xmlns="http://www.w3.org/2000/svg"
+						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/browsing.svg#icon_browsing" />
+					</svg>
+				</a>
+				<button id="updateSource" class="iconButton onlineOnly" aria-label="Update Feed">
+					<svg  xmlns="http://www.w3.org/2000/svg"
+					   version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/refresh.svg#icon_refresh" />
+					</svg>
+				</button>
 			</div>
 		</footer>
 		<div id="activeMessage"></div>
 	</section>
 	<section id="logView" class="dialog" role="region">
 		<header>
-			<button title="Close" class="closeDialog"><span class="icon icon-close">Close</span></button>
+			<button title="Close" class="closeDialog iconButton">
+				<svg xmlns="http://www.w3.org/2000/svg"
+					 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+					 <use href="styles/icons/close.svg#icon_close" />
+				</svg>
+			</button>
 			<menu></menu>
 			<h1 title="HTML5 Podcatcher Message Log">Message Log</h1>
 		</header>
@@ -127,8 +175,24 @@
 				<p class="subtitle">source.subtitle</p>
 				<p><a href="#" class="status"><time datetime="2014-01-01" class="updated">episode.updated</time></a> at <span class="source">episode.source</span></p>
 			</div>
-			<a class="origin button external onlineOnly" href="episode.uri" data-icon="browsing">Internet</a>
-			<a class="button downloadFile onlineOnly" href="episode.mediaUrl" download="episode.mediaUrl.fileName" data-icon="download">Download</a>
+			<a class="origin iconButton external onlineOnly" href="episode.uri"
+				aria-label="Internet">
+				<svg
+				   xmlns="http://www.w3.org/2000/svg"
+				   version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+					 <use href="styles/icons/browsing.svg#icon_browsing" />
+				</svg>
+			</a>
+			<a class="iconButton downloadFile onlineOnly" href="episode.mediaUrl"
+				download="episode.mediaUrl.fileName"
+				aria-label="Download">
+				<svg
+				   xmlns="http://www.w3.org/2000/svg"
+				   version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+					 <use href="styles/icons/download.svg#icon_download" />
+				</svg></a>
 		</li>
 	</template>
 </body>

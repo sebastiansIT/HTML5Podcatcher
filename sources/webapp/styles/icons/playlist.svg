@@ -12,46 +12,23 @@
    version="1.1"
    width="30"
    height="30"
-   viewBox="0 0 30 30"
-   id="svg2"
-   inkscape:version="0.48.4 r9939"
-   sodipodi:docname="playlist.svg">
-  <sodipodi:namedview
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:window-width="1680"
-     inkscape:window-height="987"
-     id="namedview6"
-     showgrid="false"
-     inkscape:zoom="7.8666667"
-     inkscape:cx="-4.8305085"
-     inkscape:cy="15"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="svg2" />
-  <metadata
-     id="metadata10">
-    <rdf:RDF>
-      <cc:Work
-         rdf:about="">
-        <dc:format>image/svg+xml</dc:format>
-        <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-      </cc:Work>
-    </rdf:RDF>
-  </metadata>
-  <defs
-     id="defs8" />
-  <path
-     d="m 22,16.214 v 7.493 c 0,0.685 -0.552,1.242 -1.238,1.242 H 3.238 C 2.554,24.95 2,24.39 2,23.7 V 10.41 L 3.99,8.42 v 14.112 c 0,0.265 0.217,0.482 0.483,0.482 h 15.06 c 0.267,0 0.483,-0.22 0.483,-0.484 v -6.28 c -3.205,-0.404 -5.69,-3.108 -5.69,-6.42 0,-1.023 0.254,-1.976 0.675,-2.836 H 5.42 l 1.99,-1.99 h 9.097 c 1.15,-1.032 2.654,-1.676 4.32,-1.676 3.592,0 6.503,2.91 6.503,6.502 0,3.187 -2.303,5.827 -5.33,6.382 z M 24.428,9.138 V 9.133 l -5.643,-3.49 v 8.362 l 5.643,-3.493 c 0.234,-0.14 0.392,-0.394 0.392,-0.687 0,-0.293 -0.158,-0.55 -0.392,-0.687 z"
-     inkscape:connector-curvature="0"
-     id="path4"
-     style="fill:#ffffff;fill-opacity:1" />
+   viewBox="0 0 30 30">
+   <metadata>
+     <rdf:RDF>
+       <cc:Work rdf:about="">
+         <dc:format>image/svg+xml</dc:format>
+         <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+         <dc:title></dc:title>
+       </cc:Work>
+     </rdf:RDF>
+   </metadata>
+   <defs>
+     <symbol id="icon_playlist" stroke="none" fill="currentColor">
+       <path
+         d="m 22,16.214 v 7.493 c 0,0.685 -0.552,1.242 -1.238,1.242 H 3.238 C 2.554,24.95 2,24.39 2,23.7 V 10.41 L 3.99,8.42 v 14.112 c 0,0.265 0.217,0.482 0.483,0.482 h 15.06 c 0.267,0 0.483,-0.22 0.483,-0.484 v -6.28 c -3.205,-0.404 -5.69,-3.108 -5.69,-6.42 0,-1.023 0.254,-1.976 0.675,-2.836 H 5.42 l 1.99,-1.99 h 9.097 c 1.15,-1.032 2.654,-1.676 4.32,-1.676 3.592,0 6.503,2.91 6.503,6.502 0,3.187 -2.303,5.827 -5.33,6.382 z M 24.428,9.138 V 9.133 l -5.643,-3.49 v 8.362 l 5.643,-3.493 c 0.234,-0.14 0.392,-0.394 0.392,-0.687 0,-0.293 -0.158,-0.55 -0.392,-0.687 z"
+         inkscape:connector-curvature="0" />
+      </symbol>
+    </defs>
+
+    <use href="#icon_playlist" style="color: white;" />
 </svg>

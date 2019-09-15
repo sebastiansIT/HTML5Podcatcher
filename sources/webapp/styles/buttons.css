@@ -81,3 +81,33 @@ button[disabled]::before,
 a.button[aria-disabled="true"]::before {
 	filter: invert(80%);
 }
+
+/* ----------------------------------
+ * Icon-Buttons
+ * ---------------------------------- */
+.iconButton {
+	min-width: 3rem;
+	width: auto;
+	min-height: 3rem;
+	align-self: flex-start;
+	margin: 1rem 0 1rem 1rem;
+	border-radius: 50%;
+	padding: 0.5rem;
+	color: inherit;
+	background: none;
+}
+.iconButton:visited {
+  color: inherit;
+}
+.iconButton:hover,
+.iconButton:active,
+.iconButton:focus {
+  padding: 0.5rem;
+}
+.iconButton[aria-disabled=true] {
+	color: var(--text-deactivated-color, #C7C7C7);
+}
+.iconButton svg {
+	display: block;
+  margin: auto;
+}

@@ -20,12 +20,34 @@
 :root {
 	--page-background: white;
 	--text-color: #333;
+	--text-deactivated-color: #C7C7C7;
 	--primary-color: rgb(0, 100, 0);
 	--primary-color-active: rgba(0, 100, 0, 0.8);
 	--primary-color-hover: rgba(0, 100, 0, 0.95);
 	--primary-color-background: rgba(0, 100, 0, 0.2);
 	--separator-color: rgb(231, 231, 231);
 	--dialog-background: rgba(255, 255, 255, 0.9);
+}
+
+@media screen and (prefers-color-scheme: dark) {
+	:root {
+		--page-background: black;
+		--text-color: #DDD;
+		--text-deactivated-color: #333333;
+		--primary-color: rgb(41, 74, 41);
+		--primary-color-active: rgba(41, 74, 41, 0.2);
+		--primary-color-hover: rgba(41, 74, 41, 0.05);
+		--primary-color-background: rgba(41, 74, 41, 0.6);
+		--separator-color: rgb(100, 100, 100);
+		--dialog-background: rgba(0, 0, 0, 0.9);
+	}
+
+	div[role="toolbar"] button[data-icon]::before,
+	div[role="toolbar"] a[data-icon]::before {
+		background-color: var(--text-color);
+		border-radius: 20%;
+		padding: 0 0.2rem;
+	}
 }
 
 html {

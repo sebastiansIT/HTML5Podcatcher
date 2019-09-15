@@ -16,7 +16,7 @@
      along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 /* global navigator, window, document */
-/* global console, localStorage */
+/* global localStorage */
 /* global $ */
 /* global POD, HTML5Podcatcher */
 /* global GlobalUserInterfaceHelper, UI */
@@ -184,12 +184,12 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
     window.h5p.player.init(playlist)
       .then((audioElement) => {
         audioElement.addEventListener('playing', function (event) {
-          $('#playPause').data('icon', 'pause')
-          $('#playPause').attr('data-icon', 'pause')
+          document.getElementById('playPause').querySelector('svg use')
+            .setAttribute('href', 'styles/icons/pause.svg#icon_pause')
         }, false)
         audioElement.addEventListener('pause', function (event) {
-          $('#playPause').data('icon', 'play')
-          $('#playPause').attr('data-icon', 'play')
+          document.getElementById('playPause').querySelector('svg use')
+            .setAttribute('href', 'styles/icons/play.svg#icon_play')
         }, false)
         audioElement.addEventListener('timeupdate', function (event) {
           GlobalUserInterfaceHelper.activeEpisode((episode) => {

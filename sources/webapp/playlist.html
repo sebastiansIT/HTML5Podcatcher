@@ -69,8 +69,20 @@
 		<header role="banner">
 			<!--<button title="Close" id="appClose"><span class="icon icon-close">Close</span></button>-->
 			<menu>
-				<li><a href="sources.html" title="Sources/Feeds"><span class="icon icon-feed">Feeds</span></a></li>
-				<li><a href="settings.html" title="Settings"><span class="icon icon-settings">Settings</span></a></li>
+				<li><a href="sources.html" title="Sources/Feeds" class="iconButton">
+					<svg xmlns="http://www.w3.org/2000/svg"
+					   version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/sources.svg#icon_sources" />
+					</svg>
+				</a></li>
+				<li><a href="settings.html" title="Settings" class="iconButton">
+					<svg xmlns="http://www.w3.org/2000/svg"
+					   version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/settings.svg#icon_settings" />
+					</svg>
+				</a></li>
 			</menu>
 			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} Playlist">Playlist</h1>
 		</header>
@@ -83,13 +95,55 @@
 		</div>
 		<footer>
 			<div role="toolbar">
-			  <button id="showLogView" data-icon="show-log">Show Log</button>
-			  <button id="playPrevious" data-icon="previous">Previous Chapter</button>
-			  <button id="jumpBackwards" data-icon="jumpBackwards">Play Previous</button>
-			  <button id="playPause" data-icon="play">Play</button>
-			  <button id="jumpForwards" data-icon="jumpForwards">Skip 10 seconds</button>
-			  <button id="playNext" data-icon="next">Next Chapter</button>
-			  <button id="refreshPlaylist" data-icon="reload" class="onlineOnly">Refresh Playlist</button>
+				<button id="showLogView" aria-label="Show Log" class="iconButton">
+					<svg xmlns="http://www.w3.org/2000/svg"
+						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/notifications.svg#icon_notifications" />
+					</svg>
+				</button>
+			  <button id="playPrevious" class="iconButton" aria-label="Previous Chapter">
+					<svg xmlns="http://www.w3.org/2000/svg"
+						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/skipback.svg#icon_skipback" />
+					</svg>
+				</button>
+			  <button id="jumpBackwards" class="iconButton" aria-label="Play Previous">
+					<svg xmlns="http://www.w3.org/2000/svg"
+						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/seekback.svg#icon_seekback" />
+					</svg>
+				</button>
+			  <button id="playPause" class="iconButton" aria-label="Play">
+					<svg xmlns="http://www.w3.org/2000/svg"
+						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/play.svg#icon_play" />
+					</svg>
+				</button>
+			  <button id="jumpForwards" class="iconButton" aria-label="Skip 10 seconds">
+					<svg xmlns="http://www.w3.org/2000/svg"
+						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/seekforward.svg#icon_seekforward" />
+					</svg>
+				</button>
+			  <button id="playNext" class="iconButton" aria-label="Next Chapter">
+					<svg xmlns="http://www.w3.org/2000/svg"
+						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/skipforward.svg#icon_skipforward" />
+					</svg>
+				</button>
+			  <button id="refreshPlaylist" class="iconButton onlineOnly" aria-label="Refresh Playlist">
+					<svg  xmlns="http://www.w3.org/2000/svg"
+					   version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+						 <use href="styles/icons/refresh.svg#icon_refresh" />
+					</svg>
+				</button>
 			</div>
 		</footer>
 		<div id="activeMessage"></div>
@@ -97,7 +151,12 @@
 
 	<section id="logView" class="dialog" role="region">
 		<header role="banner">
-			<button title="Close" class="closeDialog"><span class="icon icon-close">Close</span></button>
+			<button title="Close" class="closeDialog iconButton">
+				<svg xmlns="http://www.w3.org/2000/svg"
+					 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+					 <use href="styles/icons/close.svg#icon_close" />
+				</svg></button>
 			<menu>
 			</menu>
 			<h1 title="HTML5 Podcatcher Message Log">Message Log</h1>
@@ -110,7 +169,13 @@
 	</section>
 	<section id="playerView" class="dialog" role="region">
 		<header role="banner">
-			<button title="Close" class="closeDialog"><span class="icon icon-close">Close</span></button>
+			<button title="Close" class="closeDialog iconButton">
+				<svg xmlns="http://www.w3.org/2000/svg"
+					 version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+					 <use href="styles/icons/close.svg#icon_close" />
+				</svg>
+			</button>
 			<menu></menu>
 			<h1 title="HTML5 Podcatcher {{ VERSION }} {{ VARIANT }} :: Player">Player</h1>
 		</header>
@@ -130,8 +195,24 @@
 				</div>
 			</a>
 			<!--<button class="status">Status: played</button>-->
-			<a class="origin button external onlineOnly" href="episode.uri" data-icon="browsing">Internet</a>
-			<a class="button downloadFile onlineOnly" href="episode.mediaUrl" download="episode.mediaUrl.fileName" data-icon="download">Download</a>
+			<a class="origin iconButton external onlineOnly" href="episode.uri"
+				aria-label="Internet">
+				<svg
+				   xmlns="http://www.w3.org/2000/svg"
+				   version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+					 <use href="styles/icons/browsing.svg#icon_browsing" />
+				</svg>
+			</a>
+			<a class="iconButton downloadFile onlineOnly" href="episode.mediaUrl"
+				download="episode.mediaUrl.fileName"
+				aria-label="Download">
+				<svg
+				   xmlns="http://www.w3.org/2000/svg"
+				   version="1.1" width="30" height="30" viewBox="0 0 30 30">
+
+					 <use href="styles/icons/download.svg#icon_download" />
+				</svg></a>
 		</li>
 	</template>
 </body>

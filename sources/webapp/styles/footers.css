@@ -30,6 +30,7 @@ div[role="toolbar"] {
 div[role="toolbar"] button,
 div[role="toolbar"] a {
   position: relative;
+  display: flex;
   flex: 1;
   border: none;
   border-left: 1px solid var(--separator-color);
@@ -38,7 +39,6 @@ div[role="toolbar"] a {
   margin: 0;
   padding: 0;
   text-align: center;
-  color: #919191;
   border-radius: 0;
   height: 100%;
   font-size: 0;
@@ -47,67 +47,13 @@ div[role="toolbar"] button:first-child,
 div[role="toolbar"] a:first-child {
   border-left: none;
 }
-div[role="toolbar"] button:active,
-div[role="toolbar"] button:focus,
-div[role="toolbar"] a:active,
-div[role="toolbar"] a:focus {
-  color: #fff;
-  background-color: var(--primary-color-background, rgba(0, 100, 0, 0.2));
-}
-div[role="toolbar"] button[data-icon],
-div[role="toolbar"] a[data-icon] {
-  font-size: 0;
-  outline: medium none;
-}
-div[role="toolbar"] button[data-icon]:before,
-div[role="toolbar"] a[data-icon]:before {
-  width: 3rem;
-  height: 3rem;
-  position: absolute;
-  content: "";
-  top:50%;
-  margin-top:-1.5rem;
-  left:50%;
-  margin-left:-1.5rem;
-  background-size: 3rem 3rem;
-}
 
-[role="toolbar"] button[data-icon="reload"]:before {
-    background: url(icons/refresh.svg) no-repeat center center;
-}
-[role="toolbar"] button[data-icon="play"]:before {
-    background: url(icons/play.svg) no-repeat center center;
-}
-[role="toolbar"] button[data-icon="pause"]:before {
-    background: url(icons/pause.svg) no-repeat center center;
-}
-[role="toolbar"] button[data-icon="previous"]:before {
-    background: url(icons/skipback.svg) no-repeat center center;
-}
-[role="toolbar"] button[data-icon="next"]:before {
-    background: url(icons/skipforward.svg) no-repeat center center;
-}
-[role="toolbar"] button[data-icon="jumpBackwards"]:before {
-    background: url(icons/seekback.svg) no-repeat center center;
-}
-[role="toolbar"] button[data-icon="jumpForwards"]:before {
-    background: url(icons/seekforward.svg) no-repeat center center;
-}
-[role="toolbar"] button[data-icon="show-log"]:before {
-    background: url(icons/notifications.svg) no-repeat center center;
-}
-[role="toolbar"] button[data-icon="add-source"]:before {
-    background: url(icons/addSource.svg) no-repeat center center;
-}
-[role="toolbar"] button[data-icon="browsing"]:before,
-[role="toolbar"] a[data-icon="browsing"]:before {
-    background: url(icons/browsing.svg) no-repeat center center;
-}
-[role="toolbar"] button[data-icon="delete"]:before {
-    background: url(icons/delete.svg) no-repeat center center;
-}
-[role="toolbar"] button[data-icon="export-opml"]:before {
-    background: url(icons/exportOpml.svg) no-repeat center center;
+div[role="toolbar"] .iconButton:hover,
+div[role="toolbar"] .iconButton:active,
+div[role="toolbar"] .iconButton:focus {
+  padding: 0;
+  background-color: var(--primary-color-background, rgba(0, 100, 0, 0.2));
+  color: inherit;
 }
 
 #activeMessage p {
