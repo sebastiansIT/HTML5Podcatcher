@@ -285,6 +285,8 @@
 	* Update list of voices in settings page when it has changed by the os
 - 0.50.1
   * Selection of Voice for given language is now case insensitive
+- 0.50.3
+  * Fix a bug preventing preventing Media Session API to call "Previous Track" correctly
 - 0.51.0
   * Add a "Dark Mode" color theme
 	* Instead of convert the hole language code to lower case normalise it.

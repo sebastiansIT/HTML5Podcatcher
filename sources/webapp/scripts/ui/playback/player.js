@@ -174,7 +174,7 @@ export class Player {
           navigator.mediaSession.setActionHandler('pause', this.pause.bind(this))
           navigator.mediaSession.setActionHandler('seekbackward', this.seekBackward.bind(this))
           navigator.mediaSession.setActionHandler('seekforward', this.seekForward.bind(this))
-          navigator.mediaSession.setActionHandler('previoustrack', function () { this.previousTrack.bind(this) })
+          navigator.mediaSession.setActionHandler('previoustrack', this.previousTrack.bind(this))
           navigator.mediaSession.setActionHandler('nexttrack', this.nextTrack.bind(this))
         } else {
           document.addEventListener('keydown', (event) => {
