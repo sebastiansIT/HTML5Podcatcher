@@ -92,8 +92,8 @@ textarea:invalid:focus {
     justify-content: space-between;
     height: 4rem;
     padding: 0 1rem;
-    border: 0.1rem solid #c7c7c7;
-    color: #333;
+    border: 0.1rem solid var(--separator-color, #c7c7c7);
+    color: var(--text-secondary-color, #333);
     margin: 0 0 1rem 0;
     box-sizing: border-box;
 }
@@ -120,6 +120,6 @@ input[type="radio"] + label {
 
 fieldset {
   margin: 0 0 1rem 0;
-  border: 0.1rem solid #c7c7c7;
+  border: 0.1rem solid var(--separator-color, #c7c7c7);
   padding: 1rem 1.5rem 1rem 1.5rem;
 }

@@ -20,13 +20,14 @@
 :root {
 	--page-background: white;
 	--text-color: #333;
+	--text-secondary-color: #646464;
 	--text-deactivated-color: #C7C7C7;
 	--link-color: rgb(0,100,0);
 	--primary-color: rgb(0, 100, 0);
 	--primary-color-active: rgba(0, 100, 0, 0.8);
 	--primary-color-hover: rgba(0, 100, 0, 0.95);
 	--primary-color-background: rgba(0, 100, 0, 0.2);
-	--separator-color: rgb(231, 231, 231);
+	--separator-color: rgb(200, 200, 200);
 	--dialog-background: rgba(255, 255, 255, 0.9);
 }
 
@@ -34,6 +35,7 @@
 	:root {
 		--page-background: black;
 		--text-color: #DDD;
+		--text-secondary-color: #AAA;
 		--text-deactivated-color: #333333;
 		--link-color: #00C400;
 		--primary-color: rgb(41, 74, 41);
