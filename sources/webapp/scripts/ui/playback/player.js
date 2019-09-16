@@ -199,7 +199,7 @@ export class Player {
               LOGGER.debug(`Multimediakey ${event.key} released at ${now}.`)
               if (now - this.multiMediaKeyDownTimestamp < 1000) { // Play next Track when key is pressed short (< 1000 miliseconds)
                 this.nextTrack()
-                LOGGER.debug(`Play next Track.`)
+                LOGGER.debug('Play next Track.')
               } else { // Stop fast forward when release the key
                 if (this.audioElement &&
                     this.audioElement.playbackRate !== this.audioElement.defaultPlaybackRate) {
@@ -308,9 +308,11 @@ export class Player {
     this.audioElement.play()
       .catch((error) => LOGGER.error(error))
   }
+
   pause () {
     this.audioElement.pause()
   }
+
   toggle () {
     if (this.audioElement.paused) {
       this.play()
@@ -322,9 +324,11 @@ export class Player {
   seekBackward () {
     this.seek(SKIP_TIME * -1)
   }
+
   seekForward () {
     this.seek(SKIP_TIME)
   }
+
   /** Jump a given amount of seconds forwards or backwards.
     * @private
     * @para {number} seconds Amount of seconds to jump forward (positive numbers) or backward (negative numbers).
@@ -362,11 +366,12 @@ export class Player {
       this.playPreviousEpisode()
     }
   }
+
   nextTrack () {
     this.pause()
 
     // Find the next jump point
-    let currentTime = this.audioElement.currentTime
+    const currentTime = this.audioElement.currentTime
     let jumppoint = {
       time: this.audioElement.duration
     }
@@ -405,6 +410,7 @@ export class Player {
         }
       })
   }
+
   /**
     * @private
     */

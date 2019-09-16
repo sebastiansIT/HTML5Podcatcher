@@ -171,7 +171,7 @@ GlobalUserInterfaceHelper.getLastPlayedEpisode = function (onReadCallback) {
   })
 }
 
-let playlist = new Playlist()
+const playlist = new Playlist()
 
 /* Functions for playback */
 /** Load a new episode in the player.
