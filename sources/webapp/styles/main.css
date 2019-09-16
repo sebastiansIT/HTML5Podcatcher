@@ -89,9 +89,11 @@ section[role="region"] .content {
 	flex-basis: 0;
 	flex-grow: 1;
 	flex-shrink: 1;
-	/* autoprefixer: ignore next */
+	/* The Scroll-Snap Feature dosn't works good. Espacialy in Firefox some
+	   parts of the page are unreachable in some cases.*/
+	/* autoprefixer: ignore next
 	scroll-snap-type: y proximity;
-	scroll-padding: 0.6rem;
+	scroll-padding: 0.6rem;*/
 }
 dialog[open] .content > div,
 dialog[open] .content > section,
