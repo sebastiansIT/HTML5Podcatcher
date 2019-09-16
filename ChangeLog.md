@@ -290,3 +290,6 @@
 - 0.51.0
   * Add a "Dark Mode" color theme
 	* Instead of convert the hole language code to lower case normalise it.
+- 0.51.1
+  * Fix a bug visualising the progress updating all sources
+	* Remove CSS feature scroll snap because it dosn't works good.

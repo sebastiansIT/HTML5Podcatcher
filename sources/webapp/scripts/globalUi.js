@@ -302,7 +302,7 @@ var GlobalUserInterfaceHelper = {
     openLogViewClickListener = function (event) {
       event.preventDefault()
       event.stopPropagation()
-      let logView = document.getElementById('logView')
+      const logView = document.getElementById('logView')
       logView.classList.toggle('fullscreen')
       if (logView.hasAttribute('open')) {
         logView.removeAttribute('open')
@@ -422,7 +422,7 @@ var GlobalUserInterfaceHelper = {
 
   renderSource: function (source) {
     'use strict'
-    let fragment = document.importNode(document.getElementById('sourceTemplate').content, true)
+    const fragment = document.importNode(document.getElementById('sourceTemplate').content, true)
     let entryUI = fragment.firstElementChild
     if (source.language) {
       entryUI.setAttribute('lang', source.language)
@@ -514,13 +514,13 @@ var GlobalUserInterfaceHelper = {
 
     refreshAllSources: function (event) {
       'use strict'
-      var button = event.target
-      let onProgressCallback = function (total, progress) {
+      var button = event.target.parentElement
+      const onProgressCallback = function (total, progress) {
         // actualise the progress in the button
-        let percentCompleted = (100 / total * (total - progress)).toFixed(2) + '%'
+        const percentCompleted = (100 / total * (total - progress)).toFixed(2) + '%'
         button.style.background = 'linear-gradient(to right, var(--primary-color-background) 0%, var(--primary-color-background) ' + percentCompleted + ', transparent ' + percentCompleted + ')'
       }
-      let onFinishedCallback = function () {
+      const onFinishedCallback = function () {
         button.removeAttribute('disabled')
         button.classList.remove('spinner')
         button.style.removeProperty('background')
