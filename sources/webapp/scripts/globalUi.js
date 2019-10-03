@@ -55,8 +55,8 @@ var GlobalUserInterfaceHelper = {
     'use strict'
     var logLevel = 0
     if (logLevelName && logLevelName.indexOf(':') >= 0) {
-      logLevelName = logLevelName.substring(0, logLevelName.indexOf(':'))
       tag = logLevelName.substring(logLevelName.indexOf(':') + 1)
+      logLevelName = logLevelName.substring(0, logLevelName.indexOf(':'))
     }
     tag = tag || ''
 
