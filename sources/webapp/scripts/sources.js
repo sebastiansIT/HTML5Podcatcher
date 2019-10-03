@@ -15,7 +15,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see http://www.gnu.org/licenses/.
 */
-/* global navigator, window, document, console, XMLSerializer */
+/* global navigator, window, document, XMLSerializer */
 /* global $ */
 /* global HTML5Podcatcher, POD, UI */
 
@@ -70,7 +70,7 @@ $(document).ready(function () {
   // Update one Source
   $('#sourceslist').on('click', '.update', function (event) {
     var limitOfNewEpisodes = 5
-    var button = event.target
+    var button = event.target.parentElement
     var source = { uri: button.getAttribute('href') }
 
     event.preventDefault()
@@ -134,7 +134,7 @@ $(document).ready(function () {
   document.getElementById('loadSourceButton').addEventListener('click', event => {
     event.preventDefault()
     event.stopPropagation()
-    let urlInput = document.getElementById('addSourceUrlInput')
+    const urlInput = document.getElementById('addSourceUrlInput')
     if (urlInput.checkValidity()) {
       POD.storage.readSource(urlInput.value.trim(), function (source) {
         POD.web.downloadSource(source)
@@ -147,9 +147,9 @@ $(document).ready(function () {
     event.preventDefault()
     event.stopPropagation()
 
-    let opmlDocument = document.implementation.createDocument(null, 'opml', null)
-    let opmlHead = opmlDocument.createElement('head')
-    let opmlBody = opmlDocument.createElement('body')
+    const opmlDocument = document.implementation.createDocument(null, 'opml', null)
+    const opmlHead = opmlDocument.createElement('head')
+    const opmlBody = opmlDocument.createElement('body')
     let opmlElement
     opmlDocument.documentElement.setAttribute('version', '2.0')
     opmlDocument.documentElement.appendChild(opmlHead)
