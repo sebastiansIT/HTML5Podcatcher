@@ -99,3 +99,9 @@ h4 { /* = Title of list item */
 .content .entries li .iconButton:hover {
 	background-color: var(--primary-color-background, rgba(0, 100, 0, 0.2));
 }
+
+.content .entries li .iconButton[aria-disabled=true] {
+    color: var(--text-deactivated-color, #C7C7C7);
+		background-color: transparent;
+		cursor: default;
+}
