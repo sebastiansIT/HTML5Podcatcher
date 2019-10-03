@@ -45,7 +45,7 @@ export class UiLogAppender {
     }
 
     // Add message to the log window
-    let logEntryNode = document.createElement('p')
+    const logEntryNode = document.createElement('p')
     logEntryNode.className = logLevelName
     logEntryNode.appendChild(document.createTextNode(message))
     if (document.getElementById('log')) {
