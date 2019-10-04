@@ -293,3 +293,8 @@
 - 0.51.1
   * Fix a bug visualising the progress updating all sources
 	* Remove CSS feature scroll snap because it dosn't works good.
+- 0.51.2
+  * Change style of deactivated icon buttons in content
+	* Fix a bug identifieng the url of the feed when updating a single source
+	* Fix a bug in the global logHandler()
+	* Solve a problem that appears on Firefox: The initialisation of the last played episode threw a error on page load.
