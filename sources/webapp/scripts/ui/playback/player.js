@@ -138,8 +138,6 @@ export class Player {
           let errormessage = `Error while playback audio file. Networkstate: ${networkstate}; ReadyState: ${readystate}.`
           if (networkstate === HTMLMediaElement.NETWORK_NO_SOURCE) {
             errormessage = `There is no valid source for ${this.activeEpisode.title}. You try ${this.activeEpisode.mediaUrl} of type ${this.activeEpisode.mediaType}.`
-          } else if (readystate === HTMLMediaElement.HAVE_NOTHING) {
-            errormessage = `Can't load file ${event.target.parentNode.currentSrc}.`
           } else if (event.target.parentNode.error) {
             switch (event.target.error.code) {
               case event.target.error.MEDIA_ERR_ABORTED:
@@ -157,6 +155,13 @@ export class Player {
               default:
                 errormessage = 'An unknown error occurred.'
                 break
+            }
+          } else if (readystate === HTMLMediaElement.HAVE_NOTHING) {
+            if (event.target.parentNode.currentSrc) {
+              errormessage = `Can't load file ${event.target.parentNode.currentSrc}.`
+            } else {
+              LOGGER.debug('There is no current source set for the player.')
+              return
             }
           }
           LOGGER.error(errormessage)
@@ -297,6 +302,7 @@ export class Player {
           }
           this.audioElement.addEventListener('durationchange', durationChangeEventListener, false)
           this.audioElement.load()
+          resolve()
         } else {
           reject(new Error('Episode contains no audio file to load'))
         }

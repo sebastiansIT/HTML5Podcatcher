@@ -182,6 +182,7 @@ const playlist = new Playlist()
   */
 GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallback) {
   'use strict'
+  LOGGER.debug(`Activate episode ${JSON.stringify(episode)}.`)
 
   if ($('#player audio').length > 0) {
     window.h5p.player.load(episode)
@@ -216,15 +217,18 @@ GlobalUserInterfaceHelper.activateEpisode = function (episode, onActivatedCallba
           document.getElementById('playPause').querySelector('svg use')
             .setAttribute('href', 'styles/icons/play.svg#icon_play')
         }
-        audioElement.addEventListener('error', errorEventListener, false)
-        audioElement.querySelector('source').addEventListener('error', errorEventListener, false)
-        window.h5p.player.load(episode)
         const mediaControlElement = document.getElementById('mediacontrol')
         mediaControlElement.insertBefore(audioElement, mediaControlElement.firstChild)
-        playlist.selectedEntry = episode
-        if (onActivatedCallback && typeof onActivatedCallback === 'function') {
-          onActivatedCallback(episode)
-        }
+        LOGGER.debug('Add event listener to audio element finished.')
+        return window.h5p.player.load(episode)
+          .then(() => {
+            playlist.selectedEntry = episode
+            audioElement.addEventListener('error', errorEventListener, false)
+            audioElement.querySelector('source').addEventListener('error', errorEventListener, false)
+            if (onActivatedCallback && typeof onActivatedCallback === 'function') {
+              onActivatedCallback(episode)
+            }
+          })
       })
       .catch((error) => LOGGER.error(error))
   }
