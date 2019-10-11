@@ -47,6 +47,21 @@
 	}
 }
 
+/* Theme for test version */
+/* :root {
+	--page-background: white;
+	--text-color: #333;
+	--text-secondary-color: #646464;
+	--text-deactivated-color: #C7C7C7;
+	--link-color: rgb(0,100,0);
+	--primary-color: rgb(200, 100, 0);
+	--primary-color-active: rgba(200, 100, 0, 0.8);
+	--primary-color-hover: rgba(200, 100, 0, 0.95);
+	--primary-color-background: rgba(200, 100, 0, 0.2);
+	--separator-color: rgb(200, 200, 200);
+	--dialog-background: rgba(255, 255, 255, 0.9);
+} */
+
 html {
 	background-color: var(--page-background);
 	font-size: 62.5%; /*Set font size to 10px (if default is 16px) */
