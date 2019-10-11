@@ -100,28 +100,28 @@
 		</div>
 		<footer>
 			<div role="toolbar">
-				<button id="showLogView" aria-label="Show Log" class="iconButton">
+				<button type="button" id="showLogView" aria-label="Show Log" class="iconButton">
 					<svg xmlns="http://www.w3.org/2000/svg"
 						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
 
 						 <use href="styles/icons/notifications.svg#icon_notifications" />
 					</svg>
 				</button>
-				<button id="exportSourceList" class="iconButton" aria-label="Export Feeds as OPML">
+				<button type="button" id="exportSourceList" class="iconButton" aria-label="Export Feeds as OPML">
 					<svg  xmlns="http://www.w3.org/2000/svg"
 					   version="1.1" width="30" height="30" viewBox="0 0 30 30">
 
 						 <use href="styles/icons/exportOpml.svg#icon_exportOpml" />
 					</svg>
 				</button>
-			  <button id="showAddSourceView" class="iconButton onlineOnly" aria-label="Add Feed">
+			  <button type="button" id="showAddSourceView" class="iconButton onlineOnly" aria-label="Add Feed">
 					<svg  xmlns="http://www.w3.org/2000/svg"
 					   version="1.1" width="30" height="30" viewBox="0 0 30 30">
 
 						 <use href="styles/icons/addSource.svg#icon_add" />
 					</svg>
 				</button>
-				<button id="refreshPlaylist" class="iconButton onlineOnly" aria-label="Refresh Playlist">
+				<button type="button" id="refreshPlaylist" class="iconButton onlineOnly" aria-label="Refresh Playlist">
 					<svg  xmlns="http://www.w3.org/2000/svg"
 					   version="1.1" width="30" height="30" viewBox="0 0 30 30">
 
@@ -134,7 +134,7 @@
 	</section>
 	<section id="addSourceView" class="dialog" role="region">
 		<header>
-			<button title="Close" class="closeDialog iconButton">
+			<button type="button" title="Close" class="closeDialog iconButton">
 				<svg xmlns="http://www.w3.org/2000/svg"
 					 version="1.1" width="30" height="30" viewBox="0 0 30 30">
 
@@ -148,7 +148,7 @@
 			<div>
 				<label for="addSourceUrlInput"><abbr title="Uniform Resource Locator">URL</abbr> of Podcast Feed</label>
 				<input type="url" id="addSourceUrlInput" required="required" />
-				<button id="loadSourceButton" class="recommend onlineOnly">Load</button>
+				<button type="button" id="loadSourceButton" class="recommend onlineOnly">Load</button>
 			</div>
 		</div>
 		<footer>
@@ -157,7 +157,7 @@
 	</section>
 	<section id="logView" class="dialog" role="region">
 		<header>
-			<button title="Close" class="closeDialog iconButton">
+			<button type="button" title="Close" class="closeDialog iconButton">
 				<svg xmlns="http://www.w3.org/2000/svg"
 					 version="1.1" width="30" height="30" viewBox="0 0 30 30">
 
@@ -181,7 +181,7 @@
 					<p class="description">source.description</p>
 				</div>
 			</a>
-			<button class="iconButton delete" aria-label="Delete">
+			<button type="button" class="iconButton delete" aria-label="Delete">
 				<svg
 				   xmlns="http://www.w3.org/2000/svg"
 				   version="1.1" width="30" height="30" viewBox="0 0 30 30">

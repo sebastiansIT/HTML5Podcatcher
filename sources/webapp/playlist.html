@@ -67,7 +67,7 @@
 <body>
 	<section role="region">
 		<header role="banner">
-			<!--<button title="Close" id="appClose"><span class="icon icon-close">Close</span></button>-->
+			<!--<button type="button" title="Close" id="appClose"><span class="icon icon-close">Close</span></button>-->
 			<menu>
 				<li><a href="sources.html" title="Sources/Feeds" class="iconButton">
 					<svg xmlns="http://www.w3.org/2000/svg"
@@ -95,49 +95,49 @@
 		</div>
 		<footer>
 			<div role="toolbar">
-				<button id="showLogView" aria-label="Show Log" class="iconButton">
+				<button id="showLogView" aria-label="Show Log" class="iconButton" type="button">
 					<svg xmlns="http://www.w3.org/2000/svg"
 						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
 
 						 <use href="styles/icons/notifications.svg#icon_notifications" />
 					</svg>
 				</button>
-			  <button id="playPrevious" class="iconButton" aria-label="Previous Chapter">
+			  <button id="playPrevious" class="iconButton" aria-label="Previous Chapter" type="button">
 					<svg xmlns="http://www.w3.org/2000/svg"
 						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
 
 						 <use href="styles/icons/skipback.svg#icon_skipback" />
 					</svg>
 				</button>
-			  <button id="jumpBackwards" class="iconButton" aria-label="Play Previous">
+			  <button type="button" id="jumpBackwards" class="iconButton" aria-label="Play Previous">
 					<svg xmlns="http://www.w3.org/2000/svg"
 						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
 
 						 <use href="styles/icons/seekback.svg#icon_seekback" />
 					</svg>
 				</button>
-			  <button id="playPause" class="iconButton" aria-label="Play">
+			  <button type="button" id="playPause" class="iconButton" aria-label="Play">
 					<svg xmlns="http://www.w3.org/2000/svg"
 						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
 
 						 <use href="styles/icons/play.svg#icon_play" />
 					</svg>
 				</button>
-			  <button id="jumpForwards" class="iconButton" aria-label="Skip 10 seconds">
+			  <button type="button" id="jumpForwards" class="iconButton" aria-label="Skip 10 seconds">
 					<svg xmlns="http://www.w3.org/2000/svg"
 						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
 
 						 <use href="styles/icons/seekforward.svg#icon_seekforward" />
 					</svg>
 				</button>
-			  <button id="playNext" class="iconButton" aria-label="Next Chapter">
+			  <button type="button" id="playNext" class="iconButton" aria-label="Next Chapter">
 					<svg xmlns="http://www.w3.org/2000/svg"
 						 version="1.1" width="30" height="30" viewBox="0 0 30 30">
 
 						 <use href="styles/icons/skipforward.svg#icon_skipforward" />
 					</svg>
 				</button>
-			  <button id="refreshPlaylist" class="iconButton onlineOnly" aria-label="Refresh Playlist">
+			  <button type="button" id="refreshPlaylist" class="iconButton onlineOnly" aria-label="Refresh Playlist">
 					<svg  xmlns="http://www.w3.org/2000/svg"
 					   version="1.1" width="30" height="30" viewBox="0 0 30 30">
 
@@ -151,7 +151,7 @@
 
 	<section id="logView" class="dialog" role="region">
 		<header role="banner">
-			<button title="Close" class="closeDialog iconButton">
+			<button type="button" title="Close" class="closeDialog iconButton">
 				<svg xmlns="http://www.w3.org/2000/svg"
 					 version="1.1" width="30" height="30" viewBox="0 0 30 30">
 
@@ -169,7 +169,7 @@
 	</section>
 	<section id="playerView" class="dialog" role="region">
 		<header role="banner">
-			<button title="Close" class="closeDialog iconButton">
+			<button type="button" title="Close" class="closeDialog iconButton">
 				<svg xmlns="http://www.w3.org/2000/svg"
 					 version="1.1" width="30" height="30" viewBox="0 0 30 30">
 
@@ -194,7 +194,7 @@
 					<p><span class="status"><time datetime="2014-01-01" class="updated">episode.updated</time></span> at <span class="source">episode.source</span></p>
 				</div>
 			</a>
-			<!--<button class="status">Status: played</button>-->
+			<!--<button type="button" class="status">Status: played</button>-->
 			<a class="origin iconButton external onlineOnly" href="episode.uri"
 				aria-label="Internet">
 				<svg
