@@ -115,12 +115,12 @@ module.exports = function (grunt) {
     },
     concat: {
       'HostedWebApp-css': {
-        'src': ['sources/webapp/styles/*.css'],
-        'dest': 'distributions/webapp/styles/main.css'
+        src: ['sources/webapp/styles/*.css'],
+        dest: 'distributions/webapp/styles/main.css'
       },
       'ChromePackagedApp-css': {
-        'src': ['sources/webapp/styles/*.css'],
-        'dest': 'distributions/chromeapp/temp/styles/main.css'
+        src: ['sources/webapp/styles/*.css'],
+        dest: 'distributions/chromeapp/temp/styles/main.css'
       }
     },
     usemin: {
@@ -135,7 +135,7 @@ module.exports = function (grunt) {
           map: false,
           processors: [
             require('autoprefixer')({
-              browsers: ['ie >= 10', 'last 3 versions']
+              overrideBrowserslist: ['ie >= 10', 'last 3 versions']
             })
           ]
         },
@@ -147,7 +147,7 @@ module.exports = function (grunt) {
           map: false,
           processors: [
             require('autoprefixer')({
-              browsers: ['chrome >= 37']
+              overrideBrowserslist: ['chrome >= 37']
             })
           ]
         },
@@ -187,7 +187,7 @@ module.exports = function (grunt) {
         'unqualified-attributes': true,
         'universal-selector': true,
         'overqualified-elements': true,
-        'ids': false,
+        ids: false,
         formatters: [
           { id: 'junit-xml', dest: 'tests/csslint.result.junit.xml' },
           { id: 'text', dest: 'tests/csslint.result.txt' }
