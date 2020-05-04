@@ -1,12 +1,34 @@
-AddType text/cache-manifest .appcache
-AddType application/x-web-app-manifest+json .webapp
-AddType application/manifest+json .webmanifest
+AddDefaultCharset utf-8
 
-Header always set X-Frame-Options "SAMEORIGIN"
-Header always set X-Xss-Protection "1; mode=block"
-Header always set X-Content-Type-Options "nosniff"
-Header set Content-Security-Policy "default-src *; script-src 'self'; connect-src *; media-src blob: filesystem: *; style-src 'self' 'unsafe-inline'; img-src blob: *"
-Header set Referrer-Policy "no-referrer"
+<IfModule mod_mime.c>
+  AddType text/javascript                     .js
+  AddType text/cache-manifest                 .appcache
+  AddType application/x-web-app-manifest+json .webapp
+  AddType application/manifest+json           .webmanifest
+
+  AddCharset utf-8                            .js
+  AddCharset utf-8                            .css
+  AddCharset utf-8                            .svg
+  AddCharset utf-8                            .webmanifest
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set X-Xss-Protection "1; mode=block"
+  Header always set X-Content-Type-Options "nosniff"
+  Header set Content-Security-Policy "default-src *; script-src 'self'; connect-src *; media-src blob: filesystem: *; style-src 'self' 'unsafe-inline'; img-src blob: *"
+  Header set Referrer-Policy "no-referrer"
+
+  # Because `mod_headers` cannot match based on the content-type,
+  # the following workaround needs to be used.
+  <FilesMatch "\.(appcache|atom|bbaw|bmp|crx|css|cur|eot|f4[abpv]|flv|geojson|gif|htc|ic[os]|jpe?g|m?js|json(ld)?|m4[av]|manifest|map|markdown|md|mp4|oex|og[agv]|opus|otf|pdf|png|rdf|rss|safariextz|svgz?|swf|topojson|tt[cf]|txt|vcard|vcf|vtt|webapp|web[mp]|webmanifest|woff2?|xloc|xpi)$">
+    Header always unset X-Xss-Protection
+  </FilesMatch>
+
+  <FilesMatch "\.(appcache|atom|bbaw|bmp|crx|css|cur|eot|f4[abpv]|flv|geojson|gif|htc|ic[os]|jpe?g|json(ld)?|m4[av]|manifest|map|markdown|md|mp4|oex|og[agv]|opus|otf|png|rdf|rss|safariextz|swf|topojson|tt[cf]|txt|vcard|vcf|vtt|webapp|web[mp]|webmanifest|woff2?|xloc|xpi)$">
+    Header unset Content-Security-Policy
+  </FilesMatch>
+</IfModule>
 
 <IfModule mod_expires.c>
    ExpiresActive Off
