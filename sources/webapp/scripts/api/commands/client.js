@@ -73,6 +73,7 @@ export class CommandClient {
       worker.addEventListener('message', (event) => {
         // TODO check if it is the "completed" message
         if (event.data.complete) {
+          worker.terminate()
           resolve(event.data)
         }
       }, false)
