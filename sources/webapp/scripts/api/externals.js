@@ -23,3 +23,9 @@
   * @external Error
   * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error|Error}
   */
+
+/**
+  * The Worker Interface of the Web Workers API
+  * @external Worker
+  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Worker|Worker}
+  */

@@ -14,5 +14,13 @@ export default [
       file: 'distributions/webapp/scripts/h5p.js',
       format: 'iife'
     }
+  },
+  {
+    input: './sources/webapp/scripts/api/commands/processor.js',
+    output: {
+      name: 'CommandProcessor',
+      file: 'distributions/webapp/scripts/api/commands/processor.js',
+      format: 'iife'
+    }
   }
 ]

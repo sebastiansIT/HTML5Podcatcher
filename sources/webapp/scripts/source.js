@@ -1,4 +1,4 @@
-/*  Copyright 2015, 2019 Sebastian Spautz
+/*  Copyright 2015, 2019 - 2020 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -18,10 +18,11 @@
 /* global navigator */
 /* global window */
 /* global document */
-/* global console */
 /* global $ */
 /* global HTML5Podcatcher, POD */
 /* global GlobalUserInterfaceHelper, UI */
+
+import { CommandClient } from './api/commands/client.js'
 
 GlobalUserInterfaceHelper.renderSourceDetails = function (source) {
   'use strict'
@@ -43,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function (/* event */) {
   var sourceUri
   const LOGGER = window.podcatcher.utils.createLogger('hp5/view/source')
 
-  let init = function () {
+  const init = function () {
     LOGGER.debug('Open Source Details')
     window.podcatcher.configuration.settings.get('proxyUrl')
       .then((value) => {
@@ -135,11 +136,20 @@ document.addEventListener('DOMContentLoaded', function (/* event */) {
 
       button.setAttribute('disabled', 'disabled')
       button.classList.add('spinner')
+
+      const client = new CommandClient('processor')
+      client.call('diagnostic')
+        .then(awnser => { UI.logHandler(awnser, 'debug') })
+        .catch(awnser => { UI.logHandler(awnser, 'debug') })
+      client.call('echo')
+        .then(awnser => { UI.logHandler(awnser, 'debug') })
+        .catch(awnser => { UI.logHandler(awnser, 'debug') })
+
       // start update of the source
-      HTML5Podcatcher.web.downloadSource(source, limitOfNewEpisodes, function () {
+      /* HTML5Podcatcher.web.downloadSource(source, limitOfNewEpisodes, function () {
         button.removeAttribute('disabled')
         button.classList.remove('spinner')
-      })
+      }) */
     })
 
     UI.initGeneralUIEvents()
