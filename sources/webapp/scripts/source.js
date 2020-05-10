@@ -137,11 +137,8 @@ document.addEventListener('DOMContentLoaded', function (/* event */) {
       button.setAttribute('disabled', 'disabled')
       button.classList.add('spinner')
 
-      const client = new CommandClient('processor')
+      const client = new CommandClient('sourceProcessor')
       client.call('diagnostic')
-        .then(awnser => { UI.logHandler(awnser, 'debug') })
-        .catch(awnser => { UI.logHandler(awnser, 'debug') })
-      client.call('echo')
         .then(awnser => { UI.logHandler(awnser, 'debug') })
         .catch(awnser => { UI.logHandler(awnser, 'debug') })
 

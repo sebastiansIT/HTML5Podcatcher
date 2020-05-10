@@ -16,10 +16,10 @@ export default [
     }
   },
   {
-    input: './sources/webapp/scripts/api/commands/processor.js',
+    input: './sources/webapp/scripts/api/commands/source/sourceProcessor.js',
     output: {
       name: 'CommandProcessor',
-      file: 'distributions/webapp/scripts/api/commands/processor.js',
+      file: 'distributions/webapp/scripts/api/commands/sourceProcessor.js',
       format: 'iife'
     }
   }

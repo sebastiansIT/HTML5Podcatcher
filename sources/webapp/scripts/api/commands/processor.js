@@ -1,6 +1,6 @@
-/** The HTML5Podcatcher Command Prozessor
+/** The HTML5Podcatcher Command Processor
 
-    @module  podcatcher/commands/prozessor
+    @module  podcatcher/commands/processor
     @author  Sebastian Spautz [sebastian@human-injection.de]
     @requires module:podcatcher/utils/logging
     @license Copyright 2020 Sebastian Spautz
@@ -21,8 +21,6 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 
-/* globals self */
-
 import { Logger } from '../utils/logging.js'
 
 const LOGGER = new Logger('podcatcher/commands/processor')
@@ -33,7 +31,7 @@ const LOGGER = new Logger('podcatcher/commands/processor')
  * Base for all command prozessors.
  * @abstract
  */
-export default class BaseCommandProcessor {
+export class BaseCommandProcessor {
   /**
    * Creates a new command prozessor
    * @param {external:WorkerGlobalScope} workerScope - Global scope of the worker prozess
