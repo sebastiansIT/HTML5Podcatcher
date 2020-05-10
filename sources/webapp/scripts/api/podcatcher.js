@@ -72,6 +72,4 @@ const api = {
   web: new WebAccessProvider(null) // Temporär für umgestalltung auf Module
 }
 
-window.podcatcher = api
-
 export default api

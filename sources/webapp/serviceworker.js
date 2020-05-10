@@ -31,6 +31,10 @@ const CACHED_FILES = [
   'sources.html',
   'source.html',
   'settings.html',
+  // LIBS
+  'jquery.min.js',
+  'scripts/podcatcher.js',
+  'scripts/h5p.js',
   // SCRIPTS
   'scripts/globalUi.js',
   'scripts/jquery.min.js',

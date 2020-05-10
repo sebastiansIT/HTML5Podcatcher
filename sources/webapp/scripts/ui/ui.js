@@ -40,8 +40,6 @@ if (isSupported()) {
   }
 }
 
-window.h5p = api
-
 window.podcatcher.configuration.settings.get('logLevel', '1')
   .then((allowedLevel) => {
     switch (parseFloat(allowedLevel)) {
