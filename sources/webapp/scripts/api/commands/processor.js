@@ -1,4 +1,4 @@
-/** The HTML5Podcatcher Command Processor
+/** The HTML5Podcatcher Command Processor.
 
     @module  podcatcher/commands/processor
     @author  Sebastian Spautz [sebastian@human-injection.de]
@@ -33,8 +33,8 @@ const LOGGER = new Logger('podcatcher/commands/processor')
  */
 export class BaseCommandProcessor {
   /**
-   * Creates a new command prozessor
-   * @param {external:WorkerGlobalScope} workerScope - Global scope of the worker prozess
+   * Creates a new command prozessor.
+   * @param {external:WorkerGlobalScope} workerScope - Global scope of the worker prozess.
    */
   constructor (workerScope) {
     this._worker = workerScope
@@ -42,7 +42,7 @@ export class BaseCommandProcessor {
 
   /**
    * Command "diagnostic" awnsers with the workers name and location.
-   * @returns {Promise<WorkerAnswer>}
+   * @returns {Promise<object>} The workers name and path to the javascript file.
    */
   diagnostic () {
     LOGGER.debug('Command "diagnostic" is called')
@@ -68,7 +68,7 @@ export class BaseCommandProcessor {
   /** Command "close" closes the web worker silently.
    * @returns {null} Returns nothing.
    */
-  close (worker) {
+  close () {
     this._worker.close()
     LOGGER.debug(`Worker ${this._worker.name} is closed.`)
     return null

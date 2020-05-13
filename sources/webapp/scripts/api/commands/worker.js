@@ -1,4 +1,4 @@
-/** The HTML5Podcatcher Command Worker
+/** The HTML5Podcatcher Command Worker.
 
     @module  podcatcher/commands/worker
     @author  Sebastian Spautz [sebastian@human-injection.de]

@@ -1,4 +1,4 @@
-/** The HTML5Podcatcher Command Client
+/** The HTML5Podcatcher Command Client.
 
     @module  podcatcher/commands/client
     @author  Sebastian Spautz [sebastian@human-injection.de]
@@ -118,17 +118,15 @@ function initWorker (commandProcessorName) {
 }
 
 /**
- * Checks if the given string is a valid name for an command processor:
- * That means...
- * <ul><li>it must be a String</li>
- * <li>it must be truthy</li></li></ul>
+ * Checks if the given string is a valid name for an command processor.
+ * 
  * @private
  * @param {external:String} commandProcessorName - The name of the javascript file
  * exposing a command processor to the global scope.
  * Must be a string.
  * Must not be null, undefined or an empty string.
  * @throws {external:Error} An error if it isn't a valid name.
- * @returns undefined
+ * @returns {undefined}
  */
 function checkCommandProcessorName (commandProcessorName) {
   if (!commandProcessorName) {
