@@ -45,11 +45,10 @@
   },
   "homepage": "http://podcatcher.sebastiansit.de",
   "scripts": {
-    "lint-js": "eslint -c eslint.config.js sources/webapp/scripts/api/commands/**/*.js",
+    "lint-js": "eslint -c .eslintrc.js sources/webapp/scripts/api/commands/**/*.js",
     "test-js": "karma start karma.config.js",
-    "jsdoc-api": "jsdoc -r -a all -d distributions/jsdoc/api sources/webapp/scripts/api",
+    "jsdoc-api": "jsdoc -r -a all -P package.json -d distributions/jsdoc/api sources/webapp/scripts/api",
     "jsdoc-ui": "jsdoc -r -a all -d distributions/jsdoc/ui sources/webapp/scripts/ui",
-    "jsdoc-worker": "jsdoc -r -a all -d distributions/jsdoc/worker sources/webapp/scripts/worker",
     "jsdoc": "npm run jsdoc-api && npm run jsdoc-ui",
     "bundle-js": "rollup -c",
     "lint": "npm run lint-js",
