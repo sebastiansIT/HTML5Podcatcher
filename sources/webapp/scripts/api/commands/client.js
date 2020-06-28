@@ -25,7 +25,14 @@
 
 import { Logger } from '../utils/logging.js'
 
+/**
+ * @constant {module:podcatcher/utils/logging.Logger}
+ */
 const LOGGER = new Logger('podcatcher/commands/client')
+/**
+ * Path to the "abstract" worker that handles command requests.
+ * @constant {external:String}
+ */
 const WORKER_URL = 'scripts/api/commands/worker.js'
 
 /**
@@ -49,13 +56,22 @@ export class CommandClient {
     this._commandProcessorName = commandProcessorName
   }
 
+  // Documenting proises: see https://github.com/jsdoc/jsdoc/issues/1197#issuecomment-312948746
+  /**
+   * A promise for the commands response.
+   * @typedef {external:Promise<object>} CommandResponsePromise
+   * @promise CommandResponsePromise
+   * @fulfill {external:object} The awnser to the command.
+   * @reject {external:ErrorEvent} An error thrown by the worker.
+   * @reject {external:MessageEvent} A messageError thrown by the worker.
+   */
+
   /**
    * Send a command to the command processor.
    * @param {external:String} command - The command to be called.
-   * @param {external:Object} [payload] - The data to work on.
-   * @returns {external:Promise} A Promise that resolves with the result of the command.
+   * @param {external:object} [payload] - The data to work on.
+   * @returns {CommandResponsePromise} A Promise that resolves with the result of the command.
    */
-  // TODO document Promise
   call (command, payload) {
     // check parameter command exists and is a string
     if (!command || typeof command !== 'string') {
@@ -71,7 +87,7 @@ export class CommandClient {
     return new Promise((resolve, reject) => {
       const worker = initWorker(this._commandProcessorName)
       worker.addEventListener('message', (event) => {
-        // TODO check if it is the "completed" message
+        // check if it is the "completed" message
         if (event.data.complete) {
           worker.terminate()
           resolve(event.data)

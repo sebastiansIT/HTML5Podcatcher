@@ -1,4 +1,4 @@
-/** Copyright 2019 Sebastian Spautz
+/** Modul for logging.
 
      @module  podcatcher/utils/logging
      @author  Sebastian Spautz [sebastian@human-injection.de]
@@ -23,7 +23,7 @@
 /** Transfers the named LogLevel to a number.
   * @static
   * @private
-  * @param {external:String} level the named log level.
+  * @param {external:String} level - The named log level.
   * @returns {number} A code number corresponding to the log level.
   */
 function transferLevelToCode (level) {
@@ -54,16 +54,16 @@ function transferLevelToCode (level) {
 }
 
 /** Abstract appender - implementations of this class appends log messages
-  * to an output chanel
+  * to an output chanel.
   * @class
   * @abstract
   */
 export class AbstractLogAppender {
   /** Append a log message to the output channel.
     * @abstract
-    * @param {external:String} message The log message.
-    * @param {external:String} logLevelName The level of the message.
-    * @param {external:String} module The source of the message.
+    * @param {external:String} message - The log message.
+    * @param {external:String} logLevelName - The level of the message.
+    * @param {external:String} module - The source of the message.
     * @returns {undefined}
     */
   logMessage (message, logLevelName, module) {
@@ -71,7 +71,7 @@ export class AbstractLogAppender {
   }
 }
 
-/** Log Appender that add all messages to the browser console
+/** Log Appender that add all messages to the browser console.
   * @class
   * @private
   * @augments module:podcatcher/utils/logging.AbstractLogAppender
@@ -118,10 +118,10 @@ class LogManager {
     this.logRules = []
   }
 
-  /** log a given message to all configured appenders.
-    * @param {external:String} message The log message.
-    * @param {external:String} logLevelName The level of the message.
-    * @param {external:String} module The source of the message.
+  /** Log a given message to all configured appenders.
+    * @param {external:String} message - The log message.
+    * @param {external:String} logLevelName - The level of the message.
+    * @param {external:String} module - The source of the message.
     * @returns {undefined}
     */
   logMessage (message, logLevelName, module) {
@@ -137,9 +137,9 @@ class LogManager {
   }
 
   /** Adds a new Rule to the Log Manager.
-    * @param {module:podcatcher/utils/logging.AbstractLogAppender} logAppender A log appender used in this rule.
-    * @param {external:String} minLevel The minimal level of messages to log with the given appender.
-    * @param {external:String} maxLevel The maximal level of messages to log with the given appender.
+    * @param {module:podcatcher/utils/logging.AbstractLogAppender} logAppender - A log appender used in this rule.
+    * @param {external:String} minLevel - The minimal level of messages to log with the given appender.
+    * @param {external:String} maxLevel - The maximal level of messages to log with the given appender.
     * @returns {undefined}
     */
   addLogRule (logAppender, minLevel, maxLevel) {
@@ -163,49 +163,49 @@ logManager.addLogRule(new ConsoleLogAppender(), 'debug', 'fatal')
 export class Logger {
   /** Creates a logger for the given source code module.
     * @constructs
-    * @param {external:String} module The source of the messages created with this logger.
+    * @param {external:String} module - The source of the messages created with this logger.
     */
   constructor (module) {
     this.module = module
   }
 
   /** Log a message with level "debug".
-    * @param {external:String} message The message to log with level "debug".
+    * @param {external:String} message - The message to log with level "debug".
     */
   debug (message) {
     logManager.logMessage(message, 'debug', this.module)
   }
 
   /** Log a message with level "information".
-    * @param {external:String} message The message to log with level "information".
+    * @param {external:String} message - The message to log with level "information".
     */
   info (message) {
     logManager.logMessage(message, 'info', this.module)
   }
 
   /** Log a message with level "note".
-    * @param {external:String} message The message to log with level "note".
+    * @param {external:String} message - The message to log with level "note".
     */
   note (message) {
     logManager.logMessage(message, 'note', this.module)
   }
 
   /** Log a message with level "warning".
-    * @param {external:String} message The message to log with level "warning".
+    * @param {external:String} message - The message to log with level "warning".
     */
   warn (message) {
     logManager.logMessage(message, 'warn', this.module)
   }
 
   /** Log a message with level "error".
-    * @param {external:String} message The message to log with level "error".
+    * @param {external:String} message - The message to log with level "error".
     */
   error (message) {
     logManager.logMessage(message, 'error', this.module)
   }
 
   /** Log a message with level "fatal".
-    * @param {external:String} message The message to log with level "fatal".
+    * @param {external:String} message - The message to log with level "fatal".
     */
   fatal (message) {
     logManager.logMessage(message, 'fatal', this.module)
