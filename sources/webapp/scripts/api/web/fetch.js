@@ -33,9 +33,8 @@ import { Logger } from '../utils/logging.js'
   */
 
 /** Logger
-  * @constant {module:podcatcher/utils/logging.Logger}
-  * @private
-  */
+ * @constant {module:podcatcher/utils/logging.Logger}
+ */
 const LOGGER = new Logger('Web/Fetch')
 
 /** Implements methods to access the internet based on fetch API.
@@ -76,6 +75,8 @@ export default class FetchWebAccessProvider extends WebAccessProvider {
   // TODO abort? AbourtController (siehe https://stackoverflow.com/questions/46946380/fetch-api-request-timeout)
   // responseType = arraybuffer nötig? Scheinbar nicht!
   downloadArrayBuffer (url, onProgressCallback) {
+    this.checkUrlParameter(url)
+    this.checkProgressCallbackParameter(onProgressCallback)
     const fetchViaProxy = function (error) {
       if (this.sopProxyPattern) {
         // insert URL into pattern and try again
@@ -183,7 +184,8 @@ function sendProgressEvents (response, onProgressCallback) {
   * @throws {external:Error} Throws an Error when the response body can't parsed as XML.
   */
 function parseXmlFromText (text, url) {
-  const doc = (new window.DOMParser()).parseFromString(text, 'application/xml')
+  // TODO DOMParser isn't available in worker context.
+  const doc = (new DOMParser()).parseFromString(text, 'application/xml')
   if (doc.documentElement.querySelector('parsererror')) {
     LOGGER.error(`No XML Document found at ${url} instead found [' ${text} ]`)
     throw new Error(`No XML Document found at ${url}`)

@@ -26,7 +26,7 @@
 import WebAccessProvider from './web.js'
 import { Logger } from '../utils/logging.js'
 
-/** Logger
+/** Logger.
   * @constant {module:podcatcher/utils/logging.Logger}
   * @private
   */
@@ -35,16 +35,17 @@ const LOGGER = new Logger('Web/XHR')
 /** Implements methods to access the internet based on XMLHttpRequest.
   * @class XhrWebAccessProvider
   * @augments module:podcatcher/web~WebAccessProvider
-  * @param {external:String} [sopProxyPattern] A URL pattern used for access via a proxy.
-  * @param {Object} [options] A Object with options used by this implementation of the WebAccessProvider.
-  * @param {number} [options.downloadTimeout=600000] The  time in milliseconds to wait for finishing a network requests Default is 10 Minutes.
+  * @param {external:String} [sopProxyPattern] - A URL pattern used for access via a proxy.
+  * @param {object} [options] - A Object with options used by this implementation of the WebAccessProvider.
+  * @param {number} [options.downloadTimeout=600000] - The  time in milliseconds to wait for finishing a network requests Default is 10 Minutes.
   */
 export default class XhrWebAccessProvider extends WebAccessProvider {
   /**
+    * Creates a new web access provider working with XMLHttpRequests.
     * @constructs module:podcatcher/web/xhr~XhrWebAccessProvider
-    * @param {external:String} [sopProxyPattern] A URL pattern used for access via a proxy.
-    * @param {Object} [options] A Object with options used by this implementation of the WebAccessProvider.
-    * @param {number} [options.downloadTimeout=600000] The  time in milliseconds to wait for finishing a network requests Default is 10 Minutes.
+    * @param {external:String} [sopProxyPattern] - A URL pattern used for access via a proxy.
+    * @param {object} [options] - A Object with options used by this implementation of the WebAccessProvider.
+    * @param {number} [options.downloadTimeout=600000] - The  time in milliseconds to wait for finishing a network requests Default is 10 Minutes.
     */
   constructor (sopProxyPattern, options) {
     super(sopProxyPattern, options)
@@ -112,6 +113,8 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
   }
 
   downloadArrayBuffer (url, onProgressCallback) {
+    this.checkUrlParameter(url)
+    this.checkProgressCallbackParameter(onProgressCallback)
     return new Promise((resolve, reject) => {
       // Function called on progress events
       const progressfunction = function (event) {
@@ -146,7 +149,7 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
       const errorfunction = function (xhrError) {
         if (this.sopProxyPattern) {
           const PROXY_URL = this.sopProxyPattern.replace('$url$', url)
-          LOGGER.warning(`Direct download failed. Try proxy: ${PROXY_URL}`)
+          LOGGER.warn(`Direct download failed. Try proxy: ${PROXY_URL}`)
 
           const xhrProxy = new XMLHttpRequest()
           xhrProxy.open('GET', PROXY_URL, true)
