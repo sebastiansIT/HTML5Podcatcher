@@ -159,6 +159,7 @@ var webAPI = (function () {
     }
   }
 
+  // downloadArrayBuffer in this file should fully replaced by module based API.
   /** Load a file as an array buffer from the given URL.
     * @deprecated
     * @param {URL} url - The URL to load.
@@ -166,9 +167,11 @@ var webAPI = (function () {
     * @param {module:HTML5Podcatcher/Web~XHRProgressCallback} [onProgressCallback] - The callback funktion to notify the program about progress information.
     */
   downloadArrayBuffer = function (url, onLoadCallback, onProgressCallback) {
-    var successfunction, errorfunction, progressfunction,
-      proxyUrlPattern, downloadTimeout
+    /* var successfunction, errorfunction, progressfunction,
+      proxyUrlPattern, downloadTimeout */
 
+    throw new Error('This should never be!')
+    /*
     proxyUrlPattern = HTML5Podcatcher.api.configuration.proxyUrlPattern
     downloadTimeout = HTML5Podcatcher.api.configuration.downloadTimeout
     // Function called on progress events
@@ -241,13 +244,14 @@ var webAPI = (function () {
       })
     } catch (exeption) {
       HTML5Podcatcher.logger(exeption, 'error:Web')
-    }
+    } */
   }
 
   return {
-    'createXMLHttpRequest': createXMLHttpRequest,
-    'downloadXML': downloadXML,
-    'downloadArrayBuffer': downloadArrayBuffer
+    createXMLHttpRequest: createXMLHttpRequest,
+    downloadXML: downloadXML
+    // downloadArrayBuffer in this file should fully replaced by module based API.
+    //, downloadArrayBuffer: downloadArrayBuffer
   }
 }())
 
