@@ -1,4 +1,4 @@
-/** The HTML5Podcatcher API
+/** The HTML5Podcatcher API.
 
     @module  podcatcher
     @author  Sebastian Spautz [sebastian@human-injection.de]
@@ -43,7 +43,7 @@ const api = {
       addLogRule: (appender, minLevel, maxLevel) => logManager.addLogRule(appender, minLevel, maxLevel)
     },
     /** @summary Access to the user settings.
-      * @desc Access to the user settings as part of the entire Configuration. User settings are a key/value-store. In this store you can save all kind of user defined information for your application.
+      * @description Access to the user settings as part of the entire Configuration. User settings are a key/value-store. In this store you can save all kind of user defined information for your application.
       * @namespace
       */
     settings: {
@@ -59,7 +59,7 @@ const api = {
       /** Get the value for the given user setting.
         * @param {string} key - The key of the application setting you ask for.
         * @param {(string|number)} defaultValue - The default.
-        * @return {Promise} A Promise resolves to the value or, if not set, the default.
+        * @returns {Promise} A Promise resolves to the value or, if not set, the default.
         */
       get: function (key, defaultValue) {
         return settingsStorageProvider.readSettingsValue(key)
