@@ -1,11 +1,10 @@
-/** This modul contains functions load informations and files from the
-  * internet via Fetch API.
+/** This modul contains functions load informations and files from the internet via Fetch API.
 
-    @module  podcatcher/web/fetch
-    @author  Sebastian Spautz [sebastian@human-injection.de]
+    @module podcatcher/web/fetch
+    @author Sebastian Spautz [sebastian@human-injection.de]
     @requires module:podcatcher/web
     @requires module:podcatcher/utils/logging
-    @license Copyright 2019 Sebastian Spautz
+    @license Copyright 2019, 2020 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -22,27 +21,32 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
+
+/* global fetch, ReadableStream */
+
 import WebAccessProvider from './web.js'
 import { Logger } from '../utils/logging.js'
 
-/* global fetch, Response, ReadableStream */
-/**
-  * Represents a HTTP response in the fetch API.
-  * @external Response
-  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Response|Response}
+/** Logger.
+  * @constant {module:podcatcher/utils/logging.Logger}
   */
-
-/** Logger
- * @constant {module:podcatcher/utils/logging.Logger}
- */
 const LOGGER = new Logger('Web/Fetch')
 
-/** Implements methods to access the internet based on fetch API.
-  * @class FetchWebAccessProvider
-  * @augments module:podcatcher/web~WebAccessProvider
-  * @param {external:String} [sopProxyPattern] A URL pattern used for access via a proxy.
-  */
-export default class FetchWebAccessProvider extends WebAccessProvider {
+/**
+ * Implements methods to access the internet based on fetch API.
+ * @augments module:podcatcher/web~WebAccessProvider
+ */
+class FetchWebAccessProvider extends WebAccessProvider {
+  constructor (sopProxyPattern) {
+    super(sopProxyPattern)
+    /**
+     * A map maps the abort controller for fetch requests to the URLs of downloads.
+     * @private
+     * @type {external:Map<string, external:AbortController>}
+    */
+    this._abortControllerList = new Map()
+  }
+
   downloadXML (url) {
     const fetchViaProxy = function (error) {
       if (this.sopProxyPattern) {
@@ -70,19 +74,22 @@ export default class FetchWebAccessProvider extends WebAccessProvider {
       })
   }
 
-  // Set Timeout from Settings noch nötig? scheibar nicht!
-  // Progress Events
-  // TODO abort? AbourtController (siehe https://stackoverflow.com/questions/46946380/fetch-api-request-timeout)
-  // responseType = arraybuffer nötig? Scheinbar nicht!
   downloadArrayBuffer (url, onProgressCallback) {
     this.checkUrlParameter(url)
     this.checkProgressCallbackParameter(onProgressCallback)
-    const fetchViaProxy = function (error) {
+
+    if (this._abortControllerList.has(url)) {
+      return Promise.reject(new Error(`There is already an active download for ${url}.`))
+    }
+    const abortController = new AbortController()
+    this._abortControllerList.set(url, abortController)
+
+    const fetchViaProxy = (error) => {
       if (this.sopProxyPattern) {
         // insert URL into pattern and try again
         const proxyUrl = this.sopProxyPattern.replace('$url$', url)
         LOGGER.info(`Direct download failed. Try proxy: ${proxyUrl}`)
-        return fetch(proxyUrl)
+        return fetch(proxyUrl, { signal: abortController.signal })
           .then((response) => sendProgressEvents(response, onProgressCallback))
           .catch((error) => {
             LOGGER.error(`Can't download binary file ${proxyUrl}: ${error.message}`)
@@ -92,22 +99,31 @@ export default class FetchWebAccessProvider extends WebAccessProvider {
         LOGGER.error(`Can't download binary file ${url}: ${error.message}`)
         throw error
       }
-    }.bind(this)
+    }
 
-    return fetch(url)
+    return fetch(url, { signal: abortController.signal })
       .then((response) => sendProgressEvents(response, onProgressCallback), fetchViaProxy)
       .then((response) => response.arrayBuffer())
       .then((arrayBuffer) => {
         LOGGER.debug(`Download of ${url} finished`)
         return arrayBuffer
       })
+      .finally(() => this._abortControllerList.delete(url))
+  }
+
+  abort (url) {
+    if (this._abortControllerList.has(url)) {
+      this._abortControllerList.get(url).abort()
+    } else {
+      throw new Error(`No Download to abort available for URL ${url}`)
+    }
   }
 }
 
 /**
-  * Check if the Response is OK and returns the content from the body if it so.
+  * Check if the response is OK and returns the content from the body if it so.
   * @private
-  * @param {external:Response} response The respone to a HTTP request.
+  * @param {external:Response} response - The respone to a HTTP request.
   * @returns {external:String} The text of a HTTP response.
   * @throws {external:Error} Throws an error if the response isn't OK.
   */
@@ -124,10 +140,11 @@ function extractBodyTextFromResponse (response) {
   * reader from the fetched response. For each chunk of the reader progress
   * informations are send to the UI.
   * @private
-  * @param {external:Response} response The respone to a HTTP request.
+  * @param {external:Response} response - The respone to a HTTP request.
+  * @param {module:podcatcher/web~downloadProgressCallback} onProgressCallback - A callback function to send progress informations.
   * @returns {external:Response} A new Response with the same body content.
   * @throws {external:Error} Throws an error if the response isn't OK or a
-  *   error occured while handling the Stream.
+  * error occured while handling the Stream.
   */
 function sendProgressEvents (response, onProgressCallback) {
   if (!response.ok) {
@@ -135,18 +152,22 @@ function sendProgressEvents (response, onProgressCallback) {
   }
   // Following Code is inspired by https://github.com/AnthumChris/fetch-progress-indicators/blob/master/fetch-basic/supported-browser.js
   const contentLength = response.headers.get('content-length')
+  let fileSizeTotalBytes
+  let approximated = false
   if (!contentLength) {
     LOGGER.info(`No content length available in response to ${response.url}`)
-    return response
+    fileSizeTotalBytes = '150000000' // approximate 150MB
+    approximated = true
+  } else {
+    fileSizeTotalBytes = parseInt(contentLength, 10)
   }
-
-  const fileSizeTotalBytes = parseInt(contentLength, 10)
   let loadedBytes = 0
 
   return new Response(
+    // TODO refactor this (and understand better whats going on when aborting a request)
     new ReadableStream({
       start (controller) {
-        function read () {
+        const read = () => {
           reader.read()
             .then(({ done, value }) => {
               if (done) {
@@ -154,17 +175,23 @@ function sendProgressEvents (response, onProgressCallback) {
                 return
               }
               loadedBytes += value.byteLength
-              let percentComplete = loadedBytes / fileSizeTotalBytes
+              if (loadedBytes > fileSizeTotalBytes) {
+                fileSizeTotalBytes += 50000000 // approximate additional 50MB file size
+                approximated = true
+              }
+              const percentComplete = loadedBytes / fileSizeTotalBytes
               LOGGER.debug('Download array buffer: ' + (percentComplete * 100).toFixed(2) + '%')
               if (onProgressCallback && typeof onProgressCallback === 'function') {
-                onProgressCallback({ loaded: loadedBytes, total: fileSizeTotalBytes }, response.url)
+                onProgressCallback({ loaded: loadedBytes, total: fileSizeTotalBytes, approximated: approximated }, response.url)
               }
               controller.enqueue(value)
               read()
-            }).catch(error => {
-              LOGGER.error(`Error downloading File with progress informations: ${error}`)
+            })
+            .catch(error => {
+              if (!(error instanceof DOMException && error.name === 'AbortError')) {
+                LOGGER.error(`Error downloading File with progress informations: ${error}`)
+              }
               controller.error(error)
-              throw error
             })
         }
 
@@ -178,9 +205,9 @@ function sendProgressEvents (response, onProgressCallback) {
 /**
   * Parses the given text as XML.
   * @private
-  * @param {external:String} text The body of a HTTP request.
-  * @param {external:String} url The target URL of the HTTP request.
-  * @returns {external:XMLDocument} A XML document
+  * @param {external:String} text - The body of a HTTP request.
+  * @param {external:String} url - The target URL of the HTTP request.
+  * @returns {external:XMLDocument} A XML document.
   * @throws {external:Error} Throws an Error when the response body can't parsed as XML.
   */
 function parseXmlFromText (text, url) {
@@ -193,3 +220,5 @@ function parseXmlFromText (text, url) {
     return doc
   }
 }
+
+export default FetchWebAccessProvider

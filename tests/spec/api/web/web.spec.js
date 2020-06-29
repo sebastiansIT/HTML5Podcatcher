@@ -87,6 +87,19 @@ function testImplementation (implName, ProviderClass) {
         expect(promise instanceof Promise).toBeTrue()
       })
 
+      it('should reject the promise if file is actively downloaded by a nother caller', (done) => {
+        provider.downloadArrayBuffer('base/tests/test.m4a', (event) => { console.debug(event) })
+        provider.downloadArrayBuffer('base/tests/test.m4a', (event) => { console.log(event) })
+          .then((message) => {
+            fail('It is expected to fail downloading a file twice a time.')
+            done()
+          })
+          .catch((error) => {
+            expect(error).toBeDefined()
+            done()
+          })
+      })
+
       it('should reject the promise if file to download not exists', (done) => {
         const promise = provider.downloadArrayBuffer('nonExisting.m4a', (event) => { console.log(event) })
         expect(promise).toBeDefined()
@@ -156,10 +169,51 @@ function testImplementation (implName, ProviderClass) {
           })
       })
     })
+
+    describe('Abort a web request', () => {
+      it('should throws an error if parameter "url" is invalid', () => {
+        const provider = new ProviderClass('base/tests/test.m4a')
+        expect(() => provider.abort(undefined)).toThrow()
+        expect(() => provider.abort(null)).toThrow()
+        expect(() => provider.abort('')).toThrow()
+        expect(() => provider.abort('\n\t')).toThrow()
+      })
+
+      it('should abort an ongoing request', (done) => {
+        const provider = new ProviderClass()
+        const url = 'base/tests/test.m4a'
+        provider.downloadArrayBuffer(url/*, progressListener */)
+          .then(() => {
+            fail('Download should be aborted but is finished successfull.')
+            done()
+          })
+          .catch((error) => {
+            console.error(error)
+            expect(error.name).toBe('AbortError')
+            done()
+          })
+        provider.abort(url)
+      })
+
+      it('should abort an ongoing request if it\'s is handled via proxy', (done) => {
+        const url = 'base/tests/test.m4a'
+        const provider = new ProviderClass(url)
+        provider.downloadArrayBuffer(url/*, progressListener */)
+          .then(() => {
+            fail('Download should be aborted but is finished successfull.')
+            done()
+          })
+          .catch((error) => {
+            expect(error.name).toBe('AbortError')
+            done()
+          })
+        provider.abort(url)
+      })
+    })
   })
 }
 
 describe('Package "Web Access Client"', () => {
   testImplementation('XHR', XhrProviderClass)
-  //testImplementation('Fetch', FetchProviderClass)
+  testImplementation('Fetch', FetchProviderClass)
 })

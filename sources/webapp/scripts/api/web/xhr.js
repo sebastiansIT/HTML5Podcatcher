@@ -1,10 +1,10 @@
-/** This modul contains functions load informations and files from the internet.
+/** This modul contains functions to load informations and files from the internet via XMLHttpRequest API.
 
     @module  podcatcher/web/xhr
     @author  Sebastian Spautz [sebastian@human-injection.de]
     @requires module:podcatcher/web
     @requires module:podcatcher/utils/logging
-    @license Copyright 2015, 2016, 2019 Sebastian Spautz
+    @license Copyright 2015, 2016, 2019, 2020 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -33,16 +33,11 @@ import { Logger } from '../utils/logging.js'
 const LOGGER = new Logger('Web/XHR')
 
 /** Implements methods to access the internet based on XMLHttpRequest.
-  * @class XhrWebAccessProvider
   * @augments module:podcatcher/web~WebAccessProvider
-  * @param {external:String} [sopProxyPattern] - A URL pattern used for access via a proxy.
-  * @param {object} [options] - A Object with options used by this implementation of the WebAccessProvider.
-  * @param {number} [options.downloadTimeout=600000] - The  time in milliseconds to wait for finishing a network requests Default is 10 Minutes.
   */
-export default class XhrWebAccessProvider extends WebAccessProvider {
+class XhrWebAccessProvider extends WebAccessProvider {
   /**
     * Creates a new web access provider working with XMLHttpRequests.
-    * @constructs module:podcatcher/web/xhr~XhrWebAccessProvider
     * @param {external:String} [sopProxyPattern] - A URL pattern used for access via a proxy.
     * @param {object} [options] - A Object with options used by this implementation of the WebAccessProvider.
     * @param {number} [options.downloadTimeout=600000] - The  time in milliseconds to wait for finishing a network requests Default is 10 Minutes.
@@ -50,10 +45,22 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
   constructor (sopProxyPattern, options) {
     super(sopProxyPattern, options)
 
+    /**
+     * Timeout in milliseconds.
+     * @private
+     * @type {number}
+    */
     this.downloadTimeout = 600000
     if (options && options.downloadTimeout) {
       this.downloadTimeout = options.downloadTimeout
     }
+
+    /**
+     * A map maps the ongoing XHR request to the URLs of downloads.
+     * @private
+     * @type {external:Map<string, external:XMLHttpRequest>}
+    */
+    this._xhrRequestList = new Map()
   }
 
   downloadXML (url) {
@@ -115,6 +122,11 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
   downloadArrayBuffer (url, onProgressCallback) {
     this.checkUrlParameter(url)
     this.checkProgressCallbackParameter(onProgressCallback)
+
+    if (this._xhrRequestList.has(url)) {
+      return Promise.reject(new Error(`There is already an active download for ${url}.`))
+    }
+
     return new Promise((resolve, reject) => {
       // Function called on progress events
       const progressfunction = function (event) {
@@ -133,40 +145,48 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
         }
       }
       // Function called after successful download
-      const successfunction = function (event) {
+      const successfunction = (event) => {
         var ajaxCall = event.target
 
         if (ajaxCall.status === 200) {
           LOGGER.debug(`Download of file ""${url}" is finished`)
+          this._xhrRequestList.delete(url)
           resolve(ajaxCall.response)
         } else {
           const ERROR = `Error Downloading file "${url}": ${ajaxCall.statusText} ${ajaxCall.status})`
           LOGGER.error(ERROR)
+          this._xhrRequestList.delete(url)
           reject(new Error(ERROR))
         }
       }
       // Function called when an error occured downloading the array buffer
-      const errorfunction = function (xhrError) {
+      const errorfunction = (xhrError) => {
         if (this.sopProxyPattern) {
           const PROXY_URL = this.sopProxyPattern.replace('$url$', url)
           LOGGER.warn(`Direct download failed. Try proxy: ${PROXY_URL}`)
 
           const xhrProxy = new XMLHttpRequest()
+          this._xhrRequestList.set(url, xhrProxy)
           xhrProxy.open('GET', PROXY_URL, true)
           xhrProxy.responseType = 'arraybuffer'
           xhrProxy.timeout = this.downloadTimeout
           xhrProxy.addEventListener('progress', progressfunction, false)
           xhrProxy.addEventListener('abort', (event) => {
             LOGGER.error(`Request for ${PROXY_URL} aborted!`)
+            this._xhrRequestList.delete(url)
             reject(event)
           }, false)
-          xhrProxy.addEventListener('error', function (xhrError) {
+          xhrProxy.addEventListener('error', (xhrError) => {
             LOGGER.error(`Can't download File: ${xhrError.error}`)
             LOGGER.debug(xhrError)
+            this._xhrRequestList.delete(url)
+            reject(new Error(`Can't download File: ${xhrError.error}`))
           }, false)
           xhrProxy.onload = successfunction
-          xhrProxy.ontimeout = function () {
+          xhrProxy.ontimeout = () => {
             LOGGER.error(`Timeout after ${xhrProxy.timeout / 60000} minutes.`)
+            this._xhrRequestList.delete(url)
+            reject(new DOMException(`Request for ${url} aborted.`, 'AbortError'))
           }
           xhrProxy.send(null)
         } else {
@@ -174,10 +194,11 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
           LOGGER.error(ERROR_MESSAGE)
           reject(new Error(ERROR_MESSAGE))
         }
-      }.bind(this)
+      }
 
       try {
         const xhr = new XMLHttpRequest()
+        this._xhrRequestList.set(url, xhr)
         xhr.open('GET', url, true)
         xhr.responseType = 'arraybuffer'
         xhr.timeout = this.downloadTimeout
@@ -185,16 +206,28 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
         xhr.addEventListener('error', errorfunction, false)
         xhr.addEventListener('abort', (event) => {
           LOGGER.error(`Request for ${url} aborted!`)
-          reject(event)
+          this._xhrRequestList.delete(url)
+          reject(new DOMException(`Request for ${url} aborted.`, 'AbortError'))
         }, false)
         xhr.onload = successfunction
-        xhr.ontimeout = function () {
+        xhr.ontimeout = () => {
           LOGGER.error(`Timeout after ${xhr.timeout / 60000} minutes.`)
         }
         xhr.send(null)
       } catch (exeption) {
+        this._xhrRequestList.delete(url)
         reject(exeption)
       }
     })
   }
+
+  abort (url) {
+    if (this._xhrRequestList.has(url)) {
+      this._xhrRequestList.get(url).abort()
+    } else {
+      throw new Error(`No Download to abort available for URL ${url}`)
+    }
+  }
 }
+
+export default XhrWebAccessProvider

@@ -24,13 +24,12 @@
   * access the internet.
   * @class
   * @abstract
-  * @param {external:String} [sopProxyPattern] - A URL pattern used for access via a proxy.
   */
 class WebAccessProvider {
   /**
     * Creates a new client for access of web ressources via the given proxy.
     * @constructs
-    * @param {external:String|null|undefined} sopProxyPattern - A URL pattern used for access via a proxy.
+    * @param {external:String|null|undefined} [sopProxyPattern] - A URL pattern used for access via a proxy.
     */
   constructor (sopProxyPattern) {
     this.sopProxyPattern = sopProxyPattern
@@ -72,6 +71,7 @@ class WebAccessProvider {
    * @param {object} event - The progress event.
    * @param {number} event.loaded - The amount of data currently transfered.
    * @param {number} event.total - The total amount of data to be transferred.
+   * @param {boolean} [event.approximated] - True if the value for total is approximated.
    * @param {external:String} url - The URL of the ressource download is in progress.
    */
 
@@ -87,12 +87,23 @@ class WebAccessProvider {
    * Load a binary document from the internet.
    * @abstract
    * @param {external:String} url - A URL to load a binary document from.
-   * @param {module:podcatcher/web~downloadProgressCallback} [onProgressCallback] - A function called when the binary file is downloaded.
+   * @param {module:podcatcher/web~downloadProgressCallback} [onProgressCallback] - A callback function to send progress informations.
    * @returns {module:podcatcher/web~DownloadArrayBufferPromise} A promise that fullfiled with an ArrayBuffer
    * or rejects if there is a network error or a HTTP status code other than 200.
    */
   downloadArrayBuffer (url, onProgressCallback) {
     return Promise.reject(new Error('Not Implemented'))
+  }
+
+  /**
+   * Aborts an ongoing download.
+   * @abstract
+   * @param {external:String} url - Abort the download for this URL.
+   * @throws {external:Error} Throws if there is no ongoing download for the given URL.
+   * @returns {undefined}
+   */
+  abort (url) {
+    throw new Error('Call abstract, not implemented method WebAccessProvider.abort(url).')
   }
 
   /**

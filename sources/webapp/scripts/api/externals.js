@@ -50,3 +50,23 @@
   * @external MessageEvent
   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/MessageEvent|MDN web docs}
   */
+/**
+  * The build in map class.
+  * @external Map
+  * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map|MDN web docs}
+  */
+/**
+  * The build in AbortController.
+  * @external AbortController
+  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/AbortController|MDN web docs}
+  */
+/**
+  * Represents a HTTP response in the fetch API.
+  * @external Response
+  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Response|MDN web docs}
+  */
+/**
+  * Allows access to HTTP ressources.
+  * @external XMLHttpRequest
+  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest|MDN web docs}
+  */

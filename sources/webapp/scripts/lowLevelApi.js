@@ -145,13 +145,19 @@ var HTML5Podcatcher = {
 
       // TODO set proxyPattern outside
       podcatcher.web.sopProxyPattern = HTML5Podcatcher.api.configuration.proxyUrlPattern
-      podcatcher.web.downloadArrayBuffer(episode.mediaUrl, function (event/*, url */) {
+      podcatcher.web.downloadArrayBuffer(episode.mediaUrl, (event/*, url */) => {
         if (onProgressCallback && typeof onProgressCallback === 'function') {
           onProgressCallback(event, episode)
         }
       })
         .then((arrayBuffer) => HTML5Podcatcher.storage.saveFile(episode, arrayBuffer, onDownloadCallback, onProgressCallback))
-        .catch((error) => HTML5Podcatcher.logger(error, 'error'))
+        .catch((error) => {
+          if (error instanceof DOMException) {
+            HTML5Podcatcher.logger('Download aborted', 'info')
+          } else {
+            HTML5Podcatcher.logger(error, 'error')
+          }
+        })
     }
   },
 

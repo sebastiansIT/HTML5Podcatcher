@@ -18,7 +18,7 @@
 /* global window, navigator, document, console, confirm */
 /* global Worker, MessageChannel */
 /* global $ */
-/* global HTML5Podcatcher, POD */
+/* global HTML5Podcatcher, POD, podcatcher */
 var GlobalUserInterfaceHelper = {
   formatTimeCode: function (timecode) {
     'use strict'
@@ -494,8 +494,9 @@ var GlobalUserInterfaceHelper = {
 
       event.preventDefault()
       event.stopPropagation()
-      if (event.target.getAttribute('aria-disabled') !== 'true') {
-        event.target.setAttribute('aria-disabled', 'true')
+      if (event.currentTarget.getAttribute('aria-disabled') !== 'true') {
+        event.currentTarget.setAttribute('aria-disabled', 'true')
+        event.currentTarget.setAttribute('aria-label', 'Abort Download')
         // TODO replace Download-Link with cancel-Button while download isn't finished
 
         // load data of episode from storage...
@@ -508,7 +509,13 @@ var GlobalUserInterfaceHelper = {
           }, UI.progressHandler)
         })
       } else {
-        UI.logHandler('Download is allways in progress', 'debug')
+        UI.logHandler('Download is allways in progress - abort now', 'debug')
+        POD.storage.readEpisode(episodeUI.data('episodeUri'), function (episode) {
+          podcatcher.web.abort(episode.mediaUrl)
+          event.currentTarget.setAttribute('aria-disabled', 'false')
+          episodeUI[0].style.background = ''
+          event.currentTarget.setAttribute('aria-label', 'Download')
+        })
       }
     },
 
