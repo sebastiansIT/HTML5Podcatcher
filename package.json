@@ -49,7 +49,7 @@
     "test-js": "karma start karma.config.js",
     "jsdoc-api": "jsdoc -r -a all -P package.json -d distributions/jsdoc/api sources/webapp/scripts/api",
     "jsdoc-ui": "jsdoc -r -a all -d distributions/jsdoc/ui sources/webapp/scripts/ui",
-    "jsdoc": "npm run jsdoc-api && npm run jsdoc-ui",
+    "doc": "npm run jsdoc-api && npm run jsdoc-ui",
     "bundle-js": "rollup -c",
     "lint": "npm run lint-js",
     "test": "npm run test-js",
