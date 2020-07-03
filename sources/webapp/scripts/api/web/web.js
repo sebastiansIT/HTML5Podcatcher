@@ -1,4 +1,5 @@
-/** This modul contains functions to load informations and files from the internet.
+/** This modul contains basics for implementation of an web access provider.
+    Such a provider allows access to ressources in the internet.
 
     @module  podcatcher/web
     @author  Sebastian Spautz [sebastian@human-injection.de]
@@ -22,7 +23,6 @@
 
 /** More an Interface than a abstract class defines it all necessary methods to
   * access the internet.
-  * @class
   * @abstract
   */
 class WebAccessProvider {
@@ -36,20 +36,17 @@ class WebAccessProvider {
   }
 
   /**
-    * Set the "Same Origin Policy Proxy URL Pattern".
+    * The "Same Origin Policy Proxy URL Pattern".
     * If the access to a URL fails and "sopProxyPattern" is set the Provider
     * start another try. For this second try a new URL is
     * generated from the pattern. In this new URL the placeholder $ulr$ is
     * replaced by the URL to call.
-    * @param {external:String|null} pattern - A URL pattern.
+    * @type {external:String|null}
     */
   set sopProxyPattern (pattern) {
     this._sopProxyPattern = pattern || null
   }
 
-  /** Get the "Same Origin Policy Proxy URL Pattern".
-    * @returns {external:String|null} The "Same Origin Policy Proxy URL Pattern".
-    */
   get sopProxyPattern () {
     return this._sopProxyPattern
   }
@@ -57,7 +54,7 @@ class WebAccessProvider {
   /** Load a XML document from the internet.
     * @abstract
     * @param {external:String} url - A URL to load a XML document from.
-    * @returns {external:Promise<external:XMLDocument>} A promise that fullfiled
+    * @returns {module:podcatcher/web~DownloadXmlDocumentPromise} A promise that fullfiled
     * with an XML document or rejects if there is a network error or a HTTP
     * status code other than 200.
     */
@@ -66,28 +63,10 @@ class WebAccessProvider {
   }
 
   /**
-   * This callback is displayed as part of the Requester class.
-   * @callback downloadProgressCallback
-   * @param {object} event - The progress event.
-   * @param {number} event.loaded - The amount of data currently transfered.
-   * @param {number} event.total - The total amount of data to be transferred.
-   * @param {boolean} [event.approximated] - True if the value for total is approximated.
-   * @param {external:String} url - The URL of the ressource download is in progress.
-   */
-
-  /**
-   * A promise for the download response.
-   * @typedef {external:Promise<ArrayBuffer>} DownloadArrayBufferPromise
-   * @promise DownloadArrayBufferPromise
-   * @fulfill {external:ArrayBuffer} The downloaded file as an ArrayBuffer.
-   * @reject {external:ErrorEvent} An error thrown by the web access provider.
-   */
-
-  /**
    * Load a binary document from the internet.
    * @abstract
    * @param {external:String} url - A URL to load a binary document from.
-   * @param {module:podcatcher/web~downloadProgressCallback} [onProgressCallback] - A callback function to send progress informations.
+   * @param {module:podcatcher/web~DownloadProgressCallback} [onProgressCallback] - A callback function to send progress informations.
    * @returns {module:podcatcher/web~DownloadArrayBufferPromise} A promise that fullfiled with an ArrayBuffer
    * or rejects if there is a network error or a HTTP status code other than 200.
    */
@@ -107,7 +86,7 @@ class WebAccessProvider {
   }
 
   /**
-   * Checks the given URL-String vor validity.
+   * Checks the given URL-String for validity.
    * @protected
    * @param {external:String} url - A URL to check for validity.
    * @throws {external:Error} An error if the URL isn't valid.
@@ -120,7 +99,7 @@ class WebAccessProvider {
   }
 
   /**
-   * Checks the given callback function vor validity.
+   * Checks the given callback function for validity.
    * @protected
    * @param {Function} callback - A callback function.
    * @throws {external:Error} An error if the callback isn't a function.
@@ -131,4 +110,31 @@ class WebAccessProvider {
     }
   }
 }
+
+/**
+ * A callback function that can handle progress events of an download.
+ * @callback DownloadProgressCallback
+ * @param {object} event - The progress event.
+ * @param {number} event.loaded - The amount of data currently transfered.
+ * @param {number} event.total - The total amount of data to be transferred.
+ * @param {boolean} [event.approximated] - True if the value for total is approximated.
+ * @param {external:String} url - The URL of the ressource download is in progress.
+ */
+
+/**
+  * A promise for a XML document.
+  * @typedef {external:Promise<external:XMLDocument>} DownloadXmlDocumentPromise
+  * @promise DownloadXmlDocumentPromise
+  * @fulfill {external:ArrayBuffer} The downloaded file as an XML document.
+  * @reject {external:ErrorEvent} An error thrown by the web access provider.
+  */
+
+/**
+ * A promise for the download response.
+ * @typedef {external:Promise<external:ArrayBuffer>} DownloadArrayBufferPromise
+ * @promise DownloadArrayBufferPromise
+ * @fulfill {external:ArrayBuffer} The downloaded file as an ArrayBuffer.
+ * @reject {external:ErrorEvent} An error thrown by the web access provider.
+ */
+
 export default WebAccessProvider
