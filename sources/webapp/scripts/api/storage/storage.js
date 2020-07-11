@@ -3,6 +3,7 @@
 
     @module  podcatcher/storage
     @author  Sebastian Spautz [sebastian@human-injection.de]
+    @requires module:podcatcher/utils/logging
     @license Copyright 2020 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
@@ -20,6 +21,13 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
+
+import { Logger } from '../utils/logging.js'
+
+/** Logger.
+  * @constant {module:podcatcher/utils/logging.Logger}
+  */
+const LOGGER = new Logger('podcatcher/storage')
 
 /**
  * More a interface than a class defines Storage Service the basics for all
@@ -72,8 +80,19 @@ export class StorageServiceProvider {
    * @returns {undefined}
    */
   register (storageService, priority) {
+    if (typeof storageService !== 'object') {
+      throw new Error(`The storage serivce must be a instance of StorageService but is a ${typeof storageService}.`)
+    } else if (!(storageService instanceof StorageService)) {
+      throw new Error(`The storage serivce must be a instance of StorageService but is of ${storageService.constructor.name}.`)
+    }
+    if (typeof priority !== 'number') {
+      throw new Error(`The priority must be a number but is a ${typeof priority}.`)
+    }
+
     if (storageService.compatible) {
       this._registry.push(new RegistryEntry(storageService, priority))
+    } else {
+      LOGGER.warn(`The storage service ${storageService.toString()} is incompatible and will be ignored.`)
     }
   }
 

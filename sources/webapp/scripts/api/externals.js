@@ -70,3 +70,13 @@
   * @external XMLHttpRequest
   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest|MDN web docs}
   */
+/**
+  * Allows access to HTTP ressources.
+  * @external IDBDatabase
+  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/IDBDatabase|MDN web docs}
+  */
+/**
+ * Event raised if a update of a IndexedDB is needed.
+ * @external IDBVersionChangeEvent
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/IDBVersionChangeEvent|MDN web docs}
+ */
