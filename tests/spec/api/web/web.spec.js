@@ -122,7 +122,7 @@ function testImplementation (implName, ProviderClass) {
             done()
           })
           .catch(() => {
-            fail('It is expected to fail downloading a file not existing.')
+            fail('It isn\'t expected to fail downloading a file that exists.')
             done()
           })
       })
