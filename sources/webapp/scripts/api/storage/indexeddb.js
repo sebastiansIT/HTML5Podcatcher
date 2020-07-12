@@ -79,7 +79,7 @@ export class IndexedDbStorageService extends StorageService {
    * @protected
    * @returns {module:podcatcher/storage/indexeddb~OpenConnectionPromise} A promise that fullfiled with a database connection.
    */
-  openDatabase () {
+  createConnection () {
     return new Promise((resolve, reject) => {
       /* @type https://developer.mozilla.org/en-US/docs/Web/API/IDBOpenDBRequest */
       const openDbRequest = indexedDB.open(this._databaseName, this._databaseVersion)
@@ -102,8 +102,8 @@ export class IndexedDbStorageService extends StorageService {
   /**
    * Safe a file to the indexeddb.
    * @param {string} url - The URL of the file to store inside IndexedDB.
-   * @param {external:ArrayBuffer} content - An array buffer containing the content of the file.
-   * @param {string} [mimeType=audio/mpeg] - The MIME-Type of the File.
+   * @param {external:ArrayBuffer|external:Blob} content - An array buffer or blob containing the content of the file.
+   * @param {string} [mimeType=audio/mpeg] - The MIME-Type of the File, only used when the content is a array buffer.
    * @returns {module:podcatcher/storage/files/indexeddb~SaveFilePromise} A promise that fullfiled with the database key of the saved file.
    */
   saveFile (url, content, mimeType) {
@@ -118,9 +118,10 @@ export class IndexedDbStorageService extends StorageService {
  */
 function updateIndexedDB (event) {
   LOGGER.info(`Database Update from Version ${event.oldVersion} to Version ${event.newVersion}`)
-  const connection = this.result
+  const database = event.currentTarget.result
+  const transaction = event.currentTarget.transaction
 
-  updateSourceStorage(connection)
-  updateEpisodeStorage(connection)
-  updateFileStorage(connection)
+  updateSourceStorage(database)
+  updateEpisodeStorage(database, transaction)
+  updateFileStorage(database)
 }

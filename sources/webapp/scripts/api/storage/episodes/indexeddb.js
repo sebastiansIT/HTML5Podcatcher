@@ -39,7 +39,7 @@ const STORE_NAME_EPISODES = 'episodes'
  * @param {external:IDBDatabase} connection - The database connection.
  * @returns {undefined}
  */
-export function updateIndexedDb (connection) {
+export function updateIndexedDb (connection, transaction) {
   let episodeStore
 
   // Add object store for episodes
@@ -48,12 +48,12 @@ export function updateIndexedDb (connection) {
     episodeStore.createIndex('source', 'source', { unique: false })
   }
   // Add index "status" to episode store
-  episodeStore = event.currentTarget.transaction.objectStore(STORE_NAME_EPISODES)
+  episodeStore = transaction.objectStore(STORE_NAME_EPISODES)
   if (!episodeStore.indexNames.contains('status')) {
     episodeStore.createIndex('status', 'playback.played', { unique: false })
   }
   // Add index "source" to episode store
-  episodeStore = event.currentTarget.transaction.objectStore(STORE_NAME_EPISODES)
+  episodeStore = transaction.objectStore(STORE_NAME_EPISODES)
   if (!episodeStore.indexNames.contains('sources')) {
     episodeStore.createIndex('sources', 'source', { unique: false })
   }

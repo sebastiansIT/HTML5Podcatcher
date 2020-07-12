@@ -1,32 +1,38 @@
 /**
  * The built in object.
  * @external object
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object|Object}
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object|MDN web docs}
 */
 /**
  * The built in string object.
  * @external String
- * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String|String}
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String|MDN web docs}
 */
 /**
   * The built in promise class.
   * @external Promise
-  * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise|Promise}
+  * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise|MDN web docs}
   */
 /**
   * The built in XmlDocument class.
   * @external XMLDocument
-  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/XMLDocument|XmlDocument}
+  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/XMLDocument|MDN web docs}
   */
 /**
   * The built in array buffer class.
   * @external ArrayBuffer
-  * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer|ArrayBuffer}
+  * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer|MDN web docs}
   */
+/**
+  * The built in blob class.
+  * @external Blob
+  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Blob|MDN web docs}
+  */
+
 /**
   * The built in error object.
   * @external Error
-  * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error|Error}
+  * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error|MDN web docs}
   */
 
 /**
@@ -38,7 +44,7 @@
 /**
   * The Worker Interface of the Web Workers API.
   * @external Worker
-  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Worker|Worker}
+  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Worker|MDN web docs}
   */
 /**
   * The Worker Interface of the Web Workers API.

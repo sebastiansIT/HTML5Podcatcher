@@ -54,8 +54,8 @@ const CHUNK_SIZE = 1024 * 1024 // 1 MByte
  * Saves a file inside of a IndexedDB.
  * @param {module:podcatcher/storage/indexeddb~IndexedDbStorageService} service - A StorageService providing a funktion openDatabase().
  * @param {string} url - The URL of the file to store inside IndexedDB.
- * @param {external:ArrayBuffer} content - An array buffer containing the content of the file.
- * @param {string} [mimeType=audio/mpeg] - The MIME-Type of the File.
+ * @param {external:ArrayBuffer|external:Blob} content - An array buffer or blob containing the content of the file.
+ * @param {string} [mimeType=audio/mpeg] - The MIME-Type of the File, only used when the content is a array buffer.
  * @returns {module:podcatcher/storage/files/indexeddb~SaveFilePromise} A promise that fullfiled with the database key of the saved file.
  */
 export function saveFile (service, url, content, mimeType) {
@@ -78,18 +78,20 @@ export function saveFile (service, url, content, mimeType) {
     blob = content
   }
 
-  return service.openDatabase()
+  return service.createConnection()
     .then((connection) => {
-      const transaction = connection.transaction([STORE_NAME_FILES], 'readwrite')
-      const store = transaction.objectStore(STORE_NAME_FILES)
-      const request = store.put(blob, url)
-      request.onsuccess = function () {
-        return url
-      }
-      request.onerror = function (event) {
-        LOGGER.error(event.target.error.name + ' while saving file "' + url + '" to IndexedDB (' + event.target.error.message + ')')
-        throw new Error(event.target.error)
-      }
+      return new Promise((resolve, reject) => {
+        const transaction = connection.transaction([STORE_NAME_FILES], 'readwrite')
+        const store = transaction.objectStore(STORE_NAME_FILES)
+        const request = store.put(blob, url)
+        request.onsuccess = function () {
+          return resolve(url)
+        }
+        request.onerror = function (event) {
+          LOGGER.error(event.target.error.name + ' while saving file "' + url + '" to IndexedDB (' + event.target.error.message + ')')
+          reject(new Error(event.target.error))
+        }
+      })
     })
 }
 
