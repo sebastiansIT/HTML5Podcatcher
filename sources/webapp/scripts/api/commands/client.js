@@ -88,9 +88,14 @@ export class CommandClient {
       const worker = initWorker(this._commandProcessorName)
       worker.addEventListener('message', (event) => {
         // check if it is the "completed" message
-        if (event.data.complete) {
+        if (event.data.type === 'result') {
           worker.terminate()
           resolve(event.data)
+        } else if (event.data.type === 'event') {
+          LOGGER.debug(`Event send from worker: ${JSON.stringify(event.data)}.`) // TODO do it right
+        } else if (event.data.type === 'error') {
+          worker.terminate()
+          reject(event.data.payload)
         }
       }, false)
       worker.addEventListener('error', (error) => {
@@ -121,13 +126,13 @@ function initWorker (commandProcessorName) {
 
   const worker = new Worker(WORKER_URL, { name: commandProcessorName })
   worker.addEventListener('message', (event) => {
-    LOGGER.debug(`Response for command ${JSON.stringify(event.data)}`)
+    LOGGER.debug(`Response for command: ${JSON.stringify(event.data)}`)
   }, false)
   worker.addEventListener('error', (error) => {
-    LOGGER.error(`Error executing command ${JSON.stringify(error)}`)
+    LOGGER.error(`Error executing command: ${JSON.stringify(error)}`)
   }, false)
   worker.addEventListener('messageerror', (error) => {
-    LOGGER.error(`Error parsing payload ${JSON.stringify(error)}`)
+    LOGGER.error(`Error parsing payload: ${JSON.stringify(error)}`)
   }, false)
 
   return worker

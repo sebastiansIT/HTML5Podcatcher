@@ -25,28 +25,51 @@
 
 const commandProzessorUrl = self.name + '.js'
 self.importScripts(commandProzessorUrl)
+
 const COMMAND_PROCESSOR = new self.CommandProcessor(self)
 
 self.addEventListener('message', (event) => {
   console.debug(`Command ${event.data.command} is called.`)
 
-  // TODO check event.data.command exists
+  // check event.data.command exists
   const command = event.data.command
   if (!command) {
     throw new Error('Command is missing in message to worker')
   }
   const payload = event.data.payload
 
-  if (COMMAND_PROCESSOR[command] && typeof COMMAND_PROCESSOR[command] === 'function') {
-    COMMAND_PROCESSOR[command](payload)
-      .then((workerResult) => self.postMessage({
+  const postEventMessage = (payload) => {
+    self.postMessage({
+      echo: {
         command: command,
-        payload: payload,
-        completed: true,
-        answer: workerResult
-      }))
+        payload: payload
+      },
+      type: 'event',
+      payload: payload
+    })
+  }
+
+  if (COMMAND_PROCESSOR[command] && typeof COMMAND_PROCESSOR[command] === 'function') {
+    COMMAND_PROCESSOR[command](payload, postEventMessage)
+      .then((workerResult) => {
+        self.postMessage({
+          echo: {
+            command: command,
+            payload: payload
+          },
+          type: 'result',
+          payload: workerResult
+        })
+      })
       .catch(error => {
-        throw error
+        self.postMessage({
+          echo: {
+            command: command,
+            payload: payload
+          },
+          type: 'error',
+          payload: error
+        })
       })
   } else {
     throw new Error('Unknown command')
