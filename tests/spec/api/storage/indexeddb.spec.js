@@ -49,11 +49,14 @@ describe('Class "IndexedDbStorageService"', () => {
     })
   })
 
-  describe('Open database connection', () => {
+  describe('Method createConnection()', () => {
     it('should open a connection', (done) => {
       const service = new Service(dbname, 1)
       service.createConnection()
-        .then(() => done())
+        .then((connection) => {
+          expect(connection instanceof IDBDatabase).toBeTrue()
+          done()
+        })
         .catch((error) => {
           fail(`It isn't expected to fail creating a database connection: ${error}`)
         })

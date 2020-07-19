@@ -101,7 +101,7 @@ export class StorageServiceProvider {
    * @returns {module:podcatcher/storage.StorageService} A usable storage service.
    * @throws {external:Error} An error if no usable service available.
    */
-  provide () {
+  get () {
     let selectedServiceEntry
     this._registry.forEach(serviceEntry => {
       if (serviceEntry.service.usable) {

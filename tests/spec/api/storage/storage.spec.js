@@ -34,7 +34,7 @@ describe('Package "Storage"', () => {
       const service = new Service()
       spyOnProperty(service, 'compatible', 'get').and.returnValue(true)
       provider.register(service, 100)
-      expect(provider.provide()).toBeDefined()
+      expect(provider.get()).toBeDefined()
     })
 
     it('should throw an error registering somthing other than a StorageService', () => {
@@ -60,7 +60,7 @@ describe('Package "Storage"', () => {
 
     it('should throw an error when an service is requested but non is registered', () => {
       const provider = new Provider()
-      expect(() => provider.provide()).toThrow()
+      expect(() => provider.get()).toThrow()
     })
 
     it('should not register a StorageService that is not compatible', () => {
@@ -68,7 +68,7 @@ describe('Package "Storage"', () => {
       const service = new Service()
       spyOnProperty(service, 'compatible', 'get').and.returnValue(false)
       provider.register(service, 100)
-      expect(() => provider.provide()).toThrow()
+      expect(() => provider.get()).toThrow()
     })
 
     it('should provide the usable service with the highest priority', () => {
@@ -87,7 +87,7 @@ describe('Package "Storage"', () => {
       spyOnProperty(service4, 'usable', 'get').and.returnValue(false)
       provider.register(service4, 400)
 
-      expect(service2 === provider.provide()).toBeTrue()
+      expect(service2 === provider.get()).toBeTrue()
     })
   })
 })
