@@ -13,7 +13,7 @@ module.exports = function (config) {
 
     // list of files / patterns to load in the browser
     files: [
-      { pattern: 'tests/spec/**/web/*.spec.js', watched: false },
+      { pattern: 'tests/spec/**/*.spec.js', watched: false },
       { pattern: 'tests/test.m4a', watched: false }
     ],
 
