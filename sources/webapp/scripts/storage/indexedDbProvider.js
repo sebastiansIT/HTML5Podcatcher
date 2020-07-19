@@ -707,8 +707,8 @@ var indexedDbStorageImplementation = (function () {
   // === Export public Elements         === //
   // ====================================== //
   return {
-    'IndexedDbDataProvider': IndexedDbDataProvider,
-    'IndexedDbFileProvider': IndexedDbFileProvider
+    IndexedDbDataProvider: IndexedDbDataProvider,
+    IndexedDbFileProvider: IndexedDbFileProvider
   }
 }())
 

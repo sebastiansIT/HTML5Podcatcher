@@ -32,7 +32,7 @@ var chromeFileSystemStorageImplementation = (function () {
   // ====================================== //
   /** Provides access to a file storage implemented with Googles File System API.
   * @class
-  * @implements module:HTML5Podcatcher/Storage~IFileProvider
+  * @implements {module:HTML5Podcatcher/Storage~IFileProvider}
   * @param {(window.TEMPORARY|window.PERSISTENT)} [fileSystemStatus=window.PERSISTENT] - The persistency status of the file system: window.TEMPORARY or window.PERSISTENT.
   */
   ChromeFileSystemFileProvider = function (fileSystemStatus) {
@@ -145,6 +145,7 @@ var chromeFileSystemStorageImplementation = (function () {
   }
   ChromeFileSystemFileProvider.prototype.cleanStorage = function (onDeleteCallback) {
     window.requestFileSystem(window.PERSISTENT, 1024 * 1024, function (fs) {
+      let removeEntry
       const dirReader = fs.root.createReader()
       const readEntries = function () {
         dirReader.readEntries(function (results) {
@@ -152,7 +153,7 @@ var chromeFileSystemStorageImplementation = (function () {
             onDeleteCallback()
           } else {
             let index = 0
-            let removeEntry = function () {
+            removeEntry = function () {
               results[index].remove(function () {
                 index++
                 if (index < results.length) {
@@ -172,7 +173,7 @@ var chromeFileSystemStorageImplementation = (function () {
   // === Export public Elements         === //
   // ====================================== //
   return {
-    'ChromeFileSystemFileProvider': ChromeFileSystemFileProvider
+    ChromeFileSystemFileProvider: ChromeFileSystemFileProvider
   }
 }())
 

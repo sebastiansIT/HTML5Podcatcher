@@ -327,7 +327,7 @@ var GlobalUserInterfaceHelper = {
 
   /** Renders the html markup for a single episode.
     * @param {Episode} episode - The Episode to render.
-    * @return {Node} HTML-Element with the visualisation of an Episode.
+    * @returns {Node} HTML-Element with the visualisation of an Episode.
     */
   renderEpisode: function (episode) {
     'use strict'
