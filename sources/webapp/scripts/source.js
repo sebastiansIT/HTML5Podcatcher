@@ -22,8 +22,6 @@
 /* global HTML5Podcatcher, POD */
 /* global GlobalUserInterfaceHelper, UI */
 
-import { CommandClient } from './api/commands/client.js'
-
 GlobalUserInterfaceHelper.renderSourceDetails = function (source) {
   'use strict'
   var markup = UI.renderSource(source)
@@ -38,7 +36,7 @@ GlobalUserInterfaceHelper.renderSourceDetails = function (source) {
   })
 }
 
-/** Central 'ready' event handler */
+/* Central 'ready' event handler. */
 document.addEventListener('DOMContentLoaded', function (/* event */) {
   'use strict'
   var sourceUri
@@ -137,16 +135,11 @@ document.addEventListener('DOMContentLoaded', function (/* event */) {
       button.setAttribute('disabled', 'disabled')
       button.classList.add('spinner')
 
-      const client = new CommandClient('sourceProcessor')
-      client.call('diagnostic')
-        .then(awnser => { UI.logHandler(awnser, 'debug') })
-        .catch(awnser => { UI.logHandler(awnser, 'debug') })
-
       // start update of the source
-      /* HTML5Podcatcher.web.downloadSource(source, limitOfNewEpisodes, function () {
+      HTML5Podcatcher.web.downloadSource(source, limitOfNewEpisodes, function () {
         button.removeAttribute('disabled')
         button.classList.remove('spinner')
-      }) */
+      })
     })
 
     UI.initGeneralUIEvents()
