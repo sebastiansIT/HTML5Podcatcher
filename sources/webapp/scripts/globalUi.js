@@ -16,9 +16,9 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 /* global window, navigator, document, console, confirm */
-/* global Worker, MessageChannel */
+/* global MessageChannel */
 /* global $ */
-/* global HTML5Podcatcher, POD, podcatcher */
+/* global HTML5Podcatcher, POD */
 var GlobalUserInterfaceHelper = {
   formatTimeCode: function (timecode) {
     'use strict'

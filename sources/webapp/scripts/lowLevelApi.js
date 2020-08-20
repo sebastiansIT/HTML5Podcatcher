@@ -29,9 +29,9 @@ var HTML5Podcatcher = {
     },
 
     /** Updates a source from its feed.
-      * @param {Source} source Source to update.
-      * @param {number} [limitOfNewEpisodes=5] Maximal amount of episodes imported as 'new'.
-      * @param {function} [onFinishedCallback] Function called when download of Source is completed.
+      * @param {Source} source - Source to update.
+      * @param {number} [limitOfNewEpisodes=5] - Maximal amount of episodes imported as 'new'.
+      * @param {Function} [onFinishedCallback] - Function called when download of Source is completed.
       */
     downloadSource: function (source, limitOfNewEpisodes, onFinishedCallback) {
       'use strict'
@@ -104,9 +104,9 @@ var HTML5Podcatcher = {
     },
 
     /** Updates all Sources from there feeds.
-      * @param {number} [limitOfNewEpisodes=5] Maximal amount of episodes per source imported as 'new'.
-      * @param {function} [onFinishedCallback] Function called when download of all Sources are completed.
-      * @param {function} [onProgressCallback] Function called after each download of a single Source.
+      * @param {number} [limitOfNewEpisodes=5] - Maximal amount of episodes per source imported as 'new'.
+      * @param {Function} [onFinishedCallback] - Function called when download of all Sources are completed.
+      * @param {Function} [onProgressCallback] - Function called after each download of a single Source.
       */
     downloadAllSources: function (limitOfNewEpisodes, onFinishedCallback, onProgressCallback) {
       let statusOverall = true
@@ -150,10 +150,12 @@ var HTML5Podcatcher = {
       if (onProgressCallback && typeof onProgressCallback === 'function') {
         client.addEventListener('progress', (event) => onProgressCallback(event, episode))
       }
-      client.call('downloadMedia', {
-        mediaUrl: episode.mediaUrl,
-        sopProxyPattern: HTML5Podcatcher.api.configuration.proxyUrlPattern
-      })
+      client.call('downloadMedia',
+        {
+          mediaUrl: episode.mediaUrl,
+          sopProxyPattern: HTML5Podcatcher.api.configuration.proxyUrlPattern
+        }
+      )
         .then(() => {
           episode.isFileSavedOffline = true
           HTML5Podcatcher.api.storage.StorageProvider.writeEpisode(episode)
@@ -169,8 +171,8 @@ var HTML5Podcatcher = {
       return () => {
         client.abortAllRunningCommands()
       }
+    }
   },
-
   system: {
     isOpenWebAppContainer: function (onCompletedCallback) {
       'use strict'
