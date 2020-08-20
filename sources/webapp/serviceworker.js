@@ -21,8 +21,6 @@
 
 /* global self, caches, fetch */
 
-self.importScripts('scripts/worker/utils/workerlogger.js')
-
 const CACHE_PREFIX = 'HTML5Podcatcher_Assets'
 const CACHE_NAME = CACHE_PREFIX + '_{{ VERSION }}'
 const CACHED_FILES = [
@@ -93,7 +91,7 @@ self.addEventListener('install', event => {
   event.waitUntil(
     self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
       .then(clients => {
-        const LOGGER = new self.WorkerLogger(clients)
+        const LOGGER = new WorkerLogger(clients)
         return caches.open(CACHE_NAME)
           .then(cache => {
             LOGGER.log(`Opened cache ${CACHE_NAME}`, 'debug', 'ServiceWorker')
@@ -113,7 +111,7 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
       .then(clients => {
-        const LOGGER = new self.WorkerLogger(clients)
+        const LOGGER = new WorkerLogger(clients)
         return caches.keys()
           .then(cacheNames => {
             LOGGER.log('Clean up old Caches', 'debug', 'ServiceWorker')
@@ -137,7 +135,7 @@ self.addEventListener('activate', event => {
 })
 
 self.addEventListener('message', event => {
-  const LOGGER = new self.WorkerLogger([event.ports[0]])
+  const LOGGER = new WorkerLogger([event.ports[0]])
   if (event.data.command === 'skipWaiting') {
     LOGGER.log('Update application imediatly', 'debug', 'ServiceWorker')
     event.ports[0].postMessage({ command: 'confirm' })
@@ -162,7 +160,7 @@ self.addEventListener('fetch', event => {
           if (client) {
             clients.push(client)
           }
-          new self.WorkerLogger(clients).log(message, logLevelName, tag)
+          new WorkerLogger(clients).log(message, logLevelName, tag)
         })
     }
   }
@@ -222,3 +220,54 @@ self.addEventListener('fetch', event => {
       })
   )
 })
+
+/** Special Logger to transfer the log messages to the frontend.
+ * @class
+ */
+class WorkerLogger {
+  /**
+    * Creates a logger that communicates with the given array of clients.
+    * @param {external:Client[]} [clients] - The Worker-Clients that get notivied about new log entries.
+    */
+  constructor (clients) {
+    this.clients = clients || []
+  }
+
+  log (message, logLevelName, tag) {
+    // Defaults
+    tag = tag || self.location.pathname
+
+    // Send message to Clients of the worker
+    this.clients.forEach(client => {
+      client.postMessage({
+        command: 'messageLog',
+        message: [message, logLevelName, tag]
+      })
+    })
+
+    // Log to the console
+    message = `Module ${tag} says: ${message}`
+    switch (logLevelName) {
+      case 'debug':
+        console.debug(message)
+        break
+      case 'info':
+        console.info(message)
+        break
+      case 'note':
+        console.info(message)
+        break
+      case 'warn':
+        console.warn(message)
+        break
+      case 'error':
+        console.error(message)
+        break
+      case 'fatal':
+        console.error(message)
+        break
+      default:
+        console.log(`${logLevelName}: ${message}`)
+    }
+  }
+}

@@ -86,3 +86,8 @@
  * @external IDBVersionChangeEvent
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/IDBVersionChangeEvent|MDN web docs}
  */
+/**
+  * The Client connected to an Worker.
+  * @external Client
+  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Client|MDN web docs}
+  */
