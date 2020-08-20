@@ -1,4 +1,16 @@
-/** The HTML5Podcatcher Command Worker.
+/** The HTML5Podcatcher Command Worker. This
+    {@link https://developer.mozilla.org/en-US/docs/Web/API/Worker|Web Worker}
+    is a generic endpoint to call a command prozessor. Whenever this worker is
+    instanciatet it is necessary to give him a name. This name is used to find
+    the implementation of the command prozessor to use.
+
+    Messages send to the worker has to contain a
+    {@link modul:podcatcher/commands/worker~CommandRequest|CommandRequest}
+    in there data property of the message.
+
+    Each command send one or more
+    {@link modul:podcatcher/commands/worker~CommandResponse|CommandResponse}
+    back to the caller.
 
     @module  podcatcher/commands/worker
     @author  Sebastian Spautz [sebastian@human-injection.de]
@@ -23,11 +35,39 @@
 
 /* global self */
 
+/**
+ * The file name of the command prozessor to use. It is based on the name of
+ * the worker.
+ * @constant {string}
+ */
 const commandProzessorUrl = self.name + '.js'
 self.importScripts(commandProzessorUrl)
 
+/**
+ * The command prozessor used by this worker.
+ * @constant {module:podcatcher/commands/processor.BaseCommandProcessor}
+ */
 const COMMAND_PROCESSOR = new self.CommandProcessor(self)
 
+/**
+ * A command request.
+ * @typedef {object} CommandRequest
+ * @property {string} command - The command - it is also the name of the method called from the command prozessor.
+ * @property {object} payload - The payload for the command.
+ */
+
+/**
+  * A command response.
+  * It is possible to have more than one response per request.
+  * @typedef {object} CommandResponse
+  * @property {CommandRequest} echo - The original CommandRequest.
+  * @property {'result'|'event'|'error'} type - The type of the response.
+  * @property {object} payload - The result of the command, the event data or the error.
+  */
+
+/*
+ * Listens for messages from the client and call the command prozessor.
+ */
 self.addEventListener('message', (event) => {
   console.debug(`Command ${event.data.command} is called.`)
 
@@ -38,14 +78,17 @@ self.addEventListener('message', (event) => {
   }
   const payload = event.data.payload
 
-  const postEventMessage = (payload) => {
+  const postEventMessage = (eventName, eventPayload) => {
     self.postMessage({
       echo: {
         command: command,
         payload: payload
       },
       type: 'event',
-      payload: payload
+      payload: {
+        name: eventName,
+        data: eventPayload
+      }
     })
   }
 
@@ -77,6 +120,5 @@ self.addEventListener('message', (event) => {
 }, false)
 
 self.addEventListener('messageerror', (event) => {
-  // TODO more logging
   console.error(event.data)
 })
