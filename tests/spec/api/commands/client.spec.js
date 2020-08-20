@@ -1,4 +1,4 @@
-/** The HTML5Podcatcher Command Client
+/** The HTML5Podcatcher Command Client tests.
 
     This file is part of "HTML5 Podcatcher".
 
@@ -23,6 +23,9 @@ import { CommandClient } from '../../../../sources/webapp/scripts/api/commands/c
 beforeAll(() => {
   window._Worker = window.Worker
   window.Worker = function (path, params) {
+    this.terminate = function () {
+      console.log('Simulate termination in proxy')
+    }
     this.errorhandler = undefined
     this.messageerrorhandler = undefined
     this.messagehandler = undefined
@@ -35,7 +38,16 @@ beforeAll(() => {
           this.errorhandler('ERROR')
           break
         default:
-          this.messagehandler({ data: { command: 'OK', complete: true } })
+          this.messagehandler({
+            data: {
+              echo: {
+                command: 'Test',
+                payload: {}
+              },
+              type: 'result',
+              payload: {}
+            }
+          })
           break
       }
     }

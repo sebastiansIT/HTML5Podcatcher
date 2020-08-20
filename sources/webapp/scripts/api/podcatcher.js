@@ -28,6 +28,7 @@ import { logManager, Logger } from './utils/logging.js'
 import WebAccessProvider from './web/fetch.js'
 import WebStorageSettingsProvider from './storage/settings/webstorage.js'
 import Sourcelist from './model/sourcelist'
+import { CommandClient } from './commands/client.js'
 
 const settingsStorageProvider = new WebStorageSettingsProvider()
 
@@ -69,7 +70,8 @@ const api = {
       }
     }
   },
-  web: new WebAccessProvider(null) // Temporär für umgestalltung auf Module
+  web: new WebAccessProvider(null), // Temporär für umgestalltung auf Module
+  Worker: CommandClient // Temporär für umgestalltung auf Module
 }
 
 export default api

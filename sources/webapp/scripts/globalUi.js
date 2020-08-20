@@ -193,8 +193,9 @@ var GlobalUserInterfaceHelper = {
       GlobalUserInterfaceHelper.logHandler('Thank you for installing H5P on your device', 'note', 'WebManifest')
     })
   },
-  /** Register ServiceWorker and handle the update prozess
-    * @returns undefined
+
+  /** Register ServiceWorker and handle the update prozess.
+    * @returns {undefined}
   */
   initServiceWorker: function () {
     if ('serviceWorker' in navigator) {
@@ -501,17 +502,18 @@ var GlobalUserInterfaceHelper = {
 
         // load data of episode from storage...
         POD.storage.readEpisode(episodeUI.data('episodeUri'), function (episode) {
-          UI.logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info')
+          UI.logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info:GlobalUI')
           // ... then download file to storage...
-          POD.web.downloadFile(episode, function (episode) {
+          const abortFunction = POD.web.downloadFile(episode, function (episode) {
             // ... and update UI
             episodeUI.replaceWith(UI.renderEpisode(episode))
           }, UI.progressHandler)
+          DownloadAbortHandler.set(episode.mediaUrl, abortFunction)
         })
       } else {
-        UI.logHandler('Download is allways in progress - abort now', 'debug')
+        UI.logHandler('Download is allways in progress - abort now', 'debug:GlobalUI')
         POD.storage.readEpisode(episodeUI.data('episodeUri'), function (episode) {
-          podcatcher.web.abort(episode.mediaUrl)
+          DownloadAbortHandler.get(episode.mediaUrl)()
           event.currentTarget.setAttribute('aria-disabled', 'false')
           episodeUI[0].style.background = ''
           event.currentTarget.setAttribute('aria-label', 'Download')
@@ -540,49 +542,10 @@ var GlobalUserInterfaceHelper = {
       button.classList.add('spinner')
 
       POD.web.downloadAllSources(null, onFinishedCallback, onProgressCallback)
-    },
-
-    refreshAllSources_widthWorker: function (event) {
-      'use strict'
-      event.preventDefault()
-      event.stopPropagation()
-
-      var button
-      button = this
-
-      $(button).attr('disabled', 'disabled')
-      $(button).addClass('spinner')
-
-      POD.logger('Playlist will be refreshed', 'debug')
-
-      POD.storage.readSources(function (sources) {
-        var worker = new Worker('scripts/worker/actualisePlaylist.js')
-        worker.addEventListener('message', function (event) {
-          if (event.data.cmd === 'log') {
-            POD.logger(event.data.parameter.message, event.data.parameter.level)
-          } else if (event.data.cmd === 'exit') {
-            POD.logger(event.data.parameter.message, 'info')
-          } else {
-            console.log('Worker said: ', event.data)
-          }
-        }, false)
-        worker.addEventListener('error', function (event) {
-          POD.logger(event.message + '[' + event.filename + ':' + event.lineno + ']', 'error')
-        }, false)
-
-        worker.postMessage({ // Start Worker.
-          cmd: 'start',
-          parameter: {
-            sources: sources,
-            settings: {
-              proxyUrl: HTML5Podcatcher.api.configuration.proxyUrlPattern
-            }
-          }
-        })
-      })
     }
   }
 }
+var DownloadAbortHandler = new Map()
 var UI = GlobalUserInterfaceHelper
 POD.api.configuration.logger = UI.logHandler
 POD.storage = POD.api.storage.StorageProvider

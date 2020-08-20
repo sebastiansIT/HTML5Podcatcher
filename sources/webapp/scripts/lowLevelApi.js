@@ -16,7 +16,7 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 
-/* global navigator, window, document, console */
+/* global window, console */
 /* global podcatcher */
 
 var HTML5Podcatcher = {
@@ -145,20 +145,30 @@ var HTML5Podcatcher = {
 
       // TODO set proxyPattern outside
       podcatcher.web.sopProxyPattern = HTML5Podcatcher.api.configuration.proxyUrlPattern
-      podcatcher.web.downloadArrayBuffer(episode.mediaUrl, (event/*, url */) => {
-        if (onProgressCallback && typeof onProgressCallback === 'function') {
-          onProgressCallback(event, episode)
-        }
+
+      const client = new podcatcher.Worker('episodeProcessor')
+      if (onProgressCallback && typeof onProgressCallback === 'function') {
+        client.addEventListener('progress', (event) => onProgressCallback(event, episode))
+      }
+      client.call('downloadMedia', {
+        mediaUrl: episode.mediaUrl,
+        sopProxyPattern: HTML5Podcatcher.api.configuration.proxyUrlPattern
       })
-        .then((arrayBuffer) => HTML5Podcatcher.storage.saveFile(episode, arrayBuffer, onDownloadCallback, onProgressCallback))
-        .catch((error) => {
-          if (error instanceof DOMException) {
-            HTML5Podcatcher.logger('Download aborted', 'info')
-          } else {
-            HTML5Podcatcher.logger(error, 'error')
+        .then(() => {
+          episode.isFileSavedOffline = true
+          HTML5Podcatcher.api.storage.StorageProvider.writeEpisode(episode)
+          if (onDownloadCallback && typeof onDownloadCallback === 'function') {
+            onDownloadCallback(episode)
           }
         })
-    }
+        .catch((error) => {
+          HTML5Podcatcher.logger(error, 'error:LowLevelAPI')
+          onDownloadCallback(episode)
+        })
+
+      return () => {
+        client.abortAllRunningCommands()
+      }
   },
 
   system: {
