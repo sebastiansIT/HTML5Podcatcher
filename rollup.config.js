@@ -16,14 +16,6 @@ export default [
     }
   },
   {
-    input: './sources/webapp/scripts/api/commands/source/sourceProcessor.js',
-    output: {
-      name: 'CommandProcessor',
-      file: 'distributions/webapp/scripts/api/commands/sourceProcessor.js',
-      format: 'iife'
-    }
-  },
-  {
     input: './sources/webapp/scripts/api/commands/episode/episodeProcessor.js',
     output: {
       name: 'CommandProcessor',
