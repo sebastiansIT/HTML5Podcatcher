@@ -19,6 +19,10 @@
 /* global MessageChannel */
 /* global $ */
 /* global HTML5Podcatcher, POD */
+
+const DOWNLOAD_ICON_URL = 'styles/icons/download.svg#icon_download'
+const ABORT_ICON_URL = 'styles/icons/close.svg#icon_close'
+
 var GlobalUserInterfaceHelper = {
   formatTimeCode: function (timecode) {
     'use strict'
@@ -496,28 +500,32 @@ var GlobalUserInterfaceHelper = {
       event.preventDefault()
       event.stopPropagation()
       if (event.currentTarget.getAttribute('aria-disabled') !== 'true') {
-        event.currentTarget.setAttribute('aria-disabled', 'true')
-        event.currentTarget.setAttribute('aria-label', 'Abort Download')
-        // TODO replace Download-Link with cancel-Button while download isn't finished
+        const currentIcon = event.currentTarget.getElementsByTagName('use')[0].getAttribute('href')
+        if (currentIcon === DOWNLOAD_ICON_URL) {
+          event.currentTarget.getElementsByTagName('use')[0].setAttribute('href', ABORT_ICON_URL)
+          event.currentTarget.setAttribute('aria-label', 'Abort Download')
 
-        // load data of episode from storage...
-        POD.storage.readEpisode(episodeUI.data('episodeUri'), function (episode) {
-          UI.logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info:GlobalUI')
-          // ... then download file to storage...
-          const abortFunction = POD.web.downloadFile(episode, function (episode) {
-            // ... and update UI
-            episodeUI.replaceWith(UI.renderEpisode(episode))
-          }, UI.progressHandler)
-          DownloadAbortHandler.set(episode.mediaUrl, abortFunction)
-        })
-      } else {
-        UI.logHandler('Download is allways in progress - abort now', 'debug:GlobalUI')
-        POD.storage.readEpisode(episodeUI.data('episodeUri'), function (episode) {
-          DownloadAbortHandler.get(episode.mediaUrl)()
-          event.currentTarget.setAttribute('aria-disabled', 'false')
-          episodeUI[0].style.background = ''
-          event.currentTarget.setAttribute('aria-label', 'Download')
-        })
+          // load data of episode from storage...
+          POD.storage.readEpisode(episodeUI.data('episodeUri'), function (episode) {
+            UI.logHandler('Downloading file "' + episode.mediaUrl + '" starts now.', 'info:GlobalUI')
+            // ... then download file to storage...
+            const abortFunction = POD.web.downloadFile(episode, function (episode) {
+              downloadAbortHandler.delete(episode.mediaUrl)
+              // ... and update UI
+              episodeUI.replaceWith(UI.renderEpisode(episode))
+            }, UI.progressHandler)
+            downloadAbortHandler.set(episode.mediaUrl, abortFunction)
+          })
+        } else {
+          UI.logHandler('Download is allways in progress - abort now', 'debug:GlobalUI')
+          POD.storage.readEpisode(episodeUI.data('episodeUri'), function (episode) {
+            downloadAbortHandler.get(episode.mediaUrl)()
+            downloadAbortHandler.delete(episode.mediaUrl)
+            episodeUI[0].style.background = ''
+            event.currentTarget.getElementsByTagName('use')[0].setAttribute('href', DOWNLOAD_ICON_URL)
+            event.currentTarget.setAttribute('aria-label', 'Download')
+          })
+        }
       }
     },
 
@@ -545,7 +553,7 @@ var GlobalUserInterfaceHelper = {
     }
   }
 }
-var DownloadAbortHandler = new Map()
+var downloadAbortHandler = new Map()
 var UI = GlobalUserInterfaceHelper
 POD.api.configuration.logger = UI.logHandler
 POD.storage = POD.api.storage.StorageProvider
