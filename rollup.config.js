@@ -22,5 +22,13 @@ export default [
       file: 'distributions/webapp/scripts/api/commands/sourceProcessor.js',
       format: 'iife'
     }
+  },
+  {
+    input: './sources/webapp/scripts/api/commands/episode/episodeProcessor.js',
+    output: {
+      name: 'CommandProcessor',
+      file: 'distributions/webapp/scripts/api/commands/episodeProcessor.js',
+      format: 'iife'
+    }
   }
 ]
