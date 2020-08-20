@@ -23,12 +23,16 @@
 
 import { Logger } from '../utils/logging.js'
 
+/**
+ * @constant {module:podcatcher/utils/logging.Logger}
+ */
 const LOGGER = new Logger('podcatcher/commands/processor')
 
-// TODO Document Interface "CommandProzessor"
-
 /**
- * Base for all command prozessors.
+ * Base for all command prozessors. A command prozessor is a collection of
+ * functions that can be called by a {@link https://developer.mozilla.org/en-US/docs/Web/API/Worker|Web Worker}.
+ * Each function returns a Promise that fullfiles with the result of a command.
+ * Also each function can get some payload as the first parameter.
  * @abstract
  */
 export class BaseCommandProcessor {
@@ -41,8 +45,15 @@ export class BaseCommandProcessor {
   }
 
   /**
+   * The Result of the diagnostic command.
+   * @typedef {object} DiagnosticInformation
+   * @property {string} name - The name of the web worker.
+   * @property {string} url - The URL of the workers javascript file.
+   */
+
+  /**
    * Command "diagnostic" awnsers with the workers name and location.
-   * @returns {Promise<object>} The workers name and path to the javascript file.
+   * @returns {Promise<module:podcatcher/commands/processor~DiagnosticInformation>} The workers name and path to the javascript file.
    */
   diagnostic () {
     LOGGER.debug('Command "diagnostic" is called')
@@ -55,8 +66,8 @@ export class BaseCommandProcessor {
   }
 
   /** Command "echo" awnsers with the commands payload.
-   * @param {external:Object} payload - Some data.
-   * @returns {Promise<external:Object>} A promise resolving with the payload.
+   * @param {object} payload - Some data.
+   * @returns {Promise<object>} A promise resolving with the payload.
    */
   echo (payload) {
     LOGGER.debug('Command "echo" is called')
@@ -66,11 +77,11 @@ export class BaseCommandProcessor {
   }
 
   /** Command "close" closes the web worker silently.
-   * @returns {null} Returns nothing.
+   * @returns {undefined} Returns nothing.
    */
   close () {
     this._worker.close()
     LOGGER.debug(`Worker ${this._worker.name} is closed.`)
-    return null
+    return undefined
   }
 }
