@@ -30,14 +30,18 @@ import { Logger } from '../utils/logging.js'
  */
 const LOGGER = new Logger('podcatcher/commands/client')
 /**
- * Path to the "abstract" worker that handles command requests.
+ * Path to the "generic" worker that handles command requests.
  * @constant {external:String}
  */
 const WORKER_URL = 'scripts/api/commands/worker.js'
 
 /**
  * Client to send commands to a command processor.
- * The current implementation uses Web Workers.
+ * The current implementation uses Web Workers as runtime for the commands
+ * processors.
+ * ATTENTION! At the moment each instance of a client can only be used to run
+ * one single command. The different commands are not sepearatet completly in
+ * the diffent event listeners!
  */
 export class CommandClient {
   /**
@@ -50,13 +54,28 @@ export class CommandClient {
     checkCommandProcessorName(commandProcessorName)
     /**
      * The javascript file name of the command porcessor.
+     * @member {external:String}
      * @private
-     * @type {external:String}
     */
     this._commandProcessorName = commandProcessorName
+
+    /**
+     * The instance of a Worker prozess the client comunicate with.
+     * @member {external:Worker}
+     * @private
+     */
+    this._worker = initWorker(this._commandProcessorName)
+
+    /**
+     * ATTENTION! Should be a different list per command and not for the whole
+     * client instance.
+     * @member {Array}
+     * @private
+     */
+    this._eventListener = []
   }
 
-  // Documenting proises: see https://github.com/jsdoc/jsdoc/issues/1197#issuecomment-312948746
+  // Documenting promises: see https://github.com/jsdoc/jsdoc/issues/1197#issuecomment-312948746
   /**
    * A promise for the commands response.
    * @typedef {external:Promise<object>} CommandResponsePromise
@@ -85,14 +104,18 @@ export class CommandClient {
     }
 
     return new Promise((resolve, reject) => {
-      const worker = initWorker(this._commandProcessorName)
+      const worker = this._worker
       worker.addEventListener('message', (event) => {
         // check if it is the "completed" message
         if (event.data.type === 'result') {
           worker.terminate()
           resolve(event.data)
         } else if (event.data.type === 'event') {
-          LOGGER.debug(`Event send from worker: ${JSON.stringify(event.data)}.`) // TODO do it right
+          this._eventListener.forEach((item, i) => {
+            if (item.name === event.data.payload.name) {
+              item.callback(event.data.payload.data)
+            }
+          })
         } else if (event.data.type === 'error') {
           worker.terminate()
           reject(event.data.payload)
@@ -108,6 +131,23 @@ export class CommandClient {
         command: command,
         payload: payload
       })
+    })
+  }
+
+  /**
+   * Abort all running commands.
+   * @returns {undefined}
+   */
+  abortAllRunningCommands () {
+    LOGGER.debug('Terminate worker')
+    this._worker.terminate()
+    this._worker = initWorker(this._commandProcessorName)
+  }
+
+  addEventListener (name, callback) {
+    this._eventListener.push({
+      name: name,
+      callback: callback
     })
   }
 }
@@ -156,6 +196,3 @@ function checkCommandProcessorName (commandProcessorName) {
     throw new Error(`Name of the command processor must not be ${commandProcessorName}`)
   }
 }
-
-// TODO zwischenmeldungen
-// TODO verarbeitung abbrechen
