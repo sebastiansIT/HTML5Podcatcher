@@ -116,6 +116,7 @@ var chromeFileSystemStorageImplementation = (function () {
           var url
           url = episode.offlineMediaUrl
           episode.offlineMediaUrl = undefined
+          episode.isFileSavedOffline = false
           HTML5Podcatcher.api.storage.StorageProvider.writeEpisode(episode)
           HTML5Podcatcher.logger('File "' + url + '"not found. But that\'s OK', 'info')
         } else {
