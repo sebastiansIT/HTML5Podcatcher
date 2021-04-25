@@ -18,269 +18,287 @@
 
 /* App-Page Layout */
 :root {
-	--page-background: white;
-	--text-color: #333;
-	--text-secondary-color: #646464;
-	--text-deactivated-color: #C7C7C7;
-	--link-color: rgb(0,100,0);
-	--primary-color: rgb(0, 100, 0);
-	--primary-color-active: rgba(0, 100, 0, 0.8);
-	--primary-color-hover: rgba(0, 100, 0, 0.95);
-	--primary-color-background: rgba(0, 100, 0, 0.2);
-	--separator-color: rgb(200, 200, 200);
-	--dialog-background: rgba(255, 255, 255, 0.9);
+  --page-background: white;
+  --text-color: #333;
+  --text-secondary-color: #646464;
+  --text-deactivated-color: #c7c7c7;
+  --link-color: rgb(0, 100, 0);
+  --primary-color: rgb(0, 100, 0);
+  --primary-color-active: rgba(0, 100, 0, 0.8);
+  --primary-color-hover: rgba(0, 100, 0, 0.95);
+  --primary-color-background: rgba(0, 100, 0, 0.2);
+  --separator-color: rgb(200, 200, 200);
+  --dialog-background: rgba(255, 255, 255, 0.9);
 }
 
 @media screen and (prefers-color-scheme: dark) {
-	:root {
-		--page-background: black;
-		--text-color: #DDD;
-		--text-secondary-color: #AAA;
-		--text-deactivated-color: #333333;
-		--link-color: #00C400;
-		--primary-color: rgb(41, 74, 41);
-		--primary-color-active: rgba(41, 74, 41, 0.2);
-		--primary-color-hover: rgba(41, 74, 41, 0.05);
-		--primary-color-background: rgba(41, 74, 41, 0.6);
-		--separator-color: rgb(100, 100, 100);
-		--dialog-background: rgba(0, 0, 0, 0.9);
-	}
+  :root {
+    --page-background: black;
+    --text-color: #ddd;
+    --text-secondary-color: #aaa;
+    --text-deactivated-color: #333;
+    --link-color: #00c400;
+    --primary-color: rgb(41, 74, 41);
+    --primary-color-active: rgba(41, 74, 41, 0.2);
+    --primary-color-hover: rgba(41, 74, 41, 0.05);
+    --primary-color-background: rgba(41, 74, 41, 0.6);
+    --separator-color: rgb(100, 100, 100);
+    --dialog-background: rgba(0, 0, 0, 0.9);
+  }
 }
 
 /* Theme for test version */
 /* :root {
-	--page-background: white;
-	--text-color: #333;
-	--text-secondary-color: #646464;
-	--text-deactivated-color: #C7C7C7;
-	--link-color: rgb(0,100,0);
-	--primary-color: rgb(200, 100, 0);
-	--primary-color-active: rgba(200, 100, 0, 0.8);
-	--primary-color-hover: rgba(200, 100, 0, 0.95);
-	--primary-color-background: rgba(200, 100, 0, 0.2);
-	--separator-color: rgb(200, 200, 200);
-	--dialog-background: rgba(255, 255, 255, 0.9);
+  --page-background: white;
+  --text-color: #333;
+  --text-secondary-color: #646464;
+  --text-deactivated-color: #C7C7C7;
+  --link-color: rgb(0,100,0);
+  --primary-color: rgb(200, 100, 0);
+  --primary-color-active: rgba(200, 100, 0, 0.8);
+  --primary-color-hover: rgba(200, 100, 0, 0.95);
+  --primary-color-background: rgba(200, 100, 0, 0.2);
+  --separator-color: rgb(200, 200, 200);
+  --dialog-background: rgba(255, 255, 255, 0.9);
 } */
 
 html {
-	background-color: var(--page-background);
-	font-size: 62.5%; /*Set font size to 10px (if default is 16px) */
-	font-family: 'Fira Sans', sans-serif;
-	line-height: 2.0rem;
-	height: 100%;
+  background-color: var(--page-background);
+  font-size: 62.5%; /* Set font size to 10px (if default is 16px) */
+  font-family: 'Fira Sans', sans-serif;
+  line-height: 2rem;
+  height: 100%;
 }
 
 /* The Body defines the Stage */
 body {
-	margin: 0;
-	padding: 0;
-	height: 100%;
-	position: relative;
-	overflow: hidden;
-	font-size:1.6rem;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  font-size: 1.6rem;
   hyphens: auto;
 }
+
 /* Each Region is a Scene */
 dialog[open],
 section[role="region"] {
-	height:100%;
-	display:flex;
-	flex-direction: column;
-	flex-wrap: nowrap;
-	color: var(--text-color);
-	border: 0;
-	margin: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  color: var(--text-color);
+  border: 0;
+  margin: 0;
 }
 
 dialog[open] > footer:last-child,
 section[role="region"] > footer:last-child {
-	background-color: var(--primary-color, #006400);
-	color: #fff;
+  background-color: var(--primary-color, #006400);
+  color: #fff;
 }
+
 dialog[open] .content,
 section[role="region"] .content {
-	height:100%;
-	overflow:auto;
-	flex-basis: 0;
-	flex-grow: 1;
-	flex-shrink: 1;
-	/* The Scroll-Snap Feature dosn't works good. Espacialy in Firefox some
-	   parts of the page are unreachable in some cases.*/
-	/* autoprefixer: ignore next
-	scroll-snap-type: y proximity;
-	scroll-padding: 0.6rem;*/
+  height: 100%;
+  overflow: auto;
+  flex-basis: 0;
+  flex-grow: 1;
+  flex-shrink: 1;
 }
+
 dialog[open] .content > div,
 dialog[open] .content > section,
 section[role="region"] .content > div,
 section[role="region"] .content > section,
 section[role="region"] .content > details {
-	margin: 1.2rem;
+  margin: 1.2rem;
 }
 
 @media only all and (pointer: coarse) {
-	section[role="region"] .content > section,
-	section[role="region"] .content > details {
-		scroll-snap-align: start;
-	}
+  section[role="region"] .content > section,
+  section[role="region"] .content > details {
+    scroll-snap-align: start;
+  }
 }
 
 /* Special Layout for Dialogs */
 dialog,
 section.dialog[role="region"] {
-	display:none;
-	width:100%;
-	padding: 0;
-	background-color: var(--dialog-background);
+  display: none;
+  width: 100%;
+  padding: 0;
+  background-color: var(--dialog-background);
 }
+
 dialog[open],
 section.fullscreen[role="region"] {
-	position: absolute;
-	display:flex;
-	top: 0;
+  position: absolute;
+  display: flex;
+  top: 0;
 }
+
 /* end of App-Page Layout */
 
 /* Non-Layout for Template areas */
-template, .template {
-	display: none;
+template,
+.template {
+  display: none;
 }
 
 /* Content-Style */
 h2 { /* = Headline of Content */
-	font-size: 2.2rem;
-	line-height:1.2em;
-	margin-top: 1em;
-	margin-bottom: 0.6em;
+  font-size: 2.2rem;
+  line-height: 1.2em;
+  margin-top: 1em;
+  margin-bottom: 0.6em;
 }
+
 h3 { /* = Headline of a content section */
-	font-size: 2.0rem;
-	line-height:1.2em;
-	margin-top: 1em;
-	margin-bottom: 0.6em;
+  font-size: 2rem;
+  line-height: 1.2em;
+  margin-top: 1em;
+  margin-bottom: 0.6em;
 }
 
 a {
-	color: var(--link-color, #006400);
+  color: var(--link-color, #006400);
 }
+
 a:visited {
-	color: var(--link-color, #006400);
-	text-decoration: none;
+  color: var(--link-color, #006400);
+  text-decoration: none;
 }
+
 a:hover,
 a:active,
 a:focus {
-	background-color: var(--primary-color-background, rgba(0, 100, 0, 0.2));
-	padding: 1px 2px;
+  background-color: var(--primary-color-background, rgba(0, 100, 0, 0.2));
+  padding: 1px 2px;
 }
+
 h2 a,
 h3 a,
-h4 a { /*Links insite a Headline*/
-	color: inherit;
-	text-decoration: inherit;
+h4 a { /* Links insite a Headline */
+  color: inherit;
+  text-decoration: inherit;
 }
 
 /* Loging-Style */
 #log p {
-	padding-left: 0.5rem;
+  padding-left: 0.5rem;
 }
+
 #log .fatal {
-	border-left: 0.5rem solid #640000;
-	color: #640000;
-	text-transform:uppercase;
+  border-left: 0.5rem solid #640000;
+  color: #640000;
+  text-transform: uppercase;
 }
+
 #log .error {
-	border-left: 0.5rem solid #640000;
-	padding-left: 0.5rem;
+  border-left: 0.5rem solid #640000;
+  padding-left: 0.5rem;
 }
+
 #log .warn {
-	border-left: 0.5rem solid #EE6400;
-	padding-left: 0.5rem;
+  border-left: 0.5rem solid #ee6400;
+  padding-left: 0.5rem;
 }
+
 #log .note {
-	border-left: 0.5rem solid #006400;
-	padding-left: 0.5rem;
+  border-left: 0.5rem solid #006400;
+  padding-left: 0.5rem;
 }
+
 #log .info {
-	border-left: 0.5rem solid #444444;
-	padding-left: 0.5rem;
+  border-left: 0.5rem solid #444;
+  padding-left: 0.5rem;
 }
+
 #log .debug {
-	border-left: 0.5rem solid #888888;
-	padding-left: 0.5rem;
-	color: #888888;
+  border-left: 0.5rem solid #888;
+  padding-left: 0.5rem;
+  color: #888;
 }
 
 /* Layout for deskop displays and greater */
-@media screen and (min-width:64.6rem) {
-	body {
-		max-width:64rem;
-		height:calc(100% - 0.9rem);
-		margin: 0.3rem auto;
-		border-left: 0.3rem solid var(--primary-color, #006400);
-		border-right:0.3rem solid var(--primary-color, #006400);
-		border-bottom:0.3rem solid var(--primary-color, #006400);
-	}
+@media screen and (min-width: 64.6rem) {
+  body {
+    max-width: 64rem;
+    height: calc(100% - 0.9rem);
+    margin: 0.3rem auto;
+    border-left: 0.3rem solid var(--primary-color, #006400);
+    border-right: 0.3rem solid var(--primary-color, #006400);
+    border-bottom: 0.3rem solid var(--primary-color, #006400);
+  }
 }
 
 .spinner::before {
   animation: spinnerFrames linear 8s;
   animation-iteration-count: infinite;
 }
+
 @keyframes spinnerFrames {
-	0% {
-		transform:  rotate(0deg);
-	}
-	100% {
-		transform:  rotate(360deg);
-	}
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* see http://connoratherton.com/loaders for this and other loader animations */
 .loader {
-	display:flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-content: center;
-    align-items: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
 }
+
 .loader > div {
-	background-color: var(--primary-color, #006400);
-	width: 0.4rem;
-	height: 3.5rem;
-	border-radius: 0.2rem;
-	margin: 0.2rem;
-	animation-fill-mode: both;
-	display: inline-block;
-  animation: lineScalePulseOutFrames 0.9s -0.6s infinite cubic-bezier(.85, .25, .37, .85);
+  background-color: var(--primary-color, #006400);
+  width: 0.4rem;
+  height: 3.5rem;
+  border-radius: 0.2rem;
+  margin: 0.2rem;
+  animation-fill-mode: both;
+  display: inline-block;
+  animation: lineScalePulseOutFrames 0.9s -0.6s infinite cubic-bezier(0.85, 0.25, 0.37, 0.85);
 }
-.loader > div:nth-child(2), .loader > div:nth-child(4) {
-    animation-delay: -0.4s !important;
+
+.loader > div:nth-child(2),
+.loader > div:nth-child(4) {
+  animation-delay: -0.4s !important;
 }
-.loader > div:nth-child(1), .loader > div:nth-child(5) {
-    animation-delay: -0.2s !important;
+
+.loader > div:nth-child(1),
+.loader > div:nth-child(5) {
+  animation-delay: -0.2s !important;
 }
+
 @keyframes lineScalePulseOutFrames {
-	0% {
-        transform: scaley(1);
-	}
-	50% {
-        transform: scaley(0.4);
-	}
-	100% {
-		transform: scaley(1);
-	}
+  0% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.4);
+  }
+  100% {
+    transform: scaleY(1);
+  }
 }
 
 .nonedisplay {
-	display:none
+  display: none;
 }
 
 details summary {
-	font-size: 2.2rem;
-	font-weight: bold;
-	line-height: 1.2em;
-	margin-top: 1em;
-	margin-bottom: 0.6em;
+  font-size: 2.2rem;
+  font-weight: bold;
+  line-height: 1.2em;
+  margin-top: 1em;
+  margin-bottom: 0.6em;
 }

@@ -148,21 +148,17 @@ var chromeFileSystemStorageImplementation = (function () {
     window.requestFileSystem(window.PERSISTENT, 1024 * 1024, function (fs) {
       const dirReader = fs.root.createReader()
       const readEntries = function () {
-        dirReader.readEntries(function (results) {
+        dirReader.readEntries((results) => {
           if (!results.length) {
             onDeleteCallback()
           } else {
-            let index = 0
-            let removeEntry = function () {
-              results[index].remove(function () {
-                index++
-                if (index < results.length) {
-                  removeEntry()
-                } else {
-                  readEntries()
-                }
-              }, HTML5Podcatcher.errorLogger)
-            }
+            results.forEach((item, i) => {
+              item.remove(
+                () => HTML5Podcatcher.logger(`File ${item.name} removed`, 'debug'),
+                HTML5Podcatcher.errorLogger
+              )
+            })
+            readEntries()
           }
         }, HTML5Podcatcher.errorLogger)
       }
@@ -173,7 +169,7 @@ var chromeFileSystemStorageImplementation = (function () {
   // === Export public Elements         === //
   // ====================================== //
   return {
-    'ChromeFileSystemFileProvider': ChromeFileSystemFileProvider
+    ChromeFileSystemFileProvider: ChromeFileSystemFileProvider
   }
 }())
 
