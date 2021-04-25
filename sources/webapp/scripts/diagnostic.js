@@ -1,4 +1,4 @@
-/* Copyright 2014, 2019 Sebastian Spautz
+/* Copyright 2014, 2019, 2021 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -25,24 +25,24 @@
 /* global TEMPORARY */
 /* global $ */
 /* global UI */
-var audio = new Audio()
-var canPlayOgg = !!audio.canPlayType && audio.canPlayType('audio/ogg; codecs="vorbis"') !== ''
-var canPlayMP3 = !!audio.canPlayType && audio.canPlayType('audio/mpeg; codecs="mp3"') !== ''
+const audio = new Audio()
+const canPlayOgg = !!audio.canPlayType && audio.canPlayType('audio/ogg; codecs="vorbis"') !== ''
+const canPlayMP3 = !!audio.canPlayType && audio.canPlayType('audio/mpeg; codecs="mp3"') !== ''
 /**
  * Writes a Blob to the filesystem.
  *
  * @param {DirectoryEntry} dir The directory to write the blob into.
  * @param {Blob} blob The data to write.
  * @param {string} fileName A name for the file.
- * @param {function(ProgressEvent)} opt_callback An optional callback.
+ * @param {function(ProgressEvent)} [callback] An optional callback.
  *    Invoked when the write completes.
  **/
-var writeBlob = function (dir, blob, fileName, opt_callback) {
+var writeBlob = function (dir, blob, fileName, callback) {
   'use strict'
   dir.getFile(fileName, { create: true, exclusive: true }, function (fileEntry) {
     fileEntry.createWriter(function (writer) {
-      if (opt_callback) {
-        writer.onwrite = opt_callback
+      if (callback) {
+        writer.onwrite = callback
       }
       writer.write(blob)
     }, UI.logHandler('Error writing Blop', 'error'))
@@ -79,65 +79,38 @@ var downloadImage = function (url, mimeType) {
   xhr.send(null)
 }
 // List Content
-function toArray (list) {
+function fsEntriestoArray (list) {
   'use strict'
   return Array.prototype.slice.call(list || [], 0)
 }
 
-function listResults (entries) {
+function listFsEntries (entries) {
   'use strict'
   // Document fragments can improve performance since they're only appended
   // to the DOM once. Only one browser reflow occurs.
   var fragment = document.createDocumentFragment()
-  entries.forEach(function (entry) {
+  entries.forEach((entry) => {
     var li
     li = document.createElement('li')
-    if (entry.name.indexOf('.png') !== -1) {
-      li.innerHTML = ['<img src="' + entry.toURL() + '" title="' + entry.name + '" width="' + 50 + '" />'].join('')
-    } else if (entry.name.indexOf('.mp3') !== -1) {
-      li.innerHTML = ['<audio controls="controls" src="' + entry.toURL() + '" title="' + entry.name + '" />'].join('')
-    } else {
-      li.innerHTML = ['<a href="' + entry.toURL() + '" title="' + entry.name + '">', entry.name, '</a>'].join('')
-    }
+    li.innerHTML = [
+      '<a href="' + entry.toURL() + '" title="' + entry.name + '">', entry.name, '</a>',
+      '<button type="button" value="', entry.name, '">Delete</button>'
+    ].join('')
     fragment.appendChild(li)
   })
   document.querySelector('#filelist').appendChild(fragment)
 }
 
 function onInitFs (fs) {
-  'use strict'
-  var dirReader, entries, readEntries
-  dirReader = fs.root.createReader()
-  entries = []
+  const dirReader = fs.root.createReader()
+  let entries = []
   // Call the reader.readEntries() until no more results are returned.
-  readEntries = function () {
-    dirReader.readEntries(function (results) {
+  const readEntries = () => {
+    dirReader.readEntries((results) => {
       if (!results.length) {
-        listResults(entries.sort())
+        listFsEntries(entries.sort())
       } else {
-        entries = entries.concat(toArray(results))
-        readEntries()
-      }
-    }, UI.errorHandler)
-  }
-  readEntries() // Start reading dirs.
-}
-function onDeleteFs (fs) {
-  'use strict'
-  var dirReader, entries, readEntries
-  dirReader = fs.root.createReader()
-  entries = []
-  // Call the reader.readEntries() until no more results are returned.
-  readEntries = function () {
-    dirReader.readEntries(function (results) {
-      if (!results.length) {
-        entries.forEach(function (entry) {
-          entry.remove(function () {
-            console.log('File removed.')
-          }, UI.errorHandler)
-        })
-      } else {
-        entries = entries.concat(toArray(results))
+        entries = entries.concat(fsEntriestoArray(results))
         readEntries()
       }
     }, UI.errorHandler)
@@ -147,14 +120,21 @@ function onDeleteFs (fs) {
 
 function showFileSystemEntries () {
   'use strict'
-  // onInitFS(getFileSystem());
-  window.requestFileSystem(window.TEMPORARY, 1024 * 1024 * 50, onInitFs, UI.errorHandler)
-  window.requestFileSystem(window.PERSISTENT, 1024 * 1024 * 50, onInitFs, UI.errorHandler)
+  if (window.requestFileSystem) {
+    window.requestFileSystem(window.TEMPORARY, 1024 * 1024 * 50, onInitFs, UI.errorHandler)
+    window.requestFileSystem(window.PERSISTENT, 1024 * 1024 * 50, onInitFs, UI.errorHandler)
+  }
 }
-function deleteFileSystemEntries () {
-  'use strict'
-  window.requestFileSystem(window.TEMPORARY, 1024 * 1024 * 500, onDeleteFs, UI.errorHandler)
-  window.requestFileSystem(window.PERSISTENT, 1024 * 1024 * 500, onDeleteFs, UI.errorHandler)
+
+function deleteFile (filename, callback) {
+  window.requestFileSystem(window.PERSISTENT, 1024 * 1024 * 50, (fs) => {
+    fs.root.getFile(filename, { create: false }, (fileEntry) => {
+      fileEntry.remove(() => {
+        UI.logHandler('File removed', 'debug')
+        callback()
+      }, UI.errorHandler)
+    }, UI.errorHandler)
+  }, UI.errorHandler)
 }
 
 function showIndexDbEntries (event) {
@@ -240,6 +220,17 @@ $(document).ready(function () {
       console.log(`Storage Quota uses ${info.usage} out of ${info.quota} bytes.`)
     })
   }
+
+  document.getElementById('filelist').addEventListener('click', (event) => {
+    const list = event.currentTarget
+    if (event.target.nodeName === 'BUTTON') {
+      deleteFile(event.target.value, () => {
+        list.innerHTML = ''
+        showFileSystemEntries()
+      })
+    }
+  })
+  showFileSystemEntries()
 
   /* Check if autoplay on audio elements is allowed */
   const audioElement = document.createElement('audio')
