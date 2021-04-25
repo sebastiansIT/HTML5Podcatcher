@@ -31,6 +31,10 @@ const CACHED_FILES = [
   'sources.html',
   'source.html',
   'settings.html',
+  // LIBS
+  'jquery.min.js',
+  'scripts/podcatcher.js',
+  'scripts/h5p.js',
   // SCRIPTS
   'scripts/globalUi.js',
   'scripts/jquery.min.js',
@@ -112,7 +116,7 @@ self.addEventListener('activate', event => {
         const LOGGER = new self.WorkerLogger(clients)
         return caches.keys()
           .then(cacheNames => {
-            LOGGER.log(`Clean up old Caches`, 'debug', 'ServiceWorker')
+            LOGGER.log('Clean up old Caches', 'debug', 'ServiceWorker')
             return Promise.all(
               cacheNames.map(cacheName => {
                 // Other Caches then the actual but in general a HTML5Podcatcher-Cache
@@ -135,7 +139,7 @@ self.addEventListener('activate', event => {
 self.addEventListener('message', event => {
   const LOGGER = new self.WorkerLogger([event.ports[0]])
   if (event.data.command === 'skipWaiting') {
-    LOGGER.log(`Update application imediatly`, 'debug', 'ServiceWorker')
+    LOGGER.log('Update application imediatly', 'debug', 'ServiceWorker')
     event.ports[0].postMessage({ command: 'confirm' })
     self.skipWaiting()
   } else {
@@ -151,10 +155,10 @@ self.addEventListener('fetch', event => {
   const SCOPE_URL = new URL(SERVICEWORKER_SCOPE)
   const FETCH_URL = new URL(event.request.url)
   const LOGGER = {
-    'log': function (message, logLevelName, tag) {
+    log: function (message, logLevelName, tag) {
       self.clients.get(event.clientId)
         .then(client => {
-          let clients = []
+          const clients = []
           if (client) {
             clients.push(client)
           }
@@ -199,7 +203,7 @@ self.addEventListener('fetch', event => {
               SCOPE_URL.port === FETCH_URL.port &&
               FETCH_URL.pathname.indexOf(SCOPE_URL.pathname) === 0
           ) {
-            let responseToCache = response.clone()
+            const responseToCache = response.clone()
             caches.open(CACHE_NAME).then(cache => {
               LOGGER.log(`Application fetch a URL that will now cached (${event.request.url})`, 'debug', 'ServiceWorker')
               cache.put(event.request, responseToCache)
