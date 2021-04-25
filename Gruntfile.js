@@ -18,7 +18,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-jslint')
   grunt.loadNpmTasks('grunt-usemin')
   // grunt.loadNpmTasks('grunt-autoprefixer')
-  grunt.loadNpmTasks('grunt-postcss')
+  grunt.loadNpmTasks('@lodder/grunt-postcss')
   // Config Tasks
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
