@@ -47,7 +47,7 @@ var RssParser = (function () {
   RSS20SourceParser.prototype.parse = function (source, xmlDocument) {
     var parserResult
 
-    parserResult = { 'source': {}, 'episodes': [] }
+    parserResult = { source: {}, episodes: [] }
     parserResult.source.uri = source.uri
 
     if (!xmlDocument) {
@@ -119,8 +119,8 @@ var RssParser = (function () {
         for (i = 0; i < itemArray.length; i += 1) {
           item = itemArray[i]
           episode = {
-            'language': parserResult.source.language,
-            'image': parserResult.source.image
+            language: parserResult.source.language,
+            image: parserResult.source.image
           }
           // * URI of episode
           if (item.querySelector('link')) {
