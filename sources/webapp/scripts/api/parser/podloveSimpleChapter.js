@@ -1,35 +1,39 @@
 /** This modul contains functions to parse XML format "Podlove Simple Chapter".
-    See http://podlove.org/simple-chapters/ for the specification.
-
-    @module  podcatcher/parser/PSC
-    @author  Sebastian Spautz [sebastian@human-injection.de]
-    @requires module:podcatcher/parser/NPT
-    @requires module:podcatcher/utils/logging
-    @license Copyright 2021 Sebastian Spautz
-
-    This file is part of "HTML5 Podcatcher".
-
-    "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    any later version.
-
-    "HTML5 Podcatcher" is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see http://www.gnu.org/licenses/.
-*/
+ * See http://podlove.org/simple-chapters/ for the specification.
+ *
+ * @module  podcatcher/parser/PSC
+ * @author  Sebastian Spautz [sebastian@human-injection.de]
+ * @requires module:podcatcher/parser/NPT
+ * @requires module:podcatcher/utils/logging
+ * @license GPL-3.0-or-later
+ *
+ * Copyright 2016, 2019, 2021 Sebastian Spautz
+ *
+ * This file is part of "HTML5 Podcatcher".
+ *
+ * "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * "HTML5 Podcatcher" is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/.
+ */
 
 import NptParser from './normalPlayTime.js'
 import { Logger } from '../utils/logging.js'
 
 const LOG = new Logger('podcatcher/parser/PSC')
-/**
- * @param {external:Node} parentNode
- * @returns {external:Node|undefined}
+
+/** Identifies a Capters Element as a child of the given node.
+ *
+ * @param {external:Node} parentNode The parent to search inside.
+ * @returns {external:Node|undefined} A Chapters node if available.
  */
 export function findChaptersNode (parentNode) {
   let chaptersNode =
@@ -58,7 +62,7 @@ export function findChaptersNode (parentNode) {
   }
 
   if (chaptersNode && chaptersNode.length >= 1) {
-    // TODO HTML5Podcatcher.logger('Found "Podlove Simple Chapters" in feed', 'debug', 'Parser')
+    LOG.debug('Found "Podlove Simple Chapters" in feed')
     return chaptersNode[0]
   }
 }
@@ -66,7 +70,7 @@ export function findChaptersNode (parentNode) {
 /** Parse the XML in format "Podlove Simple Chapber" and returns a list
  * of jumppoints.
  *
- * @param {external:Node} chaptersNode
+ * @param {external:Node} chaptersNode The Chapters element.
  * @returns {object[]} Array with jumppoints.
  */
 export function parse (chaptersNode) {

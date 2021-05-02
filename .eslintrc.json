@@ -1,0 +1,42 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "parserOptions": {
+        "ecmaVersion": 12,
+        "sourceType": "module"
+    },
+    "plugins": [
+        "jsdoc"
+    ],
+    "extends": [
+        "eslint:recommended",
+        "standard",
+        "plugin:jsdoc/recommended"
+    ],
+    "rules": {
+      "no-warning-comments": ["warn", {
+        "location": "anywhere"
+      }],
+      "no-console": "off",
+      "jsdoc/require-jsdoc": ["error", {
+          "require": {
+              "ClassExpression": true,
+              "FunctionDeclaration": true,
+              "MethodDefinition": true,
+              "ClassDeclaration": true,
+              "ArrowFunctionExpression": false,
+              "FunctionExpression": true
+          }
+      }],
+      "jsdoc/check-tag-names": ["error",
+        {
+          "definedTags": ["promise", "fulfill", "reject"]
+        }
+      ],
+      "jsdoc/require-description": 1,
+      "jsdoc/require-description-complete-sentence": 1,
+      "jsdoc/require-throws": 1
+    }
+}

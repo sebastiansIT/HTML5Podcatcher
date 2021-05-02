@@ -1,25 +1,27 @@
 /** This modul contains functions to parse different data formats.
-
-    @module  podcatcher/parser
-    @author  Sebastian Spautz [sebastian@human-injection.de]
-    @requires module:podcatcher/parser/RSS20
-    @license Copyright 2015, 2021 Sebastian Spautz
-
-    This file is part of "HTML5 Podcatcher".
-
-    "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    any later version.
-
-    "HTML5 Podcatcher" is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see http://www.gnu.org/licenses/.
-*/
+ *
+  @module  podcatcher/parser
+  @author  Sebastian Spautz [sebastian@human-injection.de]
+  @requires module:podcatcher/parser/RSS20
+ * @license GPL-3.0-or-later
+ *
+ * Copyright 2016, 2019, 2021 Sebastian Spautz
+ *
+ * This file is part of "HTML5 Podcatcher".
+ *
+ * "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * "HTML5 Podcatcher" is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/.
+ */
 
 /* global HTML5Podcatcher */
 import rss20SourceParser from './rss_2-0.js'
@@ -27,9 +29,11 @@ import rss20SourceParser from './rss_2-0.js'
 // ====================================== //
 // === Interface ISourceParser        === //
 // ====================================== //
-/** Interface defining functions which parses documents for information about a source and its episodes.
-  * @interface ISourceParser
-  */
+/** Interface defining functions which parses documents for information about
+ * a source and its episodes.
+ *
+ * @interface ISourceParser
+ */
 
 /** Parse the given XMLDocument and update the defined source.
  *
@@ -44,21 +48,24 @@ import rss20SourceParser from './rss_2-0.js'
 // === Singelton SourceParserFacade   === //
 // ====================================== //
 /** Singelton facade for source parser.
-  * @class
-  */
+ *
+ * @class
+ */
 class SourceParserFacade {
+  /** Create a parser facade with a empty list of registerd parsers.
+   */
   constructor () {
-    var sourceParserList = []
+    const sourceParserList = []
 
-    this.registerSourceParser = function (sourceParser) {
+    this.registerSourceParser = (sourceParser) => {
       sourceParserList.push(sourceParser)
     }
 
-    this.sourceParser = function () {
-      var parser
+    this.sourceParser = () => {
+      let parser
 
       sourceParserList.forEach(listedParser => {
-        // TODO zustaendigkeit checken
+        // Actual only one parser is implemented. So no desicion is neccesarily.
         parser = listedParser
       })
       if (!parser) {
@@ -68,10 +75,17 @@ class SourceParserFacade {
     }
   }
 
-  parse (source, doc) {
-    var sourceParser = this.sourceParser()
+  /** Parse the given XMLDocument and update the defined source with one of
+   * the registered Parsers.
+   *
+   * @param {object} source The source to be importet.
+   * @param {external:XMLDocument} xmlDocument The XML document to be parsed.
+   * @returns {object} The updated source.
+   */
+  parse (source, xmlDocument) {
+    const sourceParser = this.sourceParser()
     if (sourceParser) {
-      const result = sourceParser.parse(source, doc)
+      const result = sourceParser.parse(source, xmlDocument)
       return result
     }
   }

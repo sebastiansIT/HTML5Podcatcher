@@ -7,6 +7,12 @@
   "devDependencies": {
     "@lodder/grunt-postcss": "^3.0.1",
     "autoprefixer": "^10.2.5",
+    "eslint": "^7.25.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsdoc": "^33.0.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.3.1",
     "grunt": "^1.1.0",
     "grunt-concat-css": "^0.3.2",
     "grunt-contrib-clean": "^2.0.0",
@@ -37,6 +43,7 @@
   },
   "homepage": "http://podcatcher.sebastiansit.de",
   "scripts": {
+    "lint:js": "eslint sources/webapp/scripts/api/parser/**/*.js",
     "test:js": "karma start karma.config.js",
     "jsdoc:api": "jsdoc -r -a all -d distributions/jsdoc/api sources/webapp/scripts/api",
     "jsdoc:ui": "jsdoc -r -a all -d distributions/jsdoc/ui sources/webapp/scripts/ui",

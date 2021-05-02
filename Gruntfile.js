@@ -240,6 +240,6 @@ module.exports = function (grunt) {
   // Register Tasks
   grunt.registerTask('HostedWebApp', ['clean:HostedWebApp', 'string-replace:HostedWebApp', 'concat:HostedWebApp-css', 'postcss:HostedWebApp', 'copy:HostedWebApp', 'curl:HostedWebApp', 'usemin:HostedWebApp'])
   grunt.registerTask('ChromePackagedApp', ['string-replace:ChromePackagedApp', 'concat:ChromePackagedApp-css', 'postcss:ChromePackagedApp', 'usemin:ChromePackagedApp', 'copy:ChromePackagedApp', 'curl:ChromePackagedApp']) //, 'clean:ChromePackagedApp'
-  grunt.registerTask('test', ['htmllint', 'csslint', 'jslint', 'jasmine'])
+  grunt.registerTask('test', ['csslint', 'jslint', 'jasmine', 'htmllint'])
   grunt.registerTask('default', ['test', 'HostedWebApp'])
 }
