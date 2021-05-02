@@ -28,7 +28,11 @@
 import NptParser from './normalPlayTime.js'
 import { Logger } from '../utils/logging.js'
 
-const LOG = new Logger('podcatcher/parser/PSC')
+/** Logger.
+ *
+ * @constant {module:podcatcher/utils/logging.Logger}
+ */
+const LOGGER = new Logger('podcatcher/parser/PSC')
 
 /** Identifies a Capters Element as a child of the given node.
  *
@@ -47,7 +51,7 @@ export function findChaptersNode (parentNode) {
     )
 
     if (chaptersNode.length > 0) {
-      LOG.info(`${parentNode} uses wrong XML namespace: There should be a trailing slash in the URI`)
+      LOGGER.info(`${parentNode} uses wrong XML namespace: There should be a trailing slash in the URI`)
     } else {
       // some guys like c3d2 Pentacast uses a wrong namespace with https and wrong toplevel domain
       chaptersNode = parentNode.getElementsByTagNameNS(
@@ -56,13 +60,13 @@ export function findChaptersNode (parentNode) {
       )
 
       if (chaptersNode.length > 0) {
-        LOG.info(`${parentNode} uses wrong XML namespace: It is https://podlove.de/simple-chapters but it should be http://podlove.org/simple-chapters`)
+        LOGGER.info(`${parentNode} uses wrong XML namespace: It is https://podlove.de/simple-chapters but it should be http://podlove.org/simple-chapters`)
       }
     }
   }
 
   if (chaptersNode && chaptersNode.length >= 1) {
-    LOG.debug('Found "Podlove Simple Chapters" in feed')
+    LOGGER.debug('Found "Podlove Simple Chapters" in feed')
     return chaptersNode[0]
   }
 }

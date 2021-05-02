@@ -19,7 +19,7 @@
 /* global window, console */
 /* global podcatcher */
 
-var HTML5Podcatcher = {
+const HTML5Podcatcher = {
   version: 'Alpha {{ VERSION }}',
   api: {},
   web: {
@@ -44,9 +44,9 @@ var HTML5Podcatcher = {
       }
 
       const readDocument = function (xmlDocument) {
-        var parserResult, mergeNewEpisodeDataWithOldPlaybackStatus
+        let parserResult
 
-        mergeNewEpisodeDataWithOldPlaybackStatus = function (mergeEpisode, forcePlayed) {
+        const mergeNewEpisodeDataWithOldPlaybackStatus = (mergeEpisode, forcePlayed) => {
           HTML5Podcatcher.api.storage.StorageProvider.readEpisode(mergeEpisode.uri, function (existingEpisode) {
             existingEpisode.link = mergeEpisode.link
             existingEpisode.title = mergeEpisode.title
@@ -59,6 +59,7 @@ var HTML5Podcatcher = {
             existingEpisode.source = mergeEpisode.source
             existingEpisode.jumppoints = mergeEpisode.jumppoints
             existingEpisode.image = mergeEpisode.image
+            existingEpisode.externalChapters = mergeEpisode.externalChapters
             // ATTENTION! never change playback information if episode updated from internet
             // Only Exception: If the forcedPlayed parameter is set - then the actual playback state is overriden
             if (forcePlayed && existingEpisode.playback.played === undefined) {
@@ -77,6 +78,21 @@ var HTML5Podcatcher = {
           // merge existing data with actual one and save episodes with actualised data
           parserResult.episodes.forEach(function (episode, index, episodes) {
             mergeNewEpisodeDataWithOldPlaybackStatus(episode, index < episodes.length - limitOfNewEpisodes)
+            if (episode.jumppoints.length <= 0 && episode.externalChapters) {
+              if (episode.externalChapters.format === podcatcher.parser.ChapterParser.MIME_TYPE) {
+                podcatcher.web.downloadJson(episode.externalChapters.url)
+                  .then(doc => {
+                    return podcatcher.parser.ChapterParser.parse(doc)
+                  })
+                  .then(data => {
+                    episode.jumppoints = data
+                    mergeNewEpisodeDataWithOldPlaybackStatus(episode, false)
+                  })
+                  .catch(exception => {
+                    HTML5Podcatcher.logger(`Error on saving chapter information for ${episode.title}: ${exception}.`, 'error', 'LowLevelAPI')
+                  })
+              }
+            }
           })
           // Save Source
           HTML5Podcatcher.api.storage.StorageProvider.writeSource(parserResult.source, function () {
@@ -185,16 +201,7 @@ var HTML5Podcatcher = {
     HTML5Podcatcher.storage.deleteFile(episode)
     HTML5Podcatcher.storage.writeEpisode(episode)
   },
-  sortEpisodes: function (firstEpisode, secondEpisode) {
-    'use strict'
-    if (firstEpisode.updated < secondEpisode.updated) {
-      return -1
-    }
-    if (firstEpisode.updated > secondEpisode.updated) {
-      return 1
-    }
-    return 0
-  },
+  sortEpisodes: podcatcher.model.Episode.comparator,
   logger: function (message, level) {
     'use strict'
     if (HTML5Podcatcher.api.configuration.logger && typeof HTML5Podcatcher.api.configuration.logger === 'function') {

@@ -1,51 +1,55 @@
 /** This modul contains functions load informations and files from the internet.
-
+ *
     @module  podcatcher/web/xhr
     @author  Sebastian Spautz [sebastian@human-injection.de]
     @requires module:podcatcher/web
     @requires module:podcatcher/utils/logging
-    @license Copyright 2015, 2016, 2019 Sebastian Spautz
+ * @license GPL-3.0-or-later
+ *
+ * Copyright 2015, 2016, 2019 Sebastian Spautz
+ *
+ *
+ * This file is part of "HTML5 Podcatcher".
+ *
+ * "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * "HTML5 Podcatcher" is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/.
+ */
 
-    This file is part of "HTML5 Podcatcher".
-
-    "HTML5 Podcatcher" is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    any later version.
-
-    "HTML5 Podcatcher" is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see http://www.gnu.org/licenses/.
-*/
 /* global XMLHttpRequest */
 
 import WebAccessProvider from './web.js'
 import { Logger } from '../utils/logging.js'
 
-/** Logger
-  * @constant {module:podcatcher/utils/logging.Logger}
-  * @private
-  */
+/** Logger.
+ *
+ * @constant {module:podcatcher/utils/logging.Logger}
+ * @private
+ */
 const LOGGER = new Logger('Web/XHR')
 
 /** Implements methods to access the internet based on XMLHttpRequest.
-  * @class XhrWebAccessProvider
-  * @augments module:podcatcher/web~WebAccessProvider
-  * @param {external:String} [sopProxyPattern] A URL pattern used for access via a proxy.
-  * @param {Object} [options] A Object with options used by this implementation of the WebAccessProvider.
-  * @param {number} [options.downloadTimeout=600000] The  time in milliseconds to wait for finishing a network requests Default is 10 Minutes.
-  */
+ *
+ * @class XhrWebAccessProvider
+ * @augments module:podcatcher/web~WebAccessProvider
+ * @param {external:String} [sopProxyPattern] A URL pattern used for access via a proxy.
+ */
 export default class XhrWebAccessProvider extends WebAccessProvider {
-  /**
-    * @constructs module:podcatcher/web/xhr~XhrWebAccessProvider
-    * @param {external:String} [sopProxyPattern] A URL pattern used for access via a proxy.
-    * @param {Object} [options] A Object with options used by this implementation of the WebAccessProvider.
-    * @param {number} [options.downloadTimeout=600000] The  time in milliseconds to wait for finishing a network requests Default is 10 Minutes.
-    */
+  /** Create a provider with the given proxy url pattern and options.
+   *
+   * @param {external:String} [sopProxyPattern] A URL pattern used for access via a proxy.
+   * @param {object} [options] A Object with options used by this implementation of the WebAccessProvider.
+   * @param {number} [options.downloadTimeout=600000] The  time in milliseconds to wait for finishing a network requests Default is 10 Minutes.
+   */
   constructor (sopProxyPattern, options) {
     super(sopProxyPattern, options)
 
@@ -55,9 +59,14 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
     }
   }
 
+  /** Downloads a XML file.
+   *
+   * @param {string} url The URL of the XML file.
+   * @returns {external:Promise} A promise downloading the file.
+   */
   downloadXML (url) {
     return new Promise((resolve, reject) => {
-      const successfunction = function (event) {
+      const successfunction = (event) => {
         const ajaxCall = event.target
 
         LOGGER.debug(`Download of ${url} is finished`)
@@ -81,7 +90,7 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
           }, false)
           proxyXhr.addEventListener('abort', (event) => reject(event), false)
           proxyXhr.onload = successfunction
-          proxyXhr.ontimeout = function (event) {
+          proxyXhr.ontimeout = (event) => {
             LOGGER.error(`Timeout after ${(proxyXhr.timeout / 60000)} minutes.`)
             reject(event)
           }
@@ -99,7 +108,7 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
         xhr.addEventListener('error', errorfunction, false)
         xhr.addEventListener('abort', (event) => reject(event), false)
         xhr.onload = successfunction
-        xhr.ontimeout = function (event) {
+        xhr.ontimeout = (event) => {
           LOGGER.error(`Timeout after ${(xhr.timeout / 60000)} minutes.`)
           reject(event)
         }
@@ -111,11 +120,17 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
     })
   }
 
+  /** Download a binary file.
+   *
+   * @param {string} url The URL of the XML file.
+   * @param {Function} onProgressCallback A Callback for changes in download progress.
+   * @returns {external:Promise} A Promise downloading the file.
+   */
   downloadArrayBuffer (url, onProgressCallback) {
     return new Promise((resolve, reject) => {
       // Function called on progress events
-      const progressfunction = function (event) {
-        var percentComplete
+      const progressfunction = (event) => {
+        let percentComplete
 
         if (event.lengthComputable) {
           // Downloaded Bytes / total Bytes
@@ -130,8 +145,8 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
         }
       }
       // Function called after successful download
-      const successfunction = function (event) {
-        var ajaxCall = event.target
+      const successfunction = (event) => {
+        const ajaxCall = event.target
 
         if (ajaxCall.status === 200) {
           LOGGER.debug(`Download of file ""${url}" is finished`)
@@ -162,7 +177,7 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
             LOGGER.debug(xhrError)
           }, false)
           xhrProxy.onload = successfunction
-          xhrProxy.ontimeout = function () {
+          xhrProxy.ontimeout = () => {
             LOGGER.error(`Timeout after ${xhrProxy.timeout / 60000} minutes.`)
           }
           xhrProxy.send(null)
@@ -185,7 +200,7 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
           reject(event)
         }, false)
         xhr.onload = successfunction
-        xhr.ontimeout = function () {
+        xhr.ontimeout = () => {
           LOGGER.error(`Timeout after ${xhr.timeout / 60000} minutes.`)
         }
         xhr.send(null)

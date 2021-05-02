@@ -23,8 +23,15 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
 
-/* global HTML5Podcatcher */
+import { Logger } from '../utils/logging.js'
 import rss20SourceParser from './rss_2-0.js'
+import * as Pod2ChapterModule from './podcast_2-0_chapter.js'
+
+/** Logger.
+ *
+ * @constant {module:podcatcher/utils/logging.Logger}
+ */
+const LOGGER = new Logger('podcatcher/parser')
 
 // ====================================== //
 // === Interface ISourceParser        === //
@@ -65,11 +72,11 @@ class SourceParserFacade {
       let parser
 
       sourceParserList.forEach(listedParser => {
-        // Actual only one parser is implemented. So no desicion is neccesarily.
+        // Actual only one parser is implemented. So, No decision is necessary.
         parser = listedParser
       })
       if (!parser) {
-        HTML5Podcatcher.logger('Missing source parser', 'error')
+        LOGGER.error('Missing source parser')
       }
       return parser
     }
@@ -94,4 +101,6 @@ class SourceParserFacade {
 const sourceParser = new SourceParserFacade()
 // Register the RSS 2.0 Parser
 sourceParser.registerSourceParser(rss20SourceParser)
-export default sourceParser
+
+export const SourceParser = sourceParser
+export const ChapterParser = Pod2ChapterModule

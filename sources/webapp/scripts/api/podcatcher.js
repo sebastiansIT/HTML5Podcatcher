@@ -1,4 +1,4 @@
-/** The HTML5Podcatcher API
+/** The HTML5Podcatcher API.
 
     @module  podcatcher
     @author  Sebastian Spautz [sebastian@human-injection.de]
@@ -28,14 +28,16 @@
 import { logManager, Logger } from './utils/logging.js'
 import WebAccessProvider from './web/fetch.js'
 import WebStorageSettingsProvider from './storage/settings/webstorage.js'
-import Sourcelist from './model/sourcelist'
-import sourceParser from './parser/parser.js'
+import Sourcelist from './model/sourcelist.js'
+import * as Episode from './model/episode.js'
+import * as ParserModul from './parser/parser.js'
 
 const settingsStorageProvider = new WebStorageSettingsProvider()
 
 const api = {
   model: {
-    Sources: Sourcelist
+    Sources: Sourcelist,
+    Episode: Episode
   },
   utils: {
     createLogger: (module) => new Logger(module)
@@ -59,10 +61,11 @@ const api = {
       },
 
       /** Get the value for the given user setting.
-        * @param {string} key - The key of the application setting you ask for.
-        * @param {(string|number)} defaultValue - The default.
-        * @return {Promise} A Promise resolves to the value or, if not set, the default.
-        */
+       *
+       * @param {string} key - The key of the application setting you ask for.
+       * @param {(string|number)} defaultValue - The default.
+       * @returns {Promise} A Promise resolves to the value or, if not set, the default.
+       */
       get: function (key, defaultValue) {
         return settingsStorageProvider.readSettingsValue(key)
           .then((value) => {
@@ -71,9 +74,7 @@ const api = {
       }
     }
   },
-  parser: {
-    SourceParser: sourceParser
-  },
+  parser: ParserModul,
   web: new WebAccessProvider(null) // Temporär für umgestalltung auf Module
 }
 

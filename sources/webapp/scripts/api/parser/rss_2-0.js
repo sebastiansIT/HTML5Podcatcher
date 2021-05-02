@@ -5,6 +5,8 @@
  * @author  SebastiansIT [sebastian@human-injection.de]
  * @requires module:podcatcher/parser/PSC
  * @requires module:podcatcher/parser/NPT
+ * @requires module:podcatcher/parser/
+ * @requires module:podcatcher/parser/podcast20chapters
  * @license GPL-3.0-or-later
  *
  * Copyright 2016, 2019, 2021 Sebastian Spautz
@@ -25,10 +27,17 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
 
-/* global HTML5Podcatcher */
-
+import { Logger } from '../utils/logging.js'
+import * as EpisodeModul from '../model/episode.js'
 import { findChaptersNode, parse } from './podloveSimpleChapter.js'
 import NptParser from './normalPlayTime.js'
+import { MIME_TYPE as POD2_CHAPTERS_MIME_TYPE } from './podcast_2-0_chapter.js'
+
+/** Logger.
+ *
+ * @constant {module:podcatcher/utils/logging.Logger}
+ */
+const LOGGER = new Logger('podcatcher/parser/RSS20')
 
 /** Parser for RSS 2.0 Feeds.
  *
@@ -68,7 +77,7 @@ class Parser {
     }
 
     if (!xmlDocument) {
-      HTML5Podcatcher.logger(`No XML document found at ${source.uri}.`, 'error', 'parser')
+      LOGGER.error(`No XML document found at ${source.uri}.`)
       return undefined
     } else {
       // RSS-Feed
@@ -133,7 +142,7 @@ class Parser {
         // Check for link to external PodLove Simple Chapters file
         Array.from(rootElement.getElementsByTagNameNS('http://www.w3.org/2005/Atom', 'link')).forEach((item, i) => {
           if (item.attributes.rel === 'http://podlove.org/simple-chapters') {
-            HTML5Podcatcher.logger(`New feature needed: Should read chapters from external PSC file ${item.attributes.href}!`, 'warning', 'parser')
+            LOGGER.warn(`New feature needed: Should read chapters from external PSC file ${item.attributes.href}!`)
           }
         })
         // RSS-Entries
@@ -152,7 +161,7 @@ class Parser {
             // If there is no link element try to get it from GUID element
             episode.uri = item.querySelector('guid').childNodes[0].nodeValue
           } else {
-            HTML5Podcatcher.logger('No URI found - invalid RSS item', 'error')
+            LOGGER.error('No URI found - invalid RSS item')
             break
           }
           // * Title of episode
@@ -221,20 +230,24 @@ class Parser {
           // Check for link to external PodLove Simple Chapters file
           Array.from(item.getElementsByTagNameNS('http://www.w3.org/2005/Atom', 'link')).forEach((link, i) => {
             if (link.attributes.rel === 'http://podlove.org/simple-chapters') {
-              HTML5Podcatcher.logger(`New feature needed: Should read chapters from external PSC file ${link.attributes.href}!`, 'warning', 'parser')
+              LOGGER.warn(`New feature needed: Should read chapters from external PSC file ${link.attributes.href}!`)
             }
           })
           // Check for Podcast 2.0 chapters feature
           // example: <podcast:chapters url="https://example.com/episode1/chapters.json" type="application/json+chapters" />
-          Array.from(item.getElementsByTagNameNS('https://podcastindex.org/namespace/1.0', 'chapters')).forEach((chaptersRef, i) => {
-            HTML5Podcatcher.logger(`New feature needed: Should read chapters from external Podcast 2.0 chapters declaration ${chaptersRef.attributes.url}{} in ${parserResult.source.title}!`, 'warning', 'parser')
-          })
+          const pod20ChapterReference = item.getElementsByTagNameNS('https://podcastindex.org/namespace/1.0', 'chapters')[0]
+          if (pod20ChapterReference) {
+            episode.externalChapters = {
+              format: POD2_CHAPTERS_MIME_TYPE,
+              url: pod20ChapterReference.getAttribute('url')
+            }
+          }
 
           parserResult.episodes.push(episode)
         }
-        parserResult.episodes.sort(HTML5Podcatcher.sortEpisodes)
+        parserResult.episodes.sort(EpisodeModul.comparator)
       } else {
-        HTML5Podcatcher.logger(`No root element (&lt;rss&gt;) found in parsed document: ${xmlDocument}`, 'error', 'parser')
+        LOGGER.error(`No root element (&lt;rss&gt;) found in parsed document: ${xmlDocument}`)
         return undefined
       }
 
