@@ -46,10 +46,11 @@ const api = {
     logging: {
       addLogRule: (appender, minLevel, maxLevel) => logManager.addLogRule(appender, minLevel, maxLevel)
     },
-    /** @summary Access to the user settings.
-      * @desc Access to the user settings as part of the entire Configuration. User settings are a key/value-store. In this store you can save all kind of user defined information for your application.
-      * @namespace
-      */
+    /**
+     * @summary Access to the user settings.
+     * @description Access to the user settings as part of the entire Configuration. User settings are a key/value-store. In this store you can save all kind of user defined information for your application.
+     * @namespace
+     */
     settings: {
       /** Set a value for the given key of a user setting.
         * @param {string} key - The key of the user setting you want to set.
