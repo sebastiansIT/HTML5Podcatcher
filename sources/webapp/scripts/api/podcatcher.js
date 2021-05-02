@@ -6,6 +6,7 @@
     @requires module:podcatcher/web/fetch
     @requires module:podcatcher/storage/settings/localstorage
     @requires module:podcatcher/model/sourcelist
+    @requires module:podcatcher/parser
     @license Copyright 2019 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
@@ -28,6 +29,7 @@ import { logManager, Logger } from './utils/logging.js'
 import WebAccessProvider from './web/fetch.js'
 import WebStorageSettingsProvider from './storage/settings/webstorage.js'
 import Sourcelist from './model/sourcelist'
+import sourceParser from './parser/parser.js'
 
 const settingsStorageProvider = new WebStorageSettingsProvider()
 
@@ -68,6 +70,9 @@ const api = {
           })
       }
     }
+  },
+  parser: {
+    SourceParser: sourceParser
   },
   web: new WebAccessProvider(null) // Temporär für umgestalltung auf Module
 }

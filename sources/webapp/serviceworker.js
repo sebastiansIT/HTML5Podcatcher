@@ -32,12 +32,11 @@ const CACHED_FILES = [
   'source.html',
   'settings.html',
   // LIBS
-  'jquery.min.js',
+  'scripts/jquery.min.js',
   'scripts/podcatcher.js',
   'scripts/h5p.js',
   // SCRIPTS
   'scripts/globalUi.js',
-  'scripts/jquery.min.js',
   'scripts/lowLevelApi.js',
   'scripts/normalise.js',
   'scripts/playlist.js',
@@ -45,8 +44,6 @@ const CACHED_FILES = [
   'scripts/source.js',
   'scripts/sources.js',
   'scripts/configuration/configuration.js',
-  'scripts/parser/parser.js',
-  'scripts/parser/rss_2-0.js',
   'scripts/storage/storage.js',
   'scripts/storage/indexedDbProvider.js',
   'scripts/storage/fileSystemProvider.js',

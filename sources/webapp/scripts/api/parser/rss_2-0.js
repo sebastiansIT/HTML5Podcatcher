@@ -1,6 +1,11 @@
-/** @module  HTML5Podcatcher/Parser/RSS_2-0
+/** This modul contains functions to parse XML format "RSS 2.0".
+    See https://cyber.harvard.edu/rss/rss.html for the specification.
+
+    @module  podcatcher/parser/RSS20
     @author  SebastiansIT [sebastian@human-injection.de]
-    @license Copyright 2016, 2019 Sebastian Spautz
+    @requires module:podcatcher/parser/PSC
+    @requires module:podcatcher/parser/NPT
+    @license Copyright 2016, 2019, 2021 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -18,33 +23,26 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 
-/*
-    Specification of RSS 2.0: https://cyber.harvard.edu/rss/rss.html
-*/
 /* global HTML5Podcatcher */
 
-var RssParser = (function () {
-  'use strict'
+import { findChaptersNode, parse } from './podloveSimpleChapter.js'
+import NptParser from './normalPlayTime.js'
 
-  var RSS20SourceParser
-
-  // ======================================= //
-  // === Implementation of ISourceParser === //
-  // ======================================= //
-  /** Parses RSS 2.0 XML documents.
-  * @class
-  * @implements module:HTML5Podcatcher/Parser~ISourceParser
-  */
-  RSS20SourceParser = function () {
+/** Parser for RSS 2.0 Feeds.
+ *
+ * @class
+ * @implements {module:HTML5Podcatcher/Parser~ISourceParser#parse}
+ */
+class Parser {
+  constructor () {
     this.allowedDocumentMimeTypes = ['application/xml+rss']
   }
-  RSS20SourceParser.prototype = new HTML5Podcatcher.api.parser.ISourceParser()
-  RSS20SourceParser.prototype.constructor = RSS20SourceParser
-  RSS20SourceParser.prototype.toString = function () {
+
+  toString () {
     return 'RSS 2.0 Parser'
   }
 
-  RSS20SourceParser.prototype.parse = function (source, xmlDocument) {
+  parse (source, xmlDocument) {
     var parserResult
 
     parserResult = { source: {}, episodes: [] }
@@ -114,6 +112,12 @@ var RssParser = (function () {
         if (currentElement && currentElement.childNodes.length > 0) {
           parserResult.source.image = currentElement.childNodes[0].nodeValue
         }
+        // Check for link to external PodLove Simple Chapters file
+        Array.from(rootElement.getElementsByTagNameNS('http://www.w3.org/2005/Atom', 'link')).forEach((item, i) => {
+          if (item.attributes.rel === 'http://podlove.org/simple-chapters') {
+            HTML5Podcatcher.logger(`New feature needed: Should read chapters from external PSC file ${item.attributes.href}!`, 'warning', 'parser')
+          }
+        })
         // RSS-Entries
         itemArray = rootElement.querySelectorAll('channel > item')
         for (i = 0; i < itemArray.length; i += 1) {
@@ -143,7 +147,7 @@ var RssParser = (function () {
           // * Duration of episode
           currentElement = item.getElementsByTagNameNS('http://www.itunes.com/dtds/podcast-1.0.dtd', 'duration')
           if (currentElement && currentElement.length > 0 && currentElement[0].childNodes.length > 0) {
-            episode.duration = this.parseNormalPlayTime(currentElement[0].childNodes[0].nodeValue)
+            episode.duration = NptParser(currentElement[0].childNodes[0].nodeValue)
           }
           // * pubDate of episode
           const pubDateElement = item.querySelector('pubDate')
@@ -193,8 +197,21 @@ var RssParser = (function () {
               episode.mediaType = 'audio/ogg; codecs=opus'
             }
           }
-          // Parse Podlove Simple Chapters Format
-          episode.jumppoints = this.parsePodloveSimpleChapters(item.getElementsByTagNameNS('http://podlove.org/simple-chapters', 'chapters'), episode)
+
+          episode.jumppoints = parse(findChaptersNode(item))
+
+          // Check for link to external PodLove Simple Chapters file
+          Array.from(item.getElementsByTagNameNS('http://www.w3.org/2005/Atom', 'link')).forEach((link, i) => {
+            if (link.attributes.rel === 'http://podlove.org/simple-chapters') {
+              HTML5Podcatcher.logger(`New feature needed: Should read chapters from external PSC file ${link.attributes.href}!`, 'warning', 'parser')
+            }
+          })
+          // Check for Podcast 2.0 chapters feature
+          // example: <podcast:chapters url="https://example.com/episode1/chapters.json" type="application/json+chapters" />
+          Array.from(item.getElementsByTagNameNS('https://podcastindex.org/namespace/1.0', 'chapters')).forEach((chaptersRef, i) => {
+            HTML5Podcatcher.logger(`New feature needed: Should read chapters from external Podcast 2.0 chapters declaration ${chaptersRef.attributes.url}{} in ${parserResult.source.title}!`, 'warning', 'parser')
+          })
+
           parserResult.episodes.push(episode)
         }
         parserResult.episodes.sort(HTML5Podcatcher.sortEpisodes)
@@ -206,12 +223,7 @@ var RssParser = (function () {
       return parserResult
     }
   }
+}
 
-  // ====================================== //
-  // === Export public Elements         === //
-  // ====================================== //
-  return new RSS20SourceParser()
-}())
-
-// Register this Implementation
-HTML5Podcatcher.api.parser.SourceParser.registerSourceParser(RssParser)
+const rss20SourceParser = new Parser()
+export default rss20SourceParser

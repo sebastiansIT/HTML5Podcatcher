@@ -18,7 +18,6 @@
 /* global navigator */
 /* global window */
 /* global document */
-/* global console */
 /* global $ */
 /* global HTML5Podcatcher, POD */
 /* global GlobalUserInterfaceHelper, UI */
@@ -43,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function (/* event */) {
   var sourceUri
   const LOGGER = window.podcatcher.utils.createLogger('hp5/view/source')
 
-  let init = function () {
+  const init = function () {
     LOGGER.debug('Open Source Details')
     window.podcatcher.configuration.settings.get('proxyUrl')
       .then((value) => {

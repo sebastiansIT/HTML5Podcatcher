@@ -16,7 +16,7 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 
-/* global navigator, window, document, console */
+/* global window, console */
 /* global podcatcher */
 
 var HTML5Podcatcher = {
@@ -70,7 +70,7 @@ var HTML5Podcatcher = {
 
         HTML5Podcatcher.logger('Downloaded source feed from ' + source.uri, 'debug')
         try {
-          parserResult = HTML5Podcatcher.api.parser.SourceParser.parse(source, xmlDocument)
+          parserResult = podcatcher.parser.SourceParser.parse(source, xmlDocument)
           HTML5Podcatcher.logger('Parsed source feed from ' + source.uri, 'debug')
 
           // compute parser result:
