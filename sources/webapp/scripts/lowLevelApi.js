@@ -57,7 +57,9 @@ const HTML5Podcatcher = {
             existingEpisode.mediaType = mergeEpisode.mediaType
             existingEpisode.duration = mergeEpisode.duration
             existingEpisode.source = mergeEpisode.source
-            existingEpisode.jumppoints = mergeEpisode.jumppoints
+            if (mergeEpisode.jumppoints) {
+              existingEpisode.jumppoints = mergeEpisode.jumppoints
+            }
             existingEpisode.image = mergeEpisode.image
             existingEpisode.externalChapters = mergeEpisode.externalChapters
             // ATTENTION! never change playback information if episode updated from internet
