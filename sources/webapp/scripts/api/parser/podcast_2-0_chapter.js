@@ -1,5 +1,6 @@
 /** This modul contains functions to parse JSON format "Podcast 2.0 Chapters".
- * See  for the specification.
+ * See https://github.com/Podcastindex-org/podcast-namespace/blob/main/chapters/jsonChapters.md
+ * for the specification.
  *
  * @module  podcatcher/parser/podcast20chapters
  * @requires module:podcatcher/utils/logging
