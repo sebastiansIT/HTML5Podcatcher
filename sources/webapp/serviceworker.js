@@ -145,14 +145,14 @@ self.addEventListener('message', event => {
 })
 
 /**
-  * @param {https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent} event
-  */
+ * @param {https://developer.mozilla.org/en-US/docs/Web/API/FetchEvent} event
+ */
 self.addEventListener('fetch', event => {
   const SERVICEWORKER_SCOPE = self.registration.scope
   const SCOPE_URL = new URL(SERVICEWORKER_SCOPE)
   const FETCH_URL = new URL(event.request.url)
   const LOGGER = {
-    log: function (message, logLevelName, tag) {
+    log: (message, logLevelName, tag) => {
       self.clients.get(event.clientId)
         .then(client => {
           const clients = []
