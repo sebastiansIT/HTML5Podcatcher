@@ -298,3 +298,8 @@
 	* Fix a bug identifieng the url of the feed when updating a single source
 	* Fix a bug in the global logHandler()
 	* Solve a problem that appears on Firefox: The initialisation of the last played episode threw a error on page load.
+- 0.52.0
+  * Rewrite Parser submodul to ES-Modules
+	* Add support for a wrong XML-Namespace for Podlove Simple chapters
+	* Add support for some elements from "RSS Namespace Extension for Podcast"
+	* Add support for Podcast 2.0 Chapter documents

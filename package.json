@@ -1,6 +1,6 @@
 {
   "name": "HTML5Podcatcher",
-  "version": "0.51.3",
+  "version": "0.52.0",
   "description": "A HTML5 based podcast player.",
   "license": "GPL-3.0",
   "main": "Gruntfile.js",
@@ -43,15 +43,16 @@
   },
   "homepage": "http://podcatcher.sebastiansit.de",
   "scripts": {
-    "lint:js": "eslint sources/webapp/scripts/api/parser/**/*.js",
+    "lint:js": "eslint sources/webapp/scripts/api/**/*.js",
     "test:js": "karma start karma.config.js",
     "jsdoc:api": "jsdoc -r -a all -d distributions/jsdoc/api sources/webapp/scripts/api",
     "jsdoc:ui": "jsdoc -r -a all -d distributions/jsdoc/ui sources/webapp/scripts/ui",
     "jsdoc:worker": "jsdoc -r -a all -d distributions/jsdoc/worker sources/webapp/scripts/worker",
     "jsdoc": "npm run jsdoc:api && npm run jsdoc:ui",
     "bundle:js": "rollup -c",
+    "lint": "npm run lint:js",
     "test": "npm run test:js",
-    "build": "grunt HostedWebApp && npm run bundle:js",
+    "build": "grunt HostedWebApp && npm run lint && npm run bundle:js",
     "watch": "karma start karma.config.js --no-single-run"
   }
 }
