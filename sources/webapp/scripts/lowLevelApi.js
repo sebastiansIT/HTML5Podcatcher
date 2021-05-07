@@ -29,10 +29,11 @@ const HTML5Podcatcher = {
     },
 
     /** Updates a source from its feed.
-      * @param {Source} source Source to update.
-      * @param {number} [limitOfNewEpisodes=5] Maximal amount of episodes imported as 'new'.
-      * @param {function} [onFinishedCallback] Function called when download of Source is completed.
-      */
+     *
+     * @param {Source} source Source to update.
+     * @param {number} [limitOfNewEpisodes=5] Maximal amount of episodes imported as 'new'.
+     * @param {Function} [onFinishedCallback] Function called when download of Source is completed.
+     */
     downloadSource: function (source, limitOfNewEpisodes, onFinishedCallback) {
       'use strict'
 
@@ -43,7 +44,7 @@ const HTML5Podcatcher = {
         throw new Error(`Parameter "limitOfNewEpisodes" must be a positiv number or 0. Actual it is set as ${limitOfNewEpisodes}.`)
       }
 
-      const readDocument = function (xmlDocument) {
+      const readDocument = (xmlDocument) => {
         let parserResult
 
         const mergeNewEpisodeDataWithOldPlaybackStatus = (mergeEpisode, forcePlayed) => {
@@ -67,6 +68,12 @@ const HTML5Podcatcher = {
             if (forcePlayed && existingEpisode.playback.played === undefined) {
               existingEpisode.playback.played = true
             }
+
+            existingEpisode.season = mergeEpisode.season
+            existingEpisode.counter = mergeEpisode.counter
+            existingEpisode.location = mergeEpisode.location
+            existingEpisode.persons = mergeEpisode.persons
+
             HTML5Podcatcher.api.storage.StorageProvider.writeEpisode(existingEpisode)
           })
         }
@@ -122,16 +129,17 @@ const HTML5Podcatcher = {
     },
 
     /** Updates all Sources from there feeds.
-      * @param {number} [limitOfNewEpisodes=5] Maximal amount of episodes per source imported as 'new'.
-      * @param {function} [onFinishedCallback] Function called when download of all Sources are completed.
-      * @param {function} [onProgressCallback] Function called after each download of a single Source.
-      */
+     *
+     * @param {number} [limitOfNewEpisodes=5] Maximal amount of episodes per source imported as 'new'.
+     * @param {Function} [onFinishedCallback] Function called when download of all Sources are completed.
+     * @param {Function} [onProgressCallback] Function called after each download of a single Source.
+     */
     downloadAllSources: function (limitOfNewEpisodes, onFinishedCallback, onProgressCallback) {
       let statusOverall = true
 
       POD.logger('Playlist will be refreshed', 'debug')
       POD.storage.readSources(function (sources) {
-        var numberOfSourcesToDownload = sources.length
+        let numberOfSourcesToDownload = sources.length
 
         sources.forEach(function (source, index, array) {
           POD.web.downloadSource(source, limitOfNewEpisodes, function (parameters) {
@@ -176,7 +184,7 @@ const HTML5Podcatcher = {
   system: {
     isOpenWebAppContainer: function (onCompletedCallback) {
       'use strict'
-      var appInfoRequest
+      let appInfoRequest
       // Detection of installed open web apps
       // see https://developer.mozilla.org/en-US/Apps/Build/App_development_FAQ#How_can_I_detect_whether_an_app_is_privileged_or_certified.3F
       if (window.navigator.mozApps) {
@@ -236,4 +244,4 @@ const HTML5Podcatcher = {
   }
 }
 
-var POD = HTML5Podcatcher
+const POD = HTML5Podcatcher

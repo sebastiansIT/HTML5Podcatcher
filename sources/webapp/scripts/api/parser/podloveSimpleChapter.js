@@ -1,5 +1,6 @@
 /** This modul contains functions to parse XML format "Podlove Simple Chapter".
- * See http://podlove.org/simple-chapters/ for the specification.
+ * See https://github.com/podlove/podlove-specifications/blob/master/podlove-simple-chapters.md
+ * for the specification.
  *
  * @module  podcatcher/parser/PSC
  * @author  Sebastian Spautz [sebastian@human-injection.de]
@@ -34,6 +35,22 @@ import { Logger } from '../utils/logging.js'
  */
 const LOGGER = new Logger('podcatcher/parser/PSC')
 
+/** XML namespace.
+ *
+ * @constant {string}
+ */
+const NAMESPACE = 'http://podlove.org/simple-chapters'
+
+/** Acceptable XML namespaces for the "RSS Namespace Extension for Podcast".
+ *
+ * @constant {Array<string>}
+ */
+const PODLOVE_EXTENSION_NAMESPACES = [
+  NAMESPACE,
+  'http://podlove.org/simple-chapters/',
+  'https://podlove.de/simple-chapters'
+]
+
 /** Identifies a Capters Element as a child of the given node.
  *
  * @param {external:Node} parentNode The parent to search inside.
@@ -41,18 +58,16 @@ const LOGGER = new Logger('podcatcher/parser/PSC')
  */
 export function findChaptersNode (parentNode) {
   let chaptersNode =
-    parentNode.getElementsByTagNameNS('http://podlove.org/simple-chapters/', 'chapters')
+    parentNode.getElementsByTagNameNS(NAMESPACE, 'chapters')
 
   if (chaptersNode.length <= 0) {
-    // in the past some guys use a wrong namespace without the trailing slash
+    // in version 1.1 there is a trailing slash
     chaptersNode = parentNode.getElementsByTagNameNS(
-      'http://podlove.org/simple-chapters',
+      'http://podlove.org/simple-chapters/',
       'chapters'
     )
 
-    if (chaptersNode.length > 0) {
-      LOGGER.info(`${parentNode} uses wrong XML namespace: There should be a trailing slash in the URI`)
-    } else {
+    if (!chaptersNode.length > 0) {
       // some guys like c3d2 Pentacast uses a wrong namespace with https and wrong toplevel domain
       chaptersNode = parentNode.getElementsByTagNameNS(
         'https://podlove.de/simple-chapters',
@@ -84,7 +99,7 @@ export function parse (chaptersNode) {
   const jumppoints = []
 
   if (chaptersNode) {
-    chapters = chaptersNode.getElementsByTagName('chapter')
+    chapters = findPodloveSimpleChapterElements(chaptersNode, 'chapter')
     for (i = 0; i < chapters.length; i += 1) {
       chapter = chapters[i]
       jumppoints.push({
@@ -98,4 +113,22 @@ export function parse (chaptersNode) {
   }
 
   return jumppoints
+}
+
+/** Search inside the parent element for an child with the given name and one of
+ * the acceptable namespces for "Podlove Simple Chapter".
+ *
+ * @param {external:Node} parentElement The element to search in.
+ * @param {string} elementName The name of the element to search for.
+ * @returns {Array<external:Node>} The nodes found or an empty array.
+ */
+function findPodloveSimpleChapterElements (parentElement, elementName) {
+  let elements = []
+  PODLOVE_EXTENSION_NAMESPACES.forEach((item, i) => {
+    elements = elements.concat(
+      Array.from(parentElement.getElementsByTagNameNS(item, elementName))
+    )
+  })
+
+  return elements
 }
