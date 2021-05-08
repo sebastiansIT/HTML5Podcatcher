@@ -1,6 +1,6 @@
 /* global module */
 
-const JQUERY_URL = 'https://code.jquery.com/jquery-3.4.1.min.js'
+const JQUERY_URL = 'https://code.jquery.com/jquery-3.6.0.min.js'
 
 module.exports = function (grunt) {
   'use strict'
