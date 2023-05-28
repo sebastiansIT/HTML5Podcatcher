@@ -1,4 +1,4 @@
-/** This modul contains functions load informations and files from the internet.
+/** This module contains functions to load informations and files from the internet.
 
     @module  HTML5Podcatcher/Web
     @author  Sebastian Spautz [sebastian@human-injection.de]
