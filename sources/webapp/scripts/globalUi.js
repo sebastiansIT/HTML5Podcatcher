@@ -549,7 +549,7 @@ var GlobalUserInterfaceHelper = {
       POD.logger('Playlist will be refreshed', 'debug')
 
       POD.storage.readSources(function (sources) {
-        var worker = new Worker('scripts/worker/actualisePlaylist.js')
+        var worker = new Worker('scripts/worker/actualisePlaylist.js')  
         worker.addEventListener('message', function (event) {
           if (event.data.cmd === 'log') {
             POD.logger(event.data.parameter.message, event.data.parameter.level)
