@@ -322,7 +322,7 @@ var GlobalUserInterfaceHelper = {
         window.close()
       }, false)
     }
-    $('.external').attr('target', '_blank')
+    document.querySelectorAll('.external').forEach((element) => element.setAttribute('target', '_blank'))
   },
 
   /** Renders the html markup for a single episode.

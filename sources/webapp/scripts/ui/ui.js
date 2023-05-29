@@ -21,6 +21,7 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
 */
 
+import podcatcher from '../api/podcatcher.js'
 import { Synthesiser as SpeechSynthesiser, getVoices, isSupported, setUsagePolicy } from './speech/synthesis.js'
 import { UiLogAppender } from './utils/logging/uilogger.js'
 import { NotificationLogAppender } from './utils/logging/notificationlogger.js'
@@ -62,8 +63,11 @@ window.podcatcher.configuration.settings.get('logLevel', '1')
         allowedLevel = 'fatal'
         break
     }
+    // TODO entfernen wenn alter Logger komplet ausgemustert ist
     window.podcatcher.configuration.logging.addLogRule(new UiLogAppender(), allowedLevel)
     window.podcatcher.configuration.logging.addLogRule(new NotificationLogAppender(), 'note', 'note')
+    podcatcher.configuration.logging.addLogRule(new UiLogAppender(), allowedLevel)
+    podcatcher.configuration.logging.addLogRule(new NotificationLogAppender(), 'node', 'node');
   })
 
 export default api

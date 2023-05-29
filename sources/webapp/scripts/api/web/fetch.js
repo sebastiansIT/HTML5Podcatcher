@@ -1,13 +1,13 @@
-/** This modul contains functions load informations and files from the
+/** This modul contains functions to load informations and files from the
  * internet via Fetch API.
  *
     @module podcatcher/web/fetch
     @author  Sebastian Spautz [sebastian@human-injection.de]
     @requires module:podcatcher/web
     @requires module:podcatcher/utils/logging
- * @license GPL-3.0-or-later
+    @license GPL-3.0-or-later
  *
- * Copyright 2021 Sebastian Spautz
+ * Copyright 2021, 2023 Sebastian Spautz
  *
  * This file is part of "HTML5 Podcatcher".
  *
@@ -72,7 +72,13 @@ export default class FetchWebAccessProvider extends WebAccessProvider {
       }
     }.bind(this)
 
-    return fetch(url)
+    return fetch(url, {
+      mode: 'no-cors',
+      cache: 'no-cache',
+      headers: {
+        'Content-Type': 'text/xml'
+      }
+    })
       .then(extractBodyTextFromResponse, fetchViaProxy)
       .then((text) => parseXmlFromText(text, url))
       .then((xmlDoc) => {
@@ -118,6 +124,23 @@ export default class FetchWebAccessProvider extends WebAccessProvider {
         LOGGER.debug(`Download of ${url} finished`)
         return json
       })
+  }
+
+  /** Upload JSON-Data.
+   *
+   * @param {string} url The URL to upload.
+   * @param {object} data The data to upload.
+   * @returns {external:Promise} A promise uploding the file.
+   */
+  uploadJson (url, data) {
+    return fetch(url, {
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
   }
 
   // Set Timeout from Settings noch nötig? scheibar nicht!

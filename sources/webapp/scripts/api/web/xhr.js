@@ -6,7 +6,7 @@
     @requires module:podcatcher/utils/logging
  * @license GPL-3.0-or-later
  *
- * Copyright 2015, 2016, 2019 Sebastian Spautz
+ * Copyright 2015, 2016, 2019, 2023 Sebastian Spautz
  *
  *
  * This file is part of "HTML5 Podcatcher".
@@ -117,6 +117,25 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
         LOGGER.error(error)
         reject(error)
       }
+    })
+  }
+
+  /** Upload JSON-Data.
+   *
+   * @param {string} url The URL to upload.
+   * @param {object} data The data to upload.
+   * @returns {external:Promise} A promise uploding the file.
+   */
+  uploadJson (url, data) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.open('POST', url, true)
+      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8')
+      xhr.onload = (event) => resolve(event)
+      xhr.addEventListener('error', (xhrError) => reject(new Error(`Can't upload configuration to syncronisation endpoint (${xhrError.error})`)))
+      xhr.addEventListener('abort', (event) => reject(event), false)
+      xhr.ontimeout = (event) => reject(new Error(`Timeout after ${(xhr.timeout / 60000)} minutes.`))
+      xhr.send(JSON.stringify(data))
     })
   }
 

@@ -48,7 +48,6 @@ const CACHED_FILES = [
   'scripts/storage/indexedDbProvider.js',
   'scripts/storage/fileSystemProvider.js',
   'scripts/storage/webStorageProvider.js',
-  'scripts/web/web.js',
   // STYLESHEETS
   'styles/main.css',
   // ICONS

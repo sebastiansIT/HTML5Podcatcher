@@ -19,6 +19,14 @@
 /* global console, global */
 /* global $ */
 /* global POD, UI */
+
+import podcatcher from './api/podcatcher.js'
+import ui from './ui/ui.js'
+import WebAccessProvider from './api/web/fetch.js'
+
+// TODO ersetze window podcatcher durch import podcatcher
+// TODO ersetzt UI durch import ui
+
 UI.exportConfiguration = function (onExportCallback) {
   'use strict'
   POD.api.configuration.readConfiguration(onExportCallback)
@@ -186,29 +194,27 @@ function initSpeechSynthesisSettings () {
     })
 }
 
-let LOGGER = null
+let webAccess
+const LOGGER = podcatcher.utils.createLogger('hp5/view/settings')
 
 /** Central 'ready' event handler */
 document.addEventListener('DOMContentLoaded', () => {
   'use strict'
-  var appInfoRequest
 
-  LOGGER = window.podcatcher.utils.createLogger('hp5/view/settings')
   LOGGER.debug('Opens Settings View')
 
   // -- Initialise UI -- //
   // Init Proxy-Settings
-  if (window.navigator.mozApps) { // is an Open Web App runtime
-    appInfoRequest = window.navigator.mozApps.getSelf()
+  /*if (window.navigator.mozApps) { // is an Open Web App runtime (alias FirefoxOS App) 
+    const appInfoRequest = window.navigator.mozApps.getSelf()
     appInfoRequest.onsuccess = function () {
       if (appInfoRequest.result) { // checks for installed app
         if (appInfoRequest.result.manifest.type === 'privileged' || appInfoRequest.result.manifest.type === 'certified') {
-          // TODO replace inline style
           document.getElementById('proxy').style.display = 'none'
         }
       }
     }
-  }
+  }*/
 
   window.podcatcher.configuration.settings.get('proxyUrl')
     .then((value) => {
@@ -216,8 +222,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('httpProxyInput').value = value
       }
       POD.api.configuration.proxyUrlPattern = value
+      webAccess = new WebAccessProvider(value)
     })
-    .catch((error) => LOGGER.error(error))
+    .catch((error) => {
+      LOGGER.error(error)
+      webAccess = new WebAccessProvider()
+    })
 
   // Init quota and filesystem
   if (POD.api.storage.chromeFileSystem !== undefined &&
@@ -301,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Connection State Events
   UI.initConnectionStateEvents()
   // Configuration UI Events
-  $('#memorySizeForm').on('submit', function (event) {
+  document.getElementById('memorySizeForm').addEventListener('submit', function (event) {
     event.preventDefault()
     event.stopPropagation()
 
@@ -313,17 +323,17 @@ document.addEventListener('DOMContentLoaded', () => {
       UI.logHandler('Please insert a number', 'error')
     }
   })
-  $('#saveProxyConfigurationButton').on('click', function (event) {
+  document.getElementById('saveProxyConfigurationButton').addEventListener('click', function (event) {
     event.preventDefault()
     event.stopPropagation()
-    if ($('#httpProxyInput')[0].checkValidity()) {
+    if (document.getElementById('httpProxyInput').checkValidity()) {
       window.podcatcher.configuration.settings.set('proxyUrl', document.getElementById('httpProxyInput').value)
         .catch((error) => LOGGER.error(error))
     } else {
       UI.logHandler('Please insert a URL!', 'error')
     }
   })
-  $('#saveSortConfigurationButton').on('click', function (event) {
+  document.getElementById('saveSortConfigurationButton').addEventListener('click', function (event) {
     event.preventDefault()
     event.stopPropagation()
     window.podcatcher.configuration.settings.set('playlistSort', document.getElementById('episodeSortSelect').value)
@@ -345,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }, false)
 
   // Transfer a JSON-Object with the whole configuration to a HTTP endpoint
-  $('#SyncronisationForm').on('submit', (event) => {
+  document.getElementById('SyncronisationForm').addEventListener('submit', (event) => {
     event.preventDefault()
     event.stopPropagation()
 
@@ -361,20 +371,9 @@ document.addEventListener('DOMContentLoaded', () => {
       ])
         .then(() => {
           POD.api.configuration.readConfiguration(function (config) {
-            POD.api.web.createXMLHttpRequest(function (xhr) {
-              xhr.open('POST', syncEndpoint, true)
-              xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8')
-              xhr.onload = function () {
-                LOGGER.note('Sended syncronisation value successfully.')
-              }
-              xhr.addEventListener('error', function (xhrError) {
-                LOGGER.error('Can\'t upload configuration to syncronisation endpoint (' + xhrError.error + ')')
-              })
-              xhr.ontimeout = function () {
-                LOGGER.error('Timeout after ' + (xhr.timeout / 60000) + ' minutes.')
-              }
-              xhr.send(JSON.stringify({ key: syncKey, value: config }))
-            })
+            webAccess.uploadJson(syncEndpoint, JSON.stringify({ key: syncKey, value: config }))
+            .then((response) => LOGGER.note('Sended syncronisation value successfully.'))
+            .catch((error) => LOGGER.error(`Can\'t upload configuration to syncronisation endpoint ('${error}')`))
           })
         })
         .catch((error) => LOGGER.error(error))
@@ -384,24 +383,22 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 
   // Load a JSON-Object with a complete configuration from a HTTP endpoint.
-  $('#receiveSyncData').on('click', function (event) {
+  document.getElementById('receiveSyncData').addEventListener('click', function (event) {
     event.preventDefault()
     event.stopPropagation()
 
-    var syncEndpoint, syncKey, syncValue
-    syncEndpoint = document.getElementById('syncEndpoint').value
-    syncKey = document.getElementById('syncKey').value
+    const form = event.currentTarget.parentElement
+    if (form.checkValidity()) {
+      let syncEndpoint = document.getElementById('syncEndpoint').value
+      let syncKey = document.getElementById('syncKey').value
 
-    POD.api.web.createXMLHttpRequest(function (xhr) {
-      xhr.open('GET', syncEndpoint + '?key=' + syncKey, true)
-      xhr.onload = function () {
-        POD.logger('Loaded syncronisation value successfully.', 'info')
-        syncValue = JSON.parse(xhr.responseText)
-        // set playback status of all episodes explicit to unlisend
-        syncValue.entries[0].value.episodes.forEach((episode) => {
+      webAccess.downloadJson(syncEndpoint + '?key=' + syncKey)
+      .then((json) => {
+        LOGGER.info('Loaded syncronisation value successfully.')
+        json.entries[0].value.episodes.forEach((episode) => {
           episode.playback.played = false
         })
-        POD.api.configuration.mergeConfigurations(syncValue.entries[0].value, function () {
+        POD.api.configuration.mergeConfigurations(json.entries[0].value, function () {
           window.podcatcher.configuration.settings.get('proxyUrl')
             .then((value) => {
               POD.api.configuration.proxyUrlPattern = value
@@ -409,24 +406,20 @@ document.addEventListener('DOMContentLoaded', () => {
               POD.web.downloadAllSources(0, function (status) {
                 LOGGER.note('Merged syncronisation value into local configuration successfully.')
               }, function (total, progress) {
-                UI.logHandler(`Updated ${progress} of ${total} sources`, 'info', 'Import')
+                LOGGER(`Updated ${progress} of ${total} sources`, 'info', 'Import')
               })
             })
             .catch((error) => LOGGER.error(error))
         })
-      }
-      xhr.addEventListener('error', function (xhrError) {
-        POD.logger('Can\'t download configuration from syncronisation endpoint (' + xhrError.error + ')', 'error')
       })
-      xhr.ontimeout = function () {
-        POD.logger('Timeout after ' + (xhr.timeout / 60000) + ' minutes.', 'error')
-      }
-      xhr.send()
-    })
+      .catch((error) => LOGGER.error(`Can\'t download configuration from syncronisation endpoint (${error})`))
+    } else {
+      LOGGER.error('Please insert a URL and a name!')
+    }
   })
 
   // Exports the whole configuration as a JSON-String to a text area field
-  $('#exportConfiguration').on('click', function (event) {
+  document.getElementById('exportConfiguration').addEventListener('click', function (event) {
     event.preventDefault()
     event.stopPropagation()
 
@@ -440,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 
   // Imports a complete configuration from a text area
-  $('#importConfiguration').on('click', function (event) {
+  document.getElementById('importConfiguration').addEventListener('click', function (event) {
     event.preventDefault()
     event.stopPropagation()
 
@@ -460,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   })
 
-  $('#saveLogingConfiguration').on('click', function (event) {
+  document.getElementById('saveLogingConfiguration').addEventListener('click', function (event) {
     event.preventDefault()
     event.stopPropagation()
     window.podcatcher.configuration.settings.set('logLevel', document.getElementById('logLevelSelect').value)

@@ -4,7 +4,7 @@
  * @author  Sebastian Spautz [sebastian@human-injection.de]
  * @license GPL-3.0-or-later
  *
- * Copyright 2019 Sebastian Spautz
+ * Copyright 2019, 2023 Sebastian Spautz
  *
  * This file is part of "HTML5 Podcatcher".
  *
@@ -74,6 +74,16 @@ class WebAccessProvider {
    * @returns {external:Promise} A promise downloading the file.
    */
   downloadJson (url) {
+    return Promise.reject(new Error('Not Implemented'))
+  }
+
+  /** Upload JSON-Data.
+   *
+   * @param {string} url The URL to upload.
+   * @param {object} data The data to upload.
+   * @returns {external:Promise} A promise uploding the file.
+   */
+  uploadJson (url, data) {
     return Promise.reject(new Error('Not Implemented'))
   }
 

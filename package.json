@@ -55,6 +55,6 @@
     "test": "npm run test:js",
     "build": "grunt HostedWebApp && npm run lint && npm run bundle:js",
     "watch": "karma start karma.config.js --no-single-run",
-    "start": "npx http-server -p 3001 -o sources/webapp/diagnostic.html"
+    "start": "npx http-server -p 3001 -o distributions/webapp/settings.html"
   }
 }
