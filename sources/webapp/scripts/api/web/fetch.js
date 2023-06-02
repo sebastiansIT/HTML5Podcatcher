@@ -67,13 +67,14 @@ export default class FetchWebAccessProvider extends WebAccessProvider {
             throw error
           })
       } else {
-        LOGGER.error(`Can't download XML ${url}: ${error.message}`)
-        throw error
+        const errorMessage = `Can't download XML ${url}: ${error.message}`
+        LOGGER.error(errorMessage)
+        throw new Error(errorMessage, error)
       }
     }.bind(this)
 
     return fetch(url, {
-      mode: 'no-cors',
+      // mode: 'no-cors',
       cache: 'no-cache',
       headers: {
         'Content-Type': 'text/xml'
@@ -192,7 +193,7 @@ function extractBodyTextFromResponse (response) {
   if (response.ok) {
     return response.text()
   } else {
-    throw new Error(`${response.status}: ${response.statusText}`)
+    throw new Error(`Response has status ${response.status}: ${response.statusText}`)
   }
 }
 

@@ -1,8 +1,8 @@
 /** Contains a class to represent a set of podcast sources.
  *
-    @module podcatcher/model/sourcelist
-    @author  Sebastian Spautz [sebastian@human-injection.de]
-    @requires module:podcatcher/utils/logging
+ * @module podcatcher/model/sourcelist
+ * @author  Sebastian Spautz [sebastian@human-injection.de]
+ * @requires module:podcatcher/utils/logging
  * @license GPL-3.0-or-later
  *
  * Copyright 2019 Sebastian Spautz

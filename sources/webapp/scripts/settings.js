@@ -1,4 +1,4 @@
-/*  Copyright 2014 - 2016, 2019 Sebastian Spautz
+/*  Copyright 2014 - 2016, 2019, 2023 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 

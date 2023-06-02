@@ -32,6 +32,7 @@ import WebAccessProvider from './web/fetch.js'
 import WebStorageSettingsProvider from './storage/settings/webstorage.js'
 import Sourcelist from './model/sourcelist.js'
 import * as Episode from './model/episode.js'
+import Source from './model/source.js'
 import * as ParserModul from './parser/parser.js'
 
 const settingsStorageProvider = new WebStorageSettingsProvider()
@@ -39,7 +40,8 @@ const settingsStorageProvider = new WebStorageSettingsProvider()
 const api = {
   model: {
     Sources: Sourcelist,
-    Episode: Episode
+    Episode: Episode,
+    Source: Source
   },
   utils: {
     createLogger: (module) => new Logger(module)

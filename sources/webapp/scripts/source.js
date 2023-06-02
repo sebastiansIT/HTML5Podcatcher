@@ -1,4 +1,4 @@
-/*  Copyright 2015, 2019 Sebastian Spautz
+/*  Copyright 2015, 2019, 2023 Sebastian Spautz
 
     This file is part of "HTML5 Podcatcher".
 
@@ -22,6 +22,14 @@
 /* global HTML5Podcatcher, POD */
 /* global GlobalUserInterfaceHelper, UI */
 
+import podcatcher from './api/podcatcher.js'
+import ui from './ui/ui.js'
+
+const LOGGER = podcatcher.utils.createLogger('hp5/view/source')
+// TODO ersetze window podcatcher durch import podcatcher
+// TODO ersetzt UI durch import ui
+// TODO var durch let oder const ersetzen
+
 GlobalUserInterfaceHelper.renderSourceDetails = function (source) {
   'use strict'
   var markup = UI.renderSource(source)
@@ -39,8 +47,7 @@ GlobalUserInterfaceHelper.renderSourceDetails = function (source) {
 /** Central 'ready' event handler */
 document.addEventListener('DOMContentLoaded', function (/* event */) {
   'use strict'
-  var sourceUri
-  const LOGGER = window.podcatcher.utils.createLogger('hp5/view/source')
+  let sourceUri
 
   const init = function () {
     LOGGER.debug('Open Source Details')
@@ -65,7 +72,9 @@ document.addEventListener('DOMContentLoaded', function (/* event */) {
       UI.renderSourceDetails(source)
     })
     if (!navigator.onLine) {
-      $('#updateSource, #openSourceWeb').attr('disabled', 'disabled')
+      document.querySelectorAll('#updateSource, #openSourceWeb').forEach((element) => {
+        element.setAttribute('disabled', 'disabled')
+      })
     }
     // --------------------------- //
     // -- Register Eventhandler -- //
@@ -114,31 +123,37 @@ document.addEventListener('DOMContentLoaded', function (/* event */) {
       })
     })
     // Toolbar events
-    $('#deleteSource').on('click', function (event) {
+    document.getElementById('deleteSource').addEventListener('click', (event) => {
       event.preventDefault()
       event.stopPropagation()
-      var removeFunction
-      removeFunction = function () { window.location.href = 'sources.html' }
+
+      const removeFunction = () => window.location.href = 'sources.html'
       POD.storage.readSource(sourceUri, function (source) {
         POD.storage.deleteSource(source, removeFunction)
       })
     })
 
-    $('#updateSource').on('click', function (event) {
-      var limitOfNewEpisodes = 5
-      var button = event.target
-      var source = { uri: sourceUri }
-
+    document.getElementById('updateSource').addEventListener('click', (event) => {
       event.preventDefault()
       event.stopPropagation()
+
+      const button = event.target
+      const source = new podcatcher.model.Source(new URL(sourceUri))
 
       button.setAttribute('disabled', 'disabled')
       button.classList.add('spinner')
       // start update of the source
-      HTML5Podcatcher.web.downloadSource(source, limitOfNewEpisodes, function () {
-        button.removeAttribute('disabled')
-        button.classList.remove('spinner')
-      })
+      source.update()
+        .then(() => {
+          LOGGER.info(`Succesfully updated source: ${source.url}.`)
+          button.removeAttribute('disabled')
+          button.classList.remove('spinner')
+        })
+        .catch((error) => {
+          LOGGER.error(`Failure on updating source: ${error}.`)
+          button.removeAttribute('disabled')
+          button.classList.remove('spinner')
+        })
     })
 
     UI.initGeneralUIEvents()

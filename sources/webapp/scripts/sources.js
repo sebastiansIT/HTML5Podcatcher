@@ -19,12 +19,20 @@
 /* global $ */
 /* global HTML5Podcatcher, POD, UI */
 
+import podcatcher from './api/podcatcher.js'
+import ui from './ui/ui.js'
+
+const LOGGER = podcatcher.utils.createLogger('hp5/view/sources')
+// TODO ersetze window podcatcher durch import podcatcher
+// TODO ersetzt UI durch import ui
+// TODO var durch let oder const ersetzen
+
 /** Central 'ready' event handler */
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', () => {
   'use strict'
 
-  const LOGGER = window.podcatcher.utils.createLogger('hp5/view/sources')
   LOGGER.debug('Opens Source View')
+  // configure web access provider
   window.podcatcher.configuration.settings.get('proxyUrl')
     .then((value) => {
       HTML5Podcatcher.api.configuration.proxyUrlPattern = value
@@ -46,8 +54,11 @@ $(document).ready(function () {
   // ------------------- //
   POD.storage.readSources(function (sources) {
     UI.renderSourceList(sources)
+    // Disable "online only" functionality
     if (!navigator.onLine) {
-      $('#refreshPlaylist, #showAddSourceView').attr('disabled', 'disabled')
+      document.querySelectorAll('#refreshPlaylist, #showAddSourceView').forEach((element) => {
+        element.setAttribute('disabled', 'disabled')
+      })
     }
   })
   // --------------------------- //
@@ -59,51 +70,65 @@ $(document).ready(function () {
   UI.initServiceWorker()
   // Connection State Events
   UI.initConnectionStateEvents()
-  $('#sourceslist').on('click', '.details', function (event) {
-    event.preventDefault()
-    event.stopPropagation()
-    window.podcatcher.configuration.settings.set('ShowDetailsForSource', $(this).closest('li').data('sourceUri'))
-      .catch((error) => LOGGER.error(error))
-    window.location.href = 'source.html'
+
+  document.getElementById('sourceslist').addEventListener('click', (event) => {
+    if (event.target.closest('.details')) {
+      event.preventDefault()
+      event.stopPropagation()
+
+      // TODO kann man das nicht auch über url params lösen?
+      window.podcatcher.configuration.settings.set(
+        'ShowDetailsForSource', 
+        event.target.closest('li').dataset.sourceUri
+      )
+        .then(() => window.location.href = 'source.html')
+        .catch((error) => LOGGER.error(error))
+    }
   })
 
   // Update one Source
-  $('#sourceslist').on('click', '.update', function (event) {
-    var limitOfNewEpisodes = 5
-    var button = event.target.parentElement
-    var source = { uri: button.getAttribute('href') }
+  document.getElementById('sourceslist').addEventListener('click', (event) => {
+    if (event.target.closest('.update')) {
+      event.preventDefault()
+      event.stopPropagation()
 
-    event.preventDefault()
-    event.stopPropagation()
+      const button = event.target.parentElement
+      const source = new podcatcher.model.Source(new URL(button.getAttribute('href')))
 
-    button.setAttribute('disabled', 'disabled')
-    button.classList.add('spinner')
-    // start update of the source
-    HTML5Podcatcher.web.downloadSource(source, limitOfNewEpisodes, function () {
-      button.removeAttribute('disabled')
-      button.classList.remove('spinner')
-    })
+      button.setAttribute('disabled', 'disabled')
+      button.classList.add('spinner')
+      // start update of the source
+      source.update()
+      .then(() => {
+        LOGGER.info(`Succesfully updated source: ${source.url}.`)
+        button.removeAttribute('disabled')
+        button.classList.remove('spinner')
+      })
+      .catch((error) => {
+        LOGGER.error(`Failure on updating source: ${error}.`)
+        button.removeAttribute('disabled')
+        button.classList.remove('spinner')
+      })
+    }
   })
 
   // Delete Source from Database
-  $('#sourceslist').on('click', '.delete', function (event) {
-    event.preventDefault()
-    event.stopPropagation()
-    var i, removeFunction
-    removeFunction = function (element) {
-      $(element).remove()
+  document.getElementById('sourceslist').addEventListener('click', (event) => {
+    if (event.target.closest('.delete')) {
+      event.preventDefault()
+      event.stopPropagation()
+      
+      const sourceElement = event.target.closest('li')
+      if (sourceElement) {
+        POD.storage.readSource(sourceElement.dataset.sourceUri, (source) => {
+          POD.storage.deleteSource(source, (/* deletedSource */) => {   
+              $(sourceElement).slideUp(400, () => sourceElement.remove())
+          })
+        })
+      }
     }
-    POD.storage.readSource($(this).closest('li').data('sourceUri'), function (source) {
-      POD.storage.deleteSource(source, function (source) {
-        for (i = 0; i < $('#sourceslist .entries li').length; i++) {
-          if ($($('#sourceslist .entries li')[i]).data('sourceUri') === source.uri) {
-            $($('#sourceslist .entries li')[i]).slideUp(400, removeFunction(this))
-            break
-          }
-        }
-      })
-    })
   })
+    
   // New or Changed Source
   document.addEventListener('writeSource', function (event) {
     const source = event.detail.source
@@ -125,22 +150,25 @@ $(document).ready(function () {
   // Reload all Podcasts
   document.getElementById('refreshPlaylist').addEventListener('click', UI.eventHandler.refreshAllSources)
   // Open and close the dialog to insert new Feeds/Sources
-  $('#showAddSourceView, #addSourceView .closeDialog').on('click', function (event) {
-    event.preventDefault()
-    event.stopPropagation()
-    $('#addSourceView').toggleClass('fullscreen')
+  document.querySelectorAll('#showAddSourceView, #addSourceView .closeDialog').forEach((element) => {
+    element.addEventListener('click', (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+      document.getElementById('addSourceView').classList.toggle('fullscreen')
+    })
   })
   // Adds a new feed/source
-  document.getElementById('loadSourceButton').addEventListener('click', event => {
+  document.getElementById('loadSourceButton').addEventListener('click', (event) => {
     event.preventDefault()
     event.stopPropagation()
     const urlInput = document.getElementById('addSourceUrlInput')
     if (urlInput.checkValidity()) {
-      POD.storage.readSource(urlInput.value.trim(), function (source) {
-        POD.web.downloadSource(source)
-        document.getElementById('addSourceView').classList.toggle('fullscreen')
-        urlInput.value = ''
-      })
+      new podcatcher.model.Source(urlInput.value.trim()).update()
+        .then(() => {
+          document.getElementById('addSourceView').classList.toggle('fullscreen')
+          urlInput.value = ''
+        })
+        .catch((error) => LOGGER.error(error))
     }
   })
   document.getElementById('exportSourceList').addEventListener('click', event => {

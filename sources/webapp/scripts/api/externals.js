@@ -34,3 +34,9 @@
  * @external Node
  * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Node|MDN Web Docs}
  */
+/**
+ * The built in URL object.
+ *
+ * @external URL
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/URL|MDN Web Docs}
+ */
