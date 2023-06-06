@@ -577,5 +577,6 @@ var GlobalUserInterfaceHelper = {
   }
 }
 var UI = GlobalUserInterfaceHelper
+POD.api.configuration = {}
 POD.api.configuration.logger = UI.logHandler
 POD.storage = POD.api.storage.StorageProvider

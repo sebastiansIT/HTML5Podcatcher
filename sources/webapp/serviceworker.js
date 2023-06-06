@@ -81,7 +81,8 @@ const CACHED_FILES = [
 const NETWORK_FILES = [
   'proxy.py',
   'sync.py',
-  'serviceworker.js'
+  'serviceworker.js',
+  'scripts/sources.js'
 ]
 
 self.addEventListener('install', event => {
