@@ -1,11 +1,11 @@
 /** This modul contains functions to load informations and files from the
  * internet via Fetch API.
  *
-    @module podcatcher/web/fetch
-    @author  Sebastian Spautz [sebastian@human-injection.de]
-    @requires module:podcatcher/web
-    @requires module:podcatcher/utils/logging
-    @license GPL-3.0-or-later
+ * @module podcatcher/web/fetch
+ * @author  Sebastian Spautz [sebastian@human-injection.de]
+ * @requires module:podcatcher/web
+ * @requires module:podcatcher/utils/logging
+ * @license GPL-3.0-or-later
  *
  * Copyright 2021, 2023 Sebastian Spautz
  *
@@ -26,6 +26,7 @@
  */
 import WebAccessProvider from './web.js'
 import { Logger } from '../utils/logging.js'
+import WebStorageSettingsProvider from '../storage/settings/webstorage.js'
 
 /* global fetch, Response, ReadableStream */
 
@@ -41,6 +42,8 @@ import { Logger } from '../utils/logging.js'
  * @private
  */
 const LOGGER = new Logger('Web/Fetch')
+
+const settingsStorageProvider = new WebStorageSettingsProvider()
 
 /** Implements methods to access the internet based on fetch API.
  *
@@ -274,5 +277,20 @@ function parseXmlFromText (text, url) {
     throw new Error(`No XML Document found at ${url}`)
   } else {
     return doc
+  }
+}
+
+let provider
+/**
+ * Get a singelton web provider. Configured with the global proxy URL pattern.
+ *
+ * @returns {FetchWebAccessProvider} A singelton web provider.
+ */
+export async function getProvider () {
+  if (provider) {
+    return provider
+  } else {
+    const proxyUrl = await settingsStorageProvider.readSettingsValue('proxyUrl')
+    return new FetchWebAccessProvider(proxyUrl)
   }
 }

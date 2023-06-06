@@ -39,9 +39,8 @@ GlobalUserInterfaceHelper.renderSourceDetails = function (source) {
   // set current values in toolbar
   $('#openSourceWebsite').attr('href', source.link)
   // read list of episodes and render them
-  POD.storage.readEpisodesBySource(source, function (episodes) {
-    UI.renderEpisodeList(episodes, 'desc')
-  })
+  podcatcher.storage.episodes.readEpisodes(source)
+    .then((episodes) => UI.renderEpisodeList(episodes, 'desc'))
 }
 
 /** Central 'ready' event handler */
@@ -49,18 +48,14 @@ document.addEventListener('DOMContentLoaded', function (/* event */) {
   'use strict'
   let sourceUri
 
-  const init = function () {
-    LOGGER.debug('Open Source Details')
-    window.podcatcher.configuration.settings.get('proxyUrl')
-      .then((value) => {
-        HTML5Podcatcher.api.configuration.proxyUrlPattern = value
-      })
-      .catch((error) => LOGGER.error(error))
+  const init = async function () {
+    LOGGER.debug('Open Source Details View')
     // ------------------- //
     // -- Initialise UI -- //
     // ------------------- //
     // Quota and Filesystem initialisation
-    window.podcatcher.configuration.settings.get('quota')
+    // TODO ersetzt das analog dem proyxURL im Fetch-Modul
+    podcatcher.configuration.settings.get('quota')
       .then((value) => {
         HTML5Podcatcher.api.storage.StorageProvider.init({ quota: value })
       })
@@ -68,9 +63,10 @@ document.addEventListener('DOMContentLoaded', function (/* event */) {
 
     // Render Feed Details
     // Load Source and render Markup
-    POD.storage.readSource(sourceUri, function (source) {
-      UI.renderSourceDetails(source)
-    })
+    podcatcher.storage.sources.readSource(sourceUri)
+    .then((source) => UI.renderSourceDetails(source))
+    .catch((error) => LOGGER.error(error))
+
     if (!navigator.onLine) {
       document.querySelectorAll('#updateSource, #openSourceWeb').forEach((element) => {
         element.setAttribute('disabled', 'disabled')
@@ -164,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function (/* event */) {
   sourceUri = window.location.search.split('uri=')[1]
   // Get alternativly the URI from Local Storage Setting
   if (!sourceUri) {
-    window.podcatcher.configuration.settings.get('ShowDetailsForSource')
+    podcatcher.configuration.settings.get('ShowDetailsForSource')
       .then((value) => {
         sourceUri = value
         // if query string and Local Storage Settings doesn't contain source uri redirect to sources.html

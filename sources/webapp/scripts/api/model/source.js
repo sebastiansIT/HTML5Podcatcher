@@ -22,10 +22,8 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
 
-/* global HTML5Podcatcher */
-
 import { Logger } from '../utils/logging.js'
-import WebAccessProvider from '../web/fetch.js'
+import { getProvider } from '../web/fetch.js'
 
 /** Logger.
  *
@@ -40,24 +38,30 @@ const LOGGER = new Logger('Model/Source')
  * @param {external:URL} url The URL identifing this source.
  */
 export default class Source {
-  /** Create a sources.
+  /**
+   * Create a sources.
    *
    * @param {external:URL} url An array of sources.
    */
   constructor (url) {
-    this.url = url
-    this.webaccess = new WebAccessProvider(HTML5Podcatcher.api.configuration.proxyUrlPattern)
-
-    // TODO lade eventuell vorhandene Daten aus dem Storage
+    this.uri = url
+    this.link = undefined
+    this.title = undefined
+    this.description = undefined
+    this.license = undefined
+    this.language = undefined
+    this.img = {}
+    this.img.uri = undefined
   }
 
-  /** Update a source from the web.
+  /**
+   * Update a source from the web.
    *
    * @param {number} limitOfNewEpisodes The maximum number of episodes marked as new.
    * @returns {external:Promise} A promise that fullfiled with TODO
    */
   update (limitOfNewEpisodes = 5) {
-    return this.webaccess.downloadXML(this.url.toString())
+    return getProvider.downloadXML(this.uri.toString())
       .then((document) => {
         LOGGER.debug(document)
         // TODO call parser with limit

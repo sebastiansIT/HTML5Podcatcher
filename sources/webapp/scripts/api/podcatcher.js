@@ -30,6 +30,8 @@
 import { logManager, Logger } from './utils/logging.js'
 import WebAccessProvider from './web/fetch.js'
 import WebStorageSettingsProvider from './storage/settings/webstorage.js'
+import StorageSourcesProvider from './storage/sources/indexeddb.js'
+import StorageEpisodeProvider from './storage/episodes/indexeddb.js'
 import Sourcelist from './model/sourcelist.js'
 import * as Episode from './model/episode.js'
 import Source from './model/source.js'
@@ -79,6 +81,10 @@ const api = {
           })
       }
     }
+  },
+  storage: {
+    sources: new StorageSourcesProvider(), // Temporär für umgestalltung auf Module
+    episodes: new StorageEpisodeProvider()
   },
   parser: ParserModul,
   web: new WebAccessProvider(null) // Temporär für umgestalltung auf Module

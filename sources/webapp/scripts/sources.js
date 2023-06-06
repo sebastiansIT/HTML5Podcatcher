@@ -32,12 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
   'use strict'
 
   LOGGER.debug('Opens Source View')
-  // configure web access provider
-  window.podcatcher.configuration.settings.get('proxyUrl')
-    .then((value) => {
-      HTML5Podcatcher.api.configuration.proxyUrlPattern = value
-    })
-    .catch((error) => LOGGER.error(error))
 
   // -------------------------- //
   // -- Check Pre Conditions -- //
