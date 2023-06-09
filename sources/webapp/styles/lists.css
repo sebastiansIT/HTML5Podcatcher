@@ -27,7 +27,7 @@
 /* List items */
 .content .entries li {
 	width: 100%;
-	min-height: 6rem;
+	min-height: var(--entry-min-height);
 	box-sizing: border-box;
 	border-bottom: solid 0.1rem var(--separator-color);
 	margin: 0;
@@ -37,6 +37,14 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	/*background: linear-gradient(to right, #006400 0%,#006400 attr(data-progress %),#ffffff attr(data-progress %));*/
+}
+.content .entries li.deleted {
+	animation-name: slideUp;
+    animation-duration: 0.4s;
+    animation-timing-function: ease-in;
+	min-height: 0;
+	max-height: 0;
+	overflow: hidden;
 }
 
 @media only all and (pointer: coarse) {

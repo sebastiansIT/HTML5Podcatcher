@@ -116,7 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (sourceElement) {
         podcatcher.storage.sources.readSource(sourceElement.dataset.sourceUri)
           .then((source) => podcatcher.storage.sources.deleteSource(source))
-          .then(() => $(sourceElement).slideUp(400, () => sourceElement.remove())) //TODO Jquery
+          .then(() => { 
+            sourceElement.classList.toggle('deleted')
+            window.setTimeout(() => sourceElement.remove(), 400)
+          })
           .catch((error) => LOGGER.error(error))
       }
     }

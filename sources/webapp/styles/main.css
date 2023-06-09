@@ -29,6 +29,21 @@
   --primary-color-background: rgba(0, 100, 0, 0.2);
   --separator-color: rgb(200, 200, 200);
   --dialog-background: rgba(255, 255, 255, 0.9);
+  --entry-min-height: 6rem;
+}
+
+@keyframes slideUp {
+  0% {
+    max-height: 100vh;
+  }
+  20% {
+    max-height: var(--entry-min-height);
+    min-height: var(--entry-min-height);
+  }
+  100% {
+    max-height: 0;
+    min-height: 0;
+  }
 }
 
 @media screen and (prefers-color-scheme: dark) {
