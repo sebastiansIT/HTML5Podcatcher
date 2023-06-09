@@ -1,5 +1,5 @@
-/** Contains a class to represent a set of podcast sources.
- *
+/**
+ * Contains a class to represent a set of podcast sources.
  * @module podcatcher/model/sources
  * @author  Sebastian Spautz [sebastian@human-injection.de]
  * @requires module:podcatcher/utils/logging
@@ -25,22 +25,21 @@
 import { Logger } from '../utils/logging.js'
 import { getProvider } from '../web/fetch.js'
 
-/** Logger.
- *
+/**
+ * Logger.
  * @constant {module:podcatcher/utils/logging.Logger}
  * @private
  */
 const LOGGER = new Logger('Model/Source')
 
-/** Instances of this class represents a set of source objects.
- *
+/**
+ * Instances of this class represents a set of source objects.
  * @class
  * @param {external:URL} url The URL identifing this source.
  */
 export default class Source {
   /**
    * Create a sources.
-   *
    * @param {external:URL} url An array of sources.
    */
   constructor (url) {
@@ -56,9 +55,8 @@ export default class Source {
 
   /**
    * Update a source from the web.
-   *
    * @param {number} limitOfNewEpisodes The maximum number of episodes marked as new.
-   * @returns {external:Promise} A promise that fullfiled with TODO
+   * @returns {external:Promise} A promise that fullfiled with TODO.
    */
   update (limitOfNewEpisodes = 5) {
     return getProvider.downloadXML(this.uri.toString())

@@ -1,5 +1,5 @@
-/** This modul contains functions to parse XML format "Podlove Simple Chapter".
- *
+/**
+ * This modul contains functions to parse XML format "Podlove Simple Chapter".
  * @module  podcatcher/parser/NPT
  * @author  Sebastian Spautz [sebastian@human-injection.de]
  * @license GPL-3.0-or-later
@@ -22,9 +22,9 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
 
-/** Parse a String in normal play time. For this format
- *  see https://www.ietf.org/rfc/rfc2326.txt Chapter 3.6.
- *
+/**
+ * Parse a String in normal play time. For this format
+ * see https://www.ietf.org/rfc/rfc2326.txt Chapter 3.6.
  * @param {string} normalPlayTime String in normal play time format.
  * @returns {number} Timecode in milliseconds.
  */

@@ -1,7 +1,7 @@
-/** This modul contains functions to parse JSON format "Podcast 2.0 Chapters".
+/**
+ * This modul contains functions to parse JSON format "Podcast 2.0 Chapters".
  * See https://github.com/Podcastindex-org/podcast-namespace/blob/main/chapters/jsonChapters.md
  * for the specification.
- *
  * @module  podcatcher/parser/podcast20chapters
  * @requires module:podcatcher/utils/logging
  * @author  SebastiansIT [sebastian@human-injection.de]
@@ -27,20 +27,20 @@
 
 import { Logger } from '../utils/logging.js'
 
-/** Logger.
- *
+/**
+ * Logger.
  * @constant {module:podcatcher/utils/logging.Logger}
  */
 const LOGGER = new Logger('podcatcher/parser/PSC')
 
-/** MIME type of Podcast 2.0 chapters files.
- *
+/**
+ * MIME type of Podcast 2.0 chapters files.
  * @constant {string}
  */
 export const MIME_TYPE = 'application/json+chapters'
 
-/** Parses a Object with chapter informations.
- *
+/**
+ * Parses a Object with chapter informations.
  * @param {object} document JSON document.
  * @returns {Array} An array of jump points.
  */

@@ -1,6 +1,6 @@
-/** This modul contains functions to parse XML format "RSS 2.0".
+/**
+ * This modul contains functions to parse XML format "RSS 2.0".
  * See https://cyber.harvard.edu/rss/rss.html for the specification.
- *
  * @module  podcatcher/parser/RSS20
  * @author  SebastiansIT [sebastian@human-injection.de]
  * @requires module:podcatcher/parser/PSC
@@ -33,14 +33,14 @@ import { findChaptersNode, parse } from './podloveSimpleChapter.js'
 import NptParser from './normalPlayTime.js'
 import { MIME_TYPE as POD2_CHAPTERS_MIME_TYPE } from './podcast_2-0_chapter.js'
 
-/** Logger.
- *
+/**
+ * Logger.
  * @constant {module:podcatcher/utils/logging.Logger}
  */
 const LOGGER = new Logger('podcatcher/parser/RSS20')
 
-/** Acceptable XML namespaces for the "RSS Namespace Extension for Podcast".
- *
+/**
+ * Acceptable XML namespaces for the "RSS Namespace Extension for Podcast".
  * @constant {Array<string>}
  */
 const PODCAST_EXTENSION_NAMESPACES = [
@@ -48,29 +48,30 @@ const PODCAST_EXTENSION_NAMESPACES = [
   'https://github.com/Podcastindex-org/podcast-namespace/blob/main/docs/1.0.md'
 ]
 
-/** Parser for RSS 2.0 Feeds.
- *
+/**
+ * Parser for RSS 2.0 Feeds.
  * @class
  * @implements {module:HTML5Podcatcher/Parser~ISourceParser#parse}
  */
 class Parser {
-  /** Create a new Parser with a static list of allowed MIME types of
-   * *application/xml+rss*.
+  /**
+   * Create a new Parser with a static list of allowed MIME types of
+   * application/xml+rss*.
    */
   constructor () {
     this.allowedDocumentMimeTypes = ['application/xml+rss']
   }
 
-  /** Returns the name of this parser.
-   *
+  /**
+   * Returns the name of this parser.
    * @returns {string} The name.
    */
   toString () {
     return 'RSS 2.0 Parser'
   }
 
-  /** Parse the given RSS 2.0 document and update the defined source.
-   *
+  /**
+   * Parse the given RSS 2.0 document and update the defined source.
    * @function
    * @name module:podcatcher/parser~ISourceParser#parse
    * @param {object} source The source to be importet.
@@ -186,8 +187,8 @@ class Parser {
 const rss20SourceParser = new Parser()
 export default rss20SourceParser
 
-/** Parses a XML node as a podcast episode.
- *
+/**
+ * Parses a XML node as a podcast episode.
  * @param {external:Node} item A RSS item node.
  * @returns {module:podcatcher/model/episode.Episode} A podcast episode.
  * @throws {external:Error} An error on parser failures.
@@ -283,8 +284,8 @@ function parseItem (item) {
   return episode
 }
 
-/** Extract information specified in the "RSS Namespace Extension for Podcast".
- *
+/**
+ * Extract information specified in the "RSS Namespace Extension for Podcast".
  * @param {external:Node} item A RSS item node.
  * @param {module:podcatcher/model/episode.Episode}episode A podcast episode.
  * @returns {undefined}
@@ -335,9 +336,9 @@ function extendPodcast20EpisodeInformation (item, episode) {
   })
 }
 
-/** Search inside the parent element for an child with the given name and one of
+/**
+ * Search inside the parent element for an child with the given name and one of
  * the acceptable namespces for the "RSS Namespace Extension for Podcast".
- *
  * @param {external:Node} parentElement The element to search in.
  * @param {string} elementName The name of the element to search for.
  * @returns {Array<external:Node>} The nodes found or an empty array.

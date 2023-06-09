@@ -1,5 +1,5 @@
-/** Contains a class to represent a set of podcast sources.
- *
+/**
+ * Contains a class to represent a set of podcast sources.
  * @module podcatcher/model/sourcelist
  * @author  Sebastian Spautz [sebastian@human-injection.de]
  * @requires module:podcatcher/utils/logging
@@ -24,29 +24,29 @@
 
 import { Logger } from '../utils/logging.js'
 
-/** Logger.
- *
+/**
+ * Logger.
  * @constant {module:podcatcher/utils/logging.Logger}
  * @private
  */
 const LOGGER = new Logger('Model/Sourcelist')
 
-/** Instances of this class represents a set of source objects.
- *
+/**
+ * Instances of this class represents a set of source objects.
  * @class
  * @param {module:podcatcher/model/sources.Source[]} sources An array of sources.
  */
 export default class Sourcelist {
-  /** Create a new list with the given sources.
-   *
+  /**
+   * Create a new list with the given sources.
    * @param {module:podcatcher/model/sources.Source[]} sources An array of sources.
    */
   constructor (sources) {
     this._sources = sources
   }
 
-  /** Return a sorted array of sources.
-   *
+  /**
+   * Return a sorted array of sources.
    * @returns {module:podcatcher/model/sources.Source[]} A sorted array of sources.
    */
   get sources () {
@@ -56,8 +56,8 @@ export default class Sourcelist {
   }
 }
 
-/** Comparator sources based on the title (case insensitive).
- *
+/**
+ * Comparator sources based on the title (case insensitive).
  * @private
  * @param {module:podcatcher/model/sources.Source} first The first source to compare.
  * @param {module:podcatcher/model/sources.Source} second The second source to compare.

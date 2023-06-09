@@ -1,5 +1,5 @@
-/** The HTML5Podcatcher API.
- *
+/**
+ * The HTML5Podcatcher API.
     @module  podcatcher
     @author  Sebastian Spautz [sebastian@human-injection.de]
     @requires module:podcatcher/utils/logging
@@ -42,8 +42,8 @@ const settingsStorageProvider = new WebStorageSettingsProvider()
 const api = {
   model: {
     Sources: Sourcelist,
-    Episode: Episode,
-    Source: Source
+    Episode,
+    Source
   },
   utils: {
     createLogger: (module) => new Logger(module)
@@ -58,8 +58,8 @@ const api = {
      * @namespace
      */
     settings: {
-      /** Set a value for the given key of a user setting.
-       *
+      /**
+       * Set a value for the given key of a user setting.
        * @param {string} key - The key of the user setting you want to set.
        * @param {(string|number)} value - The value for the user setting you want to set.
        * @returns {Promise} A Promise resolves to undefined.
@@ -68,8 +68,8 @@ const api = {
         return settingsStorageProvider.writeSettingsValue(key, value)
       },
 
-      /** Get the value for the given user setting.
-       *
+      /**
+       * Get the value for the given user setting.
        * @param {string} key - The key of the application setting you ask for.
        * @param {(string|number)} defaultValue - The default.
        * @returns {Promise} A Promise resolves to the value or, if not set, the default.

@@ -1,7 +1,6 @@
 /**
  * Implementation of an Storage for podcast source based on the
  * Indexed Database API.
- *
  * @module  podcatcher/storage/sources/indexeddb
  * @requires module:podcatcher/utils/logging
  * @author  SebastiansIT [sebastian@human-injection.de]
@@ -30,25 +29,22 @@ import AbstractIndexedDB from '../indexeddb.js'
 import Source from '../../model/source.js'
 
 /**
-* Logger.
-*
-* @constant {module:podcatcher/utils/logging.Logger}
-* @private
-*/
+ * Logger.
+ * @constant {module:podcatcher/utils/logging.Logger}
+ * @private
+ */
 const LOGGER = new Logger('Storage/Sources/IndexedDB')
 const STORE = 'sources'
 
 /**
-* Implementation of the Interface ISourcesProvider based on the HTML5
-* Indexed DB API.
-*
-* @class
-* @implements {module:podcatcher/storage/sources~SourcesStorageProvider}
-*/
+ * Implementation of the Interface ISourcesProvider based on the HTML5
+ * Indexed DB API.
+ * @class
+ * @implements {module:podcatcher/storage/sources~SourcesStorageProvider}
+ */
 export default class IndexedDBStorageProvider extends AbstractIndexedDB {
   /**
    * Read a given source from the Database.
-   *
    * @param {external:URL} url The URL of the source.
    * @returns {Promise<{module:podcatcher/model/sources.Source}, Error>} The source from the Database or a new and empty one.
    */
@@ -89,7 +85,6 @@ export default class IndexedDBStorageProvider extends AbstractIndexedDB {
 
   /**
    * Delete the given source from the storage.
-   *
    * @param {module:podcatcher/model/sources.Source} source The podcast source to delete from storage.
    * @returns {Promise<{module:podcatcher/model/sources.Source}, Error>} A Promise resolving the deleted source.
    */

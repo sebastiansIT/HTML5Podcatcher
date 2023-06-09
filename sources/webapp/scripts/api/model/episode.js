@@ -1,5 +1,5 @@
-/** All things to handle episodes.
- *
+/**
+ * All things to handle episodes.
  * @module podcatcher/model/episode
  * @author  Sebastian Spautz [sebastian@human-injection.de]
  * @license GPL-3.0-or-later
@@ -22,11 +22,11 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
 
-/** Comparator sources based on the title (case insensitive).
+/**
+ * Comparator sources based on the title (case insensitive).
  *
  * The first comparing parameter is the date last updated. If this is equals the
  * title is compared.
- *
  * @private
  * @param {module:podcatcher/model/episode.Episode} first The first episode to compare.
  * @param {module:podcatcher/model/episode.Episode} second The second episode to compare.

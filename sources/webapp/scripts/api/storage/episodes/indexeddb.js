@@ -1,7 +1,6 @@
 /**
  * Implementation of an Storage for podcast source based on the
  * Indexed Database API.
- *
  * @module  podcatcher/storage/episodes/indexeddb
  * @requires module:podcatcher/utils/logging
  * @author  SebastiansIT [sebastian@human-injection.de]
@@ -30,26 +29,23 @@ import AbstractIndexedDB from '../indexeddb.js'
 import { comparator as EpisodeSort } from '../../model/episode.js'
 
 /**
-* Logger.
-*
-* @constant {module:podcatcher/utils/logging.Logger}
-* @private
-*/
+ * Logger.
+ * @constant {module:podcatcher/utils/logging.Logger}
+ * @private
+ */
 const LOGGER = new Logger('Storage/Episodes/IndexedDB')
 
 const STORE = 'episodes'
 
 /**
-* Implementation of the Interface ISourcesProvider based on the HTML5
-* Indexed DB API.
-*
-* @class
-* @implements {module:podcatcher/storage/episodes~EpisodesStorageProvider}
-*/
+ * Implementation of the Interface ISourcesProvider based on the HTML5
+ * Indexed DB API.
+ * @class
+ * @implements {module:podcatcher/storage/episodes~EpisodesStorageProvider}
+ */
 export default class IndexedDBStorageProvider extends AbstractIndexedDB {
   /**
    * Read all Episodes of a given source.
-   *
    * @param {module:podcatcher/model/sources.Source} source The source.
    * @returns {Promise<{module:podcatcher/model/episodes.Episode}[]}, Error>} A database connection.
    */

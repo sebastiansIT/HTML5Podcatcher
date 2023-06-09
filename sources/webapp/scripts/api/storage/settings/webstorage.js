@@ -1,6 +1,6 @@
-/** Implementation of an Storage for configuration values based on the Local
+/**
+ * Implementation of an Storage for configuration values based on the Local
  * Storage API.
- *
     @module  podcatcher/storage/settings/localstorage
     @requires module:podcatcher/utils/logging
     @author  SebastiansIT [sebastian@human-injection.de]
@@ -27,31 +27,31 @@
 
 import { Logger } from '../../utils/logging.js'
 
-/** Logger.
- *
+/**
+ * Logger.
  * @constant {module:podcatcher/utils/logging.Logger}
  * @private
  */
 const LOGGER = new Logger('Storage/Settings/LocalStorage')
 
-/** Implementation of the Interface ISettingsProvider based on the HTML5
+/**
+ * Implementation of the Interface ISettingsProvider based on the HTML5
  * Local Storage API.
- *
  * @class
  * @implements {module:podcatcher/storage/settings~SettingsStorageProvider}
  * @param {string} [settingIdentifier=settings] - The prefix for all keys that references settings in the Local Storage.
  */
 class WebStorageSettingsProvider {
-  /** Creates a new settings provider width a given cluster identifier.
-   *
-   * @param {string} [settingIdentifier=settings] The cluster identifier.
+  /**
+   * Creates a new settings provider width a given cluster identifier.
+   * @param {string} [settingIdentifier] The cluster identifier.
    */
   constructor (settingIdentifier) {
     this.settingPrefix = settingIdentifier || 'settings'
   }
 
-  /** Returns True if this provider is supported by the Platform.
-   *
+  /**
+   * Returns True if this provider is supported by the Platform.
    * @returns {boolean} True if supported.
    */
   get supported () {
@@ -60,8 +60,8 @@ class WebStorageSettingsProvider {
 
   // TODO do I need a value changed event?
 
-  /** Write a value for a key.
-   *
+  /**
+   * Write a value for a key.
    * @param {string} key The key of the settings property.
    * @param {string} value The value of the settings property.
    * @returns {Promise} A promsie to write a value.
@@ -75,8 +75,8 @@ class WebStorageSettingsProvider {
     }
   }
 
-  /** Reads the value for the given key.
-   *
+  /**
+   * Reads the value for the given key.
    * @param {string} key The Key of a settings property.
    * @returns {Promise<string>} A promise to read the value.
    */
@@ -97,8 +97,8 @@ class WebStorageSettingsProvider {
     }
   }
 
-  /** Lists all available keys.
-   *
+  /**
+   * Lists all available keys.
    * @returns {Promise<Map<string, string>>} A promise for a map of key value pairs.
    */
   listSettings () {
@@ -112,8 +112,8 @@ class WebStorageSettingsProvider {
     return Promise.resolve(settings)
   }
 
-  /** Clear all setting properties.
-   *
+  /**
+   * Clear all setting properties.
    * @returns {Promise} A Promise for clearing the settings.
    */
   clearSettings () {
@@ -126,8 +126,8 @@ class WebStorageSettingsProvider {
     return Promise.resolve()
   }
 
-  /** Returns a name of the provider.
-   *
+  /**
+   * Returns a name of the provider.
    * @returns {string} A name for the provider.
    */
   toString () {

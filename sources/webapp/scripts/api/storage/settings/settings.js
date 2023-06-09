@@ -1,5 +1,5 @@
-/** Manage storage subsystems for settings.
- *
+/**
+ * Manage storage subsystems for settings.
     @module  podcatcher/storage/settings
     @author  SebastiansIT [sebastian@human-injection.de]
     @license GPL-3.0-or-later
@@ -22,35 +22,35 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
  */
 
-/** Interface for storage subsystems that can persists settings values.
- *
+/**
+ * Interface for storage subsystems that can persists settings values.
  * @interface SettingsStorageProvider
  */
 
-/** A promise fulfilled with a settings value when a notification is created.
- *
+/**
+ * A promise fulfilled with a settings value when a notification is created.
  * @promise WriteSettingsPromise
  * @fulfill {undefined} Fulfill empty when a settings value is writen.
  * @reject {external:Error} An Error if somthing goes wrong.
  */
 
-/** A Promise that fulfilled with a readed value.
- *
+/**
+ * A Promise that fulfilled with a readed value.
  * @function
  * @name module:podcatcher/storage/settings~SettingsStorageProvider#readSettingsValue
  * @param {string} key - The key of the application setting you want to read.
  * @returns {ReadSettingsPromise} A Promise that fulfilled with the readed value.
  */
 
-/** A Promise fulfilled undefined after writing a session value.
- *
+/**
+ * A Promise fulfilled undefined after writing a session value.
  * @promise WriteSettingsPromise
  * @fulfill {undefined} Fulfill empty when a settings value is writen.
  * @reject {external:Error} An Error if somthing goes wrong.
  */
 
-/** Set a value for the given key of a user setting.
- *
+/**
+ * Set a value for the given key of a user setting.
  * @function
  * @name module:podcatcher/storage/settings~SettingsStorageProvider#writeSettingsValue
  * @param {external:String} key - The key of the application setting you want to set.
@@ -58,15 +58,15 @@
  * @returns {WriteSettingsPromise} A promise fulfilled undefined after writing a session value.
  */
 
-/** A Promise fulfilled with a list of key value pairs.
- *
+/**
+ * A Promise fulfilled with a list of key value pairs.
  * @promise ListSettingsPromise
  * @fulfill {object} A Object with properties for each stored settings value.
  * @reject {external:Error} An Error if somthing goes wrong.
  */
 
-/** List all stored settings values.
- *
+/**
+ * List all stored settings values.
  * @function
  * @name module:podcatcher/storage/settings~SettingsStorageProvider#listSettings
  * @returns {ListSettingsPromise} A promise fulfilled with a list of key value pairs.
@@ -74,14 +74,13 @@
 
 /**
  * A Promise fullfinling empty when settings are cleared.
- *
  * @promise ClearSettingsPromise
  * @fulfill {undefined} A Object with properties for each stored settings value.
  * @reject {external:Error} An Error if somthing goes wrong.
  */
 
-/** Remove all settings values from the storage.
- *
+/**
+ * Remove all settings values from the storage.
  * @function
  * @name module:podcatcher/storage/settings~SettingsStorageProvider#clearSettings
  * @returns {ClearSettingsPromise} Fulfill empty when settings are cleared.

@@ -1,7 +1,7 @@
-/** This modul contains functions to parse XML format "Podlove Simple Chapter".
+/**
+ * This modul contains functions to parse XML format "Podlove Simple Chapter".
  * See https://github.com/podlove/podlove-specifications/blob/master/podlove-simple-chapters.md
  * for the specification.
- *
  * @module  podcatcher/parser/PSC
  * @author  Sebastian Spautz [sebastian@human-injection.de]
  * @requires module:podcatcher/parser/NPT
@@ -29,20 +29,20 @@
 import NptParser from './normalPlayTime.js'
 import { Logger } from '../utils/logging.js'
 
-/** Logger.
- *
+/**
+ * Logger.
  * @constant {module:podcatcher/utils/logging.Logger}
  */
 const LOGGER = new Logger('podcatcher/parser/PSC')
 
-/** XML namespace.
- *
+/**
+ * XML namespace.
  * @constant {string}
  */
 const NAMESPACE = 'http://podlove.org/simple-chapters'
 
-/** Acceptable XML namespaces for the "RSS Namespace Extension for Podcast".
- *
+/**
+ * Acceptable XML namespaces for the "RSS Namespace Extension for Podcast".
  * @constant {Array<string>}
  */
 const PODLOVE_EXTENSION_NAMESPACES = [
@@ -51,8 +51,8 @@ const PODLOVE_EXTENSION_NAMESPACES = [
   'https://podlove.de/simple-chapters'
 ]
 
-/** Identifies a Capters Element as a child of the given node.
- *
+/**
+ * Identifies a Capters Element as a child of the given node.
  * @param {external:Node} parentNode The parent to search inside.
  * @returns {external:Node|undefined} A Chapters node if available.
  */
@@ -86,9 +86,9 @@ export function findChaptersNode (parentNode) {
   }
 }
 
-/** Parse the XML in format "Podlove Simple Chapber" and returns a list
+/**
+ * Parse the XML in format "Podlove Simple Chapber" and returns a list
  * of jumppoints.
- *
  * @param {external:Node} chaptersNode The Chapters element.
  * @returns {object[]} Array with jumppoints.
  */
@@ -115,9 +115,9 @@ export function parse (chaptersNode) {
   return jumppoints
 }
 
-/** Search inside the parent element for an child with the given name and one of
+/**
+ * Search inside the parent element for an child with the given name and one of
  * the acceptable namespces for "Podlove Simple Chapter".
- *
  * @param {external:Node} parentElement The element to search in.
  * @param {string} elementName The name of the element to search for.
  * @returns {Array<external:Node>} The nodes found or an empty array.

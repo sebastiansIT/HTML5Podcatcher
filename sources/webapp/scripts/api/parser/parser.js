@@ -1,5 +1,5 @@
-/** This modul contains functions to parse different data formats.
- *
+/**
+ * This modul contains functions to parse different data formats.
   @module  podcatcher/parser
   @author  Sebastian Spautz [sebastian@human-injection.de]
   @requires module:podcatcher/parser/RSS20
@@ -27,8 +27,8 @@ import { Logger } from '../utils/logging.js'
 import rss20SourceParser from './rss_2-0.js'
 import * as Pod2ChapterModule from './podcast_2-0_chapter.js'
 
-/** Logger.
- *
+/**
+ * Logger.
  * @constant {module:podcatcher/utils/logging.Logger}
  */
 const LOGGER = new Logger('podcatcher/parser')
@@ -36,14 +36,14 @@ const LOGGER = new Logger('podcatcher/parser')
 // ====================================== //
 // === Interface ISourceParser        === //
 // ====================================== //
-/** Interface defining functions which parses documents for information about
+/**
+ * Interface defining functions which parses documents for information about
  * a source and its episodes.
- *
  * @interface ISourceParser
  */
 
-/** Parse the given XMLDocument and update the defined source.
- *
+/**
+ * Parse the given XMLDocument and update the defined source.
  * @function
  * @name module:podcatcher/parser~ISourceParser#parse
  * @param {object} source The source to be importet.
@@ -54,12 +54,13 @@ const LOGGER = new Logger('podcatcher/parser')
 // ====================================== //
 // === Singelton SourceParserFacade   === //
 // ====================================== //
-/** Singelton facade for source parser.
- *
+/**
+ * Singelton facade for source parser.
  * @class
  */
 class SourceParserFacade {
-  /** Create a parser facade with a empty list of registerd parsers.
+  /**
+    Create a parser facade with a empty list of registerd parsers.
    */
   constructor () {
     const sourceParserList = []
@@ -82,9 +83,9 @@ class SourceParserFacade {
     }
   }
 
-  /** Parse the given XMLDocument and update the defined source with one of
+  /**
+   * Parse the given XMLDocument and update the defined source with one of
    * the registered Parsers.
-   *
    * @param {object} source The source to be importet.
    * @param {external:XMLDocument} xmlDocument The XML document to be parsed.
    * @returns {object} The updated source.

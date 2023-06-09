@@ -1,5 +1,5 @@
-/** This modul contains functions load informations and files from the internet.
- *
+/**
+ * This modul contains functions load informations and files from the internet.
     @module  podcatcher/web/xhr
     @author  Sebastian Spautz [sebastian@human-injection.de]
     @requires module:podcatcher/web
@@ -30,25 +30,25 @@
 import WebAccessProvider from './web.js'
 import { Logger } from '../utils/logging.js'
 
-/** Logger.
- *
+/**
+ * Logger.
  * @constant {module:podcatcher/utils/logging.Logger}
  * @private
  */
 const LOGGER = new Logger('Web/XHR')
 
-/** Implements methods to access the internet based on XMLHttpRequest.
- *
+/**
+ * Implements methods to access the internet based on XMLHttpRequest.
  * @class XhrWebAccessProvider
  * @augments module:podcatcher/web~WebAccessProvider
  * @param {external:String} [sopProxyPattern] A URL pattern used for access via a proxy.
  */
 export default class XhrWebAccessProvider extends WebAccessProvider {
-  /** Create a provider with the given proxy url pattern and options.
-   *
+  /**
+   * Create a provider with the given proxy url pattern and options.
    * @param {external:String} [sopProxyPattern] A URL pattern used for access via a proxy.
    * @param {object} [options] A Object with options used by this implementation of the WebAccessProvider.
-   * @param {number} [options.downloadTimeout=600000] The  time in milliseconds to wait for finishing a network requests Default is 10 Minutes.
+   * @param {number} [options.downloadTimeout] The  time in milliseconds to wait for finishing a network requests Default is 10 Minutes.
    */
   constructor (sopProxyPattern, options) {
     super(sopProxyPattern, options)
@@ -59,8 +59,8 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
     }
   }
 
-  /** Downloads a XML file.
-   *
+  /**
+   * Downloads a XML file.
    * @param {string} url The URL of the XML file.
    * @returns {external:Promise} A promise downloading the file.
    */
@@ -120,8 +120,8 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
     })
   }
 
-  /** Upload JSON-Data.
-   *
+  /**
+   * Upload JSON-Data.
    * @param {string} url The URL to upload.
    * @param {object} data The data to upload.
    * @returns {external:Promise} A promise uploding the file.
@@ -139,8 +139,8 @@ export default class XhrWebAccessProvider extends WebAccessProvider {
     })
   }
 
-  /** Download a binary file.
-   *
+  /**
+   * Download a binary file.
    * @param {string} url The URL of the XML file.
    * @param {Function} onProgressCallback A Callback for changes in download progress.
    * @returns {external:Promise} A Promise downloading the file.

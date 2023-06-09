@@ -1,7 +1,6 @@
 /**
  * Implementation of an Storage for podcast source based on the
  * Indexed Database API.
- *
  * @module  podcatcher/storage/settings/localstorage
  * @requires module:podcatcher/utils/logging
  * @author  SebastiansIT [sebastian@human-injection.de]
@@ -29,8 +28,8 @@
 
 import { Logger } from '../utils/logging.js'
 
-/** Logger.
- *
+/**
+ * Logger.
  * @constant {module:podcatcher/utils/logging.Logger}
  * @private
  */
@@ -41,13 +40,11 @@ const VERSION = 7
 /**
  * Implementation of the Interface ISourcesProvider based on the HTML5
  * Indexed DB API.
- *
  * @class
  */
 export default class IndexedDBStorageProvider {
   /**
    * Open the Database.
-   *
    * @returns {Promise<IDBDatabase, Error>} A database connection.
    */
   openConnection () {
@@ -75,7 +72,6 @@ export default class IndexedDBStorageProvider {
 
   /**
    * Close a given Database connection.
-   *
    * @param {IDBDatabase} database The database connection to close.
    */
   closeConnection (database) {
@@ -84,12 +80,10 @@ export default class IndexedDBStorageProvider {
 
   /**
    * Starts a transaction to access a IndexedDB.
-   *
    * @param {IDBDatabase} database
    * @param {string[]|string} stores
    * @param {string} mode
    * @param {object} options
-   *
    * @returns {Promise<IDBTransaction, Error>} A transaction.
    */
   openTransaction (database, stores, mode = 'readonly', options = {}) {
