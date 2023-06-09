@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // start update of the source
       source.update()
       .then(() => {
-        LOGGER.info(`Succesfully updated source: ${source.url}.`)
+        LOGGER.info(`Succesfully updated source: ${source.uri}.`)
         button.removeAttribute('disabled')
         button.classList.remove('spinner')
       })
@@ -114,11 +114,10 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const sourceElement = event.target.closest('li')
       if (sourceElement) {
-        POD.storage.readSource(sourceElement.dataset.sourceUri, (source) => {
-          POD.storage.deleteSource(source, (/* deletedSource */) => {   
-              $(sourceElement).slideUp(400, () => sourceElement.remove())
-          })
-        })
+        podcatcher.storage.sources.readSource(sourceElement.dataset.sourceUri)
+          .then((source) => podcatcher.storage.sources.deleteSource(source))
+          .then(() => $(sourceElement).slideUp(400, () => sourceElement.remove())) //TODO Jquery
+          .catch((error) => LOGGER.error(error))
       }
     }
   })

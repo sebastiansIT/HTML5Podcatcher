@@ -50,7 +50,7 @@ export default class IndexedDBStorageProvider extends AbstractIndexedDB {
    * Read a given source from the Database.
    *
    * @param {external:URL} url The URL of the source.
-   * @returns {module:podcatcher/model/sources.Source} The source from the Database or a new and empty one.
+   * @returns {Promise<{module:podcatcher/model/sources.Source}, Error>} The source from the Database or a new and empty one.
    */
   readSource (url) {
     return this.openConnection()
@@ -80,6 +80,33 @@ export default class IndexedDBStorageProvider extends AbstractIndexedDB {
           }
           request.onerror = (event) => {
             const errorMessage = `${event.target.error.name} while reading source ${url} from IndexedDB (${event.target.error.message})`
+            LOGGER.debug(errorMessage)
+            reject(new Error(errorMessage))
+          }
+        })
+      })
+  }
+
+  /**
+   * Delete the given source from the storage.
+   *
+   * @param {module:podcatcher/model/sources.Source} source The podcast source to delete from storage.
+   * @returns {Promise<{module:podcatcher/model/sources.Source}, Error>} A Promise resolving the deleted source.
+   */
+  deleteSource (source) {
+    return this.openConnection()
+      .then((database) => this.openTransaction(database, STORE, 'readwrite'))
+      .then((transaction) => {
+        return new Promise((resolve, reject) => {
+          const store = transaction.objectStore(STORE)
+          const request = store.delete(source.uri)
+          request.onsuccess = () => {
+            LOGGER.debug('Source ' + source.uri + ' deleted from database')
+            this.closeConnection(transaction.db)
+            resolve(source)
+          }
+          request.onerror = (event) => {
+            const errorMessage = `${event.target.error.name} while deleting source "${source.uri}" from IndexedDB (${event.target.error.message})`
             LOGGER.debug(errorMessage)
             reject(new Error(errorMessage))
           }

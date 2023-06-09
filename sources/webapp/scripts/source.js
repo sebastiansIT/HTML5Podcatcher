@@ -113,6 +113,7 @@ document.addEventListener('DOMContentLoaded', function (/* event */) {
     $('.content').on('click', '.delete', function (event) {
       event.preventDefault()
       event.stopPropagation()
+      
       POD.storage.readEpisode($(this).closest('li').data('episodeUri'), function (episode) {
         UI.logHandler('Deleting file "' + episode.offlineMediaUrl + '" starts now', 'info')
         POD.storage.deleteFile(episode)
@@ -123,10 +124,11 @@ document.addEventListener('DOMContentLoaded', function (/* event */) {
       event.preventDefault()
       event.stopPropagation()
 
-      const removeFunction = () => window.location.href = 'sources.html'
-      POD.storage.readSource(sourceUri, function (source) {
-        POD.storage.deleteSource(source, removeFunction)
-      })
+      // TODO hier noch mal zuerst die Source zu lesen ist überflüssig
+      podcatcher.storage.sources.readSource(sourceUri)
+        .then((source) => podcatcher.storage.sources.deleteSource(source))
+        .then(() => window.location.href = 'sources.html')
+        .catch((error) => LOGGER.error(error))
     })
 
     document.getElementById('updateSource').addEventListener('click', (event) => {
@@ -141,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function (/* event */) {
       // start update of the source
       source.update()
         .then(() => {
-          LOGGER.info(`Succesfully updated source: ${source.url}.`)
+          LOGGER.info(`Succesfully updated source: ${source.uri}.`)
           button.removeAttribute('disabled')
           button.classList.remove('spinner')
         })
