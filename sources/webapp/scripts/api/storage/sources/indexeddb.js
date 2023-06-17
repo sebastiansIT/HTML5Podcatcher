@@ -46,7 +46,7 @@ export default class IndexedDBStorageProvider extends AbstractIndexedDB {
   /**
    * Read a given source from the Database.
    * @param {external:URL} url The URL of the source.
-   * @returns {Promise<{module:podcatcher/model/sources.Source}, Error>} The source from the Database or a new and empty one.
+   * @returns {Promise<module:podcatcher/model/sources.Source, Error>} The source from the Database or a new and empty one.
    */
   readSource (url) {
     return this.openConnection()
@@ -71,6 +71,7 @@ export default class IndexedDBStorageProvider extends AbstractIndexedDB {
               LOGGER.debug('Source is not saved in database. Create new one.')
               source = new Source(url)
             }
+            transaction.commit()
             this.closeConnection(transaction.db)
             resolve(source)
           }
@@ -86,7 +87,7 @@ export default class IndexedDBStorageProvider extends AbstractIndexedDB {
   /**
    * Delete the given source from the storage.
    * @param {module:podcatcher/model/sources.Source} source The podcast source to delete from storage.
-   * @returns {Promise<{module:podcatcher/model/sources.Source}, Error>} A Promise resolving the deleted source.
+   * @returns {Promise<module:podcatcher/model/sources.Source, Error>} A Promise resolving the deleted source.
    */
   deleteSource (source) {
     return this.openConnection()
@@ -97,6 +98,7 @@ export default class IndexedDBStorageProvider extends AbstractIndexedDB {
           const request = store.delete(source.uri)
           request.onsuccess = () => {
             LOGGER.debug('Source ' + source.uri + ' deleted from database')
+            transaction.commit()
             this.closeConnection(transaction.db)
             resolve(source)
           }
