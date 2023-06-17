@@ -24,6 +24,7 @@
 
 import { Logger } from '../utils/logging.js'
 import { getProvider } from '../web/fetch.js'
+import { SourceParser } from '../parser/parser.js'
 
 /**
  * Logger.
@@ -35,12 +36,11 @@ const LOGGER = new Logger('Model/Source')
 /**
  * Instances of this class represents a set of source objects.
  * @class
- * @param {external:URL} url The URL identifing this source.
  */
 export default class Source {
   /**
    * Create a sources.
-   * @param {external:URL} url An array of sources.
+   * @param {external:URL} url The URL of the source.
    */
   constructor (url) {
     this.uri = url
@@ -53,6 +53,7 @@ export default class Source {
     this.img.uri = undefined
   }
 
+  // TODO keine Abhängigkeiten zu Web erwüncht
   /**
    * Update a source from the web.
    * @param {number} limitOfNewEpisodes The maximum number of episodes marked as new.
@@ -62,6 +63,7 @@ export default class Source {
     return getProvider.downloadXML(this.uri.toString())
       .then((document) => {
         LOGGER.debug(document)
+        SourceParser.parse(this, document)
         // TODO call parser with limit
         // TODO speicher der neuen Daten zurück in den Storage
       })
