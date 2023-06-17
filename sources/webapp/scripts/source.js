@@ -18,8 +18,6 @@
 /* global navigator */
 /* global window */
 /* global document */
-/* global $ */
-/* global HTML5Podcatcher, POD */
 /* global GlobalUserInterfaceHelper, UI */
 
 import podcatcher from './api/podcatcher.js'
@@ -28,16 +26,15 @@ import ui from './ui/ui.js'
 const LOGGER = podcatcher.utils.createLogger('hp5/view/source')
 // TODO ersetze window podcatcher durch import podcatcher
 // TODO ersetzt UI durch import ui
-// TODO var durch let oder const ersetzen
 
 GlobalUserInterfaceHelper.renderSourceDetails = function (source) {
   'use strict'
-  var markup = UI.renderSource(source)
+  const markup = UI.renderSource(source)
   // insert markup in page
-  $('#information').empty()
-  $('#information').append(markup)
+  document.getElementById('information').replaceChildren()
+  document.getElementById('information').append(markup)
   // set current values in toolbar
-  $('#openSourceWebsite').attr('href', source.link)
+  document.getElementById('openSourceWebsite').setAttribute('href', source.link)
   // read list of episodes and render them
   podcatcher.storage.episodes.readEpisodes(source)
     .then((episodes) => UI.renderEpisodeList(episodes, 'desc'))
@@ -81,13 +78,12 @@ document.addEventListener('DOMContentLoaded', function (/* event */) {
     UI.initServiceWorker()
     // Data manipulation events
     // * New or changed source
-    document.addEventListener('writeSource', function (event) {
-      var source
-      source = event.detail.source
+    document.addEventListener('writeSource', (event) => {
+      const source = event.detail.source
       UI.renderSourceDetails(source)
     }, false)
     // * New or changes episode
-    document.addEventListener('writeEpisode', function (event) {
+    document.addEventListener('writeEpisode', (event) => {
       const episode = event.detail.episode
       const episodeUI = UI.renderEpisode(episode)
       const playlistEntries = document.getElementById('episodes').querySelectorAll('.entries li')
@@ -102,12 +98,19 @@ document.addEventListener('DOMContentLoaded', function (/* event */) {
     }, false)
 
     // Events in list of episodes
-    $('.content').on('click', '.status', function (event) {
-      event.preventDefault()
-      event.stopPropagation()
-      POD.storage.readEpisode($(this).closest('li').data('episodeUri'), function (episode) {
-        POD.toggleEpisodeStatus(episode)
-      })
+    document.querySelector('.content').addEventListener('click', (event) => {
+      if (event.target.closest('.status')) {
+        event.preventDefault()
+        event.stopPropagation()
+
+        podcatcher.storage.episodes.readEpisode(event.target.closest('li').dataset.episodeUri)
+          .then((episode) => {
+            podcatcher.utils.tooglePaybackStatus(episode)
+            // TODO Delete offline File
+            return podcatcher.storage.episodes.writeEpisode(episode)
+          })
+          .catch((error) => LOGGER.error(error))
+      }
     })
     $('.content').on('click', '.downloadFile', UI.eventHandler.downloadEpisodeFile)
     $('.content').on('click', '.delete', function (event) {
