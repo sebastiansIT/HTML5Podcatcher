@@ -33,7 +33,7 @@ import WebStorageSettingsProvider from './storage/settings/webstorage.js'
 import StorageSourcesProvider from './storage/sources/indexeddb.js'
 import StorageEpisodeProvider from './storage/episodes/indexeddb.js'
 import Sourcelist from './model/sourcelist.js'
-import * as Episode from './model/episode.js'
+import Episode, { toggleEpisodeStatus } from './model/episode.js'
 import Source from './model/source.js'
 import * as ParserModul from './parser/parser.js'
 
@@ -46,7 +46,8 @@ const api = {
     Source
   },
   utils: {
-    createLogger: (module) => new Logger(module)
+    createLogger: (module) => new Logger(module),
+    tooglePaybackStatus: toggleEpisodeStatus
   },
   configuration: {
     logging: {

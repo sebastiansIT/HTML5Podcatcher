@@ -26,7 +26,7 @@
 
 import { Logger } from '../../utils/logging.js'
 import AbstractIndexedDB from '../indexeddb.js'
-import { comparator as EpisodeSort } from '../../model/episode.js'
+import Episode, { comparator as EpisodeSort } from '../../model/episode.js'
 
 /**
  * Logger.
@@ -45,9 +45,51 @@ const STORE = 'episodes'
  */
 export default class IndexedDBStorageProvider extends AbstractIndexedDB {
   /**
+   *
+   */
+  readEpisode (uri) {
+    return this.openConnection()
+      .then((database) => this.openTransaction(database, STORE))
+      .then((transaction) => {
+        return new Promise((resolve, reject) => {
+          const store = transaction.objectStore(STORE)
+          const request = store.get(uri)
+          request.onsuccess = (event) => {
+            let episode
+            if (event.target.result) {
+              LOGGER.debug('Episode ' + event.target.result.uri + ' readed from database')
+              episode = event.target.result
+            } else {
+              episode = new Episode(uri)
+            }
+            // checks episode.updated to be a Date object
+            if (episode.updated && !(episode.updated instanceof Date)) {
+              episode.updated = new Date(episode.updated)
+            }
+            // generate playback object if not exists
+            if (!episode.playback) {
+              episode.playback = { played: undefined, currentTime: 0 }
+            }
+            transaction.commit()
+            this.closeConnection(transaction.db)
+            resolve(episode)
+          }
+          /**
+           *
+           */
+          request.onerror = function (event) {
+            const errorMessage = `${event.target.error.name} while reading episode "${uri}" from IndexedDB (${event.target.error.message})`
+            LOGGER.debug(errorMessage)
+            reject(new Error(errorMessage))
+          }
+        })
+      })
+  }
+
+  /**
    * Read all Episodes of a given source.
    * @param {module:podcatcher/model/sources.Source} source The source.
-   * @returns {Promise<{module:podcatcher/model/episodes.Episode}[]}, Error>} A database connection.
+   * @returns {Promise<module:podcatcher/model/episodes.Episode[]>, Error>} A Promise.
    */
   readEpisodes (source) {
     return this.openConnection()
@@ -68,11 +110,41 @@ export default class IndexedDBStorageProvider extends AbstractIndexedDB {
               episodes.push(result.value)
               result.continue()
             } else {
+              transaction.commit()
+              this.closeConnection(transaction.db)
               resolve(episodes.sort(EpisodeSort))
             }
           }
           cursor.onerror = (event) => {
             const errorMessage = `${event.target.error.name} while reading episodes from IndexedDB (${event.target.error.message})`
+            LOGGER.debug(errorMessage)
+            reject(new Error(errorMessage))
+          }
+        })
+      })
+  }
+
+  /**
+   * Write a episode to the storage.
+   * @param {*} episode The episode to write.
+   * @returns {Promise<module:podcatcher/model/episodes.Episode>, Error>} A Promise.
+   */
+  writeEpisode (episode) {
+    return this.openConnection()
+      .then((database) => this.openTransaction(database, STORE, 'readwrite'))
+      .then((transaction) => {
+        return new Promise((resolve, reject) => {
+          const store = transaction.objectStore(STORE)
+          const request = store.put(episode)
+          request.onsuccess = (event) => {
+            LOGGER.info(`Episode ${event.target.result} saved`)
+            transaction.commit()
+            this.closeConnection(transaction.db)
+            document.dispatchEvent(new CustomEvent('writeEpisode', { detail: { episode: episode } }))
+            resolve(episode)
+          }
+          request.onerror = (event) => {
+            const errorMessage = `${event.target.error.name} while saving episode "${episode.uri}" to IndexedDB (${event.target.error.message})`
             LOGGER.debug(errorMessage)
             reject(new Error(errorMessage))
           }

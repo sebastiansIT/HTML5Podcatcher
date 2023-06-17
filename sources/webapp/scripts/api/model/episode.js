@@ -23,6 +23,48 @@
  */
 
 /**
+ *
+ */
+export default class Episode {
+  /**
+   * Create a episode.
+   * @param {external:URL} uri The URI of the episode.
+   */
+  constructor (uri) {
+    this.uri = uri
+    this.title = undefined
+    this.source = undefined
+    this.updated = undefined
+    this.mediaUrl = undefined
+    this.mediaType = undefined
+    this.isFileSavedOffline = false
+    this.playback = {
+      played: false,
+      currentTime: 0
+    }
+    this.jumppoints = []
+  }
+
+  /**
+   * Toggles the playback status of the episode.
+   * @returns {undefined}
+   */
+  tooglePlaybackStatus () {
+    this.playback.played = !this.playback.played
+    this.playback.currentTime = 0
+  }
+}
+
+/**
+ *
+ * @param episode
+ */
+export function toggleEpisodeStatus (episode) {
+  episode.playback.played = !episode.playback.played
+  episode.playback.currentTime = 0
+}
+
+/**
  * Comparator sources based on the title (case insensitive).
  *
  * The first comparing parameter is the date last updated. If this is equals the
