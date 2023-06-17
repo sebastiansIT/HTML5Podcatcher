@@ -29,8 +29,8 @@
 
 /**
  * A promise fulfilled with a settings value when a notification is created.
- * @promise WriteSettingsPromise
- * @fulfill {undefined} Fulfill empty when a settings value is writen.
+ * @promise ReadSettingsPromise
+ * @fulfill {string} The readed value.
  * @reject {external:Error} An Error if somthing goes wrong.
  */
 

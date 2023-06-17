@@ -88,7 +88,7 @@ class SourceParserFacade {
    * the registered Parsers.
    * @param {object} source The source to be importet.
    * @param {external:XMLDocument} xmlDocument The XML document to be parsed.
-   * @returns {object} The updated source.
+   * @returns {object|undefined} The updated source.
    */
   parse (source, xmlDocument) {
     const sourceParser = this.sourceParser()
@@ -96,6 +96,8 @@ class SourceParserFacade {
       const result = sourceParser.parse(source, xmlDocument)
       return result
     }
+
+    return undefined
   }
 }
 

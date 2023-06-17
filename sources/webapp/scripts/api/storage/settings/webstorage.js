@@ -93,7 +93,7 @@ class WebStorageSettingsProvider {
       } else {
         LOGGER.error(exception)
       }
-      Promise.reject(exception)
+      return Promise.reject(exception)
     }
   }
 

@@ -80,10 +80,10 @@ export default class IndexedDBStorageProvider {
 
   /**
    * Starts a transaction to access a IndexedDB.
-   * @param {IDBDatabase} database
-   * @param {string[]|string} stores
-   * @param {string} mode
-   * @param {object} options
+   * @param {IDBDatabase} database The database.
+   * @param {string[]|string} stores The store inside of the database.
+   * @param {string} mode Mode of the database transaction.
+   * @param {object} options Options for the transaction.
    * @returns {Promise<IDBTransaction, Error>} A transaction.
    */
   openTransaction (database, stores, mode = 'readonly', options = {}) {

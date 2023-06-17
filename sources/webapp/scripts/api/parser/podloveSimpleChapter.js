@@ -84,6 +84,7 @@ export function findChaptersNode (parentNode) {
     LOGGER.debug('Found "Podlove Simple Chapters" in feed')
     return chaptersNode[0]
   }
+  return undefined
 }
 
 /**
